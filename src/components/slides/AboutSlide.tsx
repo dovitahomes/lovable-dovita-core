@@ -12,54 +12,39 @@ const AboutSlide = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-16 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <div className="inline-block mb-4">
-            <span className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-primary font-semibold rounded-full text-sm border border-primary/20">
-              Sobre Nosotros
-            </span>
-          </div>
-          
-          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-12">
-            ¿Quiénes somos?
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div className="space-y-6 text-lg text-foreground/80">
-              <p className="leading-relaxed">
-                <span className="font-bold text-primary text-2xl">Dovita</span> es una empresa especializada en 
-                arquitectura y construcción que te acompaña en todo el proceso, desde la compra de tu terreno 
-                hasta la entrega de tu casa terminada.
+      <div className="container mx-auto px-12 py-20 flex-1">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-20 items-start mb-24">
+            <div className="space-y-8">
+              <h2 className="text-6xl md:text-7xl font-bold text-primary leading-none">
+                ¿Quiénes<br />somos?
+              </h2>
+              
+              <p className="text-xl text-foreground/70 leading-relaxed">
+                Dovita es una empresa especializada en arquitectura y construcción que te acompaña en todo el proceso, 
+                desde la compra de tu terreno hasta la entrega de tu casa terminada.
               </p>
               
-              <p className="leading-relaxed">
-                Nos diferenciamos por nuestra <span className="font-semibold text-foreground">tecnología de punta</span>, 
-                que incluye visualización en realidad virtual de tu futuro hogar, plataforma digital para seguimiento 
-                de obra, y un sistema de gestión financiera transparente.
-              </p>
-              
-              <p className="leading-relaxed">
-                Con Dovita, construir tu casa no es un proceso estresante, sino una experiencia 
-                <span className="font-semibold text-foreground"> emocionante y transparente</span>.
+              <p className="text-xl text-foreground/70 leading-relaxed">
+                Nos diferenciamos por nuestra tecnología de punta, que incluye visualización en realidad virtual 
+                de tu futuro hogar, plataforma digital para seguimiento de obra, y un sistema de gestión financiera transparente.
               </p>
             </div>
             
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+            <div className="relative">
               <img 
                 src={vrImage} 
                 alt="Tecnología de realidad virtual en arquitectura" 
-                className="relative rounded-3xl shadow-2xl w-full h-auto"
+                className="rounded-2xl shadow-xl w-full h-auto"
               />
             </div>
           </div>
           
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary-light rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+          <div className="relative h-[500px] rounded-2xl overflow-hidden">
             <img 
               src={designImage} 
               alt="Diseño arquitectónico profesional" 
-              className="relative rounded-3xl shadow-2xl w-full h-96 object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
