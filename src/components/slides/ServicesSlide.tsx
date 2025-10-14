@@ -27,18 +27,23 @@ const services = [
 
 const ServicesSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-muted/30 flex flex-col">
+    <div className="min-h-screen w-full bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-md">
+      <div className="bg-white/80 backdrop-blur-md shadow-lg border-b border-primary/10">
         <div className="container mx-auto px-6 py-4">
           <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12 flex-1">
-        
+      <div className="container mx-auto px-6 py-16 flex-1">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-primary font-semibold rounded-full text-sm border border-primary/20">
+              Servicios
+            </span>
+          </div>
+          
+          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-4">
             Nuestros Servicios
           </h2>
           <p className="text-xl text-muted-foreground mb-12">
@@ -47,18 +52,23 @@ const ServicesSlide = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service, index) => (
-              <Card key={index} className="p-8 hover:shadow-xl transition-shadow border-2">
-                <service.icon className="h-12 w-12 text-secondary mb-4" />
-                <h3 className="text-2xl font-bold mb-3">{service.title}</h3>
-                <p className="text-muted-foreground">{service.description}</p>
-              </Card>
+              <div key={index} className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-500"></div>
+                <Card className="relative p-8 hover:shadow-2xl transition-all border-2 border-border hover:border-primary/50 bg-white/50 backdrop-blur-sm">
+                  <div className="w-14 h-14 bg-gradient-to-br from-secondary to-secondary/70 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                    <service.icon className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">{service.title}</h3>
+                  <p className="text-muted-foreground">{service.description}</p>
+                </Card>
+              </div>
             ))}
           </div>
         </div>
       </div>
       
       {/* Footer */}
-      <div className="bg-primary py-4">
+      <div className="bg-gradient-to-r from-primary to-primary-dark py-4 border-t border-white/10">
         <div className="container mx-auto px-6">
           <p className="text-center text-white text-sm">
             Servicios integrales para tu proyecto de construcción

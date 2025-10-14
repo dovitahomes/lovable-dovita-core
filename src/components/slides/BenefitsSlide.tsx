@@ -15,28 +15,35 @@ const benefits = [
 
 const BenefitsSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col">
+    <div className="min-h-screen w-full bg-gradient-to-br from-background to-muted/30 flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-md">
+      <div className="bg-white/80 backdrop-blur-md shadow-lg border-b border-primary/10">
         <div className="container mx-auto px-6 py-4">
           <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12 flex-1">
+      <div className="container mx-auto px-6 py-16 flex-1">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="relative group mb-12">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
             <img 
               src={familyImage} 
               alt="Familia feliz en su nuevo hogar" 
-              className="rounded-2xl shadow-2xl w-full h-96 object-cover mb-8"
+              className="relative rounded-3xl shadow-2xl w-full h-96 object-cover"
             />
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4 text-center">
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-primary font-semibold rounded-full text-sm border border-primary/20">
+              Beneficios
+            </span>
+          </div>
+          
+          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-4">
             ¿Por qué elegirnos?
           </h2>
-          <p className="text-xl text-muted-foreground mb-12 text-center">
+          <p className="text-xl text-muted-foreground mb-12">
             Beneficios que nos hacen únicos en el mercado
           </p>
           
@@ -44,17 +51,20 @@ const BenefitsSlide = () => {
             {benefits.map((benefit, index) => (
               <div 
                 key={index}
-                className="flex items-start gap-4 p-6 rounded-lg hover:bg-muted/50 transition-all group"
+                className="relative group"
               >
-                <CheckCircle2 className="h-7 w-7 text-secondary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform" />
-                <span className="text-lg text-foreground">{benefit}</span>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl opacity-0 group-hover:opacity-100 transition duration-300" />
+                <div className="relative flex items-start gap-4 p-6 rounded-xl">
+                  <CheckCircle2 className="h-6 w-6 text-secondary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-lg text-foreground">{benefit}</span>
+                </div>
               </div>
             ))}
           </div>
           
-          <div className="mt-12 p-8 bg-primary/10 rounded-2xl border-2 border-primary/20">
+          <div className="mt-12 p-8 bg-gradient-to-r from-primary/5 to-accent/5 rounded-3xl border-2 border-primary/10">
             <p className="text-xl text-center font-medium">
-              <span className="text-primary font-bold">Construir con Dovita</span> es más que levantar paredes, 
+              <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent font-bold">Construir con Dovita</span> es más que levantar paredes, 
               es crear el hogar de tus sueños con la confianza de que cada detalle está bajo control.
             </p>
           </div>
@@ -62,7 +72,7 @@ const BenefitsSlide = () => {
       </div>
       
       {/* Footer */}
-      <div className="bg-primary py-4">
+      <div className="bg-gradient-to-r from-primary to-primary-dark py-4 border-t border-white/10">
         <div className="container mx-auto px-6">
           <p className="text-center text-white text-sm">
             Tu satisfacción es nuestra prioridad
