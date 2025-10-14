@@ -5,6 +5,13 @@ import { Button } from "../ui/button";
 const ContactSlide = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-primary via-primary-dark to-primary-light relative overflow-hidden">
+      {/* Header */}
+      <div className="bg-primary-dark border-b-4 border-secondary">
+        <div className="container mx-auto px-6 py-4">
+          <Logo className="brightness-0 invert" />
+        </div>
+      </div>
+      
       {/* Decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
@@ -12,7 +19,6 @@ const ContactSlide = () => {
       </div>
       
       <div className="container mx-auto px-6 py-12 relative z-10">
-        <Logo className="mb-12 brightness-0 invert" />
         
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -49,12 +55,21 @@ const ContactSlide = () => {
             Agendar Consulta Gratuita
           </Button>
           
-          <div className="mt-16">
+          <div className="mt-16 bg-primary-dark/50 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
             <Logo size="large" className="mx-auto brightness-0 invert" />
-            <p className="text-white/70 mt-4 text-sm">
+            <p className="text-white/90 mt-4 text-lg font-medium">
               De terreno a casa sin estrés
             </p>
           </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="absolute bottom-0 left-0 right-0 bg-primary-dark border-t-4 border-secondary py-6">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-white/70 text-sm">
+            © 2025 Dovita. Todos los derechos reservados. | Arquitectura y Construcción de Vanguardia
+          </p>
         </div>
       </div>
     </div>

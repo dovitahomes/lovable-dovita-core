@@ -28,11 +28,17 @@ const services = [
 const ServicesSlide = () => {
   return (
     <div className="min-h-screen w-full bg-muted/30">
+      {/* Header */}
+      <div className="bg-primary border-b-4 border-secondary">
+        <div className="container mx-auto px-6 py-4">
+          <Logo className="brightness-0 invert" />
+        </div>
+      </div>
+      
       <div className="container mx-auto px-6 py-12">
-        <Logo className="mb-12" />
         
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">
             Nuestros Servicios
           </h2>
           <p className="text-xl text-muted-foreground mb-12">

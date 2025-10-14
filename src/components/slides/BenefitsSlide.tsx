@@ -1,5 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
 import Logo from "../Logo";
+import familyImage from "@/assets/happy-family.jpg";
 
 const benefits = [
   "Transparencia total en costos y tiempos",
@@ -15,14 +16,27 @@ const benefits = [
 const BenefitsSlide = () => {
   return (
     <div className="min-h-screen w-full bg-background">
+      {/* Header */}
+      <div className="bg-primary border-b-4 border-secondary">
+        <div className="container mx-auto px-6 py-4">
+          <Logo className="brightness-0 invert" />
+        </div>
+      </div>
+      
       <div className="container mx-auto px-6 py-12">
-        <Logo className="mb-12" />
-        
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <img 
+              src={familyImage} 
+              alt="Familia feliz en su nuevo hogar" 
+              className="rounded-2xl shadow-2xl w-full h-96 object-cover mb-8"
+            />
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4 text-center">
             ¿Por qué elegirnos?
           </h2>
-          <p className="text-xl text-muted-foreground mb-12">
+          <p className="text-xl text-muted-foreground mb-12 text-center">
             Beneficios que nos hacen únicos en el mercado
           </p>
           
