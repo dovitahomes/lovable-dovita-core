@@ -31,15 +31,15 @@ const features = [
 
 const TechnologySlide = () => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-muted/50 to-background">
+    <div className="min-h-screen w-full bg-gradient-to-br from-muted/50 to-background flex flex-col">
       {/* Header */}
-      <div className="bg-primary border-b-4 border-secondary">
+      <div className="bg-white shadow-md">
         <div className="container mx-auto px-6 py-4">
-          <Logo className="brightness-0 invert" />
+          <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-12 flex-1">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">
             Tecnología de Vanguardia
@@ -59,6 +59,15 @@ const TechnologySlide = () => {
               </Card>
             ))}
           </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="bg-primary py-4">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-white text-sm">
+            Innovación tecnológica al servicio de tu hogar
+          </p>
         </div>
       </div>
     </div>

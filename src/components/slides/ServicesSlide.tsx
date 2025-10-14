@@ -27,15 +27,15 @@ const services = [
 
 const ServicesSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-muted/30">
+    <div className="min-h-screen w-full bg-muted/30 flex flex-col">
       {/* Header */}
-      <div className="bg-primary border-b-4 border-secondary">
+      <div className="bg-white shadow-md">
         <div className="container mx-auto px-6 py-4">
-          <Logo className="brightness-0 invert" />
+          <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-12 flex-1">
         
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">
@@ -48,12 +48,21 @@ const ServicesSlide = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service, index) => (
               <Card key={index} className="p-8 hover:shadow-xl transition-shadow border-2">
-                <service.icon className="h-12 w-12 text-primary mb-4" />
+                <service.icon className="h-12 w-12 text-secondary mb-4" />
                 <h3 className="text-2xl font-bold mb-3">{service.title}</h3>
                 <p className="text-muted-foreground">{service.description}</p>
               </Card>
             ))}
           </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="bg-primary py-4">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-white text-sm">
+            Servicios integrales para tu proyecto de construcción
+          </p>
         </div>
       </div>
     </div>

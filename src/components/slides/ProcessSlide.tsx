@@ -1,5 +1,5 @@
 import Logo from "../Logo";
-import constructionImage from "@/assets/construction-progress.jpg";
+import progressImage from "@/assets/construction-progress.jpg";
 
 const steps = [
   {
@@ -31,56 +31,56 @@ const steps = [
 
 const ProcessSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="min-h-screen w-full bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-primary border-b-4 border-secondary">
+      <div className="bg-white shadow-md">
         <div className="container mx-auto px-6 py-4">
-          <Logo className="brightness-0 invert" />
+          <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-12 flex-1">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-start mb-12">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">
-                Nuestro Proceso
-              </h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                5 pasos para hacer realidad tu hogar
-              </p>
-              
-              <div className="space-y-6">
-                {steps.map((step, index) => (
-                  <div 
-                    key={index}
-                    className="flex gap-4 items-start group hover:bg-muted/50 p-4 rounded-lg transition-all"
-                  >
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                        <span className="text-xl font-bold text-primary-foreground">{step.number}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
-                        {step.title}
-                      </h3>
-                      <p className="text-muted-foreground">{step.description}</p>
-                    </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-primary mb-12">
+            Nuestro Proceso
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-8 items-start mb-12">
+            <div className="space-y-6">
+              {steps.map((step, index) => (
+                <div key={index} className="flex gap-4 group">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-primary font-bold text-lg shadow-lg">
+                    {step.number}
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
             
-            <div className="relative mt-8 md:mt-0">
+            <div className="relative">
               <img 
-                src={constructionImage} 
-                alt="Proceso de construcción" 
-                className="rounded-2xl shadow-2xl w-full h-auto"
+                src={progressImage} 
+                alt="Avance de construcción" 
+                className="rounded-2xl shadow-2xl w-full h-auto sticky top-24"
               />
-              <div className="absolute -top-6 -right-6 w-48 h-48 bg-primary/20 rounded-full blur-3xl" />
             </div>
           </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="bg-primary py-4">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-white text-sm">
+            Un proceso transparente y eficiente de principio a fin
+          </p>
         </div>
       </div>
     </div>

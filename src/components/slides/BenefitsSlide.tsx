@@ -15,15 +15,15 @@ const benefits = [
 
 const BenefitsSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="min-h-screen w-full bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-primary border-b-4 border-secondary">
+      <div className="bg-white shadow-md">
         <div className="container mx-auto px-6 py-4">
-          <Logo className="brightness-0 invert" />
+          <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-12 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <img 
@@ -46,7 +46,7 @@ const BenefitsSlide = () => {
                 key={index}
                 className="flex items-start gap-4 p-6 rounded-lg hover:bg-muted/50 transition-all group"
               >
-                <CheckCircle2 className="h-7 w-7 text-primary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform" />
+                <CheckCircle2 className="h-7 w-7 text-secondary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform" />
                 <span className="text-lg text-foreground">{benefit}</span>
               </div>
             ))}
@@ -58,6 +58,15 @@ const BenefitsSlide = () => {
               es crear el hogar de tus sueños con la confianza de que cada detalle está bajo control.
             </p>
           </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="bg-primary py-4">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-white text-sm">
+            Tu satisfacción es nuestra prioridad
+          </p>
         </div>
       </div>
     </div>

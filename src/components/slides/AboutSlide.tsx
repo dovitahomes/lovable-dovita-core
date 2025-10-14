@@ -4,15 +4,15 @@ import designImage from "@/assets/design-blueprint.jpg";
 
 const AboutSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="min-h-screen w-full bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-primary border-b-4 border-secondary">
+      <div className="bg-white shadow-md">
         <div className="container mx-auto px-6 py-4">
-          <Logo className="brightness-0 invert" />
+          <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-12 flex-1">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-primary mb-12">
             ¿Quiénes somos?
@@ -44,7 +44,6 @@ const AboutSlide = () => {
                 alt="Tecnología de realidad virtual en arquitectura" 
                 className="rounded-2xl shadow-2xl w-full h-auto"
               />
-              <div className="absolute -bottom-6 -left-6 w-48 h-48 bg-secondary/20 rounded-full blur-3xl" />
             </div>
           </div>
           
@@ -55,6 +54,15 @@ const AboutSlide = () => {
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
             />
           </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <div className="bg-primary py-4">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-white text-sm">
+            Transformando sueños en hogares reales
+          </p>
         </div>
       </div>
     </div>
