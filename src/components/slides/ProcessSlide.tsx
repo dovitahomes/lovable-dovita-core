@@ -1,5 +1,5 @@
 import Logo from "../Logo";
-import processImage from "@/assets/process-construction-bg.jpg";
+import processImage from "@/assets/process-construction-no-crane.jpg";
 
 const steps = [
   {
