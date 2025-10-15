@@ -17,8 +17,6 @@ const ContactSlide = () => {
         {/* Left Column - Contact Info */}
         <div className="bg-primary p-16 flex items-center justify-center">
           <div className="max-w-xl text-center">
-            <Logo size="large" className="mx-auto mb-12 brightness-0 invert" />
-            
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-8">
               ¿Listo para construir tu hogar?
             </h2>
