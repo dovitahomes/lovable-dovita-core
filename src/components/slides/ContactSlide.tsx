@@ -1,76 +1,60 @@
 import { Phone } from "lucide-react";
 import Logo from "../Logo";
-import { Button } from "../ui/button";
-import contactRender from "@/assets/contact-render.jpg";
+import { Button } from "@/components/ui/button";
 
 const ContactSlide = () => {
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex flex-col">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img 
-          src={contactRender} 
-          alt="Casa moderna render" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary-dark/85 to-primary-light/90" />
-      </div>
-      
-      {/* Animated gradient orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-      </div>
-      
+    <div className="min-h-screen w-full bg-white flex flex-col">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md shadow-lg border-b border-primary/10 relative z-10">
+      <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-6 py-4">
           <Logo />
         </div>
       </div>
       
-      <div className="container mx-auto px-6 py-16 relative z-10 flex-1 flex items-center">
-        <div className="max-w-3xl mx-auto text-center w-full">
-          <div className="inline-block p-1 bg-white/10 backdrop-blur-sm rounded-3xl mb-12">
-            <Logo size="large" className="mx-auto" />
-          </div>
-          
-          <div className="inline-block mb-6">
-            <span className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-full text-sm border border-white/20">
-              Estamos listos para ayudarte
-            </span>
-          </div>
-          
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-8 tracking-tight">
-            Contacto
-          </h2>
-          
-          <div className="mb-12 p-8 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20">
-            <div className="flex items-center justify-center gap-4">
+      <div className="flex-1 grid md:grid-cols-2">
+        {/* Left Column - Contact Info */}
+        <div className="bg-primary p-16 flex items-center justify-center">
+          <div className="max-w-xl text-center">
+            <Logo size="large" className="mx-auto mb-12 brightness-0 invert" />
+            
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-8">
+              ¿Listo para construir tu hogar?
+            </h2>
+            
+            <div className="flex items-center justify-center gap-4 mb-8">
               <Phone className="h-8 w-8 text-secondary" />
-              <p className="text-3xl text-white font-light tracking-wider">477 4752522</p>
+              <a 
+                href="tel:+524424961500" 
+                className="text-3xl font-bold text-white hover:text-secondary transition-colors"
+              >
+                442 496 1500
+              </a>
             </div>
+            
+            <Button 
+              size="lg"
+              className="bg-secondary text-primary hover:bg-secondary/90 font-bold px-8 py-6 text-lg"
+            >
+              Contáctanos
+            </Button>
           </div>
-          
-          <Button 
-            size="lg" 
-            className="bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-primary font-bold text-lg px-12 py-6 h-auto shadow-2xl transition-all hover:scale-105"
-          >
-            Agendar Consulta Gratuita
-          </Button>
-          
-          <p className="text-white/90 mt-12 text-xl font-light">
-            De terreno a casa sin estrés
-          </p>
         </div>
-      </div>
-      
-      {/* Footer */}
-      <div className="bg-primary-dark/50 backdrop-blur-md py-6 mt-auto relative z-10 border-t border-white/10">
-        <div className="container mx-auto px-6">
-          <p className="text-center text-white/70 text-sm">
-            © 2025 Dovita. Todos los derechos reservados. | Arquitectura y Construcción de Vanguardia
-          </p>
+        
+        {/* Right Column - Message */}
+        <div className="bg-white p-16 flex items-center justify-center">
+          <div className="max-w-xl">
+            <h3 className="text-4xl font-bold text-primary mb-6">
+              Tu casa, nuestra experiencia
+            </h3>
+            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+              En Dovita transformamos terrenos en hogares sin estrés. 
+              Déjanos acompañarte en cada paso del camino hacia la casa de tus sueños.
+            </p>
+            <p className="text-lg text-foreground/60">
+              Querétaro • San Luis Potosí
+            </p>
+          </div>
         </div>
       </div>
     </div>
