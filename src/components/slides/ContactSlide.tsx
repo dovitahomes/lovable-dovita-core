@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import Logo from "../Logo";
 import { Button } from "@/components/ui/button";
 
@@ -54,6 +54,50 @@ const ContactSlide = () => {
             <p className="text-lg text-foreground/60">
               Querétaro • San Luis Potosí
             </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Dark Footer */}
+      <div className="bg-[#1a1a1a] text-white py-8">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
+            {/* Logo and Copyright */}
+            <div className="flex items-center gap-4">
+              <Logo className="brightness-0 invert h-8" />
+              <span className="text-sm text-white/70">© 2025</span>
+            </div>
+            
+            {/* Navigation Links */}
+            <div className="flex flex-col gap-2 text-sm">
+              <span className="text-white/60">Home</span>
+              <span className="text-white/60">Nosotros</span>
+              <span className="text-white/60">Servicios</span>
+              <span className="text-white/60">Desarrollos</span>
+              <span className="text-white/60">Contacto</span>
+            </div>
+            
+            {/* Contact Info */}
+            <div className="flex flex-col gap-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-white/60" />
+                <span className="text-white/80">+52 1000 000 0000</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-white/60" />
+                <span className="text-white/80">contacto@dovita.mx</span>
+              </div>
+              <div className="flex items-start gap-2 mt-2">
+                <MapPin className="h-4 w-4 text-white/60 mt-1 flex-shrink-0" />
+                <span className="text-white/80">Av. Armando Britain Shaffler 2001, Centro Sur, Querétaro</span>
+              </div>
+            </div>
+            
+            {/* Social Media */}
+            <div className="flex flex-col gap-2 text-sm text-right">
+              <span className="text-white/60 hover:text-white cursor-pointer transition-colors">Instagram</span>
+              <span className="text-white/60 hover:text-white cursor-pointer transition-colors">Facebook</span>
+            </div>
           </div>
         </div>
       </div>
