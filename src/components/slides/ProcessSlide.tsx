@@ -1,5 +1,5 @@
 import Logo from "../Logo";
-import progressImage from "@/assets/construction-progress.jpg";
+import processImage from "@/assets/process-construction.jpg";
 
 const steps = [
   {
@@ -74,7 +74,7 @@ const ProcessSlide = () => {
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
               <img 
-                src={progressImage} 
+                src={processImage} 
                 alt="Avance de construcción" 
                 className="relative rounded-3xl shadow-2xl w-full h-auto sticky top-24"
               />
