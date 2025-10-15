@@ -61,20 +61,11 @@ const ContactSlide = () => {
       {/* Dark Footer */}
       <div className="bg-[#1a1a1a] text-white py-8">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             {/* Logo and Copyright */}
             <div className="flex items-center gap-4">
               <Logo className="brightness-0 invert h-8" />
               <span className="text-sm text-white/70">© 2025</span>
-            </div>
-            
-            {/* Navigation Links */}
-            <div className="flex flex-col gap-2 text-sm">
-              <span className="text-white/60">Home</span>
-              <span className="text-white/60">Nosotros</span>
-              <span className="text-white/60">Servicios</span>
-              <span className="text-white/60">Desarrollos</span>
-              <span className="text-white/60">Contacto</span>
             </div>
             
             {/* Contact Info */}
