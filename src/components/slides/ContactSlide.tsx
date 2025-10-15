@@ -1,6 +1,7 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import Logo from "../Logo";
 import { Button } from "@/components/ui/button";
+import houseRender from "@/assets/house-render-contact.jpg";
 
 const ContactSlide = () => {
   return (
@@ -41,19 +42,32 @@ const ContactSlide = () => {
           </div>
         </div>
         
-        {/* Right Column - Message */}
-        <div className="bg-white p-16 flex items-center justify-center">
-          <div className="max-w-xl">
-            <h3 className="text-4xl font-bold text-primary mb-6">
-              Tu casa, nuestra experiencia
-            </h3>
-            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-              En Dovita transformamos terrenos en hogares sin estrés. 
-              Déjanos acompañarte en cada paso del camino hacia la casa de tus sueños.
-            </p>
-            <p className="text-lg text-foreground/60">
-              Querétaro • San Luis Potosí
-            </p>
+        {/* Right Column - Message with Background */}
+        <div className="relative overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <img 
+              src={houseRender} 
+              alt="Render de casa moderna" 
+              className="w-full h-full object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-white/80" />
+          </div>
+          
+          {/* Content */}
+          <div className="relative p-16 flex items-center justify-center h-full">
+            <div className="max-w-xl">
+              <h3 className="text-4xl font-bold text-primary mb-6">
+                Tu casa, nuestra experiencia
+              </h3>
+              <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+                En Dovita transformamos terrenos en hogares sin estrés. 
+                Déjanos acompañarte en cada paso del camino hacia la casa de tus sueños.
+              </p>
+              <p className="text-lg text-foreground/60">
+                Querétaro • San Luis Potosí
+              </p>
+            </div>
           </div>
         </div>
       </div>
