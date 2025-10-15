@@ -62,10 +62,9 @@ const ContactSlide = () => {
       <div className="bg-[#1a1a1a] text-white py-8">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            {/* Logo and Copyright */}
-            <div className="flex items-center gap-4">
+            {/* Logo */}
+            <div className="flex items-center">
               <Logo className="brightness-0 invert h-8" />
-              <span className="text-sm text-white/70">© 2025</span>
             </div>
             
             {/* Contact Info */}
@@ -84,10 +83,11 @@ const ContactSlide = () => {
               </div>
             </div>
             
-            {/* Social Media */}
+            {/* Social Media and Copyright */}
             <div className="flex flex-col gap-2 text-sm text-right">
               <span className="text-white/60 hover:text-white cursor-pointer transition-colors">Instagram</span>
               <span className="text-white/60 hover:text-white cursor-pointer transition-colors">Facebook</span>
+              <span className="text-sm text-white/70 mt-2">© 2025</span>
             </div>
           </div>
         </div>
