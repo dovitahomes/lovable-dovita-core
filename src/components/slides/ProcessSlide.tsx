@@ -4,28 +4,28 @@ import progressImage from "@/assets/construction-progress.jpg";
 const steps = [
   {
     number: "01",
-    title: "Consulta Inicial",
-    description: "Nos reunimos para entender tus necesidades, presupuesto y visión de tu hogar ideal."
+    title: "Proceso de Diseño",
+    description: "Máximo 50 días para diseñar tu casa. Arquitecto asignado dedicado a tu proyecto con personalización ilimitada. Diseños funcionales y preparados para las nuevas tecnologías."
   },
   {
     number: "02",
-    title: "Diseño Arquitectónico",
-    description: "Nuestros arquitectos crean el diseño perfecto. Lo visualizas en realidad virtual antes de aprobar."
+    title: "Presupuesto y Obra a Mano Alzada",
+    description: "Certeza en costos antes de iniciar la obra. Transparencia en cada etapa. Apoyo en la obtención de créditos y plan de pagos a la medida."
   },
   {
     number: "03",
-    title: "Planificación Financiera",
-    description: "Establecemos un plan de pagos claro y transparente que se ajusta a tu presupuesto."
+    title: "Construcción y Seguimiento",
+    description: "Contrato de obra firmado con plazo fijo de construcción. Acceso digital a plataforma personalizada con avances de obra y aplicación de recursos en tiempo real."
   },
   {
     number: "04",
-    title: "Construcción",
-    description: "Iniciamos la construcción. Tú sigues el avance desde nuestra plataforma con fotos y actualizaciones."
+    title: "Entrega",
+    description: "Entregamos tu casa terminada, con todos los acabados y detalles acordados. Reportes de obra y compromisos cumplidos en tiempo y forma."
   },
   {
     number: "05",
-    title: "Entrega",
-    description: "Entregamos tu casa terminada, con todos los acabados y detalles acordados."
+    title: "Postventa y Garantías",
+    description: "Seguimiento posterior a la entrega. Garantías para tranquilidad total. Atención continua a nuestros clientes."
   }
 ];
 

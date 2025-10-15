@@ -3,13 +3,15 @@ import Logo from "../Logo";
 import familyImage from "@/assets/happy-family.jpg";
 
 const benefits = [
-  "Transparencia total en costos y tiempos",
+  "Experiencia comprobada en diseño y construcción",
+  "Alianzas estratégicas con proveedores de primera calidad",
+  "Transparencia financiera total en costos y tiempos",
+  "Atención postventa y garantías para tu tranquilidad",
   "Comunicación constante con el equipo",
   "Visualización 3D y realidad virtual de tu proyecto",
   "Seguimiento en tiempo real del avance de obra",
   "Control financiero completo desde tu dispositivo",
   "Equipo profesional de arquitectos e ingenieros",
-  "Materiales de primera calidad garantizados",
   "Asesoría personalizada en cada etapa"
 ];
 
@@ -41,10 +43,10 @@ const BenefitsSlide = () => {
           </div>
           
           <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-4">
-            ¿Por qué elegirnos?
+            Fortalezas Dovita
           </h2>
           <p className="text-xl text-muted-foreground mb-12">
-            Beneficios que nos hacen únicos en el mercado
+            Diseñamos y construimos hogares que superan expectativas, haciendo que el proceso sea sencillo, seguro y emocionante
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -64,8 +66,8 @@ const BenefitsSlide = () => {
           
           <div className="mt-12 p-8 bg-gradient-to-r from-primary/5 to-accent/5 rounded-3xl border-2 border-primary/10">
             <p className="text-xl text-center font-medium">
-              <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent font-bold">Construir con Dovita</span> es más que levantar paredes, 
-              es crear el hogar de tus sueños con la confianza de que cada detalle está bajo control.
+              <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent font-bold">Con Dovita tienes el control en tus manos</span> desde el diseño hasta la entrega. 
+              Transformamos terrenos en hogares sin estrés, donde tu casa se convierte en nuestra experiencia.
             </p>
           </div>
         </div>

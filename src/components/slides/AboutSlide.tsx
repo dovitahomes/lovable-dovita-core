@@ -34,8 +34,10 @@ const AboutSlide = () => {
               </p>
               
               <p className="leading-relaxed">
-                Te acompañamos en cada etapa: desde la asesoría inicial y el diseño integral de tu vivienda, 
-                pasando por la construcción, hasta el seguimiento postventa. Todo con la transparencia y 
+                Te acompañamos en cada etapa: desde la <span className="font-semibold text-foreground">asesoría inicial</span> y 
+                el <span className="font-semibold text-foreground">diseño integral</span> de tu vivienda, 
+                pasando por la <span className="font-semibold text-foreground">construcción</span>, hasta 
+                el <span className="font-semibold text-foreground">seguimiento postventa</span>. Todo con la transparencia y 
                 profesionalismo que tu proyecto merece.
               </p>
               

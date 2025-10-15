@@ -37,8 +37,11 @@ const CoverSlide = () => {
         
         {/* Footer */}
         <div className="py-6 bg-white/5 backdrop-blur-md border-t border-white/10">
-          <p className="text-center text-white/90 text-sm tracking-wide">
-            Acompañamiento completo en el diseño y construcción de tu hogar ideal
+          <p className="text-center text-white/90 text-lg tracking-wide">
+            Despacho de arquitectos y constructora con servicio 360°
+          </p>
+          <p className="text-center text-white/80 text-sm mt-1">
+            Querétaro • San Luis Potosí
           </p>
         </div>
       </div>
