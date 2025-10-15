@@ -31,8 +31,13 @@ const CoverSlide = () => {
             sin estrés
           </h1>
           
-          <p className="text-2xl md:text-3xl text-white/90 font-light max-w-2xl">
-            Acompañamiento completo en el diseño y construcción de tu hogar ideal
+          <p className="text-2xl md:text-3xl text-white/90 font-light max-w-2xl leading-relaxed">
+            Despacho de arquitectos y constructora enfocado en brindarte un servicio 360°: 
+            desde la asesoría y diseño integral hasta la construcción y seguimiento postventa de tu hogar ideal
+          </p>
+          
+          <p className="text-lg md:text-xl text-white/70 font-light">
+            Querétaro • San Luis Potosí
           </p>
         </div>
       </div>
