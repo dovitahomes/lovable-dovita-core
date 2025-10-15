@@ -27,9 +27,16 @@ const AboutSlide = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
             <div className="space-y-6 text-lg text-foreground/80">
               <p className="leading-relaxed">
-                <span className="font-bold text-primary text-2xl">Dovita</span> es una empresa especializada en 
-                arquitectura y construcción que te acompaña en todo el proceso, desde la compra de tu terreno 
-                hasta la entrega de tu casa terminada.
+                <span className="font-bold text-primary text-2xl">Dovita</span> es un despacho de arquitectos y 
+                constructora con sede en <span className="font-semibold text-foreground">Querétaro y San Luis Potosí</span>, 
+                orientado al servicio al cliente y enfocado en brindarte un 
+                <span className="font-semibold text-foreground"> servicio 360°</span>.
+              </p>
+              
+              <p className="leading-relaxed">
+                Te acompañamos en cada etapa: desde la asesoría inicial y el diseño integral de tu vivienda, 
+                pasando por la construcción, hasta el seguimiento postventa. Todo con la transparencia y 
+                profesionalismo que tu proyecto merece.
               </p>
               
               <p className="leading-relaxed">
