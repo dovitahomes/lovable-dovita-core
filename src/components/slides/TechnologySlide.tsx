@@ -35,27 +35,27 @@ const TechnologySlide = () => {
       </div>
       
       <div className="flex-1 bg-white">
-        <div className="container mx-auto px-6 py-16">
+        <div className="container mx-auto px-6 py-8">
           <div className="max-w-6xl mx-auto">
             <span className="text-primary/70 text-sm font-semibold uppercase tracking-wider mb-4 block">
               Innovación
             </span>
             
-            <h2 className="text-5xl md:text-6xl font-bold text-primary mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-3">
               Tecnología de Vanguardia
             </h2>
-            <p className="text-xl text-foreground/70 mb-12 max-w-2xl">
+            <p className="text-lg text-foreground/70 mb-8 max-w-2xl">
               Herramientas digitales que transforman la experiencia de construir
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {features.map((feature, index) => (
-                <div key={index} className="bg-primary p-8 rounded-lg hover:bg-primary-dark transition-all">
-                  <div className="w-14 h-14 bg-secondary rounded-lg flex items-center justify-center mb-6">
-                    <feature.icon className="h-7 w-7 text-primary" />
+                <div key={index} className="bg-primary p-6 rounded-lg hover:bg-primary-dark transition-all">
+                  <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center mb-4">
+                    <feature.icon className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3 text-white">{feature.title}</h3>
-                  <p className="text-white/80 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-bold mb-2 text-white">{feature.title}</h3>
+                  <p className="text-white/80 leading-relaxed text-sm">{feature.description}</p>
                 </div>
               ))}
             </div>

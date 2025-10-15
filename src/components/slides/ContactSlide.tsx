@@ -15,13 +15,13 @@ const ContactSlide = () => {
       
       <div className="flex-1 grid md:grid-cols-2">
         {/* Left Column - Contact Info */}
-        <div className="bg-primary p-16 flex items-center justify-center">
+        <div className="bg-primary p-8 md:p-12 flex items-center justify-center">
           <div className="max-w-xl text-center">
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               ¿Listo para construir tu hogar?
             </h2>
             
-            <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="flex items-center justify-center gap-4 mb-6">
               <Phone className="h-8 w-8 text-secondary" />
               <a 
                 href="tel:+524424961500" 
@@ -53,16 +53,16 @@ const ContactSlide = () => {
           </div>
           
           {/* Content */}
-          <div className="relative p-16 flex items-center justify-center h-full">
+          <div className="relative p-8 md:p-12 flex items-center justify-center h-full">
             <div className="max-w-xl">
-              <h3 className="text-4xl font-bold text-primary mb-6">
+              <h3 className="text-3xl md:text-4xl font-bold text-primary mb-4">
                 Tu casa, nuestra experiencia
               </h3>
-              <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+              <p className="text-lg text-foreground/70 mb-6 leading-relaxed">
                 En Dovita transformamos terrenos en hogares sin estrés. 
                 Déjanos acompañarte en cada paso del camino hacia la casa de tus sueños.
               </p>
-              <p className="text-lg text-foreground/60">
+              <p className="text-base text-foreground/60">
                 Querétaro • San Luis Potosí
               </p>
             </div>
@@ -71,7 +71,7 @@ const ContactSlide = () => {
       </div>
       
       {/* Dark Footer */}
-      <div className="bg-[#1a1a1a] text-white py-8">
+      <div className="bg-[#1a1a1a] text-white py-6">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             {/* Logo */}

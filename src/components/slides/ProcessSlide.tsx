@@ -50,27 +50,27 @@ const ProcessSlide = () => {
         </div>
         
         {/* Right side - Content (3 columns) */}
-        <div className="md:col-span-3 bg-primary p-16 overflow-y-auto">
+        <div className="md:col-span-3 bg-primary p-8 md:p-12 overflow-y-auto">
           <div className="max-w-3xl">
             <span className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4 block">
               Proceso
             </span>
             
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
               Nuestro Proceso
             </h2>
             
-            <div className="space-y-6">
+            <div className="space-y-4">
               {steps.map((step, index) => (
-                <div key={index} className="flex gap-6">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-secondary flex items-center justify-center text-primary font-bold text-lg">
+                <div key={index} className="flex gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-primary font-bold text-base">
                     {step.number}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2 text-white">
+                    <h3 className="text-lg font-bold mb-1 text-white">
                       {step.title}
                     </h3>
-                    <p className="text-white/80 leading-relaxed">
+                    <p className="text-white/80 leading-relaxed text-sm">
                       {step.description}
                     </p>
                   </div>

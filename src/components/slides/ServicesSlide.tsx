@@ -35,27 +35,27 @@ const ServicesSlide = () => {
       </div>
       
       <div className="flex-1 bg-primary">
-        <div className="container mx-auto px-6 py-16">
+        <div className="container mx-auto px-6 py-8">
           <div className="max-w-6xl mx-auto">
             <span className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4 block">
               Servicios
             </span>
             
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
               Nuestros Servicios
             </h2>
-            <p className="text-xl text-white/80 mb-12 max-w-2xl">
+            <p className="text-lg text-white/80 mb-8 max-w-2xl">
               Todo lo que necesitas para construir tu casa ideal
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {services.map((service, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-lg hover:bg-white/20 transition-all">
+                <div key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-lg hover:bg-white/20 transition-all">
                   <div className="w-14 h-14 bg-secondary rounded-lg flex items-center justify-center mb-4">
                     <service.icon className="h-7 w-7 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3 text-white">{service.title}</h3>
-                  <p className="text-white/80">{service.description}</p>
+                  <h3 className="text-xl font-bold mb-2 text-white">{service.title}</h3>
+                  <p className="text-white/80 text-sm">{service.description}</p>
                 </div>
               ))}
             </div>

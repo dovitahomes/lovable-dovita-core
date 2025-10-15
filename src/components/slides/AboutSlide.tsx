@@ -14,17 +14,17 @@ const AboutSlide = () => {
       
       <div className="flex-1 grid md:grid-cols-2">
         {/* Left Column - Content */}
-        <div className="bg-white p-16 flex items-center">
+        <div className="bg-white p-8 md:p-12 flex items-center overflow-y-auto">
           <div className="max-w-xl">
             <span className="text-primary/70 text-sm font-semibold uppercase tracking-wider mb-4 block">
               Sobre Nosotros
             </span>
             
-            <h2 className="text-5xl md:text-6xl font-bold text-primary mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-6">
               ¿Quiénes somos?
             </h2>
             
-            <div className="space-y-6 text-lg text-foreground/80">
+            <div className="space-y-4 text-base text-foreground/80">
               <p className="leading-relaxed">
                 <span className="font-bold text-primary text-2xl">Dovita</span> es un despacho de arquitectos y 
                 constructora con sede en <span className="font-semibold text-foreground">Querétaro y San Luis Potosí</span>, 
