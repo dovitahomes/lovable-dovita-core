@@ -35,27 +35,32 @@ const ServicesSlide = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-12 py-20 flex-1">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-6xl md:text-7xl font-bold text-primary mb-6 leading-none">
-            Nuestros<br />Servicios
+      <div className="container mx-auto px-6 py-16 flex-1">
+        <div className="max-w-6xl mx-auto">
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-primary font-semibold rounded-full text-sm border border-primary/20">
+              Servicios
+            </span>
+          </div>
+          
+          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-4">
+            Nuestros Servicios
           </h2>
-          <p className="text-2xl text-muted-foreground mb-16 max-w-2xl">
+          <p className="text-xl text-muted-foreground mb-12">
             Todo lo que necesitas para construir tu casa ideal
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service, index) => (
-              <div key={index} className="p-10 border-l-4 border-secondary bg-white/50 hover:bg-white/80 transition-all">
-                <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <service.icon className="h-8 w-8 text-secondary" />
+              <div key={index} className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-500"></div>
+                <Card className="relative p-8 hover:shadow-2xl transition-all border-2 border-border hover:border-primary/50 bg-white/50 backdrop-blur-sm">
+                  <div className="w-14 h-14 bg-gradient-to-br from-secondary to-secondary/70 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                    <service.icon className="h-7 w-7 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold mb-3 text-foreground">{service.title}</h3>
-                    <p className="text-lg text-muted-foreground leading-relaxed">{service.description}</p>
-                  </div>
-                </div>
+                  <h3 className="text-2xl font-bold mb-3">{service.title}</h3>
+                  <p className="text-muted-foreground">{service.description}</p>
+                </Card>
               </div>
             ))}
           </div>

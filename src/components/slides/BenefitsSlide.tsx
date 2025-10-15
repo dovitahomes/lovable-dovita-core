@@ -23,37 +23,50 @@ const BenefitsSlide = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-12 py-20 flex-1">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-20 items-center mb-20">
-            <div>
-              <h2 className="text-6xl md:text-7xl font-bold text-primary mb-6 leading-none">
-                ¿Por qué<br />elegirnos?
-              </h2>
-              <p className="text-2xl text-muted-foreground">
-                Beneficios que nos hacen únicos en el mercado
-              </p>
-            </div>
-            
-            <div className="relative h-[400px] rounded-2xl overflow-hidden">
-              <img 
-                src={familyImage} 
-                alt="Familia feliz en su nuevo hogar" 
-                className="w-full h-full object-cover"
-              />
-            </div>
+      <div className="container mx-auto px-6 py-16 flex-1">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative group mb-12">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+            <img 
+              src={familyImage} 
+              alt="Familia feliz en su nuevo hogar" 
+              className="relative rounded-3xl shadow-2xl w-full h-96 object-cover"
+            />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 bg-gradient-to-r from-primary/10 to-accent/10 text-primary font-semibold rounded-full text-sm border border-primary/20">
+              Beneficios
+            </span>
+          </div>
+          
+          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent mb-4">
+            ¿Por qué elegirnos?
+          </h2>
+          <p className="text-xl text-muted-foreground mb-12">
+            Beneficios que nos hacen únicos en el mercado
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {benefits.map((benefit, index) => (
               <div 
                 key={index}
-                className="flex items-start gap-4 p-4"
+                className="relative group"
               >
-                <CheckCircle2 className="h-7 w-7 text-secondary flex-shrink-0 mt-1" />
-                <span className="text-xl text-foreground/80">{benefit}</span>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl opacity-0 group-hover:opacity-100 transition duration-300" />
+                <div className="relative flex items-start gap-4 p-6 rounded-xl">
+                  <CheckCircle2 className="h-6 w-6 text-secondary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-lg text-foreground">{benefit}</span>
+                </div>
               </div>
             ))}
+          </div>
+          
+          <div className="mt-12 p-8 bg-gradient-to-r from-primary/5 to-accent/5 rounded-3xl border-2 border-primary/10">
+            <p className="text-xl text-center font-medium">
+              <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent font-bold">Construir con Dovita</span> es más que levantar paredes, 
+              es crear el hogar de tus sueños con la confianza de que cada detalle está bajo control.
+            </p>
           </div>
         </div>
       </div>
