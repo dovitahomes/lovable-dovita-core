@@ -27,15 +27,15 @@ const services = [
 
 const ServicesSlide = () => {
   return (
-    <div className="min-h-screen w-full bg-white flex flex-col">
+    <div className="h-screen w-full bg-white flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4">
+      <div className="bg-white shadow-sm border-b flex-shrink-0">
+        <div className="container mx-auto px-6 py-3">
           <Logo />
         </div>
       </div>
       
-      <div className="flex-1 grid md:grid-cols-2">
+      <div className="flex-1 grid md:grid-cols-2 overflow-hidden">
         {/* Left Column - Image */}
         <div className="relative overflow-hidden">
           <img 
@@ -46,27 +46,31 @@ const ServicesSlide = () => {
         </div>
         
         {/* Right Column - Content */}
-        <div className="bg-primary p-8 md:p-12 flex items-center overflow-y-auto">
-          <div className="max-w-xl">
-            <span className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4 block">
+        <div className="bg-primary p-6 md:p-8 flex items-center overflow-hidden">
+          <div className="w-full">
+            <span className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-2 block">
               Servicios
             </span>
             
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
               Nuestros Servicios
             </h2>
-            <p className="text-lg text-white/80 mb-8">
+            <p className="text-base text-white/80 mb-6">
               Todo lo que necesitas para construir tu casa ideal
             </p>
             
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {services.map((service, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-lg hover:bg-white/20 transition-all">
-                  <div className="w-14 h-14 bg-secondary rounded-lg flex items-center justify-center mb-4">
-                    <service.icon className="h-7 w-7 text-primary" />
+                <div key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-lg hover:bg-white/20 transition-all">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                      <service.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold mb-1 text-white">{service.title}</h3>
+                      <p className="text-white/80 text-sm leading-snug">{service.description}</p>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-white">{service.title}</h3>
-                  <p className="text-white/80 text-sm">{service.description}</p>
                 </div>
               ))}
             </div>
