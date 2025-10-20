@@ -1,14 +1,14 @@
 import Logo from "../Logo";
-import processOption1 from "@/assets/process-option-1.jpg";
-import processOption2 from "@/assets/process-option-2.jpg";
-import processOption3 from "@/assets/process-option-3.jpg";
-import processOption4 from "@/assets/process-option-4.jpg";
+import familyOption1 from "@/assets/family-option-1.jpg";
+import familyOption2 from "@/assets/family-option-2.jpg";
+import familyOption3 from "@/assets/family-option-3.jpg";
+import familyOption4 from "@/assets/family-option-4.jpg";
 
 const imageOptions = [
-  { src: processOption1, title: "Opción 1", description: "Casa moderna de lujo en construcción con estructura de concreto" },
-  { src: processOption2, title: "Opción 2", description: "Avance de obra con arquitectura minimalista contemporánea" },
-  { src: processOption3, title: "Opción 3", description: "Fase intermedia de construcción con diseño de techo plano" },
-  { src: processOption4, title: "Opción 4", description: "Proyecto residencial de lujo en desarrollo" },
+  { src: familyOption1, title: "Opción 1", description: "Familia mexicana feliz en su nuevo hogar moderno" },
+  { src: familyOption2, title: "Opción 2", description: "Familia celebrando en su nueva casa contemporánea" },
+  { src: familyOption3, title: "Opción 3", description: "Momento familiar en el nuevo hogar" },
+  { src: familyOption4, title: "Opción 4", description: "Familia orgullosa en su residencia moderna" },
 ];
 
 const ImageOptionsSlide = () => {
@@ -24,10 +24,10 @@ const ImageOptionsSlide = () => {
       <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-2">
-            Opciones de Imágenes para "Nuestro Proceso"
+            Opciones de Imágenes para "Fortalezas Dovita"
           </h2>
           <p className="text-foreground/70 mb-8">
-            Elige la imagen que mejor represente el progreso de construcción de tus proyectos
+            Elige la imagen que mejor represente a una familia mexicana feliz en su nuevo hogar
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
