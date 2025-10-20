@@ -1,26 +1,23 @@
-import { Monitor, Smartphone, Camera, CreditCard } from "lucide-react";
 import Logo from "../Logo";
+import platformDashboard from "@/assets/platform-dashboard.jpg";
+import platformPhotos from "@/assets/platform-photos.jpg";
+import platformChat from "@/assets/platform-chat.jpg";
 
-const features = [
+const platformFeatures = [
   {
-    icon: Monitor,
-    title: "Realidad Virtual Inmersiva",
-    description: "Recorre tu futura casa habitación por habitación antes de que se construya. Toma decisiones informadas sobre espacios, acabados y diseño."
+    image: platformDashboard,
+    title: "Portal del Cliente",
+    description: "Dashboard completo con información del proyecto, presupuestos y cronogramas en tiempo real"
   },
   {
-    icon: Smartphone,
-    title: "Plataforma de Cliente",
-    description: "Accede desde cualquier dispositivo a tu portal personalizado. Revisa planos, cronogramas y el estado de tu proyecto 24/7."
+    image: platformPhotos,
+    title: "Fotos de Progreso",
+    description: "Galería de avances con categorización automática y actualizaciones semanales de obra"
   },
   {
-    icon: Camera,
-    title: "Seguimiento Visual",
-    description: "Recibe fotos del avance de obra actualizadas semanalmente. Observa cómo tu casa toma forma día a día."
-  },
-  {
-    icon: CreditCard,
-    title: "Gestión Financiera Digital",
-    description: "Sistema transparente que muestra cada peso invertido, pagos pendientes y un desglose detallado de gastos."
+    image: platformChat,
+    title: "Comunicación Directa",
+    description: "Chat integrado y seguimiento financiero transparente de cada peso invertido"
   }
 ];
 
@@ -44,18 +41,23 @@ const TechnologySlide = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-primary mb-3">
               Tecnología de Vanguardia
             </h2>
-            <p className="text-lg text-foreground/70 mb-8 max-w-2xl">
-              Herramientas digitales que transforman la experiencia de construir
+            <p className="text-lg text-foreground/70 mb-12 max-w-2xl">
+              Plataforma digital completa para que sigas cada detalle de tu proyecto
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {features.map((feature, index) => (
-                <div key={index} className="bg-primary p-6 rounded-lg hover:bg-primary-dark transition-all">
-                  <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center mb-4">
-                    <feature.icon className="h-6 w-6 text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {platformFeatures.map((feature, index) => (
+                <div key={index} className="group">
+                  <div className="relative overflow-hidden rounded-2xl shadow-lg mb-4 aspect-[9/16] bg-gray-100">
+                    <img 
+                      src={feature.image} 
+                      alt={feature.title}
+                      className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-white">{feature.title}</h3>
-                  <p className="text-white/80 leading-relaxed text-sm">{feature.description}</p>
+                  <h3 className="text-xl font-bold mb-2 text-primary">{feature.title}</h3>
+                  <p className="text-foreground/70 leading-relaxed text-sm">{feature.description}</p>
                 </div>
               ))}
             </div>
