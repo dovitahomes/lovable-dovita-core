@@ -8,6 +8,7 @@ import ProcessSlide from "@/components/slides/ProcessSlide";
 import TechnologySlide from "@/components/slides/TechnologySlide";
 import BenefitsSlide from "@/components/slides/BenefitsSlide";
 import ContactSlide from "@/components/slides/ContactSlide";
+import ImageOptionsSlide from "@/components/slides/ImageOptionsSlide";
 
 const slides = [
   CoverSlide,
@@ -16,7 +17,8 @@ const slides = [
   ProcessSlide,
   TechnologySlide,
   BenefitsSlide,
-  ContactSlide
+  ContactSlide,
+  ImageOptionsSlide
 ];
 
 const Index = () => {
