@@ -1,5 +1,6 @@
 import { Building2, Eye, Wallet, MessageCircle } from "lucide-react";
 import Logo from "../Logo";
+import servicesImage from "@/assets/services-interior.jpg";
 
 const services = [
   {
@@ -34,9 +35,19 @@ const ServicesSlide = () => {
         </div>
       </div>
       
-      <div className="flex-1 bg-primary">
-        <div className="container mx-auto px-6 py-8">
-          <div className="max-w-6xl mx-auto">
+      <div className="flex-1 grid md:grid-cols-2">
+        {/* Left Column - Image */}
+        <div className="relative overflow-hidden">
+          <img 
+            src={servicesImage} 
+            alt="Interior de casa Dovita" 
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+        
+        {/* Right Column - Content */}
+        <div className="bg-primary p-8 md:p-12 flex items-center overflow-y-auto">
+          <div className="max-w-xl">
             <span className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4 block">
               Servicios
             </span>
@@ -44,11 +55,11 @@ const ServicesSlide = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
               Nuestros Servicios
             </h2>
-            <p className="text-lg text-white/80 mb-8 max-w-2xl">
+            <p className="text-lg text-white/80 mb-8">
               Todo lo que necesitas para construir tu casa ideal
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {services.map((service, index) => (
                 <div key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-lg hover:bg-white/20 transition-all">
                   <div className="w-14 h-14 bg-secondary rounded-lg flex items-center justify-center mb-4">
