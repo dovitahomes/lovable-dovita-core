@@ -70,11 +70,11 @@ const ServicesSlide = () => {
               </div>
 
               {/* Right side - Image */}
-              <div className="w-full">
+              <div className="relative h-full min-h-[400px] lg:min-h-[500px]">
                 <img 
                   src={servicesImage} 
                   alt="Interior de casa moderna Dovita" 
-                  className="w-full h-auto rounded-lg shadow-2xl"
+                  className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl"
                 />
               </div>
             </div>
