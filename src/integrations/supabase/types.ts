@@ -286,6 +286,53 @@ export type Database = {
           },
         ]
       }
+      price_history: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          observed_at: string
+          precio_unit: number
+          proveedor_id: string | null
+          source: string | null
+          subpartida_id: string
+          unidad: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          observed_at?: string
+          precio_unit: number
+          proveedor_id?: string | null
+          source?: string | null
+          subpartida_id: string
+          unidad: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          observed_at?: string
+          precio_unit?: number
+          proveedor_id?: string | null
+          source?: string | null
+          subpartida_id?: string
+          unidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_subpartida_id_fkey"
+            columns: ["subpartida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -448,6 +495,59 @@ export type Database = {
         }
         Relationships: []
       }
+      tu_nodes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_universal: boolean
+          name: string
+          order_index: number
+          parent_id: string | null
+          project_scope: Database["public"]["Enums"]["project_scope"]
+          scope_id: string | null
+          type: Database["public"]["Enums"]["node_type"]
+          unit_default: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_universal?: boolean
+          name: string
+          order_index?: number
+          parent_id?: string | null
+          project_scope?: Database["public"]["Enums"]["project_scope"]
+          scope_id?: string | null
+          type: Database["public"]["Enums"]["node_type"]
+          unit_default?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_universal?: boolean
+          name?: string
+          order_index?: number
+          parent_id?: string | null
+          project_scope?: Database["public"]["Enums"]["project_scope"]
+          scope_id?: string | null
+          type?: Database["public"]["Enums"]["node_type"]
+          unit_default?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tu_nodes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -574,6 +674,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_full_code: { Args: { node_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -590,7 +691,9 @@ export type Database = {
         | "calificado"
         | "convertido"
         | "perdido"
+      node_type: "departamento" | "mayor" | "partida" | "subpartida"
       person_type: "fisica" | "moral"
+      project_scope: "global" | "sucursal" | "proyecto"
       project_status: "activo" | "cerrado" | "archivado"
     }
     CompositeTypes: {
@@ -727,7 +830,9 @@ export const Constants = {
         "convertido",
         "perdido",
       ],
+      node_type: ["departamento", "mayor", "partida", "subpartida"],
       person_type: ["fisica", "moral"],
+      project_scope: ["global", "sucursal", "proyecto"],
       project_status: ["activo", "cerrado", "archivado"],
     },
   },

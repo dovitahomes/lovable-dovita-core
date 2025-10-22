@@ -14,6 +14,7 @@ import Alianzas from "./pages/herramientas/Alianzas";
 import Identidades from "./pages/herramientas/Identidades";
 import Accesos from "./pages/herramientas/Accesos";
 import Reglas from "./pages/herramientas/Reglas";
+import CatalogoTU from "./pages/herramientas/CatalogoTU";
 import NotFound from "./pages/NotFound";
 import Usuarios from "./pages/Usuarios";
 import Clientes from "./pages/Clientes";
@@ -94,6 +95,7 @@ const App = () => (
                               </ProtectedRoute>
                             }
                           />
+                          <Route path="/herramientas/catalogo-tu" element={<ProtectedRoute requireAdmin><CatalogoTU /></ProtectedRoute>} />
                           <Route path="/usuarios" element={<Usuarios />} />
                           <Route path="/clientes" element={<Clientes />} />
                           <Route path="/proyectos" element={<Proyectos />} />
