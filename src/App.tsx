@@ -25,6 +25,7 @@ import Presupuestos from "./pages/Presupuestos";
 import PresupuestoParametrico from "./pages/PresupuestoParametrico";
 import PresupuestoEjecutivo from "./pages/PresupuestoEjecutivo";
 import Cronograma from "./pages/Cronograma";
+import Proveedores from "./pages/Proveedores";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ const App = () => (
                           <Route path="/herramientas/catalogo-tu" element={<ProtectedRoute requireAdmin><CatalogoTU /></ProtectedRoute>} />
                           <Route path="/usuarios" element={<Usuarios />} />
                           <Route path="/clientes" element={<Clientes />} />
+                          <Route path="/proveedores" element={<Proveedores />} />
                           <Route path="/proyectos" element={<Proyectos />} />
                           <Route path="/proyectos/:id" element={<ProyectoDetalle />} />
                           <Route path="/leads" element={<Leads />} />

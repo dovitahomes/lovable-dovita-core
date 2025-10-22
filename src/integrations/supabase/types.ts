@@ -808,6 +808,42 @@ export type Database = {
           },
         ]
       }
+      providers: {
+        Row: {
+          activo: boolean
+          code_short: string
+          contacto_json: Json | null
+          created_at: string
+          fiscales_json: Json | null
+          id: string
+          name: string
+          terms_json: Json | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          code_short: string
+          contacto_json?: Json | null
+          created_at?: string
+          fiscales_json?: Json | null
+          id?: string
+          name: string
+          terms_json?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          code_short?: string
+          contacto_json?: Json | null
+          created_at?: string
+          fiscales_json?: Json | null
+          id?: string
+          name?: string
+          terms_json?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sucursales: {
         Row: {
           activa: boolean | null
