@@ -3,7 +3,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
+import Auth from "./pages/Auth";
+import ContenidoCorporativo from "./pages/herramientas/ContenidoCorporativo";
+import Sucursales from "./pages/herramientas/Sucursales";
+import Alianzas from "./pages/herramientas/Alianzas";
+import Identidades from "./pages/herramientas/Identidades";
+import Accesos from "./pages/herramientas/Accesos";
+import Reglas from "./pages/herramientas/Reglas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -15,9 +25,79 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <SidebarProvider>
+                  <div className="flex min-h-screen w-full">
+                    <AppSidebar />
+                    <div className="flex-1 flex flex-col">
+                      <header className="sticky top-0 z-10 h-14 flex items-center gap-4 border-b bg-background px-4 lg:px-6">
+                        <SidebarTrigger />
+                        <div className="flex-1" />
+                      </header>
+                      <main className="flex-1 p-6 lg:p-8">
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route
+                            path="/herramientas/contenido-corporativo"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <ContenidoCorporativo />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/herramientas/sucursales"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <Sucursales />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/herramientas/alianzas"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <Alianzas />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/herramientas/identidades"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <Identidades />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/herramientas/accesos"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <Accesos />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/herramientas/reglas"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <Reglas />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </div>
+                  </div>
+                </SidebarProvider>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
