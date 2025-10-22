@@ -46,9 +46,14 @@ export default function Presupuestos() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Presupuestos</h1>
-        <Button onClick={() => navigate('/presupuestos/nuevo')}>
-          <Plus className="h-4 w-4 mr-2" /> Nuevo Presupuesto
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/presupuestos/nuevo')}>
+            <Plus className="h-4 w-4 mr-2" /> Paramétrico
+          </Button>
+          <Button variant="secondary" onClick={() => navigate('/presupuestos/nuevo-ejecutivo')}>
+            <Plus className="h-4 w-4 mr-2" /> Ejecutivo
+          </Button>
+        </div>
       </div>
 
       <Card>

@@ -23,6 +23,7 @@ import ProyectoDetalle from "./pages/ProyectoDetalle";
 import Leads from "./pages/Leads";
 import Presupuestos from "./pages/Presupuestos";
 import PresupuestoParametrico from "./pages/PresupuestoParametrico";
+import PresupuestoEjecutivo from "./pages/PresupuestoEjecutivo";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const App = () => (
                           <Route path="/proyectos/:id" element={<ProyectoDetalle />} />
                           <Route path="/leads" element={<Leads />} />
                           <Route path="/presupuestos" element={<Presupuestos />} />
+                          <Route path="/presupuestos/nuevo-ejecutivo" element={<PresupuestoEjecutivo />} />
                           <Route path="/presupuestos/:id" element={<PresupuestoParametrico />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

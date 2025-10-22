@@ -62,6 +62,47 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_attachments: {
+        Row: {
+          budget_item_id: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          budget_item_id: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          budget_item_id?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_attachments_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_items: {
         Row: {
           budget_id: string
@@ -151,42 +192,84 @@ export type Database = {
           },
         ]
       }
-      budgets: {
+      budget_templates: {
         Row: {
           created_at: string
           created_by: string | null
+          description: string | null
           id: string
+          items: Json
+          name: string
+          type: Database["public"]["Enums"]["budget_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          items: Json
+          name: string
+          type: Database["public"]["Enums"]["budget_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          items?: Json
+          name?: string
+          type?: Database["public"]["Enums"]["budget_type"]
+        }
+        Relationships: []
+      }
+      budgets: {
+        Row: {
+          cliente_view_enabled: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          is_template: boolean
           iva_enabled: boolean
           notas: string | null
           project_id: string
           published_at: string | null
+          shared_with_construction: boolean
           status: Database["public"]["Enums"]["budget_status"]
+          template_name: string | null
           type: Database["public"]["Enums"]["budget_type"]
           updated_at: string
           version: number
         }
         Insert: {
+          cliente_view_enabled?: boolean
           created_at?: string
           created_by?: string | null
           id?: string
+          is_template?: boolean
           iva_enabled?: boolean
           notas?: string | null
           project_id: string
           published_at?: string | null
+          shared_with_construction?: boolean
           status?: Database["public"]["Enums"]["budget_status"]
+          template_name?: string | null
           type: Database["public"]["Enums"]["budget_type"]
           updated_at?: string
           version?: number
         }
         Update: {
+          cliente_view_enabled?: boolean
           created_at?: string
           created_by?: string | null
           id?: string
+          is_template?: boolean
           iva_enabled?: boolean
           notas?: string | null
           project_id?: string
           published_at?: string | null
+          shared_with_construction?: boolean
           status?: Database["public"]["Enums"]["budget_status"]
+          template_name?: string | null
           type?: Database["public"]["Enums"]["budget_type"]
           updated_at?: string
           version?: number
@@ -471,6 +554,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pricing_config: {
+        Row: {
+          id: string
+          updated_at: string
+          variance_threshold_pct: number
+        }
+        Insert: {
+          id?: string
+          updated_at?: string
+          variance_threshold_pct?: number
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          variance_threshold_pct?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -813,6 +914,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_price_variance: {
+        Args: { new_price: number; subpartida_id_param: string }
+        Returns: {
+          has_variance: boolean
+          previous_price: number
+          threshold_pct: number
+          variance_pct: number
+        }[]
+      }
       get_budget_subtotals: {
         Args: { budget_id_param: string }
         Returns: {
@@ -828,6 +938,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      save_price_history: {
+        Args: {
+          precio_param: number
+          proveedor_param?: string
+          source_param?: string
+          subpartida_id_param: string
+          unidad_param: string
+        }
+        Returns: string
       }
     }
     Enums: {
