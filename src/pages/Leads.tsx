@@ -10,19 +10,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, UserPlus } from "lucide-react";
+import { ConvertLeadDialog } from "@/components/ConvertLeadDialog";
+
+const ESTADOS_MEXICO = [
+  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
+  "Chihuahua", "Ciudad de México", "Coahuila", "Colima", "Durango", "Guanajuato",
+  "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán", "Morelos", "Nayarit",
+  "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí",
+  "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+];
+
+const ORIGENES_LEAD = [
+  "Facebook", "Instagram", "Google", "Referido", "Sitio Web", "Llamada", 
+  "WhatsApp", "Email", "Evento", "Alianza", "Otro"
+];
 
 export default function Leads() {
   const [open, setOpen] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<any>(null);
   const [editingLead, setEditingLead] = useState<any>(null);
   const [filterSucursal, setFilterSucursal] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [formData, setFormData] = useState({
-    client_id: "",
-    contacto_data: "",
-    origen: "",
+    nombre_completo: "",
+    telefono: "",
+    email: "",
+    estado: "",
+    direccion: "",
+    origen_lead: [] as string[],
     sucursal_id: "",
+    terreno_m2: "",
+    presupuesto_referencia: "",
+    ubicacion_terreno: "",
     notas: "",
     status: "nuevo" as "nuevo" | "contactado" | "calificado" | "convertido" | "perdido"
   });
@@ -34,22 +57,13 @@ export default function Leads() {
     queryFn: async () => {
       let query = supabase
         .from('leads')
-        .select('*, clients(name), sucursales(nombre)')
+        .select('*, sucursales(nombre)')
         .order('created_at', { ascending: false });
       
       if (filterSucursal) query = query.eq('sucursal_id', filterSucursal);
       if (filterStatus) query = query.eq('status', filterStatus as any);
       
       const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: clients } = useQuery({
-    queryKey: ['clients'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('clients').select('id, name');
       if (error) throw error;
       return data;
     }
@@ -106,10 +120,16 @@ export default function Leads() {
     e.preventDefault();
     
     const data = {
-      client_id: formData.client_id || null,
-      contacto_json: formData.contacto_data ? JSON.parse(formData.contacto_data) : null,
-      origen: formData.origen || null,
+      nombre_completo: formData.nombre_completo,
+      telefono: formData.telefono || null,
+      email: formData.email || null,
+      estado: formData.estado || null,
+      direccion: formData.direccion || null,
+      origen_lead: formData.origen_lead.length > 0 ? formData.origen_lead : null,
       sucursal_id: formData.sucursal_id || null,
+      terreno_m2: formData.terreno_m2 ? parseFloat(formData.terreno_m2) : null,
+      presupuesto_referencia: formData.presupuesto_referencia ? parseFloat(formData.presupuesto_referencia) : null,
+      ubicacion_terreno_json: formData.ubicacion_terreno ? { descripcion: formData.ubicacion_terreno } : null,
       notas: formData.notas || null,
       status: formData.status
     };
@@ -122,7 +142,11 @@ export default function Leads() {
   };
 
   const resetForm = () => {
-    setFormData({ client_id: "", contacto_data: "", origen: "", sucursal_id: "", notas: "", status: "nuevo" });
+    setFormData({ 
+      nombre_completo: "", telefono: "", email: "", estado: "", direccion: "", 
+      origen_lead: [], sucursal_id: "", terreno_m2: "", presupuesto_referencia: "", 
+      ubicacion_terreno: "", notas: "", status: "nuevo" 
+    });
     setEditingLead(null);
     setOpen(false);
   };
@@ -130,14 +154,29 @@ export default function Leads() {
   const handleEdit = (lead: any) => {
     setEditingLead(lead);
     setFormData({
-      client_id: lead.client_id || "",
-      contacto_data: lead.contacto_json ? JSON.stringify(lead.contacto_json, null, 2) : "",
-      origen: lead.origen || "",
+      nombre_completo: lead.nombre_completo || "",
+      telefono: lead.telefono || "",
+      email: lead.email || "",
+      estado: lead.estado || "",
+      direccion: lead.direccion || "",
+      origen_lead: lead.origen_lead || [],
       sucursal_id: lead.sucursal_id || "",
+      terreno_m2: lead.terreno_m2?.toString() || "",
+      presupuesto_referencia: lead.presupuesto_referencia?.toString() || "",
+      ubicacion_terreno: lead.ubicacion_terreno_json?.descripcion || "",
       notas: lead.notas || "",
       status: lead.status
     });
     setOpen(true);
+  };
+
+  const handleOrigenChange = (origen: string) => {
+    setFormData(prev => {
+      const newOrigenes = prev.origen_lead.includes(origen)
+        ? prev.origen_lead.filter(o => o !== origen)
+        : [...prev.origen_lead, origen];
+      return { ...prev, origen_lead: newOrigenes };
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -161,78 +200,132 @@ export default function Leads() {
               <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingLead ? 'Editar' : 'Crear'} Lead</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Cliente (opcional)</Label>
-                <Select value={formData.client_id} onValueChange={(value) => setFormData({ ...formData, client_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Sin cliente</SelectItem>
-                    {clients?.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label>Nombre Completo *</Label>
+                  <Input
+                    value={formData.nombre_completo}
+                    onChange={(e) => setFormData({ ...formData, nombre_completo: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Teléfono</Label>
+                  <Input
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Estado</Label>
+                  <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ESTADOS_MEXICO.map((estado) => (
+                        <SelectItem key={estado} value={estado}>{estado}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Sucursal</Label>
+                  <Select value={formData.sucursal_id} onValueChange={(value) => setFormData({ ...formData, sucursal_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar sucursal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin sucursal</SelectItem>
+                      {sucursales?.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2">
+                  <Label>Dirección</Label>
+                  <Input
+                    value={formData.direccion}
+                    onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Origen del Lead (selecciona uno o más)</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {ORIGENES_LEAD.map((origen) => (
+                      <div key={origen} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={formData.origen_lead.includes(origen)}
+                          onCheckedChange={() => handleOrigenChange(origen)}
+                        />
+                        <label className="text-sm">{origen}</label>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Contacto (JSON)</Label>
-                <Textarea
-                  value={formData.contacto_data}
-                  onChange={(e) => setFormData({ ...formData, contacto_data: e.target.value })}
-                  placeholder='{"nombre": "...", "telefono": "...", "email": "..."}'
-                  rows={3}
-                />
-              </div>
-              <div>
-                <Label>Origen</Label>
-                <Input
-                  value={formData.origen}
-                  onChange={(e) => setFormData({ ...formData, origen: e.target.value })}
-                  placeholder="Facebook, Referido, etc."
-                />
-              </div>
-              <div>
-                <Label>Sucursal</Label>
-                <Select value={formData.sucursal_id} onValueChange={(value) => setFormData({ ...formData, sucursal_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar sucursal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Sin sucursal</SelectItem>
-                    {sucursales?.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Estado</Label>
-                <Select value={formData.status} onValueChange={(value: any) => setFormData({ ...formData, status: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nuevo">Nuevo</SelectItem>
-                    <SelectItem value="contactado">Contactado</SelectItem>
-                    <SelectItem value="calificado">Calificado</SelectItem>
-                    <SelectItem value="convertido">Convertido</SelectItem>
-                    <SelectItem value="perdido">Perdido</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Notas</Label>
-                <Textarea
-                  value={formData.notas}
-                  onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                  rows={4}
-                />
+                  </div>
+                </div>
+                <div>
+                  <Label>Terreno (m²)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.terreno_m2}
+                    onChange={(e) => setFormData({ ...formData, terreno_m2: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Presupuesto Referencia</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.presupuesto_referencia}
+                    onChange={(e) => setFormData({ ...formData, presupuesto_referencia: e.target.value })}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Ubicación del Terreno</Label>
+                  <Input
+                    value={formData.ubicacion_terreno}
+                    onChange={(e) => setFormData({ ...formData, ubicacion_terreno: e.target.value })}
+                    placeholder="Descripción de la ubicación"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Estado</Label>
+                  <Select value={formData.status} onValueChange={(value: any) => setFormData({ ...formData, status: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nuevo">Nuevo</SelectItem>
+                      <SelectItem value="contactado">Contactado</SelectItem>
+                      <SelectItem value="calificado">Calificado</SelectItem>
+                      <SelectItem value="convertido">Convertido</SelectItem>
+                      <SelectItem value="perdido">Perdido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2">
+                  <Label>Notas Adicionales</Label>
+                  <Textarea
+                    value={formData.notas}
+                    onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                    rows={4}
+                  />
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button type="submit">{editingLead ? 'Actualizar' : 'Crear'}</Button>
@@ -292,9 +385,10 @@ export default function Leads() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Origen</TableHead>
-                  <TableHead>Sucursal</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Contacto</TableHead>
+                  <TableHead>Estado/Sucursal</TableHead>
+                  <TableHead>Presupuesto</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
@@ -302,15 +396,39 @@ export default function Leads() {
               <TableBody>
                 {leads?.map((lead) => (
                   <TableRow key={lead.id}>
-                    <TableCell>{lead.clients?.name || '-'}</TableCell>
-                    <TableCell>{lead.origen || '-'}</TableCell>
-                    <TableCell>{lead.sucursales?.nombre || '-'}</TableCell>
+                    <TableCell>{lead.nombre_completo || '-'}</TableCell>
+                    <TableCell>
+                      {lead.telefono && <div>{lead.telefono}</div>}
+                      {lead.email && <div className="text-sm text-muted-foreground">{lead.email}</div>}
+                    </TableCell>
+                    <TableCell>
+                      {lead.estado && <div>{lead.estado}</div>}
+                      {lead.sucursales?.nombre && <div className="text-sm text-muted-foreground">{lead.sucursales.nombre}</div>}
+                    </TableCell>
+                    <TableCell>
+                      {lead.presupuesto_referencia 
+                        ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(lead.presupuesto_referencia)
+                        : '-'
+                      }
+                    </TableCell>
                     <TableCell>{getStatusBadge(lead.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleEdit(lead)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
+                        {lead.status !== 'convertido' && (
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedLead(lead);
+                              setConvertOpen(true);
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(lead.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -323,6 +441,19 @@ export default function Leads() {
           )}
         </CardContent>
       </Card>
+
+      {selectedLead && (
+        <ConvertLeadDialog
+          open={convertOpen}
+          onOpenChange={setConvertOpen}
+          lead={selectedLead}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['leads'] });
+            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+          }}
+        />
+      )}
     </div>
   );
 }

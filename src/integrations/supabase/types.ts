@@ -154,33 +154,60 @@ export type Database = {
           client_id: string | null
           contacto_json: Json | null
           created_at: string
+          direccion: string | null
+          email: string | null
+          estado: string | null
           id: string
+          nombre_completo: string | null
           notas: string | null
           origen: string | null
+          origen_lead: string[] | null
+          presupuesto_referencia: number | null
           status: Database["public"]["Enums"]["lead_status"]
           sucursal_id: string | null
+          telefono: string | null
+          terreno_m2: number | null
+          ubicacion_terreno_json: Json | null
           updated_at: string
         }
         Insert: {
           client_id?: string | null
           contacto_json?: Json | null
           created_at?: string
+          direccion?: string | null
+          email?: string | null
+          estado?: string | null
           id?: string
+          nombre_completo?: string | null
           notas?: string | null
           origen?: string | null
+          origen_lead?: string[] | null
+          presupuesto_referencia?: number | null
           status?: Database["public"]["Enums"]["lead_status"]
           sucursal_id?: string | null
+          telefono?: string | null
+          terreno_m2?: number | null
+          ubicacion_terreno_json?: Json | null
           updated_at?: string
         }
         Update: {
           client_id?: string | null
           contacto_json?: Json | null
           created_at?: string
+          direccion?: string | null
+          email?: string | null
+          estado?: string | null
           id?: string
+          nombre_completo?: string | null
           notas?: string | null
           origen?: string | null
+          origen_lead?: string[] | null
+          presupuesto_referencia?: number | null
           status?: Database["public"]["Enums"]["lead_status"]
           sucursal_id?: string | null
+          telefono?: string | null
+          terreno_m2?: number | null
+          ubicacion_terreno_json?: Json | null
           updated_at?: string
         }
         Relationships: [
@@ -435,6 +462,50 @@ export type Database = {
             columns: ["sucursal_id"]
             isOneToOne: false
             referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          firma_tipo: string | null
+          firma_url: string | null
+          firmado: boolean
+          firmado_at: string | null
+          id: string
+          payload: Json
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          firma_tipo?: string | null
+          firma_url?: string | null
+          firmado?: boolean
+          firmado_at?: string | null
+          id?: string
+          payload: Json
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          firma_tipo?: string | null
+          firma_url?: string | null
+          firmado?: boolean
+          firmado_at?: string | null
+          id?: string
+          payload?: Json
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

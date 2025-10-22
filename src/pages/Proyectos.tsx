@@ -11,9 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Proyectos() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [filterSucursal, setFilterSucursal] = useState("");
@@ -302,6 +304,9 @@ export default function Proyectos() {
                     <TableCell>{project.terreno_m2 ? `${project.terreno_m2} m²` : '-'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/proyectos/${project.id}`)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => handleEdit(project)}>
                           <Pencil className="h-4 w-4" />
                         </Button>

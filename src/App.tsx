@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Usuarios from "./pages/Usuarios";
 import Clientes from "./pages/Clientes";
 import Proyectos from "./pages/Proyectos";
+import ProyectoDetalle from "./pages/ProyectoDetalle";
 import Leads from "./pages/Leads";
 
 const queryClient = new QueryClient();
@@ -96,6 +97,7 @@ const App = () => (
                           <Route path="/usuarios" element={<Usuarios />} />
                           <Route path="/clientes" element={<Clientes />} />
                           <Route path="/proyectos" element={<Proyectos />} />
+                          <Route path="/proyectos/:id" element={<ProyectoDetalle />} />
                           <Route path="/leads" element={<Leads />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
