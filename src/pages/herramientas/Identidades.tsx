@@ -329,12 +329,12 @@ const Identidades = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="sucursal">Sucursal</Label>
-                <Select value={formData.sucursal_id} onValueChange={(value) => setFormData({ ...formData, sucursal_id: value })}>
+                <Select value={formData.sucursal_id || "none"} onValueChange={(value) => setFormData({ ...formData, sucursal_id: value === "none" ? "" : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin asignar</SelectItem>
+                    <SelectItem value="none">Sin asignar</SelectItem>
                     {sucursales?.map((sucursal) => (
                       <SelectItem key={sucursal.id} value={sucursal.id}>
                         {sucursal.nombre}
