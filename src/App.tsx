@@ -30,6 +30,7 @@ import Construccion from "./pages/Construccion";
 import Finanzas from "./pages/Finanzas";
 import Contabilidad from "./pages/Contabilidad";
 import Comisiones from "./pages/Comisiones";
+import ClientPortal from "./pages/ClientPortal";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +120,7 @@ const App = () => (
                           <Route path="/finanzas" element={<Finanzas />} />
                           <Route path="/contabilidad" element={<ProtectedRoute requireAdmin><Contabilidad /></ProtectedRoute>} />
                           <Route path="/comisiones" element={<ProtectedRoute requireAdmin><Comisiones /></ProtectedRoute>} />
+                          <Route path="/portal-cliente" element={<ClientPortal />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
