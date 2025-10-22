@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import ContenidoCorporativo from "./pages/herramientas/ContenidoCorporativo";
 import Sucursales from "./pages/herramientas/Sucursales";
 import Alianzas from "./pages/herramientas/Alianzas";
@@ -40,8 +41,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/reset" element={<ResetPassword />} />
           <Route
             path="/*"
             element={

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, MapPin, Handshake, Users } from "lucide-react";
+import { BirthdayWidget } from "@/components/BirthdayWidget";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
@@ -104,35 +105,43 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-primary" />
-            Acerca de Dovita CRM
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            Sistema integral de gestión empresarial diseñado para optimizar tus procesos de negocio.
-          </p>
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-              <div>
-                <h4 className="font-medium text-foreground">Gestión centralizada</h4>
-                <p className="text-sm text-muted-foreground">Administra sucursales, alianzas y contenido corporativo desde un solo lugar</p>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                Acerca de Dovita CRM
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Sistema integral de gestión empresarial diseñado para optimizar tus procesos de negocio.
+              </p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                  <div>
+                    <h4 className="font-medium text-foreground">Gestión centralizada</h4>
+                    <p className="text-sm text-muted-foreground">Administra sucursales, alianzas y contenido corporativo desde un solo lugar</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-secondary mt-2" />
+                  <div>
+                    <h4 className="font-medium text-foreground">Control de accesos</h4>
+                    <p className="text-sm text-muted-foreground">Sistema robusto de roles y permisos para tu equipo</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-secondary mt-2" />
-              <div>
-                <h4 className="font-medium text-foreground">Control de accesos</h4>
-                <p className="text-sm text-muted-foreground">Sistema robusto de roles y permisos para tu equipo</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div>
+          <BirthdayWidget />
+        </div>
+      </div>
     </div>
   );
 };

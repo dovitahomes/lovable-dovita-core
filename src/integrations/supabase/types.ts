@@ -1766,8 +1766,10 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          fecha_nacimiento: string | null
           full_name: string
           id: string
+          last_login_at: string | null
           phone: string | null
           profile_id: string | null
           sucursal_id: string | null
@@ -1776,8 +1778,10 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
+          fecha_nacimiento?: string | null
           full_name: string
           id?: string
+          last_login_at?: string | null
           phone?: string | null
           profile_id?: string | null
           sucursal_id?: string | null
@@ -1786,8 +1790,10 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string
+          fecha_nacimiento?: string | null
           full_name?: string
           id?: string
+          last_login_at?: string | null
           phone?: string | null
           profile_id?: string | null
           sucursal_id?: string | null
