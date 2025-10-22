@@ -15,6 +15,10 @@ import Identidades from "./pages/herramientas/Identidades";
 import Accesos from "./pages/herramientas/Accesos";
 import Reglas from "./pages/herramientas/Reglas";
 import NotFound from "./pages/NotFound";
+import Usuarios from "./pages/Usuarios";
+import Clientes from "./pages/Clientes";
+import Proyectos from "./pages/Proyectos";
+import Leads from "./pages/Leads";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +93,10 @@ const App = () => (
                               </ProtectedRoute>
                             }
                           />
+                          <Route path="/usuarios" element={<Usuarios />} />
+                          <Route path="/clientes" element={<Clientes />} />
+                          <Route path="/proyectos" element={<Proyectos />} />
+                          <Route path="/leads" element={<Leads />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>

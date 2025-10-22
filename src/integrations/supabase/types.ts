@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          address_json: Json | null
+          created_at: string
+          email: string | null
+          fiscal_json: Json | null
+          id: string
+          name: string
+          person_type: Database["public"]["Enums"]["person_type"]
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_json?: Json | null
+          created_at?: string
+          email?: string | null
+          fiscal_json?: Json | null
+          id?: string
+          name: string
+          person_type: Database["public"]["Enums"]["person_type"]
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_json?: Json | null
+          created_at?: string
+          email?: string | null
+          fiscal_json?: Json | null
+          id?: string
+          name?: string
+          person_type?: Database["public"]["Enums"]["person_type"]
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contenido_corporativo: {
         Row: {
           color_primario: string | null
@@ -113,6 +149,57 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          client_id: string | null
+          contacto_json: Json | null
+          created_at: string
+          id: string
+          notas: string | null
+          origen: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          sucursal_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          contacto_json?: Json | null
+          created_at?: string
+          id?: string
+          notas?: string | null
+          origen?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          sucursal_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          contacto_json?: Json | null
+          created_at?: string
+          id?: string
+          notas?: string | null
+          origen?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          sucursal_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -139,6 +226,96 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      project_members: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          role_en_proyecto: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          role_en_proyecto?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          role_en_proyecto?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          notas: string | null
+          status: Database["public"]["Enums"]["project_status"]
+          sucursal_id: string | null
+          terreno_m2: number | null
+          ubicacion_json: Json | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          notas?: string | null
+          status?: Database["public"]["Enums"]["project_status"]
+          sucursal_id?: string | null
+          terreno_m2?: number | null
+          ubicacion_json?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          notas?: string | null
+          status?: Database["public"]["Enums"]["project_status"]
+          sucursal_id?: string | null
+          terreno_m2?: number | null
+          ubicacion_json?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sucursales: {
         Row: {
@@ -214,6 +391,54 @@ export type Database = {
           },
         ]
       }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          profile_id: string | null
+          sucursal_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          profile_id?: string | null
+          sucursal_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          profile_id?: string | null
+          sucursal_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -229,6 +454,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "colaborador" | "cliente"
+      lead_status:
+        | "nuevo"
+        | "contactado"
+        | "calificado"
+        | "convertido"
+        | "perdido"
+      person_type: "fisica" | "moral"
+      project_status: "activo" | "cerrado" | "archivado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -357,6 +590,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "colaborador", "cliente"],
+      lead_status: [
+        "nuevo",
+        "contactado",
+        "calificado",
+        "convertido",
+        "perdido",
+      ],
+      person_type: ["fisica", "moral"],
+      project_status: ["activo", "cerrado", "archivado"],
     },
   },
 } as const
