@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+export type UserRole = 'admin' | 'user' | 'colaborador' | 'cliente' | 'contador';
+
 export function useUserRole() {
-  const [role, setRole] = useState<'admin' | 'user' | 'colaborador' | 'cliente' | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export function useUserRole() {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      setRole(data?.role || 'user');
+      setRole(data?.role as UserRole || 'user');
       setLoading(false);
     };
 

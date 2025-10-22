@@ -28,6 +28,7 @@ import Cronograma from "./pages/Cronograma";
 import Proveedores from "./pages/Proveedores";
 import Construccion from "./pages/Construccion";
 import Finanzas from "./pages/Finanzas";
+import Contabilidad from "./pages/Contabilidad";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +116,7 @@ const App = () => (
                           <Route path="/cronograma" element={<Cronograma />} />
                           <Route path="/construccion/:id" element={<Construccion />} />
                           <Route path="/finanzas" element={<Finanzas />} />
+                          <Route path="/contabilidad" element={<ProtectedRoute requireAdmin><Contabilidad /></ProtectedRoute>} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>

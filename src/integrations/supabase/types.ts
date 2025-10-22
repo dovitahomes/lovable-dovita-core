@@ -759,6 +759,7 @@ export type Database = {
           total_amount: number
           updated_at: string
           uuid: string | null
+          xml_url: string | null
         }
         Insert: {
           created_at?: string
@@ -774,6 +775,7 @@ export type Database = {
           total_amount: number
           updated_at?: string
           uuid?: string | null
+          xml_url?: string | null
         }
         Update: {
           created_at?: string
@@ -789,6 +791,7 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           uuid?: string | null
+          xml_url?: string | null
         }
         Relationships: [
           {
@@ -1648,6 +1651,29 @@ export type Database = {
           variance_pct: number
         }[]
       }
+      extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
+      get_accounts_payable: {
+        Args: never
+        Returns: {
+          balance: number
+          oldest_invoice_date: string
+          provider_id: string
+          provider_name: string
+          total_invoiced: number
+          total_paid: number
+        }[]
+      }
+      get_accounts_receivable: {
+        Args: never
+        Returns: {
+          balance: number
+          client_id: string
+          client_name: string
+          oldest_invoice_date: string
+          total_invoiced: number
+          total_paid: number
+        }[]
+      }
       get_budget_subtotals: {
         Args: { budget_id_param: string }
         Returns: {
@@ -1695,7 +1721,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "colaborador" | "cliente"
+      app_role: "admin" | "user" | "colaborador" | "cliente" | "contador"
       budget_status: "borrador" | "publicado"
       budget_type: "parametrico" | "ejecutivo"
       currency_type: "MXN" | "USD" | "EUR"
@@ -1842,7 +1868,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "colaborador", "cliente"],
+      app_role: ["admin", "user", "colaborador", "cliente", "contador"],
       budget_status: ["borrador", "publicado"],
       budget_type: ["parametrico", "ejecutivo"],
       currency_type: ["MXN", "USD", "EUR"],
