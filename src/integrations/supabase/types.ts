@@ -149,6 +149,65 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          etiqueta: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          firmado: boolean
+          id: string
+          metadata: Json | null
+          nombre: string
+          project_id: string
+          tipo_carpeta: string
+          updated_at: string
+          uploaded_by: string | null
+          visibilidad: string
+        }
+        Insert: {
+          created_at?: string
+          etiqueta?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          firmado?: boolean
+          id?: string
+          metadata?: Json | null
+          nombre: string
+          project_id: string
+          tipo_carpeta: string
+          updated_at?: string
+          uploaded_by?: string | null
+          visibilidad: string
+        }
+        Update: {
+          created_at?: string
+          etiqueta?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          firmado?: boolean
+          id?: string
+          metadata?: Json | null
+          nombre?: string
+          project_id?: string
+          tipo_carpeta?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          visibilidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           client_id: string | null

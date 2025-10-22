@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WishlistForm } from "@/components/WishlistForm";
+import { DocumentManager } from "@/components/DocumentManager";
+import { useUserRole } from "@/hooks/useUserRole";
 import { ArrowLeft, Building2, MapPin, User } from "lucide-react";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useUserRole();
 
   const { data: project, isLoading, refetch } = useQuery({
     queryKey: ['project', id],
@@ -106,11 +109,16 @@ export default function ProyectoDetalle() {
         </Card>
       </div>
 
-      <Tabs defaultValue="wishlist" className="w-full">
+      <Tabs defaultValue="documentos" className="w-full">
         <TabsList>
+          <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
           <TabsTrigger value="detalles">Detalles</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="documentos" className="mt-6">
+          <DocumentManager projectId={id!} userRole={role || undefined} />
+        </TabsContent>
         
         <TabsContent value="wishlist" className="mt-6">
           <WishlistForm 
