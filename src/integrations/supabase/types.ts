@@ -320,6 +320,74 @@ export type Database = {
         }
         Relationships: []
       }
+      construction_photos: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          fecha_foto: string
+          file_name: string
+          file_url: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          project_id: string
+          uploaded_by: string | null
+          visibilidad: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          fecha_foto?: string
+          file_name: string
+          file_url: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          project_id: string
+          uploaded_by?: string | null
+          visibilidad: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          fecha_foto?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          project_id?: string
+          uploaded_by?: string | null
+          visibilidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consumption_config: {
+        Row: {
+          id: string
+          near_completion_threshold_pct: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          near_completion_threshold_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          near_completion_threshold_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contenido_corporativo: {
         Row: {
           color_primario: string | null
@@ -718,6 +786,104 @@ export type Database = {
         }
         Relationships: []
       }
+      project_crew: {
+        Row: {
+          activo: boolean
+          contacto_json: Json | null
+          created_at: string
+          especialidad: string | null
+          id: string
+          nombre: string
+          numero_personas: number | null
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          contacto_json?: Json | null
+          created_at?: string
+          especialidad?: string | null
+          id?: string
+          nombre: string
+          numero_personas?: number | null
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          contacto_json?: Json | null
+          created_at?: string
+          especialidad?: string | null
+          id?: string
+          nombre?: string
+          numero_personas?: number | null
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_crew_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_equipment: {
+        Row: {
+          activo: boolean
+          costo_renta_diario: number | null
+          created_at: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          project_id: string
+          proveedor_id: string | null
+          tipo: Database["public"]["Enums"]["equipment_type"]
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          costo_renta_diario?: number | null
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          project_id: string
+          proveedor_id?: string | null
+          tipo: Database["public"]["Enums"]["equipment_type"]
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          costo_renta_diario?: number | null
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          project_id?: string
+          proveedor_id?: string | null
+          tipo?: Database["public"]["Enums"]["equipment_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_equipment_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_equipment_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_members: {
         Row: {
           created_at: string
@@ -753,6 +919,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_subcontractors: {
+        Row: {
+          activo: boolean
+          contacto_json: Json | null
+          costo_aproximado: number | null
+          created_at: string
+          especialidad: string | null
+          id: string
+          nombre: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          contacto_json?: Json | null
+          costo_aproximado?: number | null
+          created_at?: string
+          especialidad?: string | null
+          id?: string
+          nombre: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          contacto_json?: Json | null
+          costo_aproximado?: number | null
+          created_at?: string
+          especialidad?: string | null
+          id?: string
+          nombre?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_subcontractors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -843,6 +1053,79 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          estado: Database["public"]["Enums"]["purchase_order_status"]
+          eta_proveedor: string | null
+          fecha_requerida: string | null
+          id: string
+          notas: string | null
+          project_id: string
+          proveedor_id: string | null
+          qty_ordenada: number | null
+          qty_recibida: number | null
+          qty_solicitada: number
+          subpartida_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          estado?: Database["public"]["Enums"]["purchase_order_status"]
+          eta_proveedor?: string | null
+          fecha_requerida?: string | null
+          id?: string
+          notas?: string | null
+          project_id: string
+          proveedor_id?: string | null
+          qty_ordenada?: number | null
+          qty_recibida?: number | null
+          qty_solicitada: number
+          subpartida_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          estado?: Database["public"]["Enums"]["purchase_order_status"]
+          eta_proveedor?: string | null
+          fecha_requerida?: string | null
+          id?: string
+          notas?: string | null
+          project_id?: string
+          proveedor_id?: string | null
+          qty_ordenada?: number | null
+          qty_recibida?: number | null
+          qty_solicitada?: number
+          subpartida_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_subpartida_id_fkey"
+            columns: ["subpartida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sucursales: {
         Row: {
@@ -1086,6 +1369,17 @@ export type Database = {
         }[]
       }
       get_full_code: { Args: { node_id: string }; Returns: string }
+      get_subpartida_consumption: {
+        Args: { p_project_id: string; p_subpartida_id: string }
+        Returns: {
+          consumption_pct: number
+          near_limit: boolean
+          qty_budgeted: number
+          qty_ordered: number
+          qty_received: number
+          qty_requested: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1108,6 +1402,7 @@ export type Database = {
       app_role: "admin" | "user" | "colaborador" | "cliente"
       budget_status: "borrador" | "publicado"
       budget_type: "parametrico" | "ejecutivo"
+      equipment_type: "propia" | "rentada"
       gantt_type: "parametrico" | "ejecutivo"
       lead_status:
         | "nuevo"
@@ -1119,6 +1414,7 @@ export type Database = {
       person_type: "fisica" | "moral"
       project_scope: "global" | "sucursal" | "proyecto"
       project_status: "activo" | "cerrado" | "archivado"
+      purchase_order_status: "solicitado" | "ordenado" | "recibido"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1249,6 +1545,7 @@ export const Constants = {
       app_role: ["admin", "user", "colaborador", "cliente"],
       budget_status: ["borrador", "publicado"],
       budget_type: ["parametrico", "ejecutivo"],
+      equipment_type: ["propia", "rentada"],
       gantt_type: ["parametrico", "ejecutivo"],
       lead_status: [
         "nuevo",
@@ -1261,6 +1558,7 @@ export const Constants = {
       person_type: ["fisica", "moral"],
       project_scope: ["global", "sucursal", "proyecto"],
       project_status: ["activo", "cerrado", "archivado"],
+      purchase_order_status: ["solicitado", "ordenado", "recibido"],
     },
   },
 } as const

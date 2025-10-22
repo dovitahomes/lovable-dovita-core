@@ -26,6 +26,7 @@ import PresupuestoParametrico from "./pages/PresupuestoParametrico";
 import PresupuestoEjecutivo from "./pages/PresupuestoEjecutivo";
 import Cronograma from "./pages/Cronograma";
 import Proveedores from "./pages/Proveedores";
+import Construccion from "./pages/Construccion";
 
 const queryClient = new QueryClient();
 
@@ -111,6 +112,7 @@ const App = () => (
                           <Route path="/presupuestos/nuevo-ejecutivo" element={<PresupuestoEjecutivo />} />
                           <Route path="/presupuestos/:id" element={<PresupuestoParametrico />} />
                           <Route path="/cronograma" element={<Cronograma />} />
+                          <Route path="/construccion/:id" element={<Construccion />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>

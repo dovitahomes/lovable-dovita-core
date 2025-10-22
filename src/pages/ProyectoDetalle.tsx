@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WishlistForm } from "@/components/WishlistForm";
 import { DocumentManager } from "@/components/DocumentManager";
 import { useUserRole } from "@/hooks/useUserRole";
-import { ArrowLeft, Building2, MapPin, User } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, User, HardHat } from "lucide-react";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
@@ -50,11 +50,17 @@ export default function ProyectoDetalle() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => navigate('/proyectos')}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => navigate('/proyectos')}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+          </Button>
+          <h1 className="text-3xl font-bold">Expediente del Proyecto</h1>
+        </div>
+        <Button onClick={() => navigate(`/construccion/${id}`)} className="gap-2">
+          <HardHat className="h-4 w-4" />
+          Ir a Construcción
         </Button>
-        <h1 className="text-3xl font-bold">Expediente del Proyecto</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
