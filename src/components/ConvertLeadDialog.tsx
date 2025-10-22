@@ -122,7 +122,7 @@ export function ConvertLeadDialog({ open, onOpenChange, lead, onSuccess }: Conve
                 <SelectValue placeholder="Seleccionar sucursal" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin sucursal</SelectItem>
+                <SelectItem value="none">Sin sucursal</SelectItem>
                 {sucursales?.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
                 ))}

@@ -49,7 +49,7 @@ export default function Usuarios() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('users').insert(data);
+      const { error } = await supabase.from('users').insert({ ...data, sucursal_id: data.sucursal_id === "none" ? null : data.sucursal_id });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -162,7 +162,7 @@ export default function Usuarios() {
                     <SelectValue placeholder="Seleccionar sucursal" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin sucursal</SelectItem>
+                    <SelectItem value="none">Sin sucursal</SelectItem>
                     {sucursales?.map((s) => (
                       <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
                     ))}

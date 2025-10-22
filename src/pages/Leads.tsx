@@ -60,8 +60,8 @@ export default function Leads() {
         .select('*, sucursales(nombre)')
         .order('created_at', { ascending: false });
       
-      if (filterSucursal) query = query.eq('sucursal_id', filterSucursal);
-      if (filterStatus) query = query.eq('status', filterStatus as any);
+      if (filterSucursal && filterSucursal !== "all") query = query.eq('sucursal_id', filterSucursal);
+      if (filterStatus && filterStatus !== "all") query = query.eq('status', filterStatus as any);
       
       const { data, error } = await query;
       if (error) throw error;
@@ -126,7 +126,7 @@ export default function Leads() {
       estado: formData.estado || null,
       direccion: formData.direccion || null,
       origen_lead: formData.origen_lead.length > 0 ? formData.origen_lead : null,
-      sucursal_id: formData.sucursal_id || null,
+      sucursal_id: formData.sucursal_id === "none" ? null : formData.sucursal_id,
       terreno_m2: formData.terreno_m2 ? parseFloat(formData.terreno_m2) : null,
       presupuesto_referencia: formData.presupuesto_referencia ? parseFloat(formData.presupuesto_referencia) : null,
       ubicacion_terreno_json: formData.ubicacion_terreno ? { descripcion: formData.ubicacion_terreno } : null,
@@ -249,7 +249,7 @@ export default function Leads() {
                       <SelectValue placeholder="Seleccionar sucursal" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sin sucursal</SelectItem>
+                      <SelectItem value="none">Sin sucursal</SelectItem>
                       {sucursales?.map((s) => (
                         <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
                       ))}
@@ -348,7 +348,7 @@ export default function Leads() {
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="all">Todas</SelectItem>
                 {sucursales?.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
                 ))}
@@ -362,7 +362,7 @@ export default function Leads() {
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="nuevo">Nuevo</SelectItem>
                 <SelectItem value="contactado">Contactado</SelectItem>
                 <SelectItem value="calificado">Calificado</SelectItem>

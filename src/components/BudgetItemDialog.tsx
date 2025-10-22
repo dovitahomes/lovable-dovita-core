@@ -212,7 +212,7 @@ export function BudgetItemDialog({
                     <SelectValue placeholder="Opcional" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin subpartida</SelectItem>
+                    <SelectItem value="none">Sin subpartida</SelectItem>
                     {subpartidas.map(s => (
                       <SelectItem key={s.id} value={s.id}>{s.code} - {s.name}</SelectItem>
                     ))}
