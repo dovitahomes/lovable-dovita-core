@@ -430,6 +430,124 @@ export type Database = {
           },
         ]
       }
+      gantt_items: {
+        Row: {
+          created_at: string
+          end_date: string
+          gantt_id: string
+          id: string
+          major_id: string
+          order_index: number
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          gantt_id: string
+          id?: string
+          major_id: string
+          order_index?: number
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          gantt_id?: string
+          id?: string
+          major_id?: string
+          order_index?: number
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gantt_items_gantt_id_fkey"
+            columns: ["gantt_id"]
+            isOneToOne: false
+            referencedRelation: "gantt_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gantt_items_major_id_fkey"
+            columns: ["major_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gantt_ministrations: {
+        Row: {
+          alcance: string | null
+          created_at: string
+          date: string
+          gantt_id: string
+          id: string
+          label: string
+          order_index: number
+        }
+        Insert: {
+          alcance?: string | null
+          created_at?: string
+          date: string
+          gantt_id: string
+          id?: string
+          label: string
+          order_index?: number
+        }
+        Update: {
+          alcance?: string | null
+          created_at?: string
+          date?: string
+          gantt_id?: string
+          id?: string
+          label?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gantt_ministrations_gantt_id_fkey"
+            columns: ["gantt_id"]
+            isOneToOne: false
+            referencedRelation: "gantt_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gantt_plans: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          shared_with_construction: boolean
+          type: Database["public"]["Enums"]["gantt_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          shared_with_construction?: boolean
+          type: Database["public"]["Enums"]["gantt_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          shared_with_construction?: boolean
+          type?: Database["public"]["Enums"]["gantt_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gantt_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           client_id: string | null
@@ -954,6 +1072,7 @@ export type Database = {
       app_role: "admin" | "user" | "colaborador" | "cliente"
       budget_status: "borrador" | "publicado"
       budget_type: "parametrico" | "ejecutivo"
+      gantt_type: "parametrico" | "ejecutivo"
       lead_status:
         | "nuevo"
         | "contactado"
@@ -1094,6 +1213,7 @@ export const Constants = {
       app_role: ["admin", "user", "colaborador", "cliente"],
       budget_status: ["borrador", "publicado"],
       budget_type: ["parametrico", "ejecutivo"],
+      gantt_type: ["parametrico", "ejecutivo"],
       lead_status: [
         "nuevo",
         "contactado",
