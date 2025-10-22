@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree } from "lucide-react";
+import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,7 @@ const mainItems = [
   { title: "Clientes", url: "/clientes", icon: BriefcaseIcon },
   { title: "Proyectos", url: "/proyectos", icon: FolderKanban },
   { title: "Leads", url: "/leads", icon: TrendingUp },
+  { title: "Presupuestos", url: "/presupuestos", icon: Calculator },
 ];
 
 const toolsItems = [

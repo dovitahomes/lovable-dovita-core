@@ -62,6 +62,145 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_items: {
+        Row: {
+          budget_id: string
+          cant_necesaria: number | null
+          cant_real: number
+          costo_unit: number
+          created_at: string
+          descripcion: string | null
+          desperdicio_pct: number
+          honorarios_pct: number
+          id: string
+          mayor_id: string | null
+          order_index: number
+          partida_id: string | null
+          precio_unit: number | null
+          proveedor_alias: string | null
+          subpartida_id: string | null
+          total: number | null
+          unidad: string
+        }
+        Insert: {
+          budget_id: string
+          cant_necesaria?: number | null
+          cant_real?: number
+          costo_unit?: number
+          created_at?: string
+          descripcion?: string | null
+          desperdicio_pct?: number
+          honorarios_pct?: number
+          id?: string
+          mayor_id?: string | null
+          order_index?: number
+          partida_id?: string | null
+          precio_unit?: number | null
+          proveedor_alias?: string | null
+          subpartida_id?: string | null
+          total?: number | null
+          unidad: string
+        }
+        Update: {
+          budget_id?: string
+          cant_necesaria?: number | null
+          cant_real?: number
+          costo_unit?: number
+          created_at?: string
+          descripcion?: string | null
+          desperdicio_pct?: number
+          honorarios_pct?: number
+          id?: string
+          mayor_id?: string | null
+          order_index?: number
+          partida_id?: string | null
+          precio_unit?: number | null
+          proveedor_alias?: string | null
+          subpartida_id?: string | null
+          total?: number | null
+          unidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_mayor_id_fkey"
+            columns: ["mayor_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_partida_id_fkey"
+            columns: ["partida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_subpartida_id_fkey"
+            columns: ["subpartida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          iva_enabled: boolean
+          notas: string | null
+          project_id: string
+          published_at: string | null
+          status: Database["public"]["Enums"]["budget_status"]
+          type: Database["public"]["Enums"]["budget_type"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          iva_enabled?: boolean
+          notas?: string | null
+          project_id: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["budget_status"]
+          type: Database["public"]["Enums"]["budget_type"]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          iva_enabled?: boolean
+          notas?: string | null
+          project_id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["budget_status"]
+          type?: Database["public"]["Enums"]["budget_type"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address_json: Json | null
@@ -674,6 +813,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_budget_subtotals: {
+        Args: { budget_id_param: string }
+        Returns: {
+          mayor_id: string
+          mayor_name: string
+          subtotal: number
+        }[]
+      }
       get_full_code: { Args: { node_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -685,6 +832,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "colaborador" | "cliente"
+      budget_status: "borrador" | "publicado"
+      budget_type: "parametrico" | "ejecutivo"
       lead_status:
         | "nuevo"
         | "contactado"
@@ -823,6 +972,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "colaborador", "cliente"],
+      budget_status: ["borrador", "publicado"],
+      budget_type: ["parametrico", "ejecutivo"],
       lead_status: [
         "nuevo",
         "contactado",
