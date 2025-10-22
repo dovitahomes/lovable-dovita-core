@@ -62,6 +62,41 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_rule_changes: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_value_json: Json
+          old_value_json: Json | null
+          rule_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_value_json: Json
+          old_value_json?: Json | null
+          rule_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_value_json?: Json
+          old_value_json?: Json | null
+          rule_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_rule_changes_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "business_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_accounts: {
         Row: {
           activa: boolean
@@ -348,6 +383,83 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_rule_sets: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_rules: {
+        Row: {
+          active_from: string
+          active_to: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          key: string
+          rule_set_id: string
+          scope_id: string | null
+          scope_type: Database["public"]["Enums"]["rule_scope_type"]
+          updated_at: string
+          value_json: Json
+        }
+        Insert: {
+          active_from?: string
+          active_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          key: string
+          rule_set_id: string
+          scope_id?: string | null
+          scope_type?: Database["public"]["Enums"]["rule_scope_type"]
+          updated_at?: string
+          value_json: Json
+        }
+        Update: {
+          active_from?: string
+          active_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          key?: string
+          rule_set_id?: string
+          scope_id?: string | null
+          scope_type?: Database["public"]["Enums"]["rule_scope_type"]
+          updated_at?: string
+          value_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_rules_rule_set_id_fkey"
+            columns: ["rule_set_id"]
+            isOneToOne: false
+            referencedRelation: "business_rule_sets"
             referencedColumns: ["id"]
           },
         ]
@@ -1751,6 +1863,10 @@ export type Database = {
           subtotal: number
         }[]
       }
+      get_effective_rule: {
+        Args: { p_key: string; p_proyecto_id?: string; p_sucursal_id?: string }
+        Returns: Json
+      }
       get_full_code: { Args: { node_id: string }; Returns: string }
       get_provider_balance: {
         Args: { p_provider_id: string }
@@ -1811,6 +1927,7 @@ export type Database = {
       project_scope: "global" | "sucursal" | "proyecto"
       project_status: "activo" | "cerrado" | "archivado"
       purchase_order_status: "solicitado" | "ordenado" | "recibido"
+      rule_scope_type: "global" | "sucursal" | "proyecto"
       transaction_type: "ingreso" | "egreso"
     }
     CompositeTypes: {
@@ -1961,6 +2078,7 @@ export const Constants = {
       project_scope: ["global", "sucursal", "proyecto"],
       project_status: ["activo", "cerrado", "archivado"],
       purchase_order_status: ["solicitado", "ordenado", "recibido"],
+      rule_scope_type: ["global", "sucursal", "proyecto"],
       transaction_type: ["ingreso", "egreso"],
     },
   },
