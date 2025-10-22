@@ -29,6 +29,7 @@ import Proveedores from "./pages/Proveedores";
 import Construccion from "./pages/Construccion";
 import Finanzas from "./pages/Finanzas";
 import Contabilidad from "./pages/Contabilidad";
+import Comisiones from "./pages/Comisiones";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ const App = () => (
                           <Route path="/construccion/:id" element={<Construccion />} />
                           <Route path="/finanzas" element={<Finanzas />} />
                           <Route path="/contabilidad" element={<ProtectedRoute requireAdmin><Contabilidad /></ProtectedRoute>} />
+                          <Route path="/comisiones" element={<ProtectedRoute requireAdmin><Comisiones /></ProtectedRoute>} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>

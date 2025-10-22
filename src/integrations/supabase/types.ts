@@ -388,6 +388,75 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_config: {
+        Row: {
+          alliance_percent: number
+          collaborator_architecture_percent: number
+          collaborator_construction_percent: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          alliance_percent?: number
+          collaborator_architecture_percent?: number
+          collaborator_construction_percent?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          alliance_percent?: number
+          collaborator_architecture_percent?: number
+          collaborator_construction_percent?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      commissions: {
+        Row: {
+          base_amount: number
+          calculated_amount: number | null
+          created_at: string
+          deal_ref: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          percent: number
+          status: Database["public"]["Enums"]["commission_status"]
+          sujeto_id: string
+          tipo: Database["public"]["Enums"]["commission_type"]
+          updated_at: string
+        }
+        Insert: {
+          base_amount: number
+          calculated_amount?: number | null
+          created_at?: string
+          deal_ref: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          percent: number
+          status?: Database["public"]["Enums"]["commission_status"]
+          sujeto_id: string
+          tipo: Database["public"]["Enums"]["commission_type"]
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number
+          calculated_amount?: number | null
+          created_at?: string
+          deal_ref?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          percent?: number
+          status?: Database["public"]["Enums"]["commission_status"]
+          sujeto_id?: string
+          tipo?: Database["public"]["Enums"]["commission_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       construction_photos: {
         Row: {
           created_at: string
@@ -1724,6 +1793,8 @@ export type Database = {
       app_role: "admin" | "user" | "colaborador" | "cliente" | "contador"
       budget_status: "borrador" | "publicado"
       budget_type: "parametrico" | "ejecutivo"
+      commission_status: "calculada" | "pendiente" | "pagada"
+      commission_type: "alianza" | "colaborador"
       currency_type: "MXN" | "USD" | "EUR"
       equipment_type: "propia" | "rentada"
       gantt_type: "parametrico" | "ejecutivo"
@@ -1871,6 +1942,8 @@ export const Constants = {
       app_role: ["admin", "user", "colaborador", "cliente", "contador"],
       budget_status: ["borrador", "publicado"],
       budget_type: ["parametrico", "ejecutivo"],
+      commission_status: ["calculada", "pendiente", "pagada"],
+      commission_type: ["alianza", "colaborador"],
       currency_type: ["MXN", "USD", "EUR"],
       equipment_type: ["propia", "rentada"],
       gantt_type: ["parametrico", "ejecutivo"],
