@@ -62,6 +62,74 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_accounts: {
+        Row: {
+          activa: boolean
+          bank_id: string
+          created_at: string
+          id: string
+          moneda: Database["public"]["Enums"]["currency_type"]
+          numero_cuenta: string
+          saldo_actual: number | null
+          tipo_cuenta: string | null
+          updated_at: string
+        }
+        Insert: {
+          activa?: boolean
+          bank_id: string
+          created_at?: string
+          id?: string
+          moneda?: Database["public"]["Enums"]["currency_type"]
+          numero_cuenta: string
+          saldo_actual?: number | null
+          tipo_cuenta?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activa?: boolean
+          bank_id?: string
+          created_at?: string
+          id?: string
+          moneda?: Database["public"]["Enums"]["currency_type"]
+          numero_cuenta?: string
+          saldo_actual?: number | null
+          tipo_cuenta?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "banks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      banks: {
+        Row: {
+          activo: boolean
+          codigo: string | null
+          created_at: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo?: string | null
+          created_at?: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string | null
+          created_at?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: []
+      }
       budget_attachments: {
         Row: {
           budget_item_id: string
@@ -498,6 +566,24 @@ export type Database = {
           },
         ]
       }
+      finance_config: {
+        Row: {
+          id: string
+          oc_grouping_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          oc_grouping_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          oc_grouping_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gantt_items: {
         Row: {
           created_at: string
@@ -612,6 +698,111 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          id: string
+          invoice_id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date: string
+          id?: string
+          invoice_id: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          id?: string
+          invoice_id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          emisor_id: string | null
+          folio: string | null
+          id: string
+          issued_at: string
+          meta_json: Json | null
+          metodo_pago: Database["public"]["Enums"]["payment_method"]
+          paid: boolean
+          receptor_id: string | null
+          tipo: Database["public"]["Enums"]["invoice_type"]
+          total_amount: number
+          updated_at: string
+          uuid: string | null
+        }
+        Insert: {
+          created_at?: string
+          emisor_id?: string | null
+          folio?: string | null
+          id?: string
+          issued_at: string
+          meta_json?: Json | null
+          metodo_pago: Database["public"]["Enums"]["payment_method"]
+          paid?: boolean
+          receptor_id?: string | null
+          tipo: Database["public"]["Enums"]["invoice_type"]
+          total_amount: number
+          updated_at?: string
+          uuid?: string | null
+        }
+        Update: {
+          created_at?: string
+          emisor_id?: string | null
+          folio?: string | null
+          id?: string
+          issued_at?: string
+          meta_json?: Json | null
+          metodo_pago?: Database["public"]["Enums"]["payment_method"]
+          paid?: boolean
+          receptor_id?: string | null
+          tipo?: Database["public"]["Enums"]["invoice_type"]
+          total_amount?: number
+          updated_at?: string
+          uuid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_emisor_id_fkey"
+            columns: ["emisor_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_receptor_id_fkey"
+            columns: ["receptor_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -1172,6 +1363,103 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          cfdi_id: string | null
+          client_id: string | null
+          concept: string
+          created_at: string
+          created_by: string | null
+          currency: Database["public"]["Enums"]["currency_type"]
+          date: string
+          id: string
+          project_id: string | null
+          provider_id: string | null
+          purchase_order_id: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          cfdi_id?: string | null
+          client_id?: string | null
+          concept: string
+          created_at?: string
+          created_by?: string | null
+          currency?: Database["public"]["Enums"]["currency_type"]
+          date: string
+          id?: string
+          project_id?: string | null
+          provider_id?: string | null
+          purchase_order_id?: string | null
+          type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          cfdi_id?: string | null
+          client_id?: string | null
+          concept?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: Database["public"]["Enums"]["currency_type"]
+          date?: string
+          id?: string
+          project_id?: string | null
+          provider_id?: string | null
+          purchase_order_id?: string | null
+          type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_cfdi_id_fkey"
+            columns: ["cfdi_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tu_nodes: {
         Row: {
           code: string
@@ -1369,6 +1657,14 @@ export type Database = {
         }[]
       }
       get_full_code: { Args: { node_id: string }; Returns: string }
+      get_provider_balance: {
+        Args: { p_provider_id: string }
+        Returns: {
+          balance: number
+          total_invoiced: number
+          total_paid: number
+        }[]
+      }
       get_subpartida_consumption: {
         Args: { p_project_id: string; p_subpartida_id: string }
         Returns: {
@@ -1402,8 +1698,10 @@ export type Database = {
       app_role: "admin" | "user" | "colaborador" | "cliente"
       budget_status: "borrador" | "publicado"
       budget_type: "parametrico" | "ejecutivo"
+      currency_type: "MXN" | "USD" | "EUR"
       equipment_type: "propia" | "rentada"
       gantt_type: "parametrico" | "ejecutivo"
+      invoice_type: "ingreso" | "egreso"
       lead_status:
         | "nuevo"
         | "contactado"
@@ -1411,10 +1709,12 @@ export type Database = {
         | "convertido"
         | "perdido"
       node_type: "departamento" | "mayor" | "partida" | "subpartida"
+      payment_method: "PUE" | "PPD"
       person_type: "fisica" | "moral"
       project_scope: "global" | "sucursal" | "proyecto"
       project_status: "activo" | "cerrado" | "archivado"
       purchase_order_status: "solicitado" | "ordenado" | "recibido"
+      transaction_type: "ingreso" | "egreso"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1545,8 +1845,10 @@ export const Constants = {
       app_role: ["admin", "user", "colaborador", "cliente"],
       budget_status: ["borrador", "publicado"],
       budget_type: ["parametrico", "ejecutivo"],
+      currency_type: ["MXN", "USD", "EUR"],
       equipment_type: ["propia", "rentada"],
       gantt_type: ["parametrico", "ejecutivo"],
+      invoice_type: ["ingreso", "egreso"],
       lead_status: [
         "nuevo",
         "contactado",
@@ -1555,10 +1857,12 @@ export const Constants = {
         "perdido",
       ],
       node_type: ["departamento", "mayor", "partida", "subpartida"],
+      payment_method: ["PUE", "PPD"],
       person_type: ["fisica", "moral"],
       project_scope: ["global", "sucursal", "proyecto"],
       project_status: ["activo", "cerrado", "archivado"],
       purchase_order_status: ["solicitado", "ordenado", "recibido"],
+      transaction_type: ["ingreso", "egreso"],
     },
   },
 } as const
