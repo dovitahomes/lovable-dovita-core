@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FolderKanban, FileText, Image, Calendar } from "lucide-react";
+import { FolderKanban, FileText, Image, Calendar, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import { FinancialSummary } from "@/components/client/FinancialSummary";
 
 export default function ClientPortal() {
   const navigate = useNavigate();
@@ -176,10 +177,14 @@ export default function ClientPortal() {
       </div>
 
       <Tabs defaultValue="resumen" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="resumen">
             <FolderKanban className="h-4 w-4 mr-2" />
             Resumen
+          </TabsTrigger>
+          <TabsTrigger value="finanzas">
+            <DollarSign className="h-4 w-4 mr-2" />
+            Finanzas
           </TabsTrigger>
           <TabsTrigger value="documentos">
             <FileText className="h-4 w-4 mr-2" />
@@ -252,6 +257,10 @@ export default function ClientPortal() {
           </div>
         </TabsContent>
 
+        <TabsContent value="finanzas">
+          <FinancialSummary projectId={project.id} />
+        </TabsContent>
+        
         <TabsContent value="documentos">
           <Card>
             <CardHeader>
