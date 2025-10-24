@@ -21,6 +21,8 @@ export function BankAccountsTab() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [showBankDialog, setShowBankDialog] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
+  const [selectedBank, setSelectedBank] = useState<any>(null);
+  const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -40,92 +42,16 @@ export function BankAccountsTab() {
     setAccounts(accountsData || []);
   };
 
-  const handleSaveBank = async () => {
-    if (selectedBank) {
-      const { error } = await supabase
-        .from("banks")
-        .update(bankForm)
-        .eq("id", selectedBank.id);
-      if (error) {
-        toast.error("Error al actualizar");
-        return;
-      }
-    } else {
-      const { error } = await supabase.from("banks").insert([bankForm]);
-      if (error) {
-        toast.error("Error al crear");
-        return;
-      }
-    }
-    toast.success("Banco guardado");
+  const handleBankSuccess = () => {
     setShowBankDialog(false);
-    setBankForm({ nombre: "", codigo: "" });
     setSelectedBank(null);
     loadData();
   };
 
-  const handleSaveAccount = async () => {
-    if (selectedAccount) {
-      const { error } = await supabase
-        .from("bank_accounts")
-        .update(accountForm)
-        .eq("id", selectedAccount.id);
-      if (error) {
-        toast.error("Error al actualizar");
-        return;
-      }
-    } else {
-      const { error } = await supabase.from("bank_accounts").insert([accountForm]);
-      if (error) {
-        toast.error("Error al crear");
-        return;
-      }
-    }
-    toast.success("Cuenta guardada");
+  const handleAccountSuccess = () => {
     setShowAccountDialog(false);
-    setAccountForm({
-      bank_id: "",
-      numero_cuenta: "",
-      tipo_cuenta: "",
-      moneda: "MXN",
-      saldo_actual: 0,
-    });
     setSelectedAccount(null);
     loadData();
-  };
-
-  const openBankDialog = (bank?: any) => {
-    if (bank) {
-      setSelectedBank(bank);
-      setBankForm({ nombre: bank.nombre, codigo: bank.codigo || "" });
-    } else {
-      setSelectedBank(null);
-      setBankForm({ nombre: "", codigo: "" });
-    }
-    setShowBankDialog(true);
-  };
-
-  const openAccountDialog = (account?: any) => {
-    if (account) {
-      setSelectedAccount(account);
-      setAccountForm({
-        bank_id: account.bank_id,
-        numero_cuenta: account.numero_cuenta,
-        tipo_cuenta: account.tipo_cuenta || "",
-        moneda: account.moneda,
-        saldo_actual: account.saldo_actual || 0,
-      });
-    } else {
-      setSelectedAccount(null);
-      setAccountForm({
-        bank_id: "",
-        numero_cuenta: "",
-        tipo_cuenta: "",
-        moneda: "MXN",
-        saldo_actual: 0,
-      });
-    }
-    setShowAccountDialog(true);
   };
 
   return (
@@ -136,7 +62,7 @@ export function BankAccountsTab() {
             <Building className="h-5 w-5" />
             Bancos
           </CardTitle>
-          <Button onClick={() => openBankDialog()} size="sm">
+          <Button onClick={() => setShowBankDialog(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Banco
           </Button>
@@ -153,7 +79,10 @@ export function BankAccountsTab() {
                         <p className="text-sm text-muted-foreground">{bank.codigo}</p>
                       )}
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => openBankDialog(bank)}>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      setSelectedBank(bank);
+                      setShowBankDialog(true);
+                    }}>
                       <Edit className="h-4 w-4" />
                     </Button>
                   </div>
@@ -167,7 +96,7 @@ export function BankAccountsTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Cuentas Bancarias</CardTitle>
-          <Button onClick={() => openAccountDialog()} size="sm">
+          <Button onClick={() => setShowAccountDialog(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Nueva Cuenta
           </Button>
@@ -204,7 +133,10 @@ export function BankAccountsTab() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => openAccountDialog(account)}
+                      onClick={() => {
+                        setSelectedAccount(account);
+                        setShowAccountDialog(true);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -216,112 +148,20 @@ export function BankAccountsTab() {
         </CardContent>
       </Card>
 
-      <Dialog open={showBankDialog} onOpenChange={setShowBankDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedBank ? "Editar" : "Nuevo"} Banco</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Nombre del Banco</Label>
-              <Input
-                value={bankForm.nombre}
-                onChange={(e) => setBankForm({ ...bankForm, nombre: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Código</Label>
-              <Input
-                value={bankForm.codigo}
-                onChange={(e) => setBankForm({ ...bankForm, codigo: e.target.value })}
-              />
-            </div>
-            <Button onClick={handleSaveBank} className="w-full">
-              Guardar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <BankDialog
+        open={showBankDialog}
+        onOpenChange={setShowBankDialog}
+        bank={selectedBank}
+        onSuccess={handleBankSuccess}
+      />
 
-      <Dialog open={showAccountDialog} onOpenChange={setShowAccountDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedAccount ? "Editar" : "Nueva"} Cuenta</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Banco</Label>
-              <Select
-                value={accountForm.bank_id}
-                onValueChange={(v) => setAccountForm({ ...accountForm, bank_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar banco" />
-                </SelectTrigger>
-                <SelectContent>
-                  {banks.map((b) => (
-                    <SelectItem key={b.id} value={b.id}>
-                      {b.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Número de Cuenta</Label>
-              <Input
-                value={accountForm.numero_cuenta}
-                onChange={(e) =>
-                  setAccountForm({ ...accountForm, numero_cuenta: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <Label>Tipo de Cuenta</Label>
-              <Input
-                value={accountForm.tipo_cuenta}
-                onChange={(e) =>
-                  setAccountForm({ ...accountForm, tipo_cuenta: e.target.value })
-                }
-                placeholder="Ej: Cuenta de cheques"
-              />
-            </div>
-            <div>
-              <Label>Moneda</Label>
-              <Select
-                value={accountForm.moneda}
-                onValueChange={(v: "MXN" | "USD" | "EUR") => setAccountForm({ ...accountForm, moneda: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MXN">MXN</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Saldo Inicial</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={accountForm.saldo_actual}
-                onChange={(e) =>
-                  setAccountForm({
-                    ...accountForm,
-                    saldo_actual: parseFloat(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <Button onClick={handleSaveAccount} className="w-full">
-              Guardar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <BankAccountDialog
+        open={showAccountDialog}
+        onOpenChange={setShowAccountDialog}
+        account={selectedAccount}
+        banks={banks}
+        onSuccess={handleAccountSuccess}
+      />
     </div>
   );
 }

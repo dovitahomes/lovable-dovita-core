@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
-import { ProviderDialog } from "@/components/ProviderDialog";
+import { ProviderDialog } from "@/components/forms/ProviderDialog";
 import { ProviderDetailsDialog } from "@/components/ProviderDetailsDialog";
 import {
   AlertDialog,
@@ -123,25 +123,21 @@ export default function Proveedores() {
     setShowDeleteDialog(true);
   };
 
-  const handleDialogClose = (shouldReload: boolean) => {
+  const handleDialogSuccess = () => {
     setShowDialog(false);
     setSelectedProvider(null);
-    if (shouldReload) {
-      loadProviders();
-    }
+    loadProviders();
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Proveedores</h1>
-        <Button onClick={() => setShowNewDialog(true)} className="gap-2">
+        <Button onClick={() => setShowDialog(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Nuevo Proveedor
         </Button>
       </div>
-
-      <NewProviderDialog open={showNewDialog} onOpenChange={setShowNewDialog} />
 
       <Card>
         <CardHeader>
@@ -235,8 +231,7 @@ export default function Proveedores() {
 
       <ProviderDialog
         open={showDialog}
-        onClose={handleDialogClose}
-        provider={selectedProvider}
+        onOpenChange={setShowDialog}
       />
 
       <ProviderDetailsDialog

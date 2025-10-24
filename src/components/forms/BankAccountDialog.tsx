@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateBankAccount, type BankAccountFormData } from "@/hooks/useCreateBankAccount";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface BankAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  account?: any;
+  banks?: any[];
+  onSuccess?: () => void;
 }
 
-export function BankAccountDialog({ open, onOpenChange }: BankAccountDialogProps) {
+export function BankAccountDialog({ open, onOpenChange, account, banks: propBanks, onSuccess }: BankAccountDialogProps) {
   const createBankAccount = useCreateBankAccount();
   const [formData, setFormData] = useState<Partial<BankAccountFormData>>({
     bank_id: "",
@@ -23,41 +26,85 @@ export function BankAccountDialog({ open, onOpenChange }: BankAccountDialogProps
     moneda: "MXN",
     saldo_actual: 0,
   });
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [banks, setBanks] = useState<any[]>(propBanks || []);
 
-  const { data: banks } = useQuery({
-    queryKey: ["banks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("banks")
-        .select("*")
-        .eq("activo", true)
-        .order("nombre");
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    if (!propBanks) {
+      loadBanks();
+    } else {
+      setBanks(propBanks);
+    }
+  }, [propBanks]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (account) {
+      setFormData({
+        bank_id: account.bank_id || "",
+        numero_cuenta: account.numero_cuenta || "",
+        tipo_cuenta: account.tipo_cuenta || "",
+        moneda: account.moneda || "MXN",
+        saldo_actual: account.saldo_actual || 0,
+      });
+    } else {
+      setFormData({
+        bank_id: "",
+        numero_cuenta: "",
+        tipo_cuenta: "",
+        moneda: "MXN",
+        saldo_actual: 0,
+      });
+    }
+  }, [account, open]);
+
+  const loadBanks = async () => {
+    const { data } = await supabase
+      .from("banks")
+      .select("*")
+      .eq("activo", true)
+      .order("nombre");
+    setBanks(data || []);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createBankAccount.mutate(formData as BankAccountFormData, {
-      onSuccess: () => {
-        onOpenChange(false);
-        setFormData({
-          bank_id: "",
-          numero_cuenta: "",
-          tipo_cuenta: "",
-          moneda: "MXN",
-          saldo_actual: 0,
-        });
-      },
-    });
+    
+    if (account) {
+      setIsUpdating(true);
+      const { error } = await supabase
+        .from("bank_accounts")
+        .update({
+          bank_id: formData.bank_id,
+          numero_cuenta: formData.numero_cuenta,
+          tipo_cuenta: formData.tipo_cuenta || null,
+          moneda: formData.moneda,
+          saldo_actual: formData.saldo_actual,
+        })
+        .eq("id", account.id);
+      
+      setIsUpdating(false);
+      if (error) {
+        toast.error("Error al actualizar cuenta");
+        return;
+      }
+      toast.success("Cuenta actualizada");
+      onSuccess?.();
+      onOpenChange(false);
+    } else {
+      createBankAccount.mutate(formData as BankAccountFormData, {
+        onSuccess: () => {
+          onSuccess?.();
+          onOpenChange(false);
+        },
+      });
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nueva Cuenta Bancaria</DialogTitle>
+          <DialogTitle>{account ? "Editar" : "Nueva"} Cuenta Bancaria</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +119,7 @@ export function BankAccountDialog({ open, onOpenChange }: BankAccountDialogProps
                 <SelectValue placeholder="Seleccionar banco" />
               </SelectTrigger>
               <SelectContent>
-                {banks?.map((bank) => (
+                {banks.map((bank) => (
                   <SelectItem key={bank.id} value={bank.id}>
                     {bank.nombre}
                   </SelectItem>
@@ -135,9 +182,9 @@ export function BankAccountDialog({ open, onOpenChange }: BankAccountDialogProps
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={createBankAccount.isPending}>
-              {createBankAccount.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Crear Cuenta
+            <Button type="submit" disabled={createBankAccount.isPending || isUpdating}>
+              {(createBankAccount.isPending || isUpdating) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {account ? "Actualizar" : "Crear"} Cuenta
             </Button>
           </DialogFooter>
         </form>
