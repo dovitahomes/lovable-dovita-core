@@ -2,13 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/auth/Login";
+import Callback from "./pages/auth/Callback";
+import ResetPassword from "./pages/auth/ResetPassword";
 import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
 import ContenidoCorporativo from "./pages/herramientas/ContenidoCorporativo";
 import Sucursales from "./pages/herramientas/Sucursales";
 import Alianzas from "./pages/herramientas/Alianzas";
@@ -42,8 +44,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/callback" element={<Callback />} />
         <Route path="/auth/reset" element={<ResetPassword />} />
+        <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
+        <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
           <Route
             path="/*"
             element={
