@@ -464,6 +464,50 @@ export type Database = {
           },
         ]
       }
+      calendar_events: {
+        Row: {
+          attendees: Json | null
+          created_at: string
+          created_by: string
+          end_at: string
+          id: string
+          notes: string | null
+          project_id: string | null
+          start_at: string
+          title: string
+        }
+        Insert: {
+          attendees?: Json | null
+          created_at?: string
+          created_by: string
+          end_at: string
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          start_at: string
+          title: string
+        }
+        Update: {
+          attendees?: Json | null
+          created_at?: string
+          created_by?: string
+          end_at?: string
+          id?: string
+          notes?: string | null
+          project_id?: string | null
+          start_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address_json: Json | null
@@ -1294,6 +1338,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          project_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          project_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          project_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
