@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WishlistForm } from "@/components/WishlistForm";
 import { DocumentManager } from "@/components/DocumentManager";
+import { ProjectChat } from "@/components/chat/ProjectChat";
+import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
 import { useUserRole } from "@/hooks/useUserRole";
-import { ArrowLeft, Building2, MapPin, User, HardHat } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar } from "lucide-react";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
@@ -119,6 +121,14 @@ export default function ProyectoDetalle() {
         <TabsList>
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+          <TabsTrigger value="chat" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Chat
+          </TabsTrigger>
+          <TabsTrigger value="citas" className="gap-2">
+            <Calendar className="h-4 w-4" />
+            Citas
+          </TabsTrigger>
           <TabsTrigger value="detalles">Detalles</TabsTrigger>
         </TabsList>
         
@@ -135,6 +145,14 @@ export default function ProyectoDetalle() {
               refetch();
             }}
           />
+        </TabsContent>
+        
+        <TabsContent value="chat" className="mt-6">
+          <ProjectChat projectId={id!} />
+        </TabsContent>
+        
+        <TabsContent value="citas" className="mt-6">
+          <ProjectCalendar projectId={id!} />
         </TabsContent>
         
         <TabsContent value="detalles" className="mt-6">
