@@ -14,11 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Calendar, Plus, Trash2, Download, Share2, Save } from "lucide-react";
-import { format, addMonths, startOfMonth, eachMonthOfInterval, eachWeekOfInterval, startOfWeek, addWeeks } from "date-fns";
+import { format, addMonths, startOfMonth, eachMonthOfInterval, eachWeekOfInterval, startOfWeek, addWeeks, differenceInDays } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getGanttDeadlineWarningDays } from "@/utils/businessRules";
 
 interface Project {
   id: string;
@@ -70,12 +72,31 @@ export default function Cronograma() {
     order_index: 0,
   });
   const [corporateData, setCorporateData] = useState<any>(null);
+  const [warningDays, setWarningDays] = useState(5);
 
   useEffect(() => {
     loadProjects();
     loadMajors();
     loadCorporateData();
+    loadWarningDays();
   }, []);
+
+  const loadWarningDays = async () => {
+    if (selectedProject) {
+      const { data: project } = await supabase
+        .from("projects")
+        .select("sucursal_id")
+        .eq("id", selectedProject)
+        .maybeSingle();
+      
+      const days = await getGanttDeadlineWarningDays(selectedProject, project?.sucursal_id);
+      setWarningDays(days ?? 5);
+    }
+  };
+
+  useEffect(() => {
+    loadWarningDays();
+  }, [selectedProject]);
 
   const loadProjects = async () => {
     const { data, error } = await supabase
@@ -488,12 +509,40 @@ export default function Cronograma() {
                         <div key={i} className="flex-1 border-l" />
                       ))}
                     </div>
-                    {/* Bar */}
-                    <div
-                      className="absolute top-2 h-8 bg-primary rounded cursor-pointer"
-                      style={getBarPosition(item.start_date, item.end_date)}
-                      title={`${format(new Date(item.start_date), "dd/MM/yyyy")} - ${format(new Date(item.end_date), "dd/MM/yyyy")}`}
-                    />
+                     {/* Bar */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="absolute top-2 h-8 bg-primary rounded cursor-pointer flex items-center justify-center gap-1"
+                            style={getBarPosition(item.start_date, item.end_date)}
+                          >
+                            {(() => {
+                              const daysUntilEnd = differenceInDays(new Date(item.end_date), new Date());
+                              const isNearDeadline = daysUntilEnd <= warningDays && daysUntilEnd >= 0;
+                              const isOverdue = daysUntilEnd < 0;
+                              
+                              if (isOverdue || isNearDeadline) {
+                                return <span className="text-white text-xs">⚠️</span>;
+                              }
+                              return null;
+                            })()}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{format(new Date(item.start_date), "dd/MM/yyyy")} - {format(new Date(item.end_date), "dd/MM/yyyy")}</p>
+                          {(() => {
+                            const daysUntilEnd = differenceInDays(new Date(item.end_date), new Date());
+                            if (daysUntilEnd < 0) {
+                              return <p className="text-destructive font-semibold">Etapa vencida</p>;
+                            } else if (daysUntilEnd <= warningDays) {
+                              return <p className="text-orange-500 font-semibold">Etapa por vencer ({daysUntilEnd} días)</p>;
+                            }
+                            return null;
+                          })()}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               ))}

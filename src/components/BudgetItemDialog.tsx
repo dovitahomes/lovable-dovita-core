@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Upload, AlertTriangle, History } from "lucide-react";
+import { getPricingVarianceThreshold } from "@/utils/businessRules";
 
 interface BudgetItem {
   id?: string;
@@ -32,6 +34,8 @@ interface BudgetItemDialogProps {
   item: BudgetItem;
   tuNodes: any[];
   onSave: (item: BudgetItem) => void;
+  projectId?: string;
+  sucursalId?: string;
 }
 
 export function BudgetItemDialog({
@@ -39,10 +43,14 @@ export function BudgetItemDialog({
   onOpenChange,
   item,
   tuNodes,
-  onSave
+  onSave,
+  projectId,
+  sucursalId
 }: BudgetItemDialogProps) {
   const [formData, setFormData] = useState<BudgetItem>(item);
   const [priceVariance, setPriceVariance] = useState<any>(null);
+  const [showVarianceAlert, setShowVarianceAlert] = useState(false);
+  const [variancePercent, setVariancePercent] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const mayores = tuNodes.filter(n => n.type === 'mayor');
@@ -72,19 +80,32 @@ export function BudgetItemDialog({
   useEffect(() => {
     const checkVariance = async () => {
       if (formData.subpartida_id && formData.costo_unit > 0) {
-        const { data, error } = await supabase.rpc('check_price_variance', {
-          subpartida_id_param: formData.subpartida_id,
-          new_price: formData.costo_unit
-        });
+        const { data: history, error } = await supabase
+          .from('price_history')
+          .select('precio_unit')
+          .eq('subpartida_id', formData.subpartida_id)
+          .order('observed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        if (!error && data && data.length > 0) {
-          setPriceVariance(data[0]);
+        if (!error && history) {
+          const threshold = await getPricingVarianceThreshold(projectId, sucursalId);
+          const previousPrice = history.precio_unit;
+          const variance = ((formData.costo_unit - previousPrice) / previousPrice) * 100;
+          
+          setVariancePercent(variance);
+          
+          if (Math.abs(variance) >= threshold) {
+            setShowVarianceAlert(true);
+          }
+          
+          setPriceVariance({ has_variance: Math.abs(variance) >= threshold, variance_pct: variance });
         }
       }
     };
 
     checkVariance();
-  }, [formData.subpartida_id, formData.costo_unit]);
+  }, [formData.subpartida_id, formData.costo_unit, projectId, sucursalId]);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -153,8 +174,25 @@ export function BudgetItemDialog({
   const total = cantNecesaria * precioUnit;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <>
+      <AlertDialog open={showVarianceAlert} onOpenChange={setShowVarianceAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Advertencia de Variación de Precio</AlertDialogTitle>
+            <AlertDialogDescription>
+              El costo supera la variación permitida ({variancePercent.toFixed(1)}%). 
+              El precio anterior era diferente al que estás ingresando.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Revisar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setShowVarianceAlert(false)}>Continuar de todos modos</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Partida</DialogTitle>
         </DialogHeader>
@@ -375,5 +413,6 @@ export function BudgetItemDialog({
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

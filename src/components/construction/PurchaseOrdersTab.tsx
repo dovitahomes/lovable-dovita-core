@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, AlertTriangle } from "lucide-react";
 import { PurchaseOrderDialog } from "./PurchaseOrderDialog";
 import { toast } from "sonner";
+import { getConsumptionThreshold } from "@/utils/businessRules";
 
 interface PurchaseOrdersTabProps {
   projectId: string;
@@ -27,15 +28,14 @@ export function PurchaseOrdersTab({ projectId, budgetId }: PurchaseOrdersTabProp
   }, [budgetId]);
 
   const loadThreshold = async () => {
-    const { data } = await supabase
-      .from("consumption_config")
-      .select("near_completion_threshold_pct")
-      .limit(1)
+    const { data: project } = await supabase
+      .from("projects")
+      .select("sucursal_id")
+      .eq("id", projectId)
       .maybeSingle();
     
-    if (data) {
-      setThreshold(data.near_completion_threshold_pct);
-    }
+    const thr = await getConsumptionThreshold(projectId, project?.sucursal_id);
+    setThreshold(thr ?? 80);
   };
 
   const loadBudgetItems = async () => {
@@ -111,7 +111,7 @@ export function PurchaseOrdersTab({ projectId, budgetId }: PurchaseOrdersTabProp
           {budgetItems.map((item) => {
             const cons = consumption.get(item.subpartida_id);
             const progress = cons ? getProgressPercentage(cons) : { requested: 0, ordered: 0, received: 0 };
-            const nearLimit = cons?.near_limit || false;
+            const nearLimit = cons ? (cons.qty_requested / cons.qty_budgeted) >= (threshold / 100) : false;
 
             return (
               <div key={item.id} className="space-y-3 p-4 border rounded-lg">
