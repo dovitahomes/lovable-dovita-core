@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -12,39 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Building } from "lucide-react";
+import { BankDialog } from "@/components/forms/BankDialog";
+import { BankAccountDialog } from "@/components/forms/BankAccountDialog";
 
 export function BankAccountsTab() {
   const [banks, setBanks] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [showBankDialog, setShowBankDialog] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
-  const [selectedBank, setSelectedBank] = useState<any>(null);
-  const [selectedAccount, setSelectedAccount] = useState<any>(null);
-  const [bankForm, setBankForm] = useState({ nombre: "", codigo: "" });
-  const [accountForm, setAccountForm] = useState<{
-    bank_id: string;
-    numero_cuenta: string;
-    tipo_cuenta: string;
-    moneda: "MXN" | "USD" | "EUR";
-    saldo_actual: number;
-  }>({
-    bank_id: "",
-    numero_cuenta: "",
-    tipo_cuenta: "",
-    moneda: "MXN",
-    saldo_actual: 0,
-  });
 
   useEffect(() => {
     loadData();
