@@ -1,4 +1,57 @@
-# Welcome to your Lovable project
+# Dovita Core
+
+Sistema integral de gestión para proyectos de construcción y arquitectura.
+
+## Datos Mock (Desarrollo)
+
+Para facilitar pruebas end-to-end, el proyecto incluye scripts para sembrar y limpiar datos de prueba.
+
+### Requisitos
+
+Configura las siguientes variables en tu archivo `.env` local:
+
+```env
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key-aqui
+```
+
+⚠️ **Importante**: El `SERVICE_ROLE_KEY` **NO** debe usarse en producción ni exponerse en el frontend. Solo para scripts locales/CI.
+
+### Sembrar datos de prueba
+
+```bash
+npm run seed:mock
+```
+
+Esto creará:
+- **10 clientes** con leads asociados
+- **10 proyectos** distribuidos en 3 flujos:
+  - 4 proyectos: Solo presupuesto Arquitectónico
+  - 3 proyectos: Arquitectónico + Ejecutivo + Gantt + Calendario + Chat
+  - 3 proyectos: Flujo completo (incluye Órdenes de Compra, transacciones bancarias)
+- Presupuestos con partidas por mayor
+- Cronogramas Gantt
+- Órdenes de compra y movimientos financieros
+- Eventos de calendario
+- Mensajes de chat
+
+Todos los registros se etiquetan con `MOCK_DOVITA` y `MOCK_DOVITA_BATCH_001` para fácil identificación.
+
+### Limpiar datos de prueba
+
+```bash
+npm run seed:cleanup
+```
+
+Elimina **todos** los registros etiquetados como mock, en orden seguro (hijos → padres).
+
+### Casos de uso
+
+- **Testing E2E**: Valida flujos completos desde leads hasta facturación
+- **Demos**: Presenta el sistema con datos realistas
+- **Desarrollo**: Trabaja con datos consistentes sin afectar producción
+
+---
 
 ## Project info
 
