@@ -20,17 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Upload, FileText, ExternalLink, Plus } from "lucide-react";
-import { useDropzone } from "react-dropzone";
 import { format } from "date-fns";
 import { PaymentComplementDialog } from "./PaymentComplementDialog";
+import { CfdiUploadDialog } from "./CfdiUploadDialog";
 
 export function InvoicesTab() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [filteredInvoices, setFilteredInvoices] = useState<any[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
@@ -104,64 +102,6 @@ export function InvoicesTab() {
     setFilteredInvoices(filtered);
   };
 
-  const onDrop = async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
-
-    setUploading(true);
-    const file = acceptedFiles[0];
-
-    try {
-      // Upload XML to storage
-      const fileName = `${Date.now()}-${file.name}`;
-      const { error: uploadError, data: uploadData } = await supabase.storage
-        .from("cfdi")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("cfdi")
-        .getPublicUrl(fileName);
-
-      // Read XML content (simplified - in production use proper XML parser)
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const xmlContent = e.target?.result as string;
-        
-        // Extract basic info from filename or use placeholders
-        // In production, parse the XML properly
-        const { error: insertError } = await supabase.from("invoices").insert({
-          tipo: "ingreso", // Would be extracted from XML
-          metodo_pago: "PUE", // Would be extracted from XML
-          folio: file.name.split(".")[0],
-          uuid: crypto.randomUUID(), // Would be extracted from XML
-          issued_at: new Date().toISOString().split("T")[0],
-          total_amount: 0, // Would be extracted from XML
-          xml_url: publicUrl,
-          meta_json: { original_filename: file.name },
-        });
-
-        if (insertError) throw insertError;
-
-        toast.success("Factura XML cargada correctamente");
-        setShowUploadDialog(false);
-        loadInvoices();
-      };
-
-      reader.readAsText(file);
-    } catch (error: any) {
-      toast.error("Error al cargar XML: " + error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "text/xml": [".xml"] },
-    maxFiles: 1,
-    disabled: uploading,
-  });
 
   const openPaymentDialog = (invoice: any) => {
     setSelectedInvoice(invoice);
@@ -308,32 +248,11 @@ export function InvoicesTab() {
         </CardContent>
       </Card>
 
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cargar Factura XML (CFDI)</DialogTitle>
-          </DialogHeader>
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25"
-            } ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            <input {...getInputProps()} />
-            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            {uploading ? (
-              <p>Subiendo...</p>
-            ) : isDragActive ? (
-              <p>Suelta el archivo XML aquí...</p>
-            ) : (
-              <div>
-                <p className="mb-2">Arrastra un archivo XML o haz clic para seleccionar</p>
-                <p className="text-sm text-muted-foreground">Solo archivos XML de CFDI</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CfdiUploadDialog 
+        open={showUploadDialog} 
+        onOpenChange={setShowUploadDialog}
+        onSuccess={() => loadInvoices()}
+      />
 
       <PaymentComplementDialog
         open={showPaymentDialog}

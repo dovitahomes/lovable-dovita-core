@@ -12,8 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, FileSpreadsheet } from "lucide-react";
 import { format } from "date-fns";
+import { exportFinanceToXLSX } from "@/utils/exports/excel";
+import { exportFinanceToPDF } from "@/utils/exports/pdf";
 
 export function ReportsTab() {
   const [startDate, setStartDate] = useState("");
@@ -135,11 +137,33 @@ export function ReportsTab() {
               <FileText className="h-4 w-4 mr-2" />
               Generar Reporte
             </Button>
-            <Button onClick={exportToExcel} variant="outline" disabled={loading}>
-              <Download className="h-4 w-4 mr-2" />
+            <Button 
+              onClick={async () => {
+                try {
+                  await exportFinanceToXLSX();
+                  toast.success("Excel exportado");
+                } catch (error) {
+                  toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
+                }
+              }} 
+              variant="outline" 
+              disabled={loading}
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
               Excel
             </Button>
-            <Button onClick={exportToPDF} variant="outline" disabled={loading}>
+            <Button 
+              onClick={async () => {
+                try {
+                  await exportFinanceToPDF();
+                  toast.success("PDF exportado");
+                } catch (error) {
+                  toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
+                }
+              }} 
+              variant="outline" 
+              disabled={loading}
+            >
               <Download className="h-4 w-4 mr-2" />
               PDF
             </Button>

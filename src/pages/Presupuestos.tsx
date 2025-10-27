@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, FileText } from "lucide-react";
+import { Plus, Eye, FileText, FileSpreadsheet, FileDown } from "lucide-react";
+import { exportBudgetToXLSX } from "@/utils/exports/excel";
+import { exportBudgetToPDF } from "@/utils/exports/pdf";
+import { toast } from "@/hooks/use-toast";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
@@ -97,6 +100,42 @@ export default function Presupuestos() {
                           onClick={() => navigate(`/presupuestos/${budget.id}`)}
                         >
                           <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              await exportBudgetToXLSX(budget.id);
+                              toast({ title: "Excel exportado" });
+                            } catch (error) {
+                              toast({ 
+                                title: "Error al exportar", 
+                                description: error instanceof Error ? error.message : "Error desconocido",
+                                variant: "destructive" 
+                              });
+                            }
+                          }}
+                        >
+                          <FileSpreadsheet className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              await exportBudgetToPDF(budget.id);
+                              toast({ title: "PDF exportado" });
+                            } catch (error) {
+                              toast({ 
+                                title: "Error al exportar", 
+                                description: error instanceof Error ? error.message : "Error desconocido",
+                                variant: "destructive" 
+                              });
+                            }
+                          }}
+                        >
+                          <FileDown className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
