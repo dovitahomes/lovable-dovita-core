@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { parseCfdiXml } from "@/utils/cfdi/parseCfdi";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface CfdiUploadDialogProps {
   open: boolean;
@@ -20,7 +20,7 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
 
   const handleUpload = async () => {
     if (!file) {
-      toast({ title: "Selecciona un archivo XML", variant: "destructive" });
+      toast.error("Selecciona un archivo XML");
       return;
     }
 
@@ -40,11 +40,7 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
         .single();
 
       if (existing) {
-        toast({ 
-          title: "Factura duplicada", 
-          description: "Ya existe una factura con este UUID",
-          variant: "destructive" 
-        });
+        toast.error("Factura duplicada: Ya existe una factura con este UUID");
         setUploading(false);
         return;
       }
@@ -115,17 +111,13 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
 
       if (insertError) throw insertError;
 
-      toast({ title: "CFDI cargado exitosamente" });
+      toast.success("CFDI cargado exitosamente");
       onSuccess?.();
       onOpenChange(false);
       setFile(null);
     } catch (error) {
       console.error('Error uploading CFDI:', error);
-      toast({ 
-        title: "Error al cargar CFDI", 
-        description: error instanceof Error ? error.message : "Error desconocido",
-        variant: "destructive" 
-      });
+      toast.error("Error al cargar CFDI: " + (error instanceof Error ? error.message : "Error desconocido"));
     } finally {
       setUploading(false);
     }

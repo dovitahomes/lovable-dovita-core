@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Eye, FileText, FileSpreadsheet, FileDown } from "lucide-react";
 import { exportBudgetToXLSX } from "@/utils/exports/excel";
 import { exportBudgetToPDF } from "@/utils/exports/pdf";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
@@ -107,13 +107,9 @@ export default function Presupuestos() {
                           onClick={async () => {
                             try {
                               await exportBudgetToXLSX(budget.id);
-                              toast({ title: "Excel exportado" });
+                              toast.success("Excel exportado");
                             } catch (error) {
-                              toast({ 
-                                title: "Error al exportar", 
-                                description: error instanceof Error ? error.message : "Error desconocido",
-                                variant: "destructive" 
-                              });
+                              toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
                             }
                           }}
                         >
@@ -125,13 +121,9 @@ export default function Presupuestos() {
                           onClick={async () => {
                             try {
                               await exportBudgetToPDF(budget.id);
-                              toast({ title: "PDF exportado" });
+                              toast.success("PDF exportado");
                             } catch (error) {
-                              toast({ 
-                                title: "Error al exportar", 
-                                description: error instanceof Error ? error.message : "Error desconocido",
-                                variant: "destructive" 
-                              });
+                              toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
                             }
                           }}
                         >
