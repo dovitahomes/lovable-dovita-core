@@ -154,11 +154,11 @@ export function ProjectChat({ projectId }: ProjectChatProps) {
   };
 
   return (
-    <Card className="flex flex-col h-[600px]">
+    <Card className="flex flex-col h-[600px] w-full">
       <CardHeader>
         <CardTitle>Chat del Proyecto</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0 gap-4">
+      <CardContent className="flex-1 flex flex-col min-h-0 gap-4 p-3 md:p-6">
         <ScrollArea ref={scrollRef} className="flex-1 pr-4">
           {loading ? (
             <div className="flex items-center justify-center h-full">
@@ -175,14 +175,14 @@ export function ProjectChat({ projectId }: ProjectChatProps) {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
+                    className={`flex gap-2 md:gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
                   >
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarFallback className="text-xs">
                         {getInitials(msg.sender?.full_name, msg.sender?.email)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className={`flex flex-col gap-1 max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
+                    <div className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="font-medium">
                           {msg.sender?.full_name || msg.sender?.email || 'Usuario'}
@@ -190,7 +190,7 @@ export function ProjectChat({ projectId }: ProjectChatProps) {
                         <span>{format(new Date(msg.created_at), 'HH:mm')}</span>
                       </div>
                       <div
-                        className={`rounded-lg px-3 py-2 ${
+                        className={`rounded-lg px-3 py-2 md:px-4 md:py-3 ${
                           isOwn
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-muted'

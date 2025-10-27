@@ -167,30 +167,33 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-4">
           <CardTitle>Calendario de Citas</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="min-w-[200px] text-center font-semibold">
-              {format(currentDate, 'MMMM yyyy', { locale: es })}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentDate(subMonths(currentDate, 1))}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="min-w-[200px] text-center font-semibold">
+                {format(currentDate, 'MMMM yyyy', { locale: es })}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button onClick={() => handleOpenDialog()} className="gap-2">
+            <Button onClick={() => handleOpenDialog()} className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
-              Nueva Cita
+              <span className="hidden sm:inline">Nueva Cita</span>
+              <span className="sm:hidden">Nueva</span>
             </Button>
           </div>
         </CardHeader>
@@ -268,7 +271,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Inicio *</Label>
                 <Input

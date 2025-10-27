@@ -133,7 +133,7 @@ export function FinancialSummary({ projectId }: FinancialSummaryProps) {
           <CardHeader>
             <CardTitle>Desglose por Mayor</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>

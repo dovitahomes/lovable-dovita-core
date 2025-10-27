@@ -76,7 +76,7 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Teléfono</Label>
               <Input
@@ -97,7 +97,7 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Terreno (m²)</Label>
               <Input

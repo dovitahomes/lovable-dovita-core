@@ -13,6 +13,9 @@ Configura las siguientes variables en tu archivo `.env` local:
 ```env
 SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key-aqui
+ADMIN_EMAIL=admin@dovita.test
+ADMIN_PASSWORD=AdminPass123!
+VITE_APP_URL=http://localhost:8080
 ```
 
 ⚠️ **Importante**: El `SERVICE_ROLE_KEY` **NO** debe usarse en producción ni exponerse en el frontend. Solo para scripts locales/CI.
@@ -50,6 +53,45 @@ Elimina **todos** los registros etiquetados como mock, en orden seguro (hijos �
 - **Testing E2E**: Valida flujos completos desde leads hasta facturación
 - **Demos**: Presenta el sistema con datos realistas
 - **Desarrollo**: Trabaja con datos consistentes sin afectar producción
+
+---
+
+## Testing
+
+### Smoke Tests Automatizados
+
+El proyecto incluye smoke tests automatizados usando Playwright para validar los flujos principales.
+
+**Instalar Playwright:**
+
+```bash
+npx playwright install
+```
+
+**Ejecutar tests:**
+
+```bash
+npx playwright test
+```
+
+**Ver reporte:**
+
+```bash
+npx playwright show-report
+```
+
+**Casos cubiertos:**
+- ✅ Login y autenticación
+- ✅ Navegación entre módulos (Planeación, Construcción, Finanzas, Contabilidad)
+- ✅ Portal del cliente (presupuesto y resumen financiero)
+- ✅ Chat en tiempo real
+- ✅ Calendario de eventos
+- ✅ Exportaciones PDF/XLSX
+- ✅ Upload CFDI y registro en tabla
+- ✅ Verificación de datos mock (10 proyectos)
+- ✅ Logout y redirección
+
+📖 **Documentación completa**: [`docs/QA_SMOKE.md`](docs/QA_SMOKE.md)
 
 ---
 

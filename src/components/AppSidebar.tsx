@@ -81,7 +81,7 @@ export function AppSidebar() {
       : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
 
   return (
-    <Sidebar className={state === "collapsed" ? "w-14" : "w-64"}>
+    <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
       <SidebarContent>
         <div className="px-3 py-4">
           <div className="flex items-center gap-3 mb-2">
@@ -89,8 +89,8 @@ export function AppSidebar() {
               <Building2 className="h-5 w-5 text-white" />
             </div>
             {state !== "collapsed" && (
-              <div>
-                <h2 className="font-bold text-sidebar-foreground">Dovita</h2>
+              <div className="min-w-0">
+                <h2 className="font-bold text-sidebar-foreground truncate">Dovita</h2>
                 <p className="text-xs text-sidebar-foreground/70">CRM/ERP</p>
               </div>
             )}
@@ -149,17 +149,19 @@ export function AppSidebar() {
           variant="ghost"
           onClick={toggleTheme}
           className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          title={theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          {state !== "collapsed" && <span className="ml-2">{theme === "dark" ? "Modo Claro" : "Modo Oscuro"}</span>}
+          {state !== "collapsed" && <span className="ml-2 truncate">{theme === "dark" ? "Modo Claro" : "Modo Oscuro"}</span>}
         </Button>
         <Button
           variant="ghost"
           onClick={handleLogout}
           className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          title="Cerrar Sesión"
         >
           <LogOut className="h-4 w-4" />
-          {state !== "collapsed" && <span className="ml-2">Cerrar Sesión</span>}
+          {state !== "collapsed" && <span className="ml-2 truncate">Cerrar Sesión</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>
