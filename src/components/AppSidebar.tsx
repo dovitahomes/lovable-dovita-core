@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator, Calendar, Truck, DollarSign, Receipt, Percent, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator, Calendar, Truck, DollarSign, Receipt, Percent, Moon, Sun, Eye } from "lucide-react";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
+import { ViewAsClientDialog } from "@/components/ViewAsClientDialog";
 import {
   Sidebar,
   SidebarContent,
@@ -164,6 +165,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-2">
+        {isAdmin && state !== "collapsed" && (
+          <div className="mb-2">
+            <ViewAsClientDialog />
+          </div>
+        )}
         <Button
           variant="ghost"
           onClick={toggleTheme}

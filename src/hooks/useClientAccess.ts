@@ -13,6 +13,12 @@ export function useClientAccess() {
     const checkAccess = async () => {
       if (roleLoading) return;
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth/login', { replace: true });
+        return;
+      }
+
       // Check for impersonate mode (admins/users can view as client)
       const urlParams = new URLSearchParams(window.location.search);
       const asClient = urlParams.get('asClient') === '1' || localStorage.getItem('asClient') === 'true';
@@ -23,10 +29,10 @@ export function useClientAccess() {
         return;
       }
 
-      // Check if user is assigned to any project
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/auth/login', { replace: true });
+      // If user is a real client (has role 'cliente'), allow access
+      if (role === 'cliente') {
+        setHasAccess(true);
+        setLoading(false);
         return;
       }
 
@@ -38,7 +44,8 @@ export function useClientAccess() {
         .limit(1);
 
       if (error || !projects || projects.length === 0) {
-        navigate('/auth/login', { replace: true });
+        // Redirect non-clients to dashboard instead of login
+        navigate('/dashboard', { replace: true });
         return;
       }
 

@@ -33,7 +33,7 @@ const Finanzas = lazy(() => import("./pages/Finanzas"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
-const ClientLayout = lazy(() => import("./pages/ClientLayout"));
+const ClientShell = lazy(() => import("./layouts/ClientShell"));
 const ClientOverview = lazy(() => import("./pages/client/Overview"));
 const ClientDocumentsPage = lazy(() => import("./pages/client/documents/ClientDocumentsPage"));
 const ClientChat = lazy(() => import("./pages/client/Chat"));
@@ -70,7 +70,7 @@ const App = () => (
           path="/client/*"
           element={
             <Suspense fallback={<PageHeaderSkeleton />}>
-              <ClientLayout />
+              <ClientShell />
             </Suspense>
           }
         >
@@ -78,7 +78,6 @@ const App = () => (
           <Route path="overview" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientOverview /></Suspense>} />
           <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentsPage /></Suspense>} />
           <Route path="diseno" element={<div className="p-4"><h2 className="text-2xl font-bold">Diseño</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
-          <Route path="obra" element={<div className="p-4"><h2 className="text-2xl font-bold">Avances de Obra</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
           <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendar /></Suspense>} />
           <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChat /></Suspense>} />
         </Route>
