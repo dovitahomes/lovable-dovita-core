@@ -1,4 +1,4 @@
-import { Home, Image, Calendar, Folder } from "lucide-react";
+import { Home, Calendar, Folder, MessageSquare, CreditCard } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +14,10 @@ interface ClientBottomNavProps {
 
 const defaultItems: NavItem[] = [
   { label: "Inicio", to: "/client/home", icon: Home },
-  { label: "Finanzas", to: "/client/finanzas", icon: Image },
   { label: "Calendario", to: "/client/calendario", icon: Calendar },
-  { label: "Documentos", to: "/client/documentos", icon: Folder },
+  { label: "Docs", to: "/client/documentos", icon: Folder },
+  { label: "Chat", to: "/client/chat", icon: MessageSquare },
+  { label: "Pagos", to: "/client/pagos", icon: CreditCard },
 ];
 
 export function ClientBottomNav({ items = defaultItems }: ClientBottomNavProps) {
@@ -27,8 +28,9 @@ export function ClientBottomNav({ items = defaultItems }: ClientBottomNavProps) 
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 md:hidden"
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0px)" }}
+      aria-label="Navegación principal del portal cliente"
     >
-      <div className="max-w-md mx-auto grid grid-cols-4 h-16 px-2">
+      <div className="max-w-md mx-auto grid grid-cols-5 h-16 px-2">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.to;

@@ -17,10 +17,10 @@ export function ViewAsClientToggle() {
   const handleToggle = () => {
     if (isViewingAsClient) {
       setClientViewMode(false);
-      navigate('/dashboard');
+      navigate('/');
     } else {
       setClientViewMode(true);
-      navigate('/client/home');
+      navigate('/client/home?viewAsClient=1');
     }
   };
 

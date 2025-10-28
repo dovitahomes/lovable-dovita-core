@@ -13,7 +13,10 @@ import { DemoGuard } from "@/auth/DemoGuard";
 import { ViewAsClientToggle } from "@/components/ViewAsClientToggle";
 import { shouldUseClientShell } from "@/lib/auth/role";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { SidebarInset } from "@/components/ui/sidebar";
 
 // Eager loaded (critical routes)
@@ -44,6 +47,7 @@ const ClientFinanzas = lazy(() => import("./pages/client/Finanzas"));
 const ClientDocumentos = lazy(() => import("./pages/client/Documentos"));
 const ClientChatView = lazy(() => import("./pages/client/Chat"));
 const ClientCalendarioView = lazy(() => import("./pages/client/Calendario"));
+const ClientPagosView = lazy(() => import("./pages/client/Pagos"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -57,6 +61,22 @@ const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 
 const InternalLayout = () => {
+  const { role } = useUserRole();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect clients to client portal - clients should NEVER see this layout
+  useEffect(() => {
+    if (role === 'cliente' && !location.pathname.startsWith('/client')) {
+      navigate('/client/home', { replace: true });
+    }
+  }, [role, location.pathname, navigate]);
+
+  // Don't render internal layout for clients at all
+  if (role === 'cliente') {
+    return null;
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -228,11 +248,13 @@ const App = () => (
             </Suspense>
           }
         >
+          <Route index element={<Navigate to="/client/home" replace />} />
           <Route path="home" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientHomeView /></Suspense>} />
           <Route path="finanzas" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientFinanzas /></Suspense>} />
           <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentos /></Suspense>} />
           <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChatView /></Suspense>} />
           <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendarioView /></Suspense>} />
+          <Route path="pagos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientPagosView /></Suspense>} />
         </Route>
 
         {/* Internal admin routes (with sidebar) */}

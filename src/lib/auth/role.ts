@@ -14,6 +14,14 @@ export function isAdmin(role: string | null): boolean {
 
 export function getEffectiveClientMode(): boolean {
   if (typeof window === 'undefined') return false;
+  
+  // Check for query param first (takes precedence)
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('viewAsClient') === '1') {
+    return true;
+  }
+  
+  // Fallback to localStorage for persistence
   return localStorage.getItem('dovita_view_as_client') === '1';
 }
 

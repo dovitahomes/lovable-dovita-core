@@ -25,21 +25,37 @@ export function useClientAccess() {
       const currentPath = location.pathname;
       const isClientRoute = currentPath.startsWith('/client');
 
+      // Real client - force to client portal ALWAYS
+      if (role === 'cliente') {
+        if (!isClientRoute) {
+          navigate('/client/home', { replace: true });
+          return;
+        }
+        setHasAccess(true);
+        setLoading(false);
+        return;
+      }
+
       // Admin/user impersonating as client
       if (isImpersonating && (role === 'admin' || role === 'user')) {
-        setHasAccess(isClientRoute);
+        if (!isClientRoute) {
+          navigate('/client/home?viewAsClient=1', { replace: true });
+          return;
+        }
+        setHasAccess(true);
         setLoading(false);
         return;
       }
 
-      // Real client access
-      if (role === 'cliente') {
-        setHasAccess(isClientRoute);
+      // Staff trying to access client routes without impersonation
+      if (isClientRoute && !isImpersonating) {
+        navigate('/', { replace: true });
+        setHasAccess(false);
         setLoading(false);
         return;
       }
 
-      // Check if user email matches any client with projects
+      // Check if user email matches any client with projects (fallback)
       const { data: projects, error } = await supabase
         .from('projects')
         .select('id, clients!inner(email)')
@@ -47,9 +63,8 @@ export function useClientAccess() {
         .limit(1);
 
       if (error || !projects || projects.length === 0) {
-        // Redirect non-clients to dashboard instead of login
         if (isClientRoute) {
-          navigate('/dashboard', { replace: true });
+          navigate('/', { replace: true });
         }
         setHasAccess(false);
         setLoading(false);

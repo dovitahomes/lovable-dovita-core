@@ -73,7 +73,8 @@ export function ClientAppShell({ children }: ClientAppShellProps) {
   const exitImpersonate = () => {
     localStorage.removeItem('dovita_view_as_client');
     localStorage.removeItem('client.activeProject');
-    navigate('/');
+    // Remove query param and go back to dashboard
+    window.location.href = '/';
   };
 
   const selectedProject = projects?.find(p => p.id === selectedProjectId);
