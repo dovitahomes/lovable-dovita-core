@@ -34,6 +34,8 @@ const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
 const ClientLayout = lazy(() => import("./pages/ClientLayout"));
+const ClientOverview = lazy(() => import("./pages/client/Overview"));
+const ClientDocumentsPage = lazy(() => import("./pages/client/documents/ClientDocumentsPage"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -54,13 +56,34 @@ const App = () => (
       <BrowserRouter>
         <DemoGuard>
       <Routes>
+        {/* Public routes */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/callback" element={<Callback />} />
         <Route path="/auth/reset" element={<ResetPassword />} />
         <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
         <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
-          <Route
-            path="/*"
+        
+        {/* Client portal routes (isolated, no sidebar) */}
+        <Route
+          path="/client/*"
+          element={
+            <Suspense fallback={<PageHeaderSkeleton />}>
+              <ClientLayout />
+            </Suspense>
+          }
+        >
+          <Route index element={<Navigate to="/client/overview" replace />} />
+          <Route path="overview" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientOverview /></Suspense>} />
+          <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentsPage /></Suspense>} />
+          <Route path="diseno" element={<div className="p-4"><h2 className="text-2xl font-bold">Diseño</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
+          <Route path="obra" element={<div className="p-4"><h2 className="text-2xl font-bold">Avances de Obra</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
+          <Route path="calendario" element={<div className="p-4"><h2 className="text-2xl font-bold">Calendario</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
+          <Route path="chat" element={<div className="p-4"><h2 className="text-2xl font-bold">Chat</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
+        </Route>
+
+        {/* Internal admin routes (with sidebar) */}
+        <Route
+          path="/*"
             element={
               <ProtectedRoute>
                 <SidebarProvider>
@@ -188,7 +211,6 @@ const App = () => (
                               }
                             />
                             <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />
-                            <Route path="/client" element={<Suspense fallback={<TableSkeleton />}><ClientLayout /></Suspense>} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </Suspense>

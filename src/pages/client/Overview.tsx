@@ -9,12 +9,17 @@ import { DollarSign, Calendar, Activity, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { useOutletContext } from "react-router-dom";
 
-export function Overview() {
+export default function Overview() {
+  const { projectId: contextProjectId } = useOutletContext<{ projectId: string | null }>();
   const { projects, currentProject, setCurrentProject, isLoading: projectsLoading } = useMyProjects();
-  const { data: finance, isLoading: financeLoading } = useClientFinance(currentProject?.id || null);
-  const { data: nextEvent, isLoading: eventLoading } = useNextEvent(currentProject?.id || null);
-  const { data: activities = [], isLoading: activitiesLoading } = useRecentActivity(currentProject?.id || null);
+  
+  const projectId = contextProjectId || currentProject?.id;
+  
+  const { data: finance, isLoading: financeLoading } = useClientFinance(projectId);
+  const { data: nextEvent, isLoading: eventLoading } = useNextEvent(projectId);
+  const { data: activities = [], isLoading: activitiesLoading } = useRecentActivity(projectId);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-MX", {

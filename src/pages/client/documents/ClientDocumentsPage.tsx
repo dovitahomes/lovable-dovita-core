@@ -8,10 +8,7 @@ import { DocumentList } from "./components/DocumentList";
 import { PreviewModal } from "./components/PreviewModal";
 import { useRequiredDocuments } from "@/hooks/useRequiredDocuments";
 import { toast } from "sonner";
-
-interface ClientDocumentsPageProps {
-  projectId: string | null;
-}
+import { useOutletContext } from "react-router-dom";
 
 interface Document {
   id: string;
@@ -24,7 +21,8 @@ interface Document {
   etiqueta?: string | null;
 }
 
-export function ClientDocumentsPage({ projectId }: ClientDocumentsPageProps) {
+export default function ClientDocumentsPage() {
+  const { projectId } = useOutletContext<{ projectId: string | null }>();
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
   const queryClient = useQueryClient();
 

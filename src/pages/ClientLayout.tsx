@@ -1,41 +1,40 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Home, FileText, PenTool, Image, Calendar, MessageSquare } from "lucide-react";
+import { User, Home, FileText, PenTool, Image, Calendar, MessageSquare, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
-import { Overview } from "@/pages/client/Overview";
 import { ModernMobileMenu } from "@/components/ui/modern-mobile-menu";
-import { ClientDocumentsPage } from "./client/documents/ClientDocumentsPage";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useClientAccess, useImpersonateMode } from "@/hooks/useClientAccess";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ClientLayout() {
-  const location = useLocation();
   const navigate = useNavigate();
+  const { hasAccess, loading: accessLoading } = useClientAccess();
+  const { isImpersonating, exitImpersonate } = useImpersonateMode();
   
-  // Derive activeTab from URL pathname
-  const getTabFromPath = (pathname: string) => {
-    if (pathname === "/client") return "overview";
-    if (pathname.startsWith("/client/documentos")) return "documentos";
-    if (pathname.startsWith("/client/diseno")) return "diseno";
-    if (pathname.startsWith("/client/obra")) return "obra";
-    if (pathname.startsWith("/client/calendario")) return "calendario";
-    if (pathname.startsWith("/client/chat")) return "chat";
-    return "overview";
-  };
-  
-  const [activeTab, setActiveTab] = useState(() => getTabFromPath(location.pathname));
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() =>
     localStorage.getItem("client.activeProject")
   );
   const [userEmail, setUserEmail] = useState<string>("");
 
-  // Sync activeTab with URL changes
-  useEffect(() => {
-    const newTab = getTabFromPath(location.pathname);
-    setActiveTab(newTab);
-    localStorage.setItem("client.activeTab", newTab);
-  }, [location.pathname]);
+  // Show loading while checking access
+  if (accessLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return null;
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -75,22 +74,6 @@ export default function ClientLayout() {
     }
   }, [projects, selectedProjectId]);
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    localStorage.setItem("client.activeTab", tab);
-    
-    // Navigate to corresponding URL
-    const pathMap: Record<string, string> = {
-      overview: "/client",
-      documentos: "/client/documentos",
-      diseno: "/client/diseno",
-      obra: "/client/obra",
-      calendario: "/client/calendario",
-      chat: "/client/chat",
-    };
-    navigate(pathMap[tab] || "/client");
-  };
-
   const handleProjectChange = (projectId: string) => {
     setSelectedProjectId(projectId);
     localStorage.setItem("client.activeProject", projectId);
@@ -102,7 +85,7 @@ export default function ClientLayout() {
     : "Mi Proyecto";
 
   const menuItems = [
-    { label: "Inicio", icon: Home, href: "/client" },
+    { label: "Inicio", icon: Home, href: "/client/overview" },
     { label: "Docs", icon: FileText, href: "/client/documentos" },
     { label: "Diseño", icon: PenTool, href: "/client/diseno" },
     { label: "Obra", icon: Image, href: "/client/obra" },
@@ -112,6 +95,26 @@ export default function ClientLayout() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Impersonate banner */}
+      {isImpersonating && (
+        <Alert className="rounded-none border-x-0 border-t-0 bg-yellow-50 border-yellow-200">
+          <AlertDescription className="flex items-center justify-between max-w-4xl mx-auto">
+            <span className="text-sm font-medium text-yellow-900">
+              Estás viendo como cliente
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={exitImpersonate}
+              className="h-8 text-yellow-900 hover:bg-yellow-100"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Salir
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3.5 shadow-sm">
         <div className="max-w-md mx-auto flex items-center justify-between">
@@ -150,47 +153,7 @@ export default function ClientLayout() {
 
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-5 pb-24">
-      {activeTab === "overview" && <Overview />}
-        
-        {activeTab === "documentos" && (
-          <ClientDocumentsPage projectId={selectedProjectId} />
-        )}
-        
-        {activeTab === "diseno" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Diseño</h2>
-            <p className="text-slate-600">
-              Contenido de diseño - en desarrollo
-            </p>
-          </div>
-        )}
-        
-        {activeTab === "obra" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Avances de Obra</h2>
-            <p className="text-slate-600">
-              Contenido de obra - en desarrollo
-            </p>
-          </div>
-        )}
-        
-        {activeTab === "calendario" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Calendario</h2>
-            <p className="text-slate-600">
-              Contenido de calendario - en desarrollo
-            </p>
-          </div>
-        )}
-        
-        {activeTab === "chat" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Chat</h2>
-            <p className="text-slate-600">
-              Contenido de chat - en desarrollo
-            </p>
-          </div>
-        )}
+        <Outlet context={{ projectId: selectedProjectId }} />
       </main>
 
       {/* Modern Mobile Bottom Navigation */}
