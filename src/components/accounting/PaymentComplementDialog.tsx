@@ -127,13 +127,40 @@ export function PaymentComplementDialog({
           <DialogTitle>Registrar Complemento de Pago (PPD)</DialogTitle>
         </DialogHeader>
 
-        <div className="mb-4 p-4 bg-muted rounded-lg">
-          <p className="font-semibold">Folio: {invoice.folio}</p>
-          <p className="text-sm">
-            Total: ${invoice.total_amount?.toLocaleString()} | Pagado: $
-            {invoice.total_paid?.toLocaleString()} | Saldo: $
-            {invoice.balance?.toLocaleString()}
-          </p>
+        <div className="mb-4 p-4 bg-muted rounded-lg space-y-2">
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">Folio:</span>
+            <span className="font-medium">{invoice.folio || 'N/A'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">Método de Pago:</span>
+            <span className="font-medium">
+              {invoice.metodo_pago === 'PUE' ? 'PUE (Pago único)' : 'PPD (Pago en parcialidades)'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">Total:</span>
+            <span className="font-medium">
+              ${invoice.total_amount?.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">Pagado:</span>
+            <span className="font-medium">
+              ${invoice.total_paid?.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">Saldo:</span>
+            <span className="font-medium text-primary">
+              ${invoice.balance?.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+          {invoice.metodo_pago === 'PUE' && invoice.total_paid > 0 && (
+            <p className="text-sm text-amber-600 mt-2">
+              ⚠️ Esta factura es PUE y ya tiene un pago registrado
+            </p>
+          )}
         </div>
 
         <Form {...form}>

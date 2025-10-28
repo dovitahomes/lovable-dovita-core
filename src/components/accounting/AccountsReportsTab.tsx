@@ -47,9 +47,27 @@ export function AccountsReportsTab() {
     }
   };
 
-  const exportToExcel = (type: "receivable" | "payable") => {
-    toast.info(`Exportando ${type === "receivable" ? "Cuentas por Cobrar" : "Cuentas por Pagar"} a Excel...`);
-    // Implementation would use a library like xlsx
+  const exportToExcel = async (type: "receivable" | "payable") => {
+    try {
+      const { exportToExcel: exportFn } = await import('@/utils/lazyExports');
+      const data = type === "receivable" ? receivables : payables;
+      const filename = type === "receivable" ? 'cuentas_por_cobrar' : 'cuentas_por_pagar';
+      
+      exportFn(
+        data.map(item => ({
+          [type === "receivable" ? 'Cliente' : 'Proveedor']: item.client_name || item.provider_name || 'N/A',
+          'Total Facturado': item.total_invoiced || 0,
+          'Total Pagado': item.total_paid || 0,
+          'Saldo': item.balance || 0,
+          'Fecha Factura Más Antigua': item.oldest_invoice_date ? format(new Date(item.oldest_invoice_date), 'dd/MM/yyyy') : 'N/A'
+        })),
+        filename
+      );
+      toast.success('Exportado a Excel');
+    } catch (error) {
+      console.error('Error exporting:', error);
+      toast.error('Error al exportar');
+    }
   };
 
   const totalReceivable = receivables.reduce((sum, r) => sum + (r.balance || 0), 0);

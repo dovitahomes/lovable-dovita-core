@@ -104,7 +104,7 @@ export function TransactionDialog({ open, onClose, type }: TransactionDialogProp
     try {
       const { data: user } = await supabase.auth.getUser();
 
-      const { error } = await supabase.from("transactions").insert([{
+      const { data: transaction, error } = await supabase.from("transactions").insert([{
         account_id: data.account_id,
         amount: data.amount,
         currency: data.currency as "MXN" | "USD" | "EUR",
@@ -115,7 +115,7 @@ export function TransactionDialog({ open, onClose, type }: TransactionDialogProp
         project_id: data.project_id || null,
         provider_id: data.provider_id || null,
         client_id: data.client_id || null,
-      }]);
+      }]).select().single();
 
       if (error) throw error;
 

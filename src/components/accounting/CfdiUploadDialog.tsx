@@ -57,15 +57,14 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
         .from('cfdi')
         .getPublicUrl(fileName);
 
-      // Find emisor/receptor IDs (optional, best effort)
+      // Find or create emisor/receptor
       let emisorId = null;
       let receptorId = null;
 
       // Try to match RFC in providers (emisor)
       const { data: providers } = await supabase
         .from('providers')
-        .select('id, fiscales_json')
-        .limit(100);
+        .select('id, fiscales_json');
       
       const matchingProvider = providers?.find(p => 
         p.fiscales_json && 
@@ -73,13 +72,36 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
         'rfc' in p.fiscales_json &&
         p.fiscales_json.rfc === cfdi.emisor.rfc
       );
-      if (matchingProvider) emisorId = matchingProvider.id;
+
+      if (matchingProvider) {
+        emisorId = matchingProvider.id;
+      } else {
+        // Auto-create provider if not found
+        const { data: newProvider, error: providerError } = await supabase
+          .from('providers')
+          .insert({
+            name: cfdi.emisor.nombre,
+            code_short: cfdi.emisor.rfc.substring(0, 10),
+            fiscales_json: {
+              rfc: cfdi.emisor.rfc,
+              razon_social: cfdi.emisor.nombre,
+              regimen_fiscal: cfdi.emisor.regimenFiscal
+            },
+            activo: true
+          })
+          .select('id')
+          .single();
+        
+        if (!providerError && newProvider) {
+          emisorId = newProvider.id;
+          toast.success(`Proveedor creado: ${cfdi.emisor.nombre}`);
+        }
+      }
 
       // Try to match RFC in clients (receptor)
       const { data: clients } = await supabase
         .from('clients')
-        .select('id, fiscal_json')
-        .limit(100);
+        .select('id, fiscal_json');
       
       const matchingClient = clients?.find(c => 
         c.fiscal_json && 
@@ -87,7 +109,32 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
         'rfc' in c.fiscal_json &&
         c.fiscal_json.rfc === cfdi.receptor.rfc
       );
-      if (matchingClient) receptorId = matchingClient.id;
+
+      if (matchingClient) {
+        receptorId = matchingClient.id;
+      } else {
+        // Auto-create client if not found
+        const { data: newClient, error: clientError } = await supabase
+          .from('clients')
+          .insert({
+            name: cfdi.receptor.nombre,
+            person_type: cfdi.receptor.rfc.length === 12 ? 'moral' : 'fisica',
+            fiscal_json: {
+              rfc: cfdi.receptor.rfc,
+              razon_social: cfdi.receptor.nombre,
+              regimen_fiscal: cfdi.receptor.regimenFiscal,
+              uso_cfdi: cfdi.receptor.usoCfdi,
+              domicilio_fiscal: cfdi.receptor.domicilioFiscal
+            }
+          })
+          .select('id')
+          .single();
+        
+        if (!clientError && newClient) {
+          receptorId = newClient.id;
+          toast.success(`Cliente creado: ${cfdi.receptor.nombre}`);
+        }
+      }
 
       // Determine tipo: I=ingreso, E=egreso
       const tipo = cfdi.tipoComprobante === 'I' ? 'ingreso' : 'egreso';

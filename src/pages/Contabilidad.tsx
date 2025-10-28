@@ -15,14 +15,14 @@ export default function Contabilidad() {
       <Tabs defaultValue="invoices" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="invoices">Facturas CFDI</TabsTrigger>
-          <TabsTrigger value="reports">Cuentas por Cobrar/Pagar</TabsTrigger>
+          <TabsTrigger value="accounts">Cuentas por Cobrar/Pagar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="invoices">
           <InvoicesTab />
         </TabsContent>
 
-        <TabsContent value="reports">
+        <TabsContent value="accounts">
           <AccountsReportsTab />
         </TabsContent>
       </Tabs>
