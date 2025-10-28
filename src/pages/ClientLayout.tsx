@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Home, FileText, PenTool, Hammer, Calendar, MessageCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { ClientOverview } from "@/components/client/ClientOverview";
+import { ClientTabBar } from "@/components/client/ClientTabBar";
 
 export default function ClientLayout() {
   const [activeTab, setActiveTab] = useState(() => 
@@ -64,15 +64,6 @@ export default function ClientLayout() {
     localStorage.setItem("client.activeProject", projectId);
   };
 
-  const tabs = [
-    { id: "overview", label: "Overview", icon: Home },
-    { id: "documentos", label: "Documentos", icon: FileText },
-    { id: "diseno", label: "Diseño", icon: PenTool },
-    { id: "obra", label: "Obra", icon: Hammer },
-    { id: "calendario", label: "Calendario", icon: Calendar },
-    { id: "chat", label: "Chat", icon: MessageCircle },
-  ];
-
   const selectedProject = projects?.find(p => p.id === selectedProjectId);
   const projectName = selectedProject?.clients?.name 
     ? `Proyecto de ${selectedProject.clients.name}` 
@@ -81,14 +72,14 @@ export default function ClientLayout() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3.5 shadow-sm">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex-1 min-w-0">
             {projects && projects.length > 1 ? (
               <Select value={selectedProjectId || undefined} onValueChange={handleProjectChange}>
-                <SelectTrigger className="w-full max-w-xs border-none shadow-none focus:ring-0">
+                <SelectTrigger className="w-full max-w-xs border-none shadow-none focus:ring-0 px-0">
                   <SelectValue placeholder="Seleccionar proyecto">
-                    <span className="text-lg font-semibold text-[hsl(var(--dovita-blue))]">
+                    <span className="text-base font-semibold text-slate-900">
                       {projectName}
                     </span>
                   </SelectValue>
@@ -102,22 +93,22 @@ export default function ClientLayout() {
                 </SelectContent>
               </Select>
             ) : (
-              <h1 className="text-lg font-semibold text-[hsl(var(--dovita-blue))] truncate">
+              <h1 className="text-base font-semibold text-slate-900 truncate">
                 {projectName}
               </h1>
             )}
           </div>
           <button 
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
             aria-label="Menú de usuario"
           >
-            <User className="h-6 w-6 text-[hsl(var(--dovita-dark))]" />
+            <User className="h-5 w-5 text-slate-700" />
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-md mx-auto px-4 py-6 pb-24">
+      <main className="max-w-md mx-auto px-4 py-5 pb-20">
         {activeTab === "overview" && (
           <ClientOverview 
             projectId={selectedProjectId} 
@@ -127,8 +118,8 @@ export default function ClientLayout() {
         
         {activeTab === "documentos" && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[hsl(var(--dovita-blue))]">Documentos</h2>
-            <p className="text-[hsl(var(--dovita-dark))] opacity-70">
+            <h2 className="text-2xl font-bold text-slate-900">Documentos</h2>
+            <p className="text-slate-600">
               Contenido de documentos - en desarrollo
             </p>
           </div>
@@ -136,8 +127,8 @@ export default function ClientLayout() {
         
         {activeTab === "diseno" && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[hsl(var(--dovita-blue))]">Diseño</h2>
-            <p className="text-[hsl(var(--dovita-dark))] opacity-70">
+            <h2 className="text-2xl font-bold text-slate-900">Diseño</h2>
+            <p className="text-slate-600">
               Contenido de diseño - en desarrollo
             </p>
           </div>
@@ -145,8 +136,8 @@ export default function ClientLayout() {
         
         {activeTab === "obra" && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[hsl(var(--dovita-blue))]">Avances de Obra</h2>
-            <p className="text-[hsl(var(--dovita-dark))] opacity-70">
+            <h2 className="text-2xl font-bold text-slate-900">Avances de Obra</h2>
+            <p className="text-slate-600">
               Contenido de obra - en desarrollo
             </p>
           </div>
@@ -154,8 +145,8 @@ export default function ClientLayout() {
         
         {activeTab === "calendario" && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[hsl(var(--dovita-blue))]">Calendario</h2>
-            <p className="text-[hsl(var(--dovita-dark))] opacity-70">
+            <h2 className="text-2xl font-bold text-slate-900">Calendario</h2>
+            <p className="text-slate-600">
               Contenido de calendario - en desarrollo
             </p>
           </div>
@@ -163,8 +154,8 @@ export default function ClientLayout() {
         
         {activeTab === "chat" && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[hsl(var(--dovita-blue))]">Chat</h2>
-            <p className="text-[hsl(var(--dovita-dark))] opacity-70">
+            <h2 className="text-2xl font-bold text-slate-900">Chat</h2>
+            <p className="text-slate-600">
               Contenido de chat - en desarrollo
             </p>
           </div>
@@ -172,41 +163,7 @@ export default function ClientLayout() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50"
-        aria-label="Navegación principal"
-      >
-        <div className="max-w-md mx-auto grid grid-cols-6 h-20">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 transition-colors",
-                  isActive
-                    ? "text-[hsl(var(--dovita-blue))]"
-                    : "text-gray-500 hover:text-[hsl(var(--dovita-blue))]"
-                )}
-                aria-label={tab.label}
-                aria-current={isActive ? "page" : undefined}
-              >
-                <Icon 
-                  className={cn(
-                    "h-5 w-5 transition-transform",
-                    isActive && "scale-110"
-                  )} 
-                  aria-hidden="true" 
-                />
-                <span className="text-[10px] font-medium">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <ClientTabBar activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );
 }

@@ -9,9 +9,9 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Dovita Brand Colors */
-    --dovita-blue: 221 83% 33%;      /* #1F2B6C */
+    --dovita-blue: 222 71% 40%;      /* #1e40af - Primary blue */
     --dovita-yellow: 48 100% 65%;    /* #FFD84D */
-    --dovita-dark: 0 0% 11%;         /* #1B1B1B */
+    --dovita-dark: 222 47% 8%;       /* Darker slate for text */
     
     /* Corporate Blue & Emerald Green Design System */
     --background: 220 17% 97%;
