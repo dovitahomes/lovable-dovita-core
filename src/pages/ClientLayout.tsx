@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
-import { ClientOverview } from "@/components/client/ClientOverview";
+import { Overview } from "@/pages/client/Overview";
 import { ClientTabBar } from "@/components/client/ClientTabBar";
 import { ClientDocumentsPage } from "./client/documents/ClientDocumentsPage";
 
@@ -110,12 +110,7 @@ export default function ClientLayout() {
 
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-5 pb-20">
-        {activeTab === "overview" && (
-          <ClientOverview 
-            projectId={selectedProjectId} 
-            clientName={selectedProject?.clients?.name}
-          />
-        )}
+      {activeTab === "overview" && <Overview />}
         
         {activeTab === "documentos" && (
           <ClientDocumentsPage projectId={selectedProjectId} />
