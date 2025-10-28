@@ -36,6 +36,7 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
     title: "",
     notes: "",
     start_at: "",
+    end_at: "",
   });
 
   useEffect(() => {
@@ -74,10 +75,12 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
 
   const handleOpenDialog = () => {
     const now = new Date();
+    const oneHourLater = new Date(now.getTime() + 3600000);
     setFormData({
       title: "",
       notes: "",
       start_at: format(now, "yyyy-MM-dd'T'HH:mm"),
+      end_at: format(oneHourLater, "yyyy-MM-dd'T'HH:mm"),
     });
     setShowEventDialog(true);
   };
@@ -88,12 +91,17 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
       return;
     }
 
+    const startDate = new Date(formData.start_at);
+    const endDate = new Date(formData.end_at);
+
+    if (endDate <= startDate) {
+      toast.error('La hora de fin debe ser posterior al inicio');
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No autenticado');
-
-      const startDate = new Date(formData.start_at);
-      const endDate = new Date(startDate.getTime() + 3600000); // 1 hour default
 
       const { error } = await supabase
         .from('calendar_events')
@@ -271,12 +279,22 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
             </div>
 
             <div>
-              <Label htmlFor="event-date">Fecha y Hora *</Label>
+              <Label htmlFor="event-start">Fecha y Hora de Inicio *</Label>
               <Input
-                id="event-date"
+                id="event-start"
                 type="datetime-local"
                 value={formData.start_at}
                 onChange={(e) => setFormData({ ...formData, start_at: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="event-end">Fecha y Hora de Fin *</Label>
+              <Input
+                id="event-end"
+                type="datetime-local"
+                value={formData.end_at}
+                onChange={(e) => setFormData({ ...formData, end_at: e.target.value })}
               />
             </div>
 

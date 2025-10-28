@@ -88,7 +88,6 @@ export default function ClientLayout() {
     { label: "Inicio", icon: Home, href: "/client/overview" },
     { label: "Docs", icon: FileText, href: "/client/documentos" },
     { label: "Diseño", icon: PenTool, href: "/client/diseno" },
-    { label: "Obra", icon: Image, href: "/client/obra" },
     { label: "Citas", icon: Calendar, href: "/client/calendario" },
     { label: "Chat", icon: MessageSquare, href: "/client/chat" },
   ];

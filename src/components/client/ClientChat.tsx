@@ -177,7 +177,7 @@ export function ClientChat({ projectId }: ClientChatProps) {
   }
 
   return (
-    <Card className="flex flex-col h-[600px]">
+    <Card className="flex flex-col h-[calc(100vh-180px)] md:h-[600px]">
       <CardHeader>
         <CardTitle>Chat del Proyecto</CardTitle>
       </CardHeader>

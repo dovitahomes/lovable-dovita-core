@@ -36,6 +36,8 @@ const ClientPortal = lazy(() => import("./pages/ClientPortal"));
 const ClientLayout = lazy(() => import("./pages/ClientLayout"));
 const ClientOverview = lazy(() => import("./pages/client/Overview"));
 const ClientDocumentsPage = lazy(() => import("./pages/client/documents/ClientDocumentsPage"));
+const ClientChat = lazy(() => import("./pages/client/Chat"));
+const ClientCalendar = lazy(() => import("./pages/client/Calendar"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -77,8 +79,8 @@ const App = () => (
           <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentsPage /></Suspense>} />
           <Route path="diseno" element={<div className="p-4"><h2 className="text-2xl font-bold">Diseño</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
           <Route path="obra" element={<div className="p-4"><h2 className="text-2xl font-bold">Avances de Obra</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
-          <Route path="calendario" element={<div className="p-4"><h2 className="text-2xl font-bold">Calendario</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
-          <Route path="chat" element={<div className="p-4"><h2 className="text-2xl font-bold">Chat</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
+          <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendar /></Suspense>} />
+          <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChat /></Suspense>} />
         </Route>
 
         {/* Internal admin routes (with sidebar) */}
