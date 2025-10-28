@@ -10,8 +10,19 @@ All colors MUST be HSL.
   :root {
     /* Dovita Brand Colors */
     --dovita-blue: 222 71% 40%;      /* #1e40af - Primary blue */
+    --dovita-blue-1: #1e3a8a;        /* base */
+    --dovita-blue-2: #0a3080;        /* más oscuro */
+    --dovita-blue-grad: linear-gradient(180deg, rgba(30,58,138,0.92), rgba(10,48,128,0.85));
     --dovita-yellow: 48 100% 65%;    /* #FFD84D */
     --dovita-dark: 222 47% 8%;       /* Darker slate for text */
+    
+    /* Client Portal Mobile Nav */
+    --client-nav-bg: rgba(6, 12, 28, 0.72);
+    --client-nav-border: rgba(255,255,255,0.08);
+    --client-nav-fg: #c8cbe0;
+    
+    /* Acento activo */
+    --brand-accent: #6d6cff;
     
     /* Corporate Blue & Emerald Green Design System */
     --background: 220 17% 97%;
@@ -73,6 +84,8 @@ All colors MUST be HSL.
   }
 
   .dark {
+    --client-nav-bg: rgba(3, 6, 18, 0.72);
+    
     --background: 222 47% 11%;
     --foreground: 220 17% 97%;
 

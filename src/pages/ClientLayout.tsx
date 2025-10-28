@@ -1,21 +1,41 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "lucide-react";
+import { User, Home, FileText, PenTool, Image, Calendar, MessageSquare } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { Overview } from "@/pages/client/Overview";
-import { ClientTabBar } from "@/components/client/ClientTabBar";
+import { ModernMobileMenu } from "@/components/ui/modern-mobile-menu";
 import { ClientDocumentsPage } from "./client/documents/ClientDocumentsPage";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ClientLayout() {
-  const [activeTab, setActiveTab] = useState(() => 
-    localStorage.getItem("client.activeTab") || "overview"
-  );
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Derive activeTab from URL pathname
+  const getTabFromPath = (pathname: string) => {
+    if (pathname === "/client") return "overview";
+    if (pathname.startsWith("/client/documentos")) return "documentos";
+    if (pathname.startsWith("/client/diseno")) return "diseno";
+    if (pathname.startsWith("/client/obra")) return "obra";
+    if (pathname.startsWith("/client/calendario")) return "calendario";
+    if (pathname.startsWith("/client/chat")) return "chat";
+    return "overview";
+  };
+  
+  const [activeTab, setActiveTab] = useState(() => getTabFromPath(location.pathname));
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() =>
     localStorage.getItem("client.activeProject")
   );
   const [userEmail, setUserEmail] = useState<string>("");
+
+  // Sync activeTab with URL changes
+  useEffect(() => {
+    const newTab = getTabFromPath(location.pathname);
+    setActiveTab(newTab);
+    localStorage.setItem("client.activeTab", newTab);
+  }, [location.pathname]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -58,6 +78,17 @@ export default function ClientLayout() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     localStorage.setItem("client.activeTab", tab);
+    
+    // Navigate to corresponding URL
+    const pathMap: Record<string, string> = {
+      overview: "/client",
+      documentos: "/client/documentos",
+      diseno: "/client/diseno",
+      obra: "/client/obra",
+      calendario: "/client/calendario",
+      chat: "/client/chat",
+    };
+    navigate(pathMap[tab] || "/client");
   };
 
   const handleProjectChange = (projectId: string) => {
@@ -69,6 +100,15 @@ export default function ClientLayout() {
   const projectName = selectedProject?.clients?.name 
     ? `Proyecto de ${selectedProject.clients.name}` 
     : "Mi Proyecto";
+
+  const menuItems = [
+    { label: "Inicio", icon: Home, href: "/client" },
+    { label: "Docs", icon: FileText, href: "/client/documentos" },
+    { label: "Diseño", icon: PenTool, href: "/client/diseno" },
+    { label: "Obra", icon: Image, href: "/client/obra" },
+    { label: "Citas", icon: Calendar, href: "/client/calendario" },
+    { label: "Chat", icon: MessageSquare, href: "/client/chat" },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -109,7 +149,7 @@ export default function ClientLayout() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-md mx-auto px-4 py-5 pb-20">
+      <main className="max-w-md mx-auto px-4 py-5 pb-24">
       {activeTab === "overview" && <Overview />}
         
         {activeTab === "documentos" && (
@@ -153,8 +193,8 @@ export default function ClientLayout() {
         )}
       </main>
 
-      {/* Bottom Navigation */}
-      <ClientTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+      {/* Modern Mobile Bottom Navigation */}
+      <ModernMobileMenu items={menuItems} accentColor="var(--brand-accent)" />
     </div>
   );
 }
