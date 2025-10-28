@@ -10,8 +10,11 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
-import { AdminViewAsClientButton } from "@/components/AdminViewAsClientButton";
-import { useUserRole } from "@/hooks/useUserRole";
+import { ViewAsClientToggle } from "@/components/ViewAsClientToggle";
+import { shouldUseClientShell } from "@/lib/auth/role";
+import { ThemeProvider } from "@/context/ThemeProvider";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset } from "@/components/ui/sidebar";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -54,20 +57,25 @@ const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 
 const InternalLayout = () => {
-  const { role } = useUserRole();
-  const canViewAsClient = role === 'admin' || role === 'user';
-
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-10 h-14 flex items-center gap-4 border-b bg-background px-4 lg:px-6">
-            <SidebarTrigger />
-            <div className="flex-1" />
-            {canViewAsClient && <AdminViewAsClientButton />}
+        <SidebarInset>
+          <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-background px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <div className="flex items-center gap-2">
+                <img src="/lovable-uploads/d5eef59f-dd35-4dc2-9a50-12e8dd8e4c19.png" alt="Logo" className="h-8" />
+                <span className="font-semibold text-foreground">Dovita</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ViewAsClientToggle />
+            </div>
           </header>
-          <main className="flex-1 p-6 lg:p-8">
+          <div className="flex flex-1 flex-col gap-4 p-4">
             <Suspense fallback={<PageHeaderSkeleton />}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
@@ -188,8 +196,8 @@ const InternalLayout = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </main>
-        </div>
+          </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
@@ -197,11 +205,12 @@ const InternalLayout = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <DemoGuard>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <DemoGuard>
       <Routes>
         {/* Public routes */}
         <Route path="/auth/login" element={<Login />} />
@@ -223,6 +232,7 @@ const App = () => (
           <Route path="avances" element={<Suspense fallback={<PageHeaderSkeleton />}><Avances /></Suspense>} />
           <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><Documentos /></Suspense>} />
           <Route path="citas" element={<Suspense fallback={<PageHeaderSkeleton />}><Citas /></Suspense>} />
+          <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><Citas /></Suspense>} />
           <Route path="presupuesto" element={<Suspense fallback={<PageHeaderSkeleton />}><Presupuesto /></Suspense>} />
         </Route>
 
@@ -235,10 +245,11 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-        </Routes>
-        </DemoGuard>
-      </BrowserRouter>
-    </TooltipProvider>
+          </Routes>
+          </DemoGuard>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
