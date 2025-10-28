@@ -1,11 +1,31 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { ClientAppShell } from "@/components/client/ClientAppShell";
 import { useClientAccess } from "@/hooks/useClientAccess";
+import { useEffect, useState } from "react";
+import { getSession } from "@/lib/auth";
 
 export default function ClientPortalLayout() {
   const { hasAccess, loading: accessLoading } = useClientAccess();
+  const navigate = useNavigate();
+  const [sessionChecked, setSessionChecked] = useState(false);
 
-  if (accessLoading) {
+  useEffect(() => {
+    const checkSession = async () => {
+      const session = await getSession();
+      
+      if (!session) {
+        // No session - redirect to login
+        navigate('/auth/login', { replace: true });
+        return;
+      }
+      
+      setSessionChecked(true);
+    };
+
+    checkSession();
+  }, [navigate]);
+
+  if (!sessionChecked || accessLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
