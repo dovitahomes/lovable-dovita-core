@@ -31,7 +31,7 @@ const Callback = () => {
           // Redirect after a short delay
           setTimeout(() => {
             if (role === 'cliente') {
-              navigate("/client", { replace: true });
+              navigate("/portal", { replace: true });
             } else {
               navigate("/", { replace: true });
             }

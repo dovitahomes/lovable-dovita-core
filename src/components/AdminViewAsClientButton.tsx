@@ -68,7 +68,7 @@ export function AdminViewAsClientButton() {
     // Set impersonation flag and navigate
     localStorage.setItem("asClient", "true");
     localStorage.setItem("client.activeProject", selectedProjectId);
-    navigate(`/client?asClient=1&project=${selectedProjectId}`);
+    navigate(`/portal?asClient=1&project=${selectedProjectId}`);
     setOpen(false);
   };
 

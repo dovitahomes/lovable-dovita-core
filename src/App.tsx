@@ -35,11 +35,12 @@ const Finanzas = lazy(() => import("./pages/Finanzas"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
-const ClientShell = lazy(() => import("./layouts/ClientShell"));
-const ClientOverview = lazy(() => import("./pages/client/Overview"));
-const ClientDocumentsPage = lazy(() => import("./pages/client/documents/ClientDocumentsPage"));
-const ClientChat = lazy(() => import("./pages/client/Chat"));
-const ClientCalendar = lazy(() => import("./pages/client/Calendar"));
+const ClientPortalLayout = lazy(() => import("./layouts/ClientPortalLayout"));
+const HomeCliente = lazy(() => import("./pages/portal/HomeCliente"));
+const Avances = lazy(() => import("./pages/portal/Avances"));
+const Documentos = lazy(() => import("./pages/portal/Documentos"));
+const Citas = lazy(() => import("./pages/portal/Citas"));
+const Presupuesto = lazy(() => import("./pages/portal/Presupuesto"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -70,6 +71,7 @@ const InternalLayout = () => {
             <Suspense fallback={<PageHeaderSkeleton />}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
+                
                 <Route
                   path="/herramientas/contenido-corporativo"
                   element={
@@ -210,19 +212,18 @@ const App = () => (
         
         {/* Client portal routes (isolated, no sidebar) */}
         <Route
-          path="/client/*"
+          path="/portal"
           element={
             <Suspense fallback={<PageHeaderSkeleton />}>
-              <ClientShell />
+              <ClientPortalLayout />
             </Suspense>
           }
         >
-          <Route index element={<Navigate to="/client/overview" replace />} />
-          <Route path="overview" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientOverview /></Suspense>} />
-          <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentsPage /></Suspense>} />
-          <Route path="diseno" element={<div className="p-4"><h2 className="text-2xl font-bold">Diseño</h2><p className="text-muted-foreground mt-2">En desarrollo</p></div>} />
-          <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendar /></Suspense>} />
-          <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChat /></Suspense>} />
+          <Route index element={<Suspense fallback={<PageHeaderSkeleton />}><HomeCliente /></Suspense>} />
+          <Route path="avances" element={<Suspense fallback={<PageHeaderSkeleton />}><Avances /></Suspense>} />
+          <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><Documentos /></Suspense>} />
+          <Route path="citas" element={<Suspense fallback={<PageHeaderSkeleton />}><Citas /></Suspense>} />
+          <Route path="presupuesto" element={<Suspense fallback={<PageHeaderSkeleton />}><Presupuesto /></Suspense>} />
         </Route>
 
         {/* Internal admin routes (with sidebar) */}
@@ -242,3 +243,4 @@ const App = () => (
 );
 
 export default App;
+
