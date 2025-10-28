@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { useDemoSession } from "@/auth/DemoGuard";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,12 +10,23 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+  const demoSession = useDemoSession();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If demo mode is active, use demo session
+    if (demoSession.isDemoMode) {
+      setUser(demoSession.user);
+      setSession(demoSession.session);
+      setIsAdmin(demoSession.role === 'admin');
+      setLoading(false);
+      return;
+    }
+
+    // Real auth flow
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -42,7 +54,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     });
 
     return () => subscription.unsubscribe();
-  }, [requireAdmin]);
+  }, [requireAdmin, demoSession]);
 
   const checkAdminRole = async (userId: string) => {
     try {

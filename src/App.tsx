@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
+import { DemoGuard } from "@/auth/DemoGuard";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -50,6 +51,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <DemoGuard>
       <Routes>
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/callback" element={<Callback />} />
@@ -196,6 +198,7 @@ const App = () => (
             }
           />
         </Routes>
+        </DemoGuard>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
