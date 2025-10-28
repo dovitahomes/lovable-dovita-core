@@ -13,7 +13,7 @@ export interface CalendarEvent {
 }
 
 export function useClientCalendar(projectId: string | null) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['client-calendar', projectId],
     queryFn: async () => {
       if (!projectId) return [];
@@ -37,4 +37,11 @@ export function useClientCalendar(projectId: string | null) {
     enabled: !!projectId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  return {
+    data: query.data,
+    loading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
