@@ -1,35 +1,24 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DollarSign, FileText, CreditCard } from "lucide-react";
+import { useMyProjects, useClientFinancialSummary } from "@/features/client/hooks";
 
 export default function ClientPagos() {
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const { currentProject } = useMyProjects();
+  const projectId = currentProject?.id || null;
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  useEffect(() => {
-    const storedProjectId = localStorage.getItem("client.activeProject");
-    if (storedProjectId) {
-      setProjectId(storedProjectId);
-    }
-  }, []);
-
-  const { data: financialSummary, isLoading } = useQuery({
-    queryKey: ["client-financial-summary", projectId],
-    queryFn: async () => {
-      if (!projectId) return null;
-      const { data, error } = await supabase
-        .from("vw_client_financial_summary")
-        .select("*")
-        .eq("project_id", projectId)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!projectId,
-  });
+  const { data: financialData, isLoading } = useClientFinancialSummary(projectId);
+  const financialSummary = financialData?.[0];
 
   if (!projectId) {
     return (
@@ -96,7 +85,44 @@ export default function ClientPagos() {
             </div>
           </div>
         </Card>
+
+        {/* Payment CTA */}
+        <Card className="p-4 bg-primary/5 border-primary/20">
+          <div className="text-center">
+            <h3 className="font-medium mb-2">¿Necesitas realizar un pago?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Próximamente podrás realizar pagos directamente desde el portal
+            </p>
+            <Button onClick={() => setShowPaymentModal(true)} variant="default">
+              Información de pago
+            </Button>
+          </div>
+        </Card>
       </div>
+
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Información de pago</DialogTitle>
+            <DialogDescription>
+              Esta funcionalidad estará disponible próximamente
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            <p className="text-sm text-muted-foreground">
+              Mientras tanto, puedes contactar con tu Project Manager para coordinar los pagos.
+            </p>
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="text-sm font-medium mb-1">Métodos de pago disponibles:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
+                <li>Transferencia bancaria</li>
+                <li>Depósito en efectivo</li>
+                <li>Cheque</li>
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

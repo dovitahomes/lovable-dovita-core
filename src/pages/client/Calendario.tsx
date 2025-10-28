@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
 import { ClientCalendar } from "@/components/client/ClientCalendar";
+import { useMyProjects } from "@/features/client/hooks";
 
 export default function ClientCalendarioView() {
-  const [projectId, setProjectId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedProjectId = localStorage.getItem("client.activeProject");
-    if (storedProjectId) {
-      setProjectId(storedProjectId);
-    }
-  }, []);
+  const { currentProject } = useMyProjects();
+  const projectId = currentProject?.id || null;
 
   if (!projectId) {
     return (

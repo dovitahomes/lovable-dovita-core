@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
 import { ClientChat } from "@/components/client/ClientChat";
+import { useMyProjects } from "@/features/client/hooks";
 
 export default function ClientChatView() {
-  const [projectId, setProjectId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedProjectId = localStorage.getItem("client.activeProject");
-    if (storedProjectId) {
-      setProjectId(storedProjectId);
-    }
-  }, []);
+  const { currentProject } = useMyProjects();
+  const projectId = currentProject?.id || null;
 
   if (!projectId) {
     return (
