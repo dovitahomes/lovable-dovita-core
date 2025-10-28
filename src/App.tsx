@@ -33,6 +33,7 @@ const Finanzas = lazy(() => import("./pages/Finanzas"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
+const ClientLayout = lazy(() => import("./pages/ClientLayout"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -187,6 +188,7 @@ const App = () => (
                               }
                             />
                             <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />
+                            <Route path="/client" element={<Suspense fallback={<TableSkeleton />}><ClientLayout /></Suspense>} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </Suspense>
