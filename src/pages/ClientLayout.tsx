@@ -5,6 +5,7 @@ import { User, Home, FileText, PenTool, Hammer, Calendar, MessageCircle } from "
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
+import { ClientOverview } from "@/components/client/ClientOverview";
 
 export default function ClientLayout() {
   const [activeTab, setActiveTab] = useState(() => 
@@ -118,12 +119,10 @@ export default function ClientLayout() {
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-6 pb-24">
         {activeTab === "overview" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[hsl(var(--dovita-blue))]">Resumen del Proyecto</h2>
-            <p className="text-[hsl(var(--dovita-dark))] opacity-70">
-              Contenido de overview - en desarrollo
-            </p>
-          </div>
+          <ClientOverview 
+            projectId={selectedProjectId} 
+            clientName={selectedProject?.clients?.name}
+          />
         )}
         
         {activeTab === "documentos" && (
