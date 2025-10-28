@@ -95,6 +95,63 @@ npx playwright show-report
 
 ---
 
+## Performance Optimizations
+
+### Build Analysis
+
+Analiza el tamaño del bundle con:
+
+```bash
+ANALYZE=true npm run build
+```
+
+Se generará un reporte visual en `dist/stats.html`.
+
+### Optimizaciones Implementadas
+
+#### 1. **Code-Splitting y Lazy Loading**
+- Rutas cargadas dinámicamente con `React.lazy()`
+- Skeletons de carga para mejor UX
+- Chunks manuales para librerías vendor
+
+#### 2. **Query Caching (TanStack Query)**
+- **Catálogos** (bancos, proveedores): `staleTime: 60s, gcTime: 5min`
+- **Datos activos** (transacciones, OCs): `staleTime: 15s, gcTime: 5min`
+- Prefetch automático al hacer hover en sidebar (desktop)
+- Debounce de 300ms en filtros de búsqueda
+
+#### 3. **Virtualización de Tablas**
+- Tablas grandes usan `@tanstack/react-virtual`
+- Sticky headers mantenidos
+- Scroll horizontal en móvil preservado
+- `React.memo` para optimizar renders de filas
+
+#### 4. **Realtime Optimizado**
+- Una sola suscripción por `project_id`
+- Auto-reconnect en caso de desconexión
+- Cleanup automático al desmontar componentes
+
+#### 5. **Build Production**
+- Source maps deshabilitados en producción
+- Tree-shaking de `xlsx` y `jspdf` (importación dinámica)
+- Chunks vendor separados para mejor cache
+
+### Usar Exportaciones
+
+Las exportaciones PDF/XLSX ahora se cargan bajo demanda:
+
+```typescript
+import { exportToExcel, exportToPDF } from "@/utils/lazyExports";
+
+// Excel
+await exportToExcel(data, "reporte");
+
+// PDF
+await exportToPDF("Título", ["Col1", "Col2"], rows, "reporte");
+```
+
+---
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/e87f68f6-93fd-48c6-9d4c-0bdedf329979

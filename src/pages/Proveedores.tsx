@@ -1,8 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { VirtualizedProvidersTable } from "@/components/finance/VirtualizedProvidersTable";
+import { CACHE_CONFIG } from "@/lib/queryConfig";
 import {
   Table,
   TableBody,
@@ -39,55 +43,42 @@ interface Provider {
 }
 
 export default function Proveedores() {
-  const [providers, setProviders] = useState<Provider[]>([]);
-  const [filteredProviders, setFilteredProviders] = useState<Provider[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProviders();
-  }, []);
+  const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
-  useEffect(() => {
-    filterProviders();
-  }, [searchTerm, providers]);
+  const { data: providers = [], isLoading } = useQuery({
+    queryKey: ["providers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("providers")
+        .select("*")
+        .order("name");
 
-  const loadProviders = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("providers")
-      .select("*")
-      .order("name");
+      if (error) {
+        toast.error("Error al cargar proveedores");
+        throw error;
+      }
+      return data as Provider[];
+    },
+    ...CACHE_CONFIG.catalogs,
+  });
 
-    if (error) {
-      toast.error("Error al cargar proveedores");
-      console.error(error);
-    } else {
-      setProviders(data || []);
-    }
-    setLoading(false);
-  };
-
-  const filterProviders = () => {
-    if (!searchTerm.trim()) {
-      setFilteredProviders(providers);
-      return;
-    }
-
-    const term = searchTerm.toLowerCase();
-    const filtered = providers.filter(
-      (p) =>
-        p.name.toLowerCase().includes(term) ||
-        p.code_short.toLowerCase().includes(term) ||
-        (p.fiscales_json?.rfc && p.fiscales_json.rfc.toLowerCase().includes(term))
-    );
-    setFilteredProviders(filtered);
-  };
+  const filteredProviders = debouncedSearch.trim()
+    ? providers.filter((p) => {
+        const term = debouncedSearch.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(term) ||
+          p.code_short.toLowerCase().includes(term) ||
+          (p.fiscales_json?.rfc && p.fiscales_json.rfc.toLowerCase().includes(term))
+        );
+      })
+    : providers;
 
   const handleEdit = (provider: Provider) => {
     setSelectedProvider(provider);
@@ -112,7 +103,6 @@ export default function Proveedores() {
       console.error(error);
     } else {
       toast.success("Proveedor eliminado correctamente");
-      loadProviders();
     }
     setShowDeleteDialog(false);
     setProviderToDelete(null);
@@ -126,7 +116,6 @@ export default function Proveedores() {
   const handleDialogSuccess = () => {
     setShowDialog(false);
     setSelectedProvider(null);
-    loadProviders();
   };
 
   return (
@@ -160,71 +149,19 @@ export default function Proveedores() {
 
       <Card>
         <CardContent className="p-0">
-          {loading ? (
+          {isLoading ? (
             <div className="p-8 text-center text-muted-foreground">Cargando...</div>
           ) : filteredProviders.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               No se encontraron proveedores
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>RFC</TableHead>
-                  <TableHead>Contacto</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProviders.map((provider) => (
-                  <TableRow key={provider.id}>
-                    <TableCell className="font-mono font-semibold">
-                      {provider.code_short}
-                    </TableCell>
-                    <TableCell className="font-medium">{provider.name}</TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {provider.fiscales_json?.rfc || "-"}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {provider.contacto_json?.email || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={provider.activo ? "default" : "secondary"}>
-                        {provider.activo ? "Activo" : "Inactivo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleViewDetails(provider)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(provider)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => confirmDelete(provider.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <VirtualizedProvidersTable
+              providers={filteredProviders}
+              onEdit={handleEdit}
+              onView={handleViewDetails}
+              onDelete={confirmDelete}
+            />
           )}
         </CardContent>
       </Card>

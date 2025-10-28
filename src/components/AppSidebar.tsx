@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator, Calendar, Truck, DollarSign, Receipt, Percent, Moon, Sun } from "lucide-react";
+import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +48,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const { theme, toggle: toggleTheme } = useTheme();
+  const { prefetch } = usePrefetchRoute();
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -108,7 +110,23 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink to={item.url} end className={getNavClass}>
+                      <NavLink
+                        to={item.url}
+                        end
+                        className={getNavClass}
+                        onMouseEnter={() => {
+                          // Prefetch on hover (desktop only)
+                          if (item.url === "/proveedores") {
+                            prefetch({
+                              queryKey: ["providers"],
+                              queryFn: async () => {
+                                const { data } = await supabase.from("providers").select("*").order("name");
+                                return data;
+                              },
+                            });
+                          }
+                        }}
+                      >
                         <item.icon className="h-4 w-4" />
                         {state !== "collapsed" && <span>{item.title}</span>}
                       </NavLink>
