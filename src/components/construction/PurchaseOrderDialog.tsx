@@ -132,63 +132,65 @@ export function PurchaseOrderDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="qty_solicitada"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cantidad Solicitada *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      {...field}
-                      placeholder="0"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="fecha_requerida"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha Requerida</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="proveedor_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Proveedor</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="qty_solicitada"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad Solicitada *</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar proveedor" />
-                      </SelectTrigger>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        placeholder="0"
+                      />
                     </FormControl>
-                    <SelectContent>
-                      {providers.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.code_short} - {p.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="fecha_requerida"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha Requerida</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="proveedor_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Proveedor</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar proveedor" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {providers.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.code_short} - {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

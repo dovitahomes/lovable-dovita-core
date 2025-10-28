@@ -44,49 +44,51 @@ export function ClientDialog({ open, onOpenChange }: ClientDialogProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Nombre / Razón Social *</Label>
-            <Input
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Nombre completo o empresa"
-              required
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Nombre / Razón Social *</Label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Nombre completo o empresa"
+                required
+              />
+            </div>
 
-          <div>
-            <Label>Tipo de Persona *</Label>
-            <Select
-              value={formData.person_type}
-              onValueChange={(v) => setFormData({ ...formData, person_type: v as "fisica" | "moral" })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fisica">Persona Física</SelectItem>
-                <SelectItem value="moral">Persona Moral</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div>
+              <Label>Tipo de Persona *</Label>
+              <Select
+                value={formData.person_type}
+                onValueChange={(v) => setFormData({ ...formData, person_type: v as "fisica" | "moral" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fisica">Persona Física</SelectItem>
+                  <SelectItem value="moral">Persona Moral</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div>
-            <Label>Email</Label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="correo@ejemplo.com"
-            />
-          </div>
+            <div>
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
 
-          <div>
-            <Label>Teléfono</Label>
-            <Input
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="55 1234 5678"
-            />
+            <div>
+              <Label>Teléfono</Label>
+              <Input
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="55 1234 5678"
+              />
+            </div>
           </div>
 
           <DialogFooter>
