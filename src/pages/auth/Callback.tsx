@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleMagicLinkExchange } from "@/auth/handleMagicLink";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -16,10 +17,30 @@ const Callback = () => {
         await handleMagicLinkExchange();
         setStatus('success');
         
-        // Redirect after a short delay
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 1500);
+        // Check user role and redirect accordingly
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          
+          const role = roleData?.role;
+          
+          // Redirect after a short delay
+          setTimeout(() => {
+            if (role === 'cliente') {
+              navigate("/client", { replace: true });
+            } else {
+              navigate("/", { replace: true });
+            }
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            navigate("/", { replace: true });
+          }, 1500);
+        }
       } catch (error: any) {
         setStatus('error');
         setErrorMessage(error.message || 'Error al procesar el enlace de acceso');

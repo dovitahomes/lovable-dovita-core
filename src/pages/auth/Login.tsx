@@ -26,7 +26,21 @@ const Login = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/", { replace: true });
+        // Check user role and redirect accordingly
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        const role = roleData?.role;
+        
+        // Redirect clients to their portal
+        if (role === 'cliente') {
+          navigate("/client", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       }
     };
     checkUser();
@@ -54,8 +68,26 @@ const Login = () => {
 
       if (error) throw error;
 
-      toast.success("Inicio de sesión exitoso");
-      navigate("/", { replace: true });
+      // Check user role for redirect
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        const role = roleData?.role;
+        
+        toast.success("Inicio de sesión exitoso");
+        
+        // Redirect clients to their portal
+        if (role === 'cliente') {
+          navigate("/client", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+      }
     } catch (error: any) {
       toast.error(error.message || "Error al iniciar sesión");
     } finally {

@@ -105,18 +105,23 @@ export default function ClientShell() {
     <div className="min-h-screen bg-background">
       {/* Impersonation Banner */}
       {isImpersonating && (
-        <Alert className="rounded-none border-x-0 border-t-0 bg-yellow-50 border-yellow-200">
-          <AlertDescription className="flex items-center justify-between max-w-4xl mx-auto">
-            <span className="text-sm font-medium text-yellow-900">
-              👁 Viendo como cliente {selectedProject?.clients?.name || ""}
-            </span>
+        <Alert className="rounded-none border-x-0 border-t-0 bg-primary/10 border-primary/20">
+          <AlertDescription className="flex items-center justify-between max-w-md mx-auto px-4">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 bg-primary/20 text-primary px-2 py-1 rounded-md text-xs font-medium">
+                👁 Vista Admin
+              </div>
+              <span className="text-sm text-foreground">
+                {selectedProject?.clients?.name || "Cliente"}
+              </span>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={exitImpersonate}
-              className="h-8 text-yellow-900 hover:bg-yellow-100"
+              className="h-7 text-xs hover:bg-primary/10"
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="h-3 w-3 mr-1" />
               Salir
             </Button>
           </AlertDescription>

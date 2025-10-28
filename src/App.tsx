@@ -10,6 +10,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
+import { AdminViewAsClientButton } from "@/components/AdminViewAsClientButton";
+import { useUserRole } from "@/hooks/useUserRole";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -50,6 +52,147 @@ const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 
+const InternalLayout = () => {
+  const { role } = useUserRole();
+  const canViewAsClient = role === 'admin' || role === 'user';
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <header className="sticky top-0 z-10 h-14 flex items-center gap-4 border-b bg-background px-4 lg:px-6">
+            <SidebarTrigger />
+            <div className="flex-1" />
+            {canViewAsClient && <AdminViewAsClientButton />}
+          </header>
+          <main className="flex-1 p-6 lg:p-8">
+            <Suspense fallback={<PageHeaderSkeleton />}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route
+                  path="/herramientas/contenido-corporativo"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <ContenidoCorporativo />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/sucursales"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <Sucursales />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/alianzas"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <Alianzas />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/identidades"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <Identidades />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/accesos"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <Accesos />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/reglas"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <Reglas />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/catalogo-tu"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <CatalogoTU />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/metrics"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <Metrics />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
+                <Route path="/clientes" element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
+                <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
+                <Route path="/proyectos" element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
+                <Route path="/proyectos/:id" element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
+                <Route path="/leads" element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
+                <Route path="/presupuestos" element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
+                <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
+                <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
+                <Route path="/cronograma" element={<Suspense fallback={<TableSkeleton />}><Cronograma /></Suspense>} />
+                <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
+                <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
+                <Route
+                  path="/contabilidad"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TabsSkeleton />}>
+                        <Contabilidad />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/comisiones"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TabsSkeleton />}>
+                        <Comisiones />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -85,143 +228,12 @@ const App = () => (
         {/* Internal admin routes (with sidebar) */}
         <Route
           path="/*"
-            element={
-              <ProtectedRoute>
-                <SidebarProvider>
-                  <div className="flex min-h-screen w-full">
-                    <AppSidebar />
-                    <div className="flex-1 flex flex-col">
-                      <header className="sticky top-0 z-10 h-14 flex items-center gap-4 border-b bg-background px-4 lg:px-6">
-                        <SidebarTrigger />
-                        <div className="flex-1" />
-                      </header>
-                      <main className="flex-1 p-6 lg:p-8">
-                        <Suspense fallback={<PageHeaderSkeleton />}>
-                          <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route
-                              path="/herramientas/contenido-corporativo"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <ContenidoCorporativo />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/herramientas/sucursales"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <Sucursales />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/herramientas/alianzas"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <Alianzas />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/herramientas/identidades"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <Identidades />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/herramientas/accesos"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <Accesos />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/herramientas/reglas"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <Reglas />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/herramientas/catalogo-tu"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <CatalogoTU />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/metrics"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TableSkeleton />}>
-                                    <Metrics />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
-                            <Route path="/clientes" element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
-                            <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
-                            <Route path="/proyectos" element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
-                            <Route path="/proyectos/:id" element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
-                            <Route path="/leads" element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
-                            <Route path="/presupuestos" element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
-                            <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
-                            <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
-                            <Route path="/cronograma" element={<Suspense fallback={<TableSkeleton />}><Cronograma /></Suspense>} />
-                            <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
-                            <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
-                            <Route
-                              path="/contabilidad"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TabsSkeleton />}>
-                                    <Contabilidad />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route
-                              path="/comisiones"
-                              element={
-                                <ProtectedRoute requireAdmin>
-                                  <Suspense fallback={<TabsSkeleton />}>
-                                    <Comisiones />
-                                  </Suspense>
-                                </ProtectedRoute>
-                              }
-                            />
-                            <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                        </Suspense>
-                      </main>
-                    </div>
-                  </div>
-                </SidebarProvider>
-              </ProtectedRoute>
-            }
-          />
+          element={
+            <ProtectedRoute>
+              <InternalLayout />
+            </ProtectedRoute>
+          }
+        />
         </Routes>
         </DemoGuard>
       </BrowserRouter>
