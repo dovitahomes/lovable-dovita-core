@@ -1,75 +1,22 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useProjectChat } from "@/features/client/hooks";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Loader2, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
+import { Send, Loader2, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-
-interface Message {
-  id: string;
-  project_id: string;
-  sender_id: string;
-  message: string;
-  created_at: string;
-  sender?: {
-    email: string;
-    full_name?: string;
-  };
-}
 
 interface ClientChatProps {
   projectId: string;
 }
 
 export function ClientChat({ projectId }: ClientChatProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, loading, sending, sendMessage, currentUserId } = useProjectChat(projectId);
   const [newMessage, setNewMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadCurrentUser();
-    loadMessages();
-    
-    const channel = supabase
-      .channel(`project_messages:${projectId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'project_messages',
-          filter: `project_id=eq.${projectId}`
-        },
-        async (payload) => {
-          const { data: senderData } = await supabase
-            .from('profiles')
-            .select('email, full_name')
-            .eq('id', payload.new.sender_id)
-            .single();
-          
-          const newMsg = {
-            ...payload.new,
-            sender: senderData
-          } as Message;
-          
-          setMessages(prev => [...prev, newMsg]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [projectId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -77,78 +24,23 @@ export function ClientChat({ projectId }: ClientChatProps) {
     }
   }, [messages]);
 
-  const loadCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setCurrentUserId(user?.id || null);
-  };
-
-  const loadMessages = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error } = await supabase
-        .from('project_messages')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      
-      const messagesWithSenders = await Promise.all(
-        (data || []).map(async (msg) => {
-          const { data: senderData } = await supabase
-            .from('profiles')
-            .select('email, full_name')
-            .eq('id', msg.sender_id)
-            .single();
-          
-          return {
-            ...msg,
-            sender: senderData || undefined
-          };
-        })
-      );
-      
-      setMessages(messagesWithSenders);
-    } catch (error: any) {
-      console.error('Error loading messages:', error);
-      setError('Error al cargar mensajes');
-      toast.error('Error al cargar mensajes');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sendMessage = async (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
     
-    if (!newMessage.trim() || !currentUserId) return;
+    if (!newMessage.trim()) return;
 
-    setSending(true);
     try {
-      const { error } = await supabase
-        .from('project_messages')
-        .insert({
-          project_id: projectId,
-          sender_id: currentUserId,
-          message: newMessage.trim()
-        });
-
-      if (error) throw error;
-      
+      await sendMessage(newMessage.trim());
       setNewMessage("");
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      toast.error('Error al enviar mensaje');
-    } finally {
-      setSending(false);
+    } catch (error) {
+      // Error already handled in the hook
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSendMessage();
     }
   };
 
@@ -159,30 +51,10 @@ export function ClientChat({ projectId }: ClientChatProps) {
     return email?.slice(0, 2).toUpperCase() || '??';
   };
 
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Chat del Proyecto</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-          <p className="text-sm text-destructive text-center">{error}</p>
-          <Button onClick={loadMessages} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reintentar
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="flex flex-col h-[calc(100vh-180px)] md:h-[600px]">
-      <CardHeader>
-        <CardTitle>Chat del Proyecto</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0 gap-4 p-3 md:p-6">
-        <ScrollArea ref={scrollRef} className="flex-1 pr-4" aria-live="polite">
+    <Card className="flex flex-col h-[calc(100vh-280px)] md:h-[600px]">
+      <CardContent className="flex-1 flex flex-col min-h-0 gap-4 p-3 md:p-4 pt-6">
+        <ScrollArea ref={scrollRef} className="flex-1 pr-3" aria-live="polite">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-label="Cargando mensajes" />
@@ -233,7 +105,7 @@ export function ClientChat({ projectId }: ClientChatProps) {
           )}
         </ScrollArea>
 
-        <form onSubmit={sendMessage} className="flex gap-2">
+        <form onSubmit={handleSendMessage} className="flex gap-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -258,22 +130,5 @@ export function ClientChat({ projectId }: ClientChatProps) {
         </form>
       </CardContent>
     </Card>
-  );
-}
-
-function MessageSquare({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
   );
 }
