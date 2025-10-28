@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, MapPin, Handshake, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Building2, MapPin, Handshake, Users, Eye } from "lucide-react";
 import { BirthdayWidget } from "@/components/BirthdayWidget";
 import { KpiCards } from "@/components/kpi/KpiCards";
 import { KpiCharts } from "@/components/kpi/KpiCharts";
 import { KpiFilters } from "@/components/kpi/KpiFilters";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Dashboard = () => {
+  const { role } = useUserRole();
   const [userName, setUserName] = useState("");
   const [dateRange, setDateRange] = useState("180");
   const [stats, setStats] = useState({
@@ -15,6 +18,8 @@ const Dashboard = () => {
     alianzas: 0,
     usuarios: 0,
   });
+
+  const isAdminOrUser = role === 'admin' || role === 'user';
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -117,7 +122,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -147,6 +152,30 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
+
+          {isAdminOrUser && (
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-primary" />
+                  Vista de Cliente
+                </CardTitle>
+                <CardDescription>
+                  Visualiza el portal cliente tal como lo ven tus clientes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={() => window.location.href = '/client?asClient=1'}
+                  variant="outline"
+                  className="w-full border-primary/50 hover:bg-primary/10"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Ver como Cliente
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
         
         <div>

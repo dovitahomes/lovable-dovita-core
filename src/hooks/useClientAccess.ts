@@ -13,18 +13,11 @@ export function useClientAccess() {
     const checkAccess = async () => {
       if (roleLoading) return;
 
-      // Check for impersonate mode
+      // Check for impersonate mode (admins/users can view as client)
       const urlParams = new URLSearchParams(window.location.search);
       const asClient = urlParams.get('asClient') === '1' || localStorage.getItem('asClient') === 'true';
       
       if (asClient && (role === 'admin' || role === 'user')) {
-        setHasAccess(true);
-        setLoading(false);
-        return;
-      }
-
-      // If already a client role, grant access
-      if (role === 'cliente') {
         setHasAccess(true);
         setLoading(false);
         return;
