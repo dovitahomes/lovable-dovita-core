@@ -42,6 +42,7 @@ const Identidades = lazy(() => import("./pages/herramientas/Identidades"));
 const Accesos = lazy(() => import("./pages/herramientas/Accesos"));
 const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
+const Metrics = lazy(() => import("./pages/Metrics"));
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -137,6 +138,16 @@ const App = () => (
                                 <ProtectedRoute requireAdmin>
                                   <Suspense fallback={<TableSkeleton />}>
                                     <CatalogoTU />
+                                  </Suspense>
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="/metrics"
+                              element={
+                                <ProtectedRoute requireAdmin>
+                                  <Suspense fallback={<TableSkeleton />}>
+                                    <Metrics />
                                   </Suspense>
                                 </ProtectedRoute>
                               }

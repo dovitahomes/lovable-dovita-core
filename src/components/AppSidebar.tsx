@@ -33,6 +33,7 @@ const mainItems = [
 ];
 
 const toolsItems = [
+  { title: "Métricas", url: "/metrics", icon: TrendingUp },
   { title: "Contenido Corporativo", url: "/herramientas/contenido-corporativo", icon: Building2 },
   { title: "Sucursales", url: "/herramientas/sucursales", icon: MapPin },
   { title: "Alianzas", url: "/herramientas/alianzas", icon: Handshake },

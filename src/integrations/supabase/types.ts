@@ -392,6 +392,13 @@ export type Database = {
             referencedRelation: "vw_client_financial_summary"
             referencedColumns: ["project_id"]
           },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       business_rule_sets: {
@@ -518,6 +525,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "calendar_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
           },
         ]
@@ -682,6 +696,13 @@ export type Database = {
             referencedRelation: "vw_client_financial_summary"
             referencedColumns: ["project_id"]
           },
+          {
+            foreignKeyName: "construction_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       consumption_config: {
@@ -815,6 +836,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
           },
         ]
@@ -958,6 +986,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "gantt_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
           },
         ]
@@ -1289,6 +1324,13 @@ export type Database = {
             referencedRelation: "vw_client_financial_summary"
             referencedColumns: ["project_id"]
           },
+          {
+            foreignKeyName: "project_crew_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       project_equipment: {
@@ -1344,6 +1386,13 @@ export type Database = {
             referencedColumns: ["project_id"]
           },
           {
+            foreignKeyName: "project_equipment_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "project_equipment_proveedor_id_fkey"
             columns: ["proveedor_id"]
             isOneToOne: false
@@ -1390,6 +1439,13 @@ export type Database = {
             referencedColumns: ["project_id"]
           },
           {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "project_members_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1433,6 +1489,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
           },
         ]
@@ -1484,6 +1547,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_subcontractors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
           },
         ]
@@ -1640,6 +1710,13 @@ export type Database = {
             referencedColumns: ["project_id"]
           },
           {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "purchase_orders_proveedor_id_fkey"
             columns: ["proveedor_id"]
             isOneToOne: false
@@ -1786,6 +1863,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
           },
           {
@@ -2025,6 +2109,13 @@ export type Database = {
             referencedRelation: "vw_client_financial_summary"
             referencedColumns: ["project_id"]
           },
+          {
+            foreignKeyName: "wishlists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
     }
@@ -2058,6 +2149,35 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vw_kpi_ap_ar: {
+        Row: {
+          total_cobrar: number | null
+          total_pagar: number | null
+        }
+        Relationships: []
+      }
+      vw_kpi_pipeline_value: {
+        Row: {
+          total_pipeline: number | null
+        }
+        Relationships: []
+      }
+      vw_kpi_project_progress: {
+        Row: {
+          client_name: string | null
+          progress_pct: number | null
+          project_id: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      vw_kpi_sales_funnel: {
+        Row: {
+          count: number | null
+          status: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Relationships: []
       }
     }
     Functions: {
