@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, TrendingDown, Wallet, Loader2 } from "lucide-react";
+import { DollarSign, TrendingDown, Wallet, Loader2, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CACHE_CONFIG } from "@/lib/queryConfig";
 
 interface FinancialSummaryProps {
   projectId: string;
@@ -23,7 +25,7 @@ interface FinancialData {
 }
 
 export function FinancialSummary({ projectId }: FinancialSummaryProps) {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['client-financial-summary', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,7 +35,9 @@ export function FinancialSummary({ projectId }: FinancialSummaryProps) {
 
       if (error) throw error;
       return data as FinancialData[];
-    }
+    },
+    staleTime: CACHE_CONFIG.active.staleTime,
+    gcTime: CACHE_CONFIG.active.gcTime,
   });
 
   if (isLoading) {
@@ -47,8 +51,15 @@ export function FinancialSummary({ projectId }: FinancialSummaryProps) {
   if (error) {
     return (
       <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">Error al cargar resumen financiero</p>
+        <CardHeader>
+          <CardTitle>Resumen Financiero</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+          <p className="text-sm text-destructive text-center">Error al cargar resumen financiero</p>
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reintentar
+          </Button>
         </CardContent>
       </Card>
     );
@@ -78,13 +89,13 @@ export function FinancialSummary({ projectId }: FinancialSummaryProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <section aria-labelledby="financial-summary-heading" className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Depósitos Totales</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle id="financial-summary-heading" className="text-sm font-medium">Depósitos Totales</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -134,7 +145,8 @@ export function FinancialSummary({ projectId }: FinancialSummaryProps) {
             <CardTitle>Desglose por Mayor</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <Table>
+            <div className="overflow-x-auto">
+              <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead>Código</TableHead>
@@ -178,20 +190,23 @@ export function FinancialSummary({ projectId }: FinancialSummaryProps) {
                   </TableCell>
                 </TableRow>
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       )}
 
       {majorBreakdown.length === 0 && (
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground text-center">
-              No hay gastos registrados aún
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Wallet className="h-12 w-12 text-muted-foreground mb-4 opacity-50" aria-hidden="true" />
+            <h3 className="text-lg font-medium mb-2">No hay gastos registrados</h3>
+            <p className="text-sm text-muted-foreground">
+              Los gastos del proyecto aparecerán aquí cuando se registren
             </p>
           </CardContent>
         </Card>
       )}
-    </div>
+    </section>
   );
 }
