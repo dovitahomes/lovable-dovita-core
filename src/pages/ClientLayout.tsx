@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { ClientOverview } from "@/components/client/ClientOverview";
 import { ClientTabBar } from "@/components/client/ClientTabBar";
+import { ClientDocumentsPage } from "./client/documents/ClientDocumentsPage";
 
 export default function ClientLayout() {
   const [activeTab, setActiveTab] = useState(() => 
@@ -117,12 +118,7 @@ export default function ClientLayout() {
         )}
         
         {activeTab === "documentos" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Documentos</h2>
-            <p className="text-slate-600">
-              Contenido de documentos - en desarrollo
-            </p>
-          </div>
+          <ClientDocumentsPage projectId={selectedProjectId} />
         )}
         
         {activeTab === "diseno" && (
