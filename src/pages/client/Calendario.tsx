@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { ClientChat } from "@/components/client/ClientChat";
+import { ClientCalendar } from "@/components/client/ClientCalendar";
 
-export default function ClientChatView() {
+export default function ClientCalendarioView() {
   const [projectId, setProjectId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,8 +21,8 @@ export default function ClientChatView() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Chat del Proyecto</h1>
-      <ClientChat projectId={projectId} />
+      <h1 className="text-xl font-semibold">Calendario</h1>
+      <ClientCalendar projectId={projectId} />
     </div>
   );
 }

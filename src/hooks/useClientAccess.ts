@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from './useUserRole';
+import { getEffectiveClientMode } from '@/lib/auth/role';
 
 export function useClientAccess() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { role, loading: roleLoading } = useUserRole();
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -19,19 +21,20 @@ export function useClientAccess() {
         return;
       }
 
-      // Check for impersonate mode (admins/users can view as client)
-      const urlParams = new URLSearchParams(window.location.search);
-      const asClient = urlParams.get('asClient') === '1' || localStorage.getItem('asClient') === 'true';
-      
-      if (asClient && (role === 'admin' || role === 'user')) {
-        setHasAccess(true);
+      const isImpersonating = getEffectiveClientMode();
+      const currentPath = location.pathname;
+      const isClientRoute = currentPath.startsWith('/client');
+
+      // Admin/user impersonating as client
+      if (isImpersonating && (role === 'admin' || role === 'user')) {
+        setHasAccess(isClientRoute);
         setLoading(false);
         return;
       }
 
-      // If user is a real client (has role 'cliente'), allow access
+      // Real client access
       if (role === 'cliente') {
-        setHasAccess(true);
+        setHasAccess(isClientRoute);
         setLoading(false);
         return;
       }
@@ -45,7 +48,11 @@ export function useClientAccess() {
 
       if (error || !projects || projects.length === 0) {
         // Redirect non-clients to dashboard instead of login
-        navigate('/dashboard', { replace: true });
+        if (isClientRoute) {
+          navigate('/dashboard', { replace: true });
+        }
+        setHasAccess(false);
+        setLoading(false);
         return;
       }
 
@@ -54,27 +61,22 @@ export function useClientAccess() {
     };
 
     checkAccess();
-  }, [role, roleLoading, navigate]);
+  }, [role, roleLoading, navigate, location.pathname]);
 
   return { hasAccess, loading };
 }
 
 export function useImpersonateMode() {
   const [isImpersonating, setIsImpersonating] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('asClient') === '1' || localStorage.getItem('asClient') === 'true';
+    return getEffectiveClientMode();
   });
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('asClient') === '1') {
-      localStorage.setItem('asClient', 'true');
-      setIsImpersonating(true);
-    }
+    setIsImpersonating(getEffectiveClientMode());
   }, []);
 
   const exitImpersonate = () => {
-    localStorage.removeItem('asClient');
+    localStorage.removeItem('dovita_view_as_client');
     window.location.href = '/';
   };
 

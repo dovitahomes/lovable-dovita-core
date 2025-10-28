@@ -20,7 +20,7 @@ export function ViewAsClientToggle() {
       navigate('/dashboard');
     } else {
       setClientViewMode(true);
-      navigate('/portal');
+      navigate('/client/home');
     }
   };
 

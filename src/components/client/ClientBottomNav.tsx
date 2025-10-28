@@ -13,10 +13,10 @@ interface ClientBottomNavProps {
 }
 
 const defaultItems: NavItem[] = [
-  { label: "Inicio", to: "/portal", icon: Home },
-  { label: "Avances", to: "/portal/avances", icon: Image },
-  { label: "Calendario", to: "/portal/calendario", icon: Calendar },
-  { label: "Documentos", to: "/portal/documentos", icon: Folder },
+  { label: "Inicio", to: "/client/home", icon: Home },
+  { label: "Finanzas", to: "/client/finanzas", icon: Image },
+  { label: "Calendario", to: "/client/calendario", icon: Calendar },
+  { label: "Documentos", to: "/client/documentos", icon: Folder },
 ];
 
 export function ClientBottomNav({ items = defaultItems }: ClientBottomNavProps) {

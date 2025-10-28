@@ -17,7 +17,7 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
       }
 
       if (!shouldUseClientShell(role)) {
-        navigate('/dashboard', { replace: true });
+        navigate('/', { replace: true });
         return;
       }
     }, [role, loading, navigate]);

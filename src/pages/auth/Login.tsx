@@ -37,7 +37,7 @@ const Login = () => {
         
         // Redirect clients to their portal
         if (role === 'cliente') {
-          navigate("/portal", { replace: true });
+          navigate("/client/home", { replace: true });
         } else {
           navigate("/", { replace: true });
         }
@@ -83,7 +83,7 @@ const Login = () => {
         
         // Redirect clients to their portal
         if (role === 'cliente') {
-          navigate("/portal", { replace: true });
+          navigate("/client/home", { replace: true });
         } else {
           navigate("/", { replace: true });
         }

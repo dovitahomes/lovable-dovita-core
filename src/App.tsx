@@ -39,11 +39,11 @@ const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
 const ClientPortalLayout = lazy(() => import("./layouts/ClientPortalLayout"));
-const HomeCliente = lazy(() => import("./pages/portal/HomeCliente"));
-const Avances = lazy(() => import("./pages/portal/Avances"));
-const Documentos = lazy(() => import("./pages/portal/Documentos"));
-const Citas = lazy(() => import("./pages/portal/Citas"));
-const Presupuesto = lazy(() => import("./pages/portal/Presupuesto"));
+const ClientHomeView = lazy(() => import("./pages/client/Home"));
+const ClientFinanzas = lazy(() => import("./pages/client/Finanzas"));
+const ClientDocumentos = lazy(() => import("./pages/client/Documentos"));
+const ClientChatView = lazy(() => import("./pages/client/Chat"));
+const ClientCalendarioView = lazy(() => import("./pages/client/Calendario"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -221,19 +221,18 @@ const App = () => (
         
         {/* Client portal routes (isolated, no sidebar) */}
         <Route
-          path="/portal"
+          path="/client"
           element={
             <Suspense fallback={<PageHeaderSkeleton />}>
               <ClientPortalLayout />
             </Suspense>
           }
         >
-          <Route index element={<Suspense fallback={<PageHeaderSkeleton />}><HomeCliente /></Suspense>} />
-          <Route path="avances" element={<Suspense fallback={<PageHeaderSkeleton />}><Avances /></Suspense>} />
-          <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><Documentos /></Suspense>} />
-          <Route path="citas" element={<Suspense fallback={<PageHeaderSkeleton />}><Citas /></Suspense>} />
-          <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><Citas /></Suspense>} />
-          <Route path="presupuesto" element={<Suspense fallback={<PageHeaderSkeleton />}><Presupuesto /></Suspense>} />
+          <Route path="home" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientHomeView /></Suspense>} />
+          <Route path="finanzas" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientFinanzas /></Suspense>} />
+          <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentos /></Suspense>} />
+          <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChatView /></Suspense>} />
+          <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendarioView /></Suspense>} />
         </Route>
 
         {/* Internal admin routes (with sidebar) */}
