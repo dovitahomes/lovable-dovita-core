@@ -3,9 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, MapPin, Handshake, Users } from "lucide-react";
 import { BirthdayWidget } from "@/components/BirthdayWidget";
+import { KpiCards } from "@/components/kpi/KpiCards";
+import { KpiCharts } from "@/components/kpi/KpiCharts";
+import { KpiFilters } from "@/components/kpi/KpiFilters";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
+  const [dateRange, setDateRange] = useState("180");
   const [stats, setStats] = useState({
     sucursales: 0,
     alianzas: 0,
@@ -72,17 +76,24 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md">
-          <Building2 className="h-8 w-8 text-white" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md">
+            <Building2 className="h-8 w-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Bienvenido{userName ? `, ${userName}` : ""}
+            </h1>
+            <p className="text-muted-foreground">Sistema de gestión Dovita CRM</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Bienvenido{userName ? `, ${userName}` : ""}
-          </h1>
-          <p className="text-muted-foreground">Sistema de gestión Dovita CRM</p>
-        </div>
+        <KpiFilters dateRange={dateRange} onDateRangeChange={setDateRange} />
       </div>
+
+      <KpiCards />
+
+      <KpiCharts months={parseInt(dateRange) / 30} />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {statCards.map((card) => (
