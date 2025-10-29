@@ -47,7 +47,7 @@ const ClientFinanzas = lazy(() => import("./pages/client/Finanzas"));
 const ClientDocumentos = lazy(() => import("./pages/client/Documentos"));
 const ClientChat = lazy(() => import("./pages/client/Chat"));
 const ClientCalendarioView = lazy(() => import("./pages/client/Calendario"));
-const ClientPagosView = lazy(() => import("./pages/client/Pagos"));
+const ClientPagosView = lazy(() => import("./pages/client/Payments"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -256,6 +256,7 @@ const App = () => (
           <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChat /></Suspense>} />
           <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendarioView /></Suspense>} />
           <Route path="pagos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientPagosView /></Suspense>} />
+          <Route path="payments" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientPagosView /></Suspense>} />
         </Route>
 
         {/* Internal admin routes (with sidebar) */}
