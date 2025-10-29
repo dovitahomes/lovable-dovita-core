@@ -84,17 +84,12 @@ const Login = () => {
       const bootstrap = await bootstrapUser();
       
       if (!bootstrap.ok) {
-        // Show error but don't block - allow navigation with limited permissions
+        // Show warning but don't block - allow navigation anyway
         console.warn('[auth] ⚠️ Bootstrap incomplete:', bootstrap.reason);
-        toast.error('Sesión iniciada, pero no se pudieron cargar permisos completos', {
-          description: 'Contacta al administrador si persiste',
+        toast.info('Sesión iniciada, pero aún no se cargaron permisos. Actualiza en unos segundos.', {
           duration: 5000,
-          action: {
-            label: 'Reintentar',
-            onClick: () => window.location.reload(),
-          },
         });
-        // Navigate anyway
+        // Force navigation even without permissions
         navigate("/", { replace: true });
         setIsLoading(false);
         return;

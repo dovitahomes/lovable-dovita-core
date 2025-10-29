@@ -57,9 +57,13 @@ export function useUserPermissions() {
           .eq('user_id', session.user.id);
 
         if (fetchError) {
-          // Check if it's a 403/RLS error
-          if (fetchError.code === 'PGRST301' || fetchError.message?.includes('row-level security') || fetchError.message?.includes('permission denied')) {
-            console.error('[permissions] RLS/403 error:', fetchError);
+          // Check if it's a 403/RLS/401 error
+          if (fetchError.code === 'PGRST301' || 
+              fetchError.code === '401' || 
+              fetchError.code === '403' ||
+              fetchError.message?.includes('row-level security') || 
+              fetchError.message?.includes('permission denied')) {
+            console.error('[permissions] RLS/403/401 error:', fetchError);
             setIsForbidden(true);
             setError(null);
             setPermissions([]);
@@ -67,10 +71,18 @@ export function useUserPermissions() {
             throw fetchError;
           }
         } else {
-          console.info('[permissions] ✓ Loaded:', data?.length || 0, 'permissions');
-          setPermissions(data || []);
-          setIsForbidden(false);
-          setError(null);
+          // Detect empty results explicitly
+          if (data && data.length === 0) {
+            console.warn('[permissions] No permissions found, treating as empty (not blocking)');
+            setPermissions([]);
+            setIsForbidden(false);
+            setError(null);
+          } else {
+            console.info('[permissions] ✓ Loaded:', data?.length || 0, 'permissions');
+            setPermissions(data || []);
+            setIsForbidden(false);
+            setError(null);
+          }
         }
       } catch (err) {
         console.error('[permissions] Error:', err);
