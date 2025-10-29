@@ -88,6 +88,7 @@ const Login = () => {
         console.warn('[auth] ⚠️ Bootstrap incomplete:', bootstrap.reason);
         toast.error('Sesión iniciada, pero no se pudieron cargar permisos completos', {
           description: 'Contacta al administrador si persiste',
+          duration: 5000,
           action: {
             label: 'Reintentar',
             onClick: () => window.location.reload(),
@@ -95,6 +96,7 @@ const Login = () => {
         });
         // Navigate anyway
         navigate("/", { replace: true });
+        setIsLoading(false);
         return;
       }
 

@@ -58,22 +58,24 @@ export function useUserPermissions() {
 
         if (fetchError) {
           // Check if it's a 403/RLS error
-          if (fetchError.code === 'PGRST301' || fetchError.message?.includes('row-level security')) {
+          if (fetchError.code === 'PGRST301' || fetchError.message?.includes('row-level security') || fetchError.message?.includes('permission denied')) {
             console.error('[permissions] RLS/403 error:', fetchError);
             setIsForbidden(true);
             setError(null);
+            setPermissions([]);
           } else {
             throw fetchError;
           }
         } else {
-          console.info('[permissions] ✓ Loaded:', data);
+          console.info('[permissions] ✓ Loaded:', data?.length || 0, 'permissions');
           setPermissions(data || []);
           setIsForbidden(false);
           setError(null);
         }
       } catch (err) {
         console.error('[permissions] Error:', err);
-        setError(err instanceof Error ? err.message : 'Error cargando permisos');
+        const errorMsg = err instanceof Error ? err.message : 'Error cargando permisos';
+        setError(errorMsg);
         setPermissions([]);
         setIsForbidden(false);
       } finally {

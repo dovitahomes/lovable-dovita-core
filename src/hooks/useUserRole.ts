@@ -12,22 +12,33 @@ export function useUserRole() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('[useUserRole] Timeout after 15s, defaulting to user role');
+        setRole('user');
+        setLoading(false);
+      }
+    }, 15000);
+
     // If in demo mode, return demo role
     if (demoSession.isDemoMode) {
       setRole(demoSession.role);
       setLoading(false);
+      clearTimeout(timeout);
       return;
     }
 
     // Wait for session to be ready
     if (status === 'loading') {
       setLoading(true);
-      return;
+      return () => clearTimeout(timeout);
     }
 
     if (status === 'unauthenticated') {
       setRole(null);
       setLoading(false);
+      clearTimeout(timeout);
       return;
     }
 
@@ -35,30 +46,38 @@ export function useUserRole() {
       if (!session?.user) {
         setRole(null);
         setLoading(false);
+        clearTimeout(timeout);
         return;
       }
 
       try {
+        console.info('[useUserRole] Fetching role for user:', session.user.id);
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', session.user.id)
-          .maybeSingle();
+          .limit(1)
+          .single();
 
         if (error) {
           console.error('[useUserRole] Error fetching role:', error);
+          setRole('user');
+        } else {
+          console.info('[useUserRole] Role fetched:', data?.role);
+          setRole(data?.role as UserRole || 'user');
         }
-
-        setRole(data?.role as UserRole || 'user');
       } catch (error) {
         console.error('[useUserRole] Exception fetching role:', error);
         setRole('user');
       } finally {
         setLoading(false);
+        clearTimeout(timeout);
       }
     };
 
     fetchRole();
+
+    return () => clearTimeout(timeout);
   }, [demoSession, status, session]);
 
   return { role, loading };

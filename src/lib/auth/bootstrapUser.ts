@@ -33,13 +33,21 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       
       // Step 1: Ensure profile
       const profileStart = Date.now();
-      await supabase.rpc('ensure_profile');
-      console.info(`[bootstrap] ✓ Profile ensured (${Date.now() - profileStart}ms)`);
+      const { error: profileError } = await supabase.rpc('ensure_profile');
+      if (profileError) {
+        console.warn(`[bootstrap] Profile RPC warning:`, profileError);
+      } else {
+        console.info(`[bootstrap] ✓ Profile ensured (${Date.now() - profileStart}ms)`);
+      }
       
       // Step 2: Ensure default role
       const roleStart = Date.now();
-      await supabase.rpc('ensure_default_role');
-      console.info(`[bootstrap] ✓ Default role ensured (${Date.now() - roleStart}ms)`);
+      const { error: roleError } = await supabase.rpc('ensure_default_role');
+      if (roleError) {
+        console.warn(`[bootstrap] Role RPC warning:`, roleError);
+      } else {
+        console.info(`[bootstrap] ✓ Default role ensured (${Date.now() - roleStart}ms)`);
+      }
       
       // Step 3: Load user roles
       const rolesStart = Date.now();
@@ -71,7 +79,12 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(`[bootstrap] ❌ Attempt ${attempt + 1}/${maxRetries} failed:`, errorMsg);
+      const errorCode = (error as any)?.code;
+      console.error(`[bootstrap] ❌ Attempt ${attempt + 1}/${maxRetries} failed:`, {
+        message: errorMsg,
+        code: errorCode,
+        error
+      });
       
       if (attempt < maxRetries - 1) {
         const delay = BACKOFF_DELAYS[attempt];
