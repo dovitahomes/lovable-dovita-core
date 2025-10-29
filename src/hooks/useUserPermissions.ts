@@ -74,12 +74,12 @@ export function useUserPermissions() {
         } else {
           // Detect empty results explicitly
           if (data && data.length === 0) {
-            console.warn('[permissions] No permissions found, treating as empty (not blocking)');
+            console.warn('[useUserPermissions] No permissions found, treating as empty (not blocking)');
             setPermissions([]);
             setIsForbidden(false);
             setError(null);
           } else {
-            console.info('[permissions] ✓ Loaded:', data?.length || 0, 'permissions');
+            console.info('[useUserPermissions] ✓ Loaded:', data?.length || 0, 'permissions');
             setPermissions(data || []);
             setIsForbidden(false);
             setError(null);

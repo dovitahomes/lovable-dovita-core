@@ -89,6 +89,16 @@ const ALL_ROUTES: RouteGroup[] = [
   },
 ];
 
+// Rutas mínimas (fallback cuando no hay permisos pero hay sesión)
+const MINIMAL_ROUTES: RouteGroup[] = [
+  {
+    label: "Principal",
+    items: [
+      { title: "Dashboard", url: "/", icon: LayoutDashboard, moduleName: "dashboard" },
+    ],
+  },
+];
+
 /**
  * Filtra las rutas accesibles según los permisos del usuario.
  * Solo muestra rutas donde el usuario tiene permiso de visualización.
@@ -107,16 +117,28 @@ export function getAccessibleRoutes(
     return [];
   }
 
+  // Si no hay permisos (vacío o null), retornar rutas mínimas
+  if (!Array.isArray(permissions) || permissions.length === 0) {
+    return MINIMAL_ROUTES;
+  }
+
+  // Crear set de claves de módulos permitidos
+  const allowedKeys = new Set(
+    permissions.filter(p => p.can_view).map(p => p.module_name)
+  );
+
   // Filtrar según permisos
-  return ALL_ROUTES.map(group => ({
+  const filtered = ALL_ROUTES.map(group => ({
     ...group,
     items: group.items.filter(item => {
       // Si no tiene moduleName asociado, mostrar siempre (rutas públicas internas)
       if (!item.moduleName) return true;
 
-      // Buscar permiso correspondiente
-      const perm = permissions.find(p => p.module_name === item.moduleName);
-      return perm?.can_view === true;
+      // Verificar si tiene permiso
+      return allowedKeys.has(item.moduleName);
     }),
   })).filter(group => group.items.length > 0); // Eliminar grupos vacíos
+
+  // Si después de filtrar no quedó nada, retornar mínimas
+  return filtered.length > 0 ? filtered : MINIMAL_ROUTES;
 }

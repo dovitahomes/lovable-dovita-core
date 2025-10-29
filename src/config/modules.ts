@@ -9,7 +9,7 @@ export const MODULES = [
   { key: 'proyectos', path: '/proyectos', label: 'Proyectos' },
   { key: 'diseno', path: '/diseno', label: 'Diseño' },
   { key: 'presupuestos', path: '/presupuestos', label: 'Presupuestos' },
-  { key: 'cronogramas', path: '/cronograma', label: 'Cronogramas' },
+  { key: 'cronograma', path: '/cronograma', label: 'Cronogramas' },
   { key: 'construccion', path: '/construccion', label: 'Construcción' },
   { key: 'finanzas', path: '/finanzas', label: 'Finanzas' },
   { key: 'contabilidad', path: '/contabilidad', label: 'Contabilidad' },

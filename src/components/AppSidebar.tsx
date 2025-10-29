@@ -29,16 +29,16 @@ export function AppSidebar() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { prefetch } = usePrefetchRoute();
   const { role, loading: roleLoading } = useUserRole();
-  const { permissions, isLoading: permsLoading, hasModule } = useUserPermissions();
+  const { permissions, isLoading: permsLoading, isForbidden } = useUserPermissions();
   const { data: corporate } = useCorporateContent();
 
   const isAdmin = role === 'admin';
   const roles = role ? [role] : [];
   
-  // Obtener rutas accesibles — si no hay permisos, mostrar básico
-  const accessibleRoutes = permissions.length > 0 
-    ? getAccessibleRoutes(permissions, roles)
-    : []; // Vacío si no hay permisos aún
+  // Obtener rutas accesibles — no bloquear si permisos aún cargan
+  const accessibleRoutes = getAccessibleRoutes(permissions, roles);
+
+  const showEmptyState = !permsLoading && accessibleRoutes.length === 0 && !isAdmin;
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -98,13 +98,18 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {!permsLoading && accessibleRoutes.length === 0 && (
+        {showEmptyState && (
           <SidebarGroup>
             <SidebarGroupLabel>Sin permisos</SidebarGroupLabel>
             <SidebarGroupContent>
-              <p className="px-3 py-2 text-xs text-muted-foreground">
-                No se cargaron permisos. Contacta al administrador.
-              </p>
+              <div className="px-3 py-2 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  No cuentas con permisos para módulos.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Contacta a un administrador.
+                </p>
+              </div>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
