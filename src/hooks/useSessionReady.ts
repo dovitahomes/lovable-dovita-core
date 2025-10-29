@@ -1,55 +1,61 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
 type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
 export function useSessionReady() {
-  const [session, setSession] = useState<Session | null>(null);
   const [status, setStatus] = useState<SessionStatus>('loading');
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
 
-    // Timeout duro de 5s: si no hay sesión, marcar unauthenticated
+    async function checkSession() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        if (data?.session) {
+          console.log('[useSessionReady] ✅ Session found, authenticating immediately');
+          setSession(data.session);
+          setStatus('authenticated');
+        } else {
+          console.warn('[useSessionReady] ⚠️ No session found');
+          setStatus('unauthenticated');
+        }
+      } catch (err) {
+        console.error('[useSessionReady] ❌ Error checking session', err);
+        setStatus('unauthenticated');
+      }
+    }
+
+    checkSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!mounted) return;
+      if (newSession) {
+        console.log('[useSessionReady] 🔁 Session refreshed');
+        setSession(newSession);
+        setStatus('authenticated');
+      } else {
+        console.log('[useSessionReady] 🔒 Session cleared');
+        setSession(null);
+        setStatus('unauthenticated');
+      }
+    });
+
     timeoutId = setTimeout(() => {
       if (mounted && status === 'loading') {
-        console.warn('[useSessionReady] Timeout after 5s — marking unauthenticated');
+        console.warn('[useSessionReady] ⏰ Timeout reached (10s) — assuming unauthenticated');
         setStatus('unauthenticated');
-        setSession(null);
       }
-    }, 5000);
-
-    // Set up auth listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      console.info('[useSessionReady] Auth state changed:', _event, !!session);
-      setSession(session);
-      setStatus(session ? 'authenticated' : 'unauthenticated');
-      clearTimeout(timeoutId);
-    });
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (!mounted) return;
-      
-      if (error) {
-        console.error('[useSessionReady] Error getting session:', error);
-        setStatus('unauthenticated');
-        setSession(null);
-      } else {
-        console.info('[useSessionReady] Initial session:', !!session);
-        setSession(session);
-        setStatus(session ? 'authenticated' : 'unauthenticated');
-      }
-      clearTimeout(timeoutId);
-    });
+    }, 10000);
 
     return () => {
       mounted = false;
       clearTimeout(timeoutId);
-      subscription.unsubscribe();
+      listener?.subscription.unsubscribe();
     };
   }, []);
 

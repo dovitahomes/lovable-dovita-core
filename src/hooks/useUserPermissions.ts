@@ -21,9 +21,10 @@ export function useUserPermissions() {
     // Never leave in infinite loading
     const timeout = setTimeout(() => {
       if (isLoading) {
-        console.warn('[permissions] Timeout after 15s');
+        console.warn('[useUserPermissions] Timeout — returning empty permissions');
         setIsLoading(false);
-        setError('Timeout cargando permisos');
+        setPermissions([]);
+        setError(null);
       }
     }, 15000);
 
