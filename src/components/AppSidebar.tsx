@@ -35,8 +35,10 @@ export function AppSidebar() {
   const isAdmin = role === 'admin';
   const roles = role ? [role] : [];
   
-  // Obtener rutas accesibles según permisos
-  const accessibleRoutes = getAccessibleRoutes(permissions, roles);
+  // Obtener rutas accesibles — si no hay permisos, mostrar básico
+  const accessibleRoutes = permissions.length > 0 
+    ? getAccessibleRoutes(permissions, roles)
+    : []; // Vacío si no hay permisos aún
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -53,26 +55,8 @@ export function AppSidebar() {
       ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
       : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
 
-  // Mostrar skeleton mientras carga
-  if (roleLoading || permsLoading) {
-    return (
-      <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
-        <SidebarContent>
-          <div className="px-3 py-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
-              {state !== "collapsed" && (
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-                  <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
-                </div>
-              )}
-            </div>
-          </div>
-        </SidebarContent>
-      </Sidebar>
-    );
-  }
+  // NO mostrar skeleton — renderizar sidebar vacío con logo
+  // (permisos cargan en background)
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
@@ -101,7 +85,31 @@ export function AppSidebar() {
           </div>
         </div>
 
-        {accessibleRoutes.map((group) => (
+        {permsLoading && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Cargando módulos…</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="px-3 py-2 space-y-2">
+                <div className="h-8 bg-muted rounded animate-pulse" />
+                <div className="h-8 bg-muted rounded animate-pulse" />
+                <div className="h-8 bg-muted rounded animate-pulse" />
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {!permsLoading && accessibleRoutes.length === 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Sin permisos</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <p className="px-3 py-2 text-xs text-muted-foreground">
+                No se cargaron permisos. Contacta al administrador.
+              </p>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {!permsLoading && accessibleRoutes.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -114,7 +122,6 @@ export function AppSidebar() {
                         end={item.url === "/"}
                         className={getNavClass}
                         onMouseEnter={() => {
-                          // Prefetch on hover (desktop only)
                           if (item.url === "/proveedores") {
                             prefetch({
                               queryKey: ["providers"],

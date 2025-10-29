@@ -15,10 +15,9 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   const [sessionChecking, setSessionChecking] = useState(true);
   const [hasSession, setHasSession] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingAdmin, setCheckingAdmin] = useState(false);
 
   useEffect(() => {
-    // If demo mode is active, use demo session
+    // Demo mode
     if (demoSession.isDemoMode) {
       setHasSession(true);
       setIsAdmin(demoSession.role === 'admin');
@@ -26,22 +25,36 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
       return;
     }
 
-    // Wait for session with timeout (non-blocking)
+    // Check session rápidamente (max 5s)
     const checkSession = async () => {
       console.info('[route-guard] Checking session...');
-      const session = await waitForSession({ timeoutMs: 20000 });
+      const session = await waitForSession({ timeoutMs: 5000 });
       
       if (session) {
         console.info('[route-guard] ✓ Session found');
         setHasSession(true);
         
-        // Check admin role if required
+        // Check admin in parallel if needed (non-blocking)
         if (requireAdmin) {
-          setCheckingAdmin(true);
-          checkAdminRole(session.user.id);
+          (async () => {
+            try {
+              const { data } = await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", session.user.id)
+                .eq("role", "admin")
+                .maybeSingle();
+              
+              setIsAdmin(!!data);
+              console.info('[route-guard] Admin:', !!data);
+            } catch (error) {
+              console.error('[route-guard] Error checking admin:', error);
+              setIsAdmin(false);
+            }
+          })();
         }
       } else {
-        console.warn('[route-guard] ⚠️ No session after 20s');
+        console.warn('[route-guard] ⚠️ No session');
         setHasSession(false);
       }
       
@@ -51,43 +64,23 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     checkSession();
   }, [requireAdmin, demoSession]);
 
-  const checkAdminRole = async (userId: string) => {
-    try {
-      console.info('[route-guard] Checking admin role...');
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-      
-      setIsAdmin(!!data);
-      console.info('[route-guard] Admin:', !!data);
-    } catch (error) {
-      console.error('[route-guard] Error checking admin role:', error);
-      setIsAdmin(false);
-    } finally {
-      setCheckingAdmin(false);
-    }
-  };
-
-  // Show loading state while checking session (max 20s due to waitForSession timeout)
-  if (sessionChecking || checkingAdmin) {
+  // Spinner pequeño (max 5s)
+  if (sessionChecking) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground">Verificando sesión...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Verificando sesión… (máx. 5s)</p>
       </div>
     );
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login
   if (!hasSession && !demoSession.isDemoMode) {
     console.info('[route-guard] → Redirecting to login');
     return <Navigate to="/auth/login" replace />;
   }
 
-  // Check admin access
+  // Check admin (non-blocking ya que isAdmin se carga en paralelo)
   if (requireAdmin && !isAdmin && !demoSession.isDemoMode) {
     return (
       <div className="flex items-center justify-center min-h-screen">

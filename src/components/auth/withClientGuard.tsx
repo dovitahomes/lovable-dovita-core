@@ -11,9 +11,10 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
     const navigate = useNavigate();
     const { status, session } = useSessionReady();
     const [role, setRole] = useState<UserRole | null>(null);
-    const [checkingRole, setCheckingRole] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+      // No esperar si aún cargando sesión
       if (status === 'loading') return;
 
       if (status === 'unauthenticated') {
@@ -21,9 +22,9 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
         return;
       }
 
-      // Fetch user role
-      if (session?.user && !role && !checkingRole) {
-        setCheckingRole(true);
+      // Fetch role en paralelo (non-blocking)
+      if (session?.user && !role && !loading) {
+        setLoading(true);
         
         const fetchRole = async () => {
           try {
@@ -34,42 +35,45 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
               .maybeSingle();
             
             if (error) {
-              console.error('[withClientGuard] Error fetching role:', error);
+              console.error('[withClientGuard] Error:', error);
             }
             
-            const userRole = data?.role as UserRole || 'user';
+            const userRole = data?.role as UserRole || 'cliente';
             setRole(userRole);
 
-            // Check if user should use client shell
+            // Redirect si no es cliente
             if (!shouldUseClientShell(userRole)) {
               navigate('/', { replace: true });
             }
           } catch (error) {
-            console.error('[withClientGuard] Exception fetching role:', error);
+            console.error('[withClientGuard] Exception:', error);
+            setRole('cliente'); // Default a cliente en caso de error
           } finally {
-            setCheckingRole(false);
+            setLoading(false);
           }
         };
         
         fetchRole();
       }
-    }, [status, session, role, checkingRole, navigate]);
+    }, [status, session, role, loading, navigate]);
 
-    if (status === 'loading' || checkingRole) {
+    // Spinner pequeño solo si verificando sesión
+    if (status === 'loading') {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Verificando acceso...</p>
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Verificando acceso…</p>
           </div>
         </div>
       );
     }
 
-    if (status === 'unauthenticated' || !role || !shouldUseClientShell(role)) {
+    if (status === 'unauthenticated') {
       return null;
     }
 
+    // Render children inmediatamente con sesión (rol se carga en background)
     return <Component {...props} />;
   };
 }

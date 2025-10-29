@@ -9,39 +9,43 @@ export function useUserRole() {
   const demoSession = useDemoSession();
   const { status, session } = useSessionReady();
   const [role, setRole] = useState<UserRole | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // No bloqueante por defecto
+  const [errorRole, setErrorRole] = useState(false);
 
   useEffect(() => {
-    // Timeout to prevent infinite loading
+    // Timeout de 15s NO bloqueante
     const timeout = setTimeout(() => {
       if (loading) {
-        console.warn('[useUserRole] Timeout after 15s, defaulting to user role');
-        setRole('user');
+        console.warn('[useUserRole] Timeout after 15s — returning empty');
+        setRole(null);
+        setErrorRole(true);
         setLoading(false);
       }
     }, 15000);
 
-    // If in demo mode, return demo role
+    // Demo mode
     if (demoSession.isDemoMode) {
       setRole(demoSession.role);
       setLoading(false);
+      setErrorRole(false);
       clearTimeout(timeout);
       return;
     }
 
-    // Wait for session to be ready
+    // Si no hay sesión aún, no cargar
     if (status === 'loading') {
-      setLoading(true);
       return () => clearTimeout(timeout);
     }
 
     if (status === 'unauthenticated') {
       setRole(null);
       setLoading(false);
+      setErrorRole(false);
       clearTimeout(timeout);
       return;
     }
 
+    // Cargar rol en paralelo (no bloqueante)
     const fetchRole = async () => {
       if (!session?.user) {
         setRole(null);
@@ -50,8 +54,9 @@ export function useUserRole() {
         return;
       }
 
+      setLoading(true);
       try {
-        console.info('[useUserRole] Fetching role for user:', session.user.id);
+        console.info('[useUserRole] Fetching role...');
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
@@ -60,15 +65,18 @@ export function useUserRole() {
           .single();
 
         if (error) {
-          console.error('[useUserRole] Error fetching role:', error);
-          setRole('user');
+          console.error('[useUserRole] Error:', error);
+          setRole(null);
+          setErrorRole(true);
         } else {
-          console.info('[useUserRole] Role fetched:', data?.role);
-          setRole(data?.role as UserRole || 'user');
+          console.info('[useUserRole] ✓ Loaded:', data?.role);
+          setRole(data?.role as UserRole || null);
+          setErrorRole(false);
         }
       } catch (error) {
-        console.error('[useUserRole] Exception fetching role:', error);
-        setRole('user');
+        console.error('[useUserRole] Exception:', error);
+        setRole(null);
+        setErrorRole(true);
       } finally {
         setLoading(false);
         clearTimeout(timeout);
@@ -80,5 +88,5 @@ export function useUserRole() {
     return () => clearTimeout(timeout);
   }, [demoSession, status, session]);
 
-  return { role, loading };
+  return { role, loading, errorRole };
 }
