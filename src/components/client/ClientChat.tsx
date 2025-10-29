@@ -8,15 +8,26 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Loader2, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientChatProps {
   projectId: string;
 }
 
 export function ClientChat({ projectId }: ClientChatProps) {
-  const { messages, loading, sending, sendMessage, currentUserId } = useProjectChat(projectId);
+  const { messages, loading, sending, sendMessage } = useProjectChat(projectId);
   const [newMessage, setNewMessage] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getUserId();
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -44,11 +55,9 @@ export function ClientChat({ projectId }: ClientChatProps) {
     }
   };
 
-  const getInitials = (name?: string, email?: string) => {
-    if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    }
-    return email?.slice(0, 2).toUpperCase() || '??';
+  const getInitials = (senderId?: string) => {
+    // Simple initials based on sender ID
+    return senderId?.slice(0, 2).toUpperCase() || '??';
   };
 
   return (
@@ -76,13 +85,13 @@ export function ClientChat({ projectId }: ClientChatProps) {
                   >
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarFallback className="text-xs">
-                        {getInitials(msg.sender?.full_name, msg.sender?.email)}
+                        {getInitials(msg.sender_id)}
                       </AvatarFallback>
                     </Avatar>
                     <div className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="font-medium">
-                          {msg.sender?.full_name || msg.sender?.email || 'Usuario'}
+                          {isOwn ? 'Tú' : 'Equipo'}
                         </span>
                         <time dateTime={msg.created_at}>
                           {format(new Date(msg.created_at), 'HH:mm', { locale: es })}
