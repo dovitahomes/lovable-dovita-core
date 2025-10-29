@@ -14,6 +14,12 @@ export type BootstrapResult = {
  * Ensures the current user has a profile, role, and permissions.
  * NEVER throws - always returns a result object.
  * Safe to call after login; won't block UI indefinitely.
+ * 
+ * Uses the new admin_ensure_user_bootstrap RPC which:
+ * - Creates profile
+ * - Assigns default role (colaborador)
+ * - Assigns cliente role if user email exists in clients table
+ * - Seeds permissions for all user roles
  */
 export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapResult> {
   const startTime = Date.now();
@@ -31,25 +37,20 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
     try {
       console.info(`[bootstrap] Attempt ${attempt + 1}/${maxRetries}`);
       
-      // Step 1: Ensure profile
-      const profileStart = Date.now();
-      const { error: profileError } = await supabase.rpc('ensure_profile');
-      if (profileError) {
-        console.warn(`[bootstrap] Profile RPC warning:`, profileError);
-      } else {
-        console.info(`[bootstrap] ✓ Profile ensured (${Date.now() - profileStart}ms)`);
+      // Step 1: Call unified bootstrap RPC (replaces ensure_profile + ensure_default_role + permissions seed)
+      const bootstrapStart = Date.now();
+      const { error: bootstrapError } = await supabase.rpc('admin_ensure_user_bootstrap', {
+        target_user_id: userId
+      });
+      
+      if (bootstrapError) {
+        console.warn(`[bootstrap] Bootstrap RPC warning:`, bootstrapError);
+        throw bootstrapError;
       }
       
-      // Step 2: Ensure default role
-      const roleStart = Date.now();
-      const { error: roleError } = await supabase.rpc('ensure_default_role');
-      if (roleError) {
-        console.warn(`[bootstrap] Role RPC warning:`, roleError);
-      } else {
-        console.info(`[bootstrap] ✓ Default role ensured (${Date.now() - roleStart}ms)`);
-      }
+      console.info(`[bootstrap] ✓ Bootstrap RPC completed (${Date.now() - bootstrapStart}ms)`);
       
-      // Step 3: Load user roles
+      // Step 2: Load user roles
       const rolesStart = Date.now();
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
@@ -59,7 +60,7 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       if (rolesError) throw rolesError;
       console.info(`[bootstrap] ✓ Roles loaded (${Date.now() - rolesStart}ms):`, roles);
       
-      // Step 4: Load module permissions
+      // Step 3: Load module permissions
       const permsStart = Date.now();
       const { data: permissions, error: permsError } = await supabase
         .from('user_module_permissions')

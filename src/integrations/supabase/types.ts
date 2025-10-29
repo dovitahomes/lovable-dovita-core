@@ -2181,6 +2181,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_ensure_user_bootstrap: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       check_price_variance: {
         Args: { new_price: number; subpartida_id_param: string }
         Returns: {
@@ -2191,7 +2195,18 @@ export type Database = {
         }[]
       }
       ensure_default_role: { Args: never; Returns: undefined }
+      ensure_default_role_by: {
+        Args: {
+          p_role?: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       ensure_profile: { Args: never; Returns: undefined }
+      ensure_profile_by: {
+        Args: { p_email: string; p_full_name: string; p_user_id: string }
+        Returns: undefined
+      }
       extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
       get_accounts_payable: {
         Args: never
