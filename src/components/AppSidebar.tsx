@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator, Calendar, Truck, DollarSign, Receipt, Percent, Moon, Sun, Eye, PenTool } from "lucide-react";
+import { LogOut, Moon, Sun, Building2 } from "lucide-react";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import { ViewAsClientDialog } from "@/components/ViewAsClientDialog";
 import {
@@ -17,58 +17,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
 import { useTheme } from "@/context/ThemeProvider";
-
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Leads", url: "/leads", icon: TrendingUp },
-  { title: "Clientes", url: "/clientes", icon: BriefcaseIcon },
-  { title: "Proyectos", url: "/proyectos", icon: FolderKanban },
-  { title: "Diseño", url: "/diseno", icon: PenTool },
-  { title: "Presupuestos", url: "/presupuestos", icon: Calculator },
-  { title: "Cronograma", url: "/cronograma", icon: Calendar },
-  { title: "Finanzas", url: "/finanzas", icon: DollarSign },
-  { title: "Contabilidad", url: "/contabilidad", icon: Receipt, requireAdmin: true },
-  { title: "Comisiones", url: "/comisiones", icon: Percent, requireAdmin: true },
-  { title: "Proveedores", url: "/proveedores", icon: Truck },
-  { title: "Usuarios", url: "/usuarios", icon: UserCog, requireAdmin: true },
-];
-
-const toolsItems = [
-  { title: "Métricas", url: "/metrics", icon: TrendingUp },
-  { title: "Contenido Corporativo", url: "/herramientas/contenido-corporativo", icon: Building2 },
-  { title: "Sucursales", url: "/herramientas/sucursales", icon: MapPin },
-  { title: "Alianzas", url: "/herramientas/alianzas", icon: Handshake },
-  { title: "Identidades", url: "/herramientas/identidades", icon: Users },
-  { title: "Accesos", url: "/herramientas/accesos", icon: ShieldCheck },
-  { title: "Centro de Reglas", url: "/herramientas/reglas", icon: FileText },
-  { title: "Catálogo TU", url: "/herramientas/catalogo-tu", icon: ListTree },
-];
+import { useUserRole } from "@/hooks/useUserRole";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { getAccessibleRoutes } from "@/lib/routing/getAccessibleRoutes";
+import { useCorporateContent } from "@/hooks/useCorporateContent";
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
   const { theme, toggle: toggleTheme } = useTheme();
   const { prefetch } = usePrefetchRoute();
+  const { role, loading: roleLoading } = useUserRole();
+  const { permissions, loading: permsLoading } = useUserPermissions();
+  const { data: corporate } = useCorporateContent();
 
-  useEffect(() => {
-    const checkAdminRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .single();
-        
-        setIsAdmin(!!data);
-      }
-    };
-    checkAdminRole();
-  }, []);
+  const isAdmin = role === 'admin';
+  const roles = role ? [role] : [];
+  
+  // Obtener rutas accesibles según permisos
+  const accessibleRoutes = getAccessibleRoutes(permissions, roles);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -85,37 +53,65 @@ export function AppSidebar() {
       ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
       : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
 
+  // Mostrar skeleton mientras carga
+  if (roleLoading || permsLoading) {
+    return (
+      <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
+        <SidebarContent>
+          <div className="px-3 py-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
+              {state !== "collapsed" && (
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                </div>
+              )}
+            </div>
+          </div>
+        </SidebarContent>
+      </Sidebar>
+    );
+  }
+
   return (
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
       <SidebarContent>
         <div className="px-3 py-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-              <Building2 className="h-5 w-5 text-white" />
-            </div>
+            {corporate?.isotipo_url ? (
+              <img 
+                src={corporate.isotipo_url} 
+                alt={corporate.nombre_empresa}
+                className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                <Building2 className="h-5 w-5 text-white" />
+              </div>
+            )}
             {state !== "collapsed" && (
               <div className="min-w-0">
-                <h2 className="font-bold text-sidebar-foreground truncate">Dovita</h2>
+                <h2 className="font-bold text-sidebar-foreground truncate">
+                  {corporate?.nombre_empresa || 'Dovita'}
+                </h2>
                 <p className="text-xs text-sidebar-foreground/70">CRM/ERP</p>
               </div>
             )}
           </div>
         </div>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainItems.map((item) => {
-                // Hide Contabilidad if not admin
-                if (item.requireAdmin && !isAdmin) return null;
-                
-                return (
+        {accessibleRoutes.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
-                        end
+                        end={item.url === "/"}
                         className={getNavClass}
                         onMouseEnter={() => {
                           // Prefetch on hover (desktop only)
@@ -135,34 +131,11 @@ export function AppSidebar() {
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>
-              <Settings className="h-3 w-3 inline mr-1" />
-              Herramientas
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {toolsItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                        {state !== "collapsed" && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-2">
