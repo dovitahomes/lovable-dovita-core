@@ -1110,6 +1110,7 @@ export type Database = {
           client_id: string | null
           contacto_json: Json | null
           created_at: string
+          created_by: string | null
           direccion: string | null
           email: string | null
           estado: string | null
@@ -1130,6 +1131,7 @@ export type Database = {
           client_id?: string | null
           contacto_json?: Json | null
           created_at?: string
+          created_by?: string | null
           direccion?: string | null
           email?: string | null
           estado?: string | null
@@ -1150,6 +1152,7 @@ export type Database = {
           client_id?: string | null
           contacto_json?: Json | null
           created_at?: string
+          created_by?: string | null
           direccion?: string | null
           email?: string | null
           estado?: string | null
