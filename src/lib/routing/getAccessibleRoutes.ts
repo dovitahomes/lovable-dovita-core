@@ -90,7 +90,7 @@ const ALL_ROUTES: RouteGroup[] = [
 ];
 
 // Rutas mínimas (fallback cuando no hay permisos pero hay sesión)
-const MINIMAL_ROUTES: RouteGroup[] = [
+export const MINIMAL_ROUTES: RouteGroup[] = [
   {
     label: "Principal",
     items: [

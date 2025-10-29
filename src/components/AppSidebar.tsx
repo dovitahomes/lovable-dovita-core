@@ -19,8 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeProvider";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { getAccessibleRoutes } from "@/lib/routing/getAccessibleRoutes";
+import { useStablePermissions } from "@/hooks/useStablePermissions";
+import { getAccessibleRoutes, MINIMAL_ROUTES } from "@/lib/routing/getAccessibleRoutes";
 import { useCorporateContent } from "@/hooks/useCorporateContent";
 
 export function AppSidebar() {
@@ -29,17 +29,20 @@ export function AppSidebar() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { prefetch } = usePrefetchRoute();
   const { role, loading: roleLoading } = useUserRole();
-  const { permissions, isLoading: permsLoading, isForbidden } = useUserPermissions();
+  const { permissions, viewable, loading: permsLoading, error } = useStablePermissions();
   const { data: corporate } = useCorporateContent();
 
   const isAdmin = role === 'admin';
   const roles = role ? [role] : [];
   
-  // Obtener rutas accesibles — muestra dashboard si permisos vacíos
+  // Get accessible routes — keeps last valid permissions during refetch
   const accessibleRoutes = getAccessibleRoutes(permissions, roles);
-
-  // Empty state solo si ya cargaron permisos y siguen vacíos (cliente puro)
-  const showEmptyState = !permsLoading && !roleLoading && accessibleRoutes.length === 0 && !isAdmin;
+  
+  // While loading with no cached permissions, show minimal routes
+  const routesToShow = permsLoading && accessibleRoutes.length === 0 ? MINIMAL_ROUTES : accessibleRoutes;
+  
+  // Empty state only if finished loading and still no routes
+  const showEmptyState = !permsLoading && !roleLoading && routesToShow.length === 0 && !isAdmin;
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -115,7 +118,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {!permsLoading && accessibleRoutes.map((group) => (
+        {!showEmptyState && routesToShow.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -149,6 +152,12 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        
+        {error && permissions.length > 0 && state !== "collapsed" && (
+          <div className="px-4 py-2 text-xs text-muted-foreground">
+            Mostrando última versión conocida
+          </div>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-3 space-y-2">

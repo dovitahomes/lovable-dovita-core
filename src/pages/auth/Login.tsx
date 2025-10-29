@@ -80,7 +80,7 @@ const Login = () => {
         console.warn('[auth] ⚠️ Session not ready, redirecting anyway');
       }
 
-      // Step 3: Bootstrap user (non-blocking)
+      // Step 3: Bootstrap user (non-blocking, triggers permission refresh)
       console.log('[auth] 🔧 Bootstrapping user in background...');
       bootstrapUser().catch(err => 
         console.warn('[auth] ⚠️ Bootstrap failed (non-blocking):', err)
