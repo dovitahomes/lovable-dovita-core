@@ -15,10 +15,14 @@ import { toast } from "sonner";
 import { Plus, Edit, Trash2, Building } from "lucide-react";
 import { BankDialog } from "@/components/forms/BankDialog";
 import { BankAccountDialog } from "@/components/forms/BankAccountDialog";
+import { LoadingError } from "@/components/common/LoadingError";
+import { TableSkeleton } from "@/components/common/Skeletons";
 
 export function BankAccountsTab() {
   const [banks, setBanks] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [showBankDialog, setShowBankDialog] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const [selectedBank, setSelectedBank] = useState<any>(null);
@@ -29,17 +33,33 @@ export function BankAccountsTab() {
   }, []);
 
   const loadData = async () => {
-    const { data: banksData } = await supabase
-      .from("banks")
-      .select("*")
-      .order("nombre");
-    setBanks(banksData || []);
+    try {
+      setLoading(true);
+      setError(false);
+      
+      const { data: banksData, error: banksError } = await supabase
+        .from("banks")
+        .select("*")
+        .order("nombre");
+      
+      if (banksError) throw banksError;
 
-    const { data: accountsData } = await supabase
-      .from("bank_accounts")
-      .select("*, banks(nombre)")
-      .order("created_at", { ascending: false });
-    setAccounts(accountsData || []);
+      const { data: accountsData, error: accountsError } = await supabase
+        .from("bank_accounts")
+        .select("*, banks(nombre)")
+        .order("created_at", { ascending: false });
+      
+      if (accountsError) throw accountsError;
+      
+      setBanks(banksData || []);
+      setAccounts(accountsData || []);
+    } catch (err) {
+      console.error("Error al cargar datos bancarios:", err);
+      setError(true);
+      toast.error("No pudimos cargar las cuentas bancarias");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBankSuccess = () => {
@@ -53,6 +73,14 @@ export function BankAccountsTab() {
     setSelectedAccount(null);
     loadData();
   };
+
+  if (error) {
+    return <LoadingError onRetry={loadData} />;
+  }
+
+  if (loading) {
+    return <TableSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

@@ -10,12 +10,15 @@ import { PurchaseOrdersTab } from "@/components/construction/PurchaseOrdersTab";
 import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
 import { ProjectTeamTab } from "@/components/construction/ProjectTeamTab";
 import { GanttProgressTab } from "@/components/construction/GanttProgressTab";
+import { LoadingError } from "@/components/common/LoadingError";
+import { TableSkeleton } from "@/components/common/Skeletons";
 
 export default function Construccion() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -24,52 +27,69 @@ export default function Construccion() {
   }, [id]);
 
   const loadProject = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("projects")
-      .select(`
-        *,
-        clients(name),
-        budgets!inner(
-          id,
-          type,
-          status,
-          shared_with_construction
-        )
-      `)
-      .eq("id", id)
-      .eq("budgets.type", "ejecutivo")
-      .eq("budgets.status", "publicado")
-      .eq("budgets.shared_with_construction", true)
-      .maybeSingle();
+    try {
+      setLoading(true);
+      setError(false);
+      const { data, error } = await supabase
+        .from("projects")
+        .select(`
+          *,
+          clients(name),
+          budgets!inner(
+            id,
+            type,
+            status,
+            shared_with_construction
+          )
+        `)
+        .eq("id", id)
+        .eq("budgets.type", "ejecutivo")
+        .eq("budgets.status", "publicado")
+        .eq("budgets.shared_with_construction", true)
+        .maybeSingle();
 
-    if (error) {
+      if (error) throw error;
+
+      if (!data || !data.budgets || data.budgets.length === 0) {
+        toast.error("Este proyecto no tiene un presupuesto ejecutivo compartido");
+        navigate("/proyectos");
+        return;
+      }
+
+      setProject(data);
+    } catch (err) {
+      console.error("Error al cargar proyecto:", err);
+      setError(true);
       toast.error("Error al cargar el proyecto");
-      console.error(error);
-      navigate("/proyectos");
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    if (!data || !data.budgets || data.budgets.length === 0) {
-      toast.error("Este proyecto no tiene un presupuesto ejecutivo compartido");
-      navigate("/proyectos");
-      return;
-    }
-
-    setProject(data);
-    setLoading(false);
   };
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <LoadingError onRetry={loadProject} />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center">Cargando...</div>
+        <TableSkeleton />
       </div>
     );
   }
 
   if (!project) {
-    return null;
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center text-muted-foreground">
+          No se encontró el proyecto
+        </div>
+      </div>
+    );
   }
 
   return (

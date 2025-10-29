@@ -17,10 +17,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { ShoppingCart, Check } from "lucide-react";
 import { format } from "date-fns";
+import { LoadingError } from "@/components/common/LoadingError";
+import { TableSkeleton } from "@/components/common/Skeletons";
 
 export function PurchaseOrdersTab() {
   const [orders, setOrders] = useState<any[]>([]);
   const [groupedOrders, setGroupedOrders] = useState<Map<string, any[]>>(new Map());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [showProcessDialog, setShowProcessDialog] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [etaDate, setEtaDate] = useState("");
@@ -44,35 +48,43 @@ export function PurchaseOrdersTab() {
   };
 
   const loadOrders = async () => {
-    const { data, error } = await supabase
-      .from("purchase_orders")
-      .select(`
-        *,
-        projects(id, clients(name)),
-        tu_nodes!subpartida_id(code, name, unit_default),
-        providers(id, code_short, name)
-      `)
-      .eq("estado", "solicitado")
-      .order("created_at", { ascending: false });
+    try {
+      setLoading(true);
+      setError(false);
+      
+      const { data, error } = await supabase
+        .from("purchase_orders")
+        .select(`
+          *,
+          projects(id, clients(name)),
+          tu_nodes!subpartida_id(code, name, unit_default),
+          providers(id, code_short, name)
+        `)
+        .eq("estado", "solicitado")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      toast.error("Error al cargar órdenes");
-      return;
-    }
+      if (error) throw error;
 
-    setOrders(data || []);
+      setOrders(data || []);
 
-    // Group by provider if enabled
-    if (groupingEnabled) {
-      const grouped = new Map();
-      data?.forEach((order) => {
-        const key = order.proveedor_id || "sin_proveedor";
-        if (!grouped.has(key)) {
-          grouped.set(key, []);
-        }
-        grouped.get(key).push(order);
-      });
-      setGroupedOrders(grouped);
+      // Group by provider if enabled
+      if (groupingEnabled) {
+        const grouped = new Map();
+        data?.forEach((order) => {
+          const key = order.proveedor_id || "sin_proveedor";
+          if (!grouped.has(key)) {
+            grouped.set(key, []);
+          }
+          grouped.get(key).push(order);
+        });
+        setGroupedOrders(grouped);
+      }
+    } catch (err) {
+      console.error("Error al cargar órdenes:", err);
+      setError(true);
+      toast.error("No pudimos cargar las órdenes de compra");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,6 +133,14 @@ export function PurchaseOrdersTab() {
         return <Badge>{status}</Badge>;
     }
   };
+
+  if (error) {
+    return <LoadingError onRetry={loadOrders} />;
+  }
+
+  if (loading) {
+    return <TableSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
