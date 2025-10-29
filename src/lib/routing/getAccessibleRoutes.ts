@@ -104,11 +104,12 @@ const MINIMAL_ROUTES: RouteGroup[] = [
  * Solo muestra rutas donde el usuario tiene permiso de visualización.
  */
 export function getAccessibleRoutes(
-  permissions: ModulePermission[],
-  roles: UserRole[]
+  permissions: ModulePermission[] = [],
+  roles: UserRole[] = []
 ): RouteGroup[] {
   // Admin siempre ve todo
-  if (roles.includes('admin')) {
+  const isAdmin = roles.includes('admin');
+  if (isAdmin) {
     return ALL_ROUTES;
   }
 
@@ -117,8 +118,9 @@ export function getAccessibleRoutes(
     return [];
   }
 
-  // Si no hay permisos (vacío o null), retornar rutas mínimas
-  if (!Array.isArray(permissions) || permissions.length === 0) {
+  // Si no hay permisos todavía, mostrar solo dashboard (no bloquear)
+  if (!permissions.length) {
+    console.info('[getAccessibleRoutes] No permissions yet, showing minimal routes');
     return MINIMAL_ROUTES;
   }
 

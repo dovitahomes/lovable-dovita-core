@@ -19,6 +19,7 @@ export function useSessionReady() {
         if (data?.session) {
           console.log('[useSessionReady] ✅ Session found, authenticating immediately');
           setSession(data.session);
+          // ⚡ No esperar permisos - liberar UI inmediatamente
           setStatus('authenticated');
         } else {
           console.warn('[useSessionReady] ⚠️ No session found');
@@ -37,6 +38,7 @@ export function useSessionReady() {
       if (newSession) {
         console.log('[useSessionReady] 🔁 Session refreshed');
         setSession(newSession);
+        // ⚡ Autenticar inmediatamente, permisos cargarán después
         setStatus('authenticated');
       } else {
         console.log('[useSessionReady] 🔒 Session cleared');
@@ -45,12 +47,13 @@ export function useSessionReady() {
       }
     });
 
+    // Timeout reducido - si hay sesión ya estamos authenticated
     timeoutId = setTimeout(() => {
       if (mounted && status === 'loading') {
-        console.warn('[useSessionReady] ⏰ Timeout reached (10s) — assuming unauthenticated');
+        console.warn('[useSessionReady] ⏰ Timeout reached (6s) — assuming unauthenticated');
         setStatus('unauthenticated');
       }
-    }, 10000);
+    }, 6000);
 
     return () => {
       mounted = false;

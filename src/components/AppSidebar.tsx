@@ -35,10 +35,11 @@ export function AppSidebar() {
   const isAdmin = role === 'admin';
   const roles = role ? [role] : [];
   
-  // Obtener rutas accesibles — no bloquear si permisos aún cargan
+  // Obtener rutas accesibles — muestra dashboard si permisos vacíos
   const accessibleRoutes = getAccessibleRoutes(permissions, roles);
 
-  const showEmptyState = !permsLoading && accessibleRoutes.length === 0 && !isAdmin;
+  // Empty state solo si ya cargaron permisos y siguen vacíos (cliente puro)
+  const showEmptyState = !permsLoading && !roleLoading && accessibleRoutes.length === 0 && !isAdmin;
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
