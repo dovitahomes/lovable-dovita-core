@@ -14,10 +14,10 @@ export function useSessionReady() {
     // Set a timeout to prevent infinite loading
     timeoutId = setTimeout(() => {
       if (status === 'loading') {
-        console.error('[useSessionReady] Session check timeout after 8s');
+        console.error('[useSessionReady] Session check timeout after 20s');
         setStatus('unauthenticated');
       }
-    }, 8000);
+    }, 20000);
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
