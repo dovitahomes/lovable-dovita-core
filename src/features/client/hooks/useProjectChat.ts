@@ -1,61 +1,116 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
-export interface ProjectMessage {
+export interface ChatMessage {
   id: string;
-  project_id: string;
   sender_id: string;
   message: string;
   created_at: string;
-  sender?: {
-    email: string;
-    full_name?: string;
-  };
 }
 
 export function useProjectChat(projectId: string | null) {
-  const [messages, setMessages] = useState<ProjectMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const [sending, setSending] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const isMounted = useIsMounted();
 
-  useEffect(() => {
-    const loadUser = async () => {
+  const loadMessages = useCallback(async () => {
+    if (!projectId) {
+      setMessages([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: loadError } = await supabase
+        .from('project_messages')
+        .select('id, sender_id, message, created_at')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+
+      if (loadError) {
+        throw new Error(`No se pudieron cargar los mensajes: ${loadError.message}`);
+      }
+
+      if (isMounted.current) {
+        setMessages(data || []);
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        setError(err instanceof Error ? err : new Error('Error desconocido'));
+      }
+    } finally {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+    }
+  }, [projectId, isMounted]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!projectId || !text.trim()) return;
+
+    setSending(true);
+    setError(null);
+
+    try {
       const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
-    };
-    loadUser();
-  }, []);
+      
+      if (!user) {
+        throw new Error('No estás autenticado');
+      }
 
+      const { error: insertError } = await supabase
+        .from('project_messages')
+        .insert({
+          project_id: projectId,
+          sender_id: user.id,
+          message: text.trim(),
+        });
+
+      if (insertError) {
+        throw new Error(`No se pudo enviar el mensaje: ${insertError.message}`);
+      }
+
+      // Message will be added via realtime subscription
+    } catch (err) {
+      if (isMounted.current) {
+        setError(err instanceof Error ? err : new Error('Error al enviar mensaje'));
+      }
+      throw err; // Re-throw so caller can handle
+    } finally {
+      if (isMounted.current) {
+        setSending(false);
+      }
+    }
+  }, [projectId, isMounted]);
+
+  // Load messages on mount or project change
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+
+  // Set up realtime subscription
   useEffect(() => {
     if (!projectId) return;
 
-    loadMessages();
-
     const channel = supabase
-      .channel(`project_messages:${projectId}`)
+      .channel(`pm:${projectId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'project_messages',
-          filter: `project_id=eq.${projectId}`
+          filter: `project_id=eq.${projectId}`,
         },
-        async (payload) => {
-          const { data: senderData } = await supabase
-            .from('profiles')
-            .select('email, full_name')
-            .eq('id', payload.new.sender_id)
-            .single();
-
-          const newMsg = {
-            ...payload.new,
-            sender: senderData || undefined
-          } as ProjectMessage;
-
-          setMessages(prev => [...prev, newMsg]);
+        (payload) => {
+          if (isMounted.current) {
+            setMessages(prev => [...prev, payload.new as ChatMessage]);
+          }
         }
       )
       .subscribe();
@@ -63,73 +118,13 @@ export function useProjectChat(projectId: string | null) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [projectId]);
-
-  const loadMessages = async () => {
-    if (!projectId) return;
-
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('project_messages')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-
-      const messagesWithSenders = await Promise.all(
-        (data || []).map(async (msg) => {
-          const { data: senderData } = await supabase
-            .from('profiles')
-            .select('email, full_name')
-            .eq('id', msg.sender_id)
-            .single();
-
-          return {
-            ...msg,
-            sender: senderData || undefined
-          };
-        })
-      );
-
-      setMessages(messagesWithSenders);
-    } catch (error: any) {
-      console.error('Error loading messages:', error);
-      toast.error('Error al cargar mensajes');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || !currentUserId || !projectId) return;
-
-    setSending(true);
-    try {
-      const { error } = await supabase
-        .from('project_messages')
-        .insert({
-          project_id: projectId,
-          sender_id: currentUserId,
-          message: text.trim()
-        });
-
-      if (error) throw error;
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      toast.error('Error al enviar mensaje');
-      throw error;
-    } finally {
-      setSending(false);
-    }
-  };
+  }, [projectId, isMounted]);
 
   return {
     messages,
     loading,
+    error,
     sending,
-    currentUserId,
     sendMessage,
     refetch: loadMessages,
   };
