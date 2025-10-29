@@ -60,7 +60,13 @@ const ALL_ROUTES: RouteGroup[] = [
     ],
   },
   {
-    label: "Finanzas",
+    label: "Operaciones",
+    items: [
+      { title: "Proveedores", url: "/proveedores", icon: Truck, moduleName: "proveedores" },
+    ],
+  },
+  {
+    label: "Administración",
     items: [
       { title: "Finanzas", url: "/finanzas", icon: DollarSign, moduleName: "finanzas" },
       { title: "Contabilidad", url: "/contabilidad", icon: Receipt, moduleName: "contabilidad" },
@@ -68,15 +74,9 @@ const ALL_ROUTES: RouteGroup[] = [
     ],
   },
   {
-    label: "Operaciones",
+    label: "Gestión",
     items: [
-      { title: "Proveedores", url: "/proveedores", icon: Truck, moduleName: "proveedores" },
       { title: "Usuarios", url: "/usuarios", icon: UserCog, moduleName: "usuarios" },
-    ],
-  },
-  {
-    label: "Herramientas",
-    items: [
       { title: "Métricas", url: "/metrics", icon: TrendingUp, moduleName: "herramientas" },
       { title: "Contenido Corporativo", url: "/herramientas/contenido-corporativo", icon: Building2, moduleName: "herramientas" },
       { title: "Sucursales", url: "/herramientas/sucursales", icon: MapPin, moduleName: "herramientas" },
