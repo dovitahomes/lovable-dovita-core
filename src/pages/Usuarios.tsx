@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { LoadingError } from "@/components/common/LoadingError";
 
 export default function Usuarios() {
   const [open, setOpen] = useState(false);
@@ -23,7 +24,7 @@ export default function Usuarios() {
 
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -183,9 +184,14 @@ export default function Usuarios() {
           <CardTitle>Lista de Usuarios</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div>Cargando...</div>
-          ) : (
+          <LoadingError
+            isLoading={isLoading}
+            error={error}
+            isEmpty={!users || users.length === 0}
+            emptyMessage="Aún no hay usuarios"
+            onRetry={() => queryClient.invalidateQueries({ queryKey: ['users'] })}
+          />
+          {!isLoading && !error && users && users.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -197,7 +203,7 @@ export default function Usuarios() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.full_name}</TableCell>
                     <TableCell>{user.email}</TableCell>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { LoadingError } from "@/components/common/LoadingError";
 
 interface Provider {
   id: string;
@@ -50,9 +51,10 @@ export default function Proveedores() {
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
-  const { data: providers = [], isLoading } = useQuery({
+  const { data: providers = [], isLoading, error } = useQuery({
     queryKey: ["providers"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -149,13 +151,14 @@ export default function Proveedores() {
 
       <Card>
         <CardContent className="p-0">
-          {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">Cargando...</div>
-          ) : filteredProviders.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              No se encontraron proveedores
-            </div>
-          ) : (
+          <LoadingError
+            isLoading={isLoading}
+            error={error}
+            isEmpty={filteredProviders.length === 0}
+            emptyMessage="No se encontraron proveedores"
+            onRetry={() => queryClient.invalidateQueries({ queryKey: ['providers'] })}
+          />
+          {!isLoading && !error && filteredProviders.length > 0 && (
             <VirtualizedProvidersTable
               providers={filteredProviders}
               onEdit={handleEdit}

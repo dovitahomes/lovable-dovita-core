@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { LoadingError } from "@/components/common/LoadingError";
 
 export default function Proyectos() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function Proyectos() {
 
   const queryClient = useQueryClient();
 
-  const { data: projects, isLoading } = useQuery({
+  const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects', filterSucursal, filterStatus],
     queryFn: async () => {
       let query = supabase
@@ -282,9 +283,14 @@ export default function Proyectos() {
           <CardTitle>Lista de Proyectos</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div>Cargando...</div>
-          ) : (
+          <LoadingError
+            isLoading={isLoading}
+            error={error}
+            isEmpty={!projects || projects.length === 0}
+            emptyMessage="Aún no hay proyectos"
+            onRetry={() => queryClient.invalidateQueries({ queryKey: ['projects', filterSucursal, filterStatus] })}
+          />
+          {!isLoading && !error && projects && projects.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -296,7 +302,7 @@ export default function Proyectos() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projects?.map((project) => (
+                {projects.map((project) => (
                   <TableRow key={project.id}>
                     <TableCell>{project.clients?.name}</TableCell>
                     <TableCell>{project.sucursales?.nombre || '-'}</TableCell>

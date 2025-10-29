@@ -7,13 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { ClientDialog } from "@/components/forms/ClientDialog";
+import { LoadingError } from "@/components/common/LoadingError";
 
 export default function Clientes() {
   const [open, setOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
-  const { data: clients, isLoading } = useQuery({
+  const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -53,9 +54,14 @@ export default function Clientes() {
           <CardTitle>Lista de Clientes</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div>Cargando...</div>
-          ) : (
+          <LoadingError
+            isLoading={isLoading}
+            error={error}
+            isEmpty={!clients || clients.length === 0}
+            emptyMessage="Aún no hay clientes"
+            onRetry={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
+          />
+          {!isLoading && !error && clients && clients.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -67,7 +73,7 @@ export default function Clientes() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients?.map((client) => (
+                {clients.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell className="capitalize">{client.person_type}</TableCell>
                     <TableCell>{client.name}</TableCell>

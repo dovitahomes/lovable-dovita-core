@@ -3,10 +3,13 @@ import { ClientAppShell } from "@/components/client/ClientAppShell";
 import { useClientAccess } from "@/hooks/useClientAccess";
 import { useEffect, useState } from "react";
 import { getSession } from "@/lib/auth";
+import { LoadingError } from "@/components/common/LoadingError";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ClientPortalLayout() {
-  const { hasAccess, loading: accessLoading } = useClientAccess();
+  const { hasAccess, loading: accessLoading, error: accessError } = useClientAccess();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
@@ -25,19 +28,20 @@ export default function ClientPortalLayout() {
     checkSession();
   }, [navigate]);
 
-  if (!sessionChecked || accessLoading) {
+  if (!sessionChecked || accessLoading || accessError || !hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando...</p>
-        </div>
+        <LoadingError
+          isLoading={!sessionChecked || accessLoading}
+          error={accessError}
+          emptyMessage="No tienes permisos para acceder al portal de cliente"
+          onRetry={() => {
+            queryClient.clear();
+            window.location.reload();
+          }}
+        />
       </div>
     );
-  }
-
-  if (!hasAccess) {
-    return null;
   }
 
   return (

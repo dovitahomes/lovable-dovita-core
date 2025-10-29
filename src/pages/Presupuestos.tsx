@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +10,13 @@ import { Plus, Eye, FileText, FileSpreadsheet, FileDown } from "lucide-react";
 import { exportBudgetToXLSX } from "@/utils/exports/excel";
 import { exportBudgetToPDF } from "@/utils/exports/pdf";
 import { toast } from "sonner";
+import { LoadingError } from "@/components/common/LoadingError";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const { data: budgets, isLoading } = useQuery({
+  const { data: budgets, isLoading, error } = useQuery({
     queryKey: ['budgets'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -64,9 +66,14 @@ export default function Presupuestos() {
           <CardTitle>Lista de Presupuestos</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div>Cargando...</div>
-          ) : budgets && budgets.length > 0 ? (
+          <LoadingError
+            isLoading={isLoading}
+            error={error}
+            isEmpty={!budgets || budgets.length === 0}
+            emptyMessage="Aún no hay presupuestos"
+            onRetry={() => queryClient.invalidateQueries({ queryKey: ['budgets'] })}
+          />
+          {!isLoading && !error && budgets && budgets.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -135,11 +142,6 @@ export default function Presupuestos() {
                 ))}
               </TableBody>
             </Table>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
-              <p>No hay presupuestos creados</p>
-            </div>
           )}
         </CardContent>
       </Card>

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, UserPlus } from "lucide-react";
 import { ConvertLeadDialog } from "@/components/ConvertLeadDialog";
 import { LeadDialog } from "@/components/forms/LeadDialog";
+import { LoadingError } from "@/components/common/LoadingError";
 
 const ESTADOS_MEXICO = [
   "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
@@ -35,7 +36,7 @@ export default function Leads() {
 
   const queryClient = useQueryClient();
 
-  const { data: leads, isLoading } = useQuery({
+  const { data: leads, isLoading, error } = useQuery({
     queryKey: ['leads', filterSucursal, filterStatus],
     queryFn: async () => {
       let query = supabase
@@ -138,9 +139,14 @@ export default function Leads() {
           <CardTitle>Lista de Leads</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div>Cargando...</div>
-          ) : (
+          <LoadingError
+            isLoading={isLoading}
+            error={error}
+            isEmpty={!leads || leads.length === 0}
+            emptyMessage="Aún no hay leads"
+            onRetry={() => queryClient.invalidateQueries({ queryKey: ['leads', filterSucursal, filterStatus] })}
+          />
+          {!isLoading && !error && leads && leads.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -153,7 +159,7 @@ export default function Leads() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leads?.map((lead) => (
+                {leads.map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell>{lead.nombre_completo || '-'}</TableCell>
                     <TableCell>
