@@ -252,6 +252,7 @@ const App = () => (
           <Route path="home" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientHomeView /></Suspense>} />
           <Route path="finanzas" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientFinanzas /></Suspense>} />
           <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentos /></Suspense>} />
+          <Route path="docs" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentos /></Suspense>} />
           <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChat /></Suspense>} />
           <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendarioView /></Suspense>} />
           <Route path="pagos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientPagosView /></Suspense>} />

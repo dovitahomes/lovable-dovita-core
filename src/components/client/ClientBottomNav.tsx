@@ -15,7 +15,7 @@ interface ClientBottomNavProps {
 const defaultItems: NavItem[] = [
   { label: "Inicio", to: "/client/home", icon: Home },
   { label: "Calendario", to: "/client/calendario", icon: Calendar },
-  { label: "Docs", to: "/client/documentos", icon: Folder },
+  { label: "Docs", to: "/client/docs", icon: Folder },
   { label: "Chat", to: "/client/chat", icon: MessageSquare },
   { label: "Pagos", to: "/client/pagos", icon: CreditCard },
 ];
