@@ -11,6 +11,7 @@ interface LoadingErrorProps {
   forbiddenMessage?: string;
   onRetry?: () => void;
   onHelp?: () => void;
+  children?: React.ReactNode;
 }
 
 export function LoadingError({
@@ -22,6 +23,7 @@ export function LoadingError({
   forbiddenMessage = "No tienes permisos para ver este módulo",
   onRetry,
   onHelp,
+  children,
 }: LoadingErrorProps) {
   if (isLoading) {
     return (
@@ -84,5 +86,6 @@ export function LoadingError({
     );
   }
 
-  return null;
+  // All checks passed - render children
+  return <>{children}</>;
 }

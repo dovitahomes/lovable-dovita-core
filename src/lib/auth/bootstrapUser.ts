@@ -1,80 +1,93 @@
 import { supabase } from '@/integrations/supabase/client';
+import { getUserIdOrNull } from '@/lib/authClient';
 
 const BACKOFF_DELAYS = [250, 750, 1500]; // ms
 
+export type BootstrapResult = {
+  ok: boolean;
+  roles: any[];
+  permissions: any[];
+  reason?: 'NO_SESSION' | 'BOOTSTRAP_FAILED';
+};
+
 /**
- * Ensures the current user has a profile and default role.
- * Called after successful authentication.
- * Retries up to 3 times with exponential backoff before failing.
+ * Ensures the current user has a profile, role, and permissions.
+ * NEVER throws - always returns a result object.
+ * Safe to call after login; won't block UI indefinitely.
  */
-export async function bootstrapUser(): Promise<{
-  success: boolean;
-  roles?: any[];
-  permissions?: any[];
-  error?: string;
-}> {
+export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapResult> {
   const startTime = Date.now();
 
-  for (let attempt = 0; attempt < 3; attempt++) {
+  // Step 0: Check session exists
+  const userId = await getUserIdOrNull();
+  if (!userId) {
+    console.info('[bootstrap] No session - skipping bootstrap');
+    return { ok: false, roles: [], permissions: [], reason: 'NO_SESSION' };
+  }
+
+  console.info('[bootstrap] Starting bootstrap for user:', userId);
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      console.log(`[bootstrapUser] Attempt ${attempt + 1}/3 - Starting profile setup`);
+      console.info(`[bootstrap] Attempt ${attempt + 1}/${maxRetries}`);
       
-      // Paso 1: Asegurar perfil
+      // Step 1: Ensure profile
       const profileStart = Date.now();
       await supabase.rpc('ensure_profile');
-      console.log(`[bootstrapUser] ✓ Profile ensured (${Date.now() - profileStart}ms)`);
+      console.info(`[bootstrap] ✓ Profile ensured (${Date.now() - profileStart}ms)`);
       
-      // Paso 2: Asegurar rol por defecto
+      // Step 2: Ensure default role
       const roleStart = Date.now();
       await supabase.rpc('ensure_default_role');
-      console.log(`[bootstrapUser] ✓ Default role ensured (${Date.now() - roleStart}ms)`);
+      console.info(`[bootstrap] ✓ Default role ensured (${Date.now() - roleStart}ms)`);
       
-      // Paso 3: Cargar roles del usuario
+      // Step 3: Load user roles
       const rolesStart = Date.now();
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+        .eq('user_id', userId);
       
       if (rolesError) throw rolesError;
-      console.log(`[bootstrapUser] ✓ Roles loaded (${Date.now() - rolesStart}ms):`, roles);
+      console.info(`[bootstrap] ✓ Roles loaded (${Date.now() - rolesStart}ms):`, roles);
       
-      // Paso 4: Cargar permisos de módulos
+      // Step 4: Load module permissions
       const permsStart = Date.now();
       const { data: permissions, error: permsError } = await supabase
         .from('user_module_permissions')
         .select('*')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+        .eq('user_id', userId);
       
       if (permsError) throw permsError;
-      console.log(`[bootstrapUser] ✓ Permissions loaded (${Date.now() - permsStart}ms):`, permissions);
+      console.info(`[bootstrap] ✓ Permissions loaded (${Date.now() - permsStart}ms):`, permissions);
       
       const totalTime = Date.now() - startTime;
-      console.log(`[bootstrapUser] ✅ Success in ${totalTime}ms (attempt ${attempt + 1})`);
+      console.info(`[bootstrap] ✅ Success in ${totalTime}ms (attempt ${attempt + 1})`);
       
       return {
-        success: true,
-        roles,
-        permissions,
+        ok: true,
+        roles: roles || [],
+        permissions: permissions || [],
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(`[bootstrapUser] ❌ Attempt ${attempt + 1}/3 failed:`, errorMsg);
+      console.error(`[bootstrap] ❌ Attempt ${attempt + 1}/${maxRetries} failed:`, errorMsg);
       
-      if (attempt < 2) {
+      if (attempt < maxRetries - 1) {
         const delay = BACKOFF_DELAYS[attempt];
-        console.log(`[bootstrapUser] ⏳ Waiting ${delay}ms before retry...`);
+        console.info(`[bootstrap] ⏳ Waiting ${delay}ms before retry...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
   
   const totalTime = Date.now() - startTime;
-  const errorMsg = `No se pudieron cargar permisos después de 3 intentos (${totalTime}ms)`;
-  console.error(`[bootstrapUser] ❌ ${errorMsg}`);
+  console.error(`[bootstrap] ❌ Failed after ${maxRetries} attempts (${totalTime}ms)`);
   
   return {
-    success: false,
-    error: errorMsg,
+    ok: false,
+    roles: [],
+    permissions: [],
+    reason: 'BOOTSTRAP_FAILED',
   };
 }

@@ -13,49 +13,83 @@ export type ModulePermission = {
 export function useUserPermissions() {
   const { status, session } = useSessionReady();
   const [permissions, setPermissions] = useState<ModulePermission[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isForbidden, setIsForbidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Never leave in infinite loading
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.warn('[permissions] Timeout after 15s');
+        setIsLoading(false);
+        setError('Timeout cargando permisos');
+      }
+    }, 15000);
+
     if (status === 'loading') {
-      setLoading(true);
-      return;
+      setIsLoading(true);
+      return () => clearTimeout(timeout);
     }
 
     if (status === 'unauthenticated') {
       setPermissions([]);
-      setLoading(false);
+      setIsLoading(false);
+      setIsForbidden(false);
+      clearTimeout(timeout);
       return;
     }
 
     const fetchPermissions = async () => {
       if (!session?.user) {
         setPermissions([]);
-        setLoading(false);
+        setIsLoading(false);
+        setIsForbidden(false);
+        clearTimeout(timeout);
         return;
       }
 
       try {
+        console.info('[permissions] Fetching for user:', session.user.id);
         const { data, error: fetchError } = await supabase
           .from('user_module_permissions')
           .select('module_name, can_view, can_create, can_edit, can_delete')
           .eq('user_id', session.user.id);
 
-        if (fetchError) throw fetchError;
-
-        setPermissions(data || []);
-        setError(null);
+        if (fetchError) {
+          // Check if it's a 403/RLS error
+          if (fetchError.code === 'PGRST301' || fetchError.message?.includes('row-level security')) {
+            console.error('[permissions] RLS/403 error:', fetchError);
+            setIsForbidden(true);
+            setError(null);
+          } else {
+            throw fetchError;
+          }
+        } else {
+          console.info('[permissions] ✓ Loaded:', data);
+          setPermissions(data || []);
+          setIsForbidden(false);
+          setError(null);
+        }
       } catch (err) {
-        console.error('[useUserPermissions] Error:', err);
+        console.error('[permissions] Error:', err);
         setError(err instanceof Error ? err.message : 'Error cargando permisos');
         setPermissions([]);
+        setIsForbidden(false);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
+        clearTimeout(timeout);
       }
     };
 
     fetchPermissions();
+
+    return () => clearTimeout(timeout);
   }, [status, session]);
+
+  const hasModule = (moduleName: string) => {
+    return permissions.some(p => p.module_name === moduleName && p.can_view);
+  };
 
   const hasPermission = (moduleName: string, action: 'view' | 'create' | 'edit' | 'delete' = 'view') => {
     const perm = permissions.find((p) => p.module_name === moduleName);
@@ -77,8 +111,10 @@ export function useUserPermissions() {
 
   return {
     permissions,
-    loading,
+    isLoading,
+    isForbidden,
     error,
+    hasModule,
     hasPermission,
   };
 }

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { LogIn, Mail } from "lucide-react";
 import { z } from "zod";
 import { bootstrapUser } from "@/lib/auth/bootstrapUser";
+import { waitForSession } from "@/lib/authClient";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -62,56 +63,63 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('[Login] 🔐 Attempting login...');
+      console.log('[auth] 🔐 Attempting login...');
       
-      // Paso 1: Autenticación
+      // Step 1: Authentication
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) throw authError;
-      console.log('[Login] ✓ Authentication successful');
+      console.log('[auth] ✓ Authentication successful');
 
-      // Paso 2: Bootstrap del usuario (perfil, roles, permisos)
+      // Step 2: Wait for session (non-blocking timeout)
+      const session = await waitForSession({ timeoutMs: 20000 });
+      if (!session) {
+        console.warn('[auth] ⚠️ Session not ready, redirecting anyway');
+      }
+
+      // Step 3: Bootstrap user (profile, roles, permissions)
       const bootstrap = await bootstrapUser();
       
-      if (!bootstrap.success) {
-        // Mostrar error pero no bloquear completamente
-        toast.error(bootstrap.error || 'No se pudieron cargar tus permisos', {
-          description: 'Intenta refrescar la página',
+      if (!bootstrap.ok) {
+        // Show error but don't block - allow navigation with limited permissions
+        console.warn('[auth] ⚠️ Bootstrap incomplete:', bootstrap.reason);
+        toast.error('Sesión iniciada, pero no se pudieron cargar permisos completos', {
+          description: 'Contacta al administrador si persiste',
           action: {
             label: 'Reintentar',
             onClick: () => window.location.reload(),
           },
         });
-        // Aún así redirigir al dashboard con permisos limitados
+        // Navigate anyway
         navigate("/", { replace: true });
         return;
       }
 
-      // Paso 3: Determinar redirección según roles
+      // Step 4: Determine redirect based on roles
       const roles = bootstrap.roles || [];
       const hasClientRole = roles.some((r: any) => r.role === 'cliente');
       const hasStaffRole = roles.some((r: any) => 
         ['admin', 'colaborador', 'contador'].includes(r.role)
       );
 
-      console.log('[Login] ✓ Roles:', roles);
-      console.log('[Login] ✓ Permissions:', bootstrap.permissions);
+      console.log('[auth] ✓ Roles:', roles);
+      console.log('[auth] ✓ Permissions:', bootstrap.permissions);
       
       toast.success("Inicio de sesión exitoso");
       
-      // Clientes puros van a su portal
+      // Pure clients go to portal
       if (hasClientRole && !hasStaffRole) {
-        console.log('[Login] → Redirecting to client portal');
+        console.log('[auth] → Redirecting to client portal');
         navigate("/client/home", { replace: true });
       } else {
-        console.log('[Login] → Redirecting to dashboard');
+        console.log('[auth] → Redirecting to dashboard');
         navigate("/", { replace: true });
       }
     } catch (error: any) {
-      console.error('[Login] ❌ Error:', error);
+      console.error('[auth] ❌ Login error:', error);
       toast.error(error.message || "Error al iniciar sesión");
     } finally {
       setIsLoading(false);

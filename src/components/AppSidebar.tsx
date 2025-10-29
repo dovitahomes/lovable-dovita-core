@@ -29,7 +29,7 @@ export function AppSidebar() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { prefetch } = usePrefetchRoute();
   const { role, loading: roleLoading } = useUserRole();
-  const { permissions, loading: permsLoading } = useUserPermissions();
+  const { permissions, isLoading: permsLoading, hasModule } = useUserPermissions();
   const { data: corporate } = useCorporateContent();
 
   const isAdmin = role === 'admin';
