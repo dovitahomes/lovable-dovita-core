@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator, Calendar, Truck, DollarSign, Receipt, Percent, Moon, Sun, Eye } from "lucide-react";
+import { LayoutDashboard, Settings, Building2, Handshake, MapPin, Users, ShieldCheck, FileText, LogOut, UserCog, BriefcaseIcon, FolderKanban, TrendingUp, ListTree, Calculator, Calendar, Truck, DollarSign, Receipt, Percent, Moon, Sun, Eye, PenTool } from "lucide-react";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import { ViewAsClientDialog } from "@/components/ViewAsClientDialog";
 import {
@@ -22,15 +22,17 @@ import { useTheme } from "@/context/ThemeProvider";
 
 const mainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Usuarios", url: "/usuarios", icon: UserCog },
-  { title: "Clientes", url: "/clientes", icon: BriefcaseIcon },
-  { title: "Proveedores", url: "/proveedores", icon: Truck },
-  { title: "Proyectos", url: "/proyectos", icon: FolderKanban },
   { title: "Leads", url: "/leads", icon: TrendingUp },
+  { title: "Clientes", url: "/clientes", icon: BriefcaseIcon },
+  { title: "Proyectos", url: "/proyectos", icon: FolderKanban },
+  { title: "Diseño", url: "/diseno", icon: PenTool },
   { title: "Presupuestos", url: "/presupuestos", icon: Calculator },
+  { title: "Cronograma", url: "/cronograma", icon: Calendar },
   { title: "Finanzas", url: "/finanzas", icon: DollarSign },
   { title: "Contabilidad", url: "/contabilidad", icon: Receipt, requireAdmin: true },
   { title: "Comisiones", url: "/comisiones", icon: Percent, requireAdmin: true },
+  { title: "Proveedores", url: "/proveedores", icon: Truck },
+  { title: "Usuarios", url: "/usuarios", icon: UserCog, requireAdmin: true },
 ];
 
 const toolsItems = [
@@ -42,7 +44,6 @@ const toolsItems = [
   { title: "Accesos", url: "/herramientas/accesos", icon: ShieldCheck },
   { title: "Centro de Reglas", url: "/herramientas/reglas", icon: FileText },
   { title: "Catálogo TU", url: "/herramientas/catalogo-tu", icon: ListTree },
-  { title: "Cronograma Gantt", url: "/cronograma", icon: Calendar },
 ];
 
 export function AppSidebar() {

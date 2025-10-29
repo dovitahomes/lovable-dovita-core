@@ -31,6 +31,7 @@ const Clientes = lazy(() => import("./pages/Clientes"));
 const Proyectos = lazy(() => import("./pages/Proyectos"));
 const ProyectoDetalle = lazy(() => import("./pages/ProyectoDetalle"));
 const Leads = lazy(() => import("./pages/Leads"));
+const Diseno = lazy(() => import("./pages/Diseno"));
 const Presupuestos = lazy(() => import("./pages/Presupuestos"));
 const PresupuestoParametrico = lazy(() => import("./pages/PresupuestoParametrico"));
 const PresupuestoEjecutivo = lazy(() => import("./pages/PresupuestoEjecutivo"));
@@ -186,6 +187,7 @@ const InternalLayout = () => {
                 <Route path="/proyectos" element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
                 <Route path="/proyectos/:id" element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
                 <Route path="/leads" element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
+                <Route path="/diseno" element={<Suspense fallback={<TableSkeleton />}><Diseno /></Suspense>} />
                 <Route path="/presupuestos" element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
                 <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
                 <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
