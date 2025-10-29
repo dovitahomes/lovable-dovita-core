@@ -21,6 +21,10 @@ export default function Calendar() {
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
 
+    const formatFileDate = (date: Date) => {
+      return format(date, 'yyyyMMdd');
+    };
+
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -39,7 +43,8 @@ export default function Calendar() {
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
+    const safeTitle = event.title.replace(/[^a-z0-9]/gi, '_');
+    link.download = `${safeTitle}-${formatFileDate(startDate)}.ics`;
     link.click();
     
     toast.success("Evento descargado");
@@ -68,18 +73,12 @@ export default function Calendar() {
   }
 
   if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <AlertCircle className="h-12 w-12 text-destructive" />
-        <div className="text-center space-y-2">
-          <p className="text-foreground font-medium">Error al cargar eventos</p>
-          <p className="text-sm text-muted-foreground">No se pudieron cargar los eventos del calendario</p>
-        </div>
-        <Button onClick={() => refetch()} variant="outline">
-          Reintentar
-        </Button>
-      </div>
-    );
+    toast.error("Hubo un problema al cargar tu calendario", {
+      action: {
+        label: "Reintentar",
+        onClick: () => refetch(),
+      },
+    });
   }
 
   return (
@@ -93,9 +92,9 @@ export default function Calendar() {
         <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-6 text-center px-4">
           <CalendarIcon className="h-16 w-16 text-muted-foreground" />
           <div className="space-y-2">
-            <h3 className="text-lg font-medium text-foreground">No hay eventos próximos</h3>
+            <h3 className="text-lg font-medium text-foreground">No hay eventos recientes</h3>
             <p className="text-sm text-muted-foreground max-w-md">
-              Aún no tienes citas programadas. Mantente en contacto con tu equipo.
+              Aún no tienes citas programadas. Revisa tus documentos o contacta a tu equipo.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -108,7 +107,7 @@ export default function Calendar() {
               Abrir chat
             </Button>
             <Button
-              onClick={() => navigate('/client/documentos')}
+              onClick={() => navigate('/client/docs')}
               variant="outline"
               className="w-full sm:w-auto"
             >

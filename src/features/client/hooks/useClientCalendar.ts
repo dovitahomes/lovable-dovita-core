@@ -27,7 +27,9 @@ export function useClientCalendar(projectId: string | null) {
         .gte('end_at', sixMonthsAgo.toISOString())
         .order('start_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(`No se pudieron cargar los eventos del calendario: ${error.message}`);
+      }
 
       return (data || []).map(event => ({
         ...event,
