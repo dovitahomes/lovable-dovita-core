@@ -80,25 +80,35 @@ const Login = () => {
         console.warn('[auth] ⚠️ Session not ready, redirecting anyway');
       }
 
-      // Step 3: Bootstrap user (non-blocking)
-      console.log('[auth] 🔧 Bootstrapping user in background...');
-      bootstrapUser().catch(err => 
-        console.warn('[auth] ⚠️ Bootstrap failed (non-blocking):', err)
+      // Step 3: Bootstrap user (profile, roles, permissions)
+      const bootstrap = await bootstrapUser();
+      
+      if (!bootstrap.ok) {
+        // Show warning but don't block - allow navigation anyway
+        console.warn('[auth] ⚠️ Bootstrap incomplete:', bootstrap.reason);
+        toast.info('Sesión iniciada, pero aún no se cargaron permisos. Actualiza en unos segundos.', {
+          duration: 5000,
+        });
+        // Force navigation even without permissions
+        navigate("/", { replace: true });
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 4: Determine redirect based on roles
+      const roles = bootstrap.roles || [];
+      const hasClientRole = roles.some((r: any) => r.role === 'cliente');
+      const hasStaffRole = roles.some((r: any) => 
+        ['admin', 'colaborador', 'contador'].includes(r.role)
       );
 
-      // Step 4: Quick role check for redirect (don't wait for bootstrap)
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session!.user.id)
-        .limit(1);
-
-      const roles = rolesData?.map(r => r.role) || [];
+      console.log('[auth] ✓ Roles:', roles);
+      console.log('[auth] ✓ Permissions:', bootstrap.permissions);
       
       toast.success("Inicio de sesión exitoso");
       
       // Pure clients go to portal
-      if (roles.includes('cliente')) {
+      if (hasClientRole && !hasStaffRole) {
         console.log('[auth] → Redirecting to client portal');
         navigate("/client/home", { replace: true });
       } else {

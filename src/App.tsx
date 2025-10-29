@@ -17,7 +17,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useAuthState } from "@/lib/auth/AuthContext";
+import { useSessionReady } from "@/hooks/useSessionReady";
 import { bootstrapUser } from "@/lib/auth/bootstrapUser";
 
 // Eager loaded (critical routes)
@@ -227,15 +227,12 @@ const InternalLayout = () => {
 };
 
 const App = () => {
-  const { status, session } = useAuthState();
+  const { status, session } = useSessionReady();
 
-  // Bootstrap user profile and role on authentication (non-blocking)
+  // Bootstrap user profile and role on authentication
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      console.log('[App] Bootstrapping user in background...');
-      bootstrapUser().catch(err => 
-        console.warn('[App] Bootstrap failed (non-blocking):', err)
-      );
+      bootstrapUser();
     }
   }, [status, session]);
 
