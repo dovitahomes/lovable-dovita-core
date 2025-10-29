@@ -2190,6 +2190,8 @@ export type Database = {
           variance_pct: number
         }[]
       }
+      ensure_default_role: { Args: never; Returns: undefined }
+      ensure_profile: { Args: never; Returns: undefined }
       extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
       get_accounts_payable: {
         Args: never
