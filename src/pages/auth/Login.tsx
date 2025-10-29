@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { LogIn, Mail } from "lucide-react";
 import { z } from "zod";
-import { bootstrapUser } from "@/lib/auth/bootstrapUser";
-import { waitForSession } from "@/lib/authClient";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -63,60 +61,34 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('[auth] 🔐 Attempting login...');
-      
-      // Step 1: Authentication
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (authError) throw authError;
-      console.log('[auth] ✓ Authentication successful');
+      if (error) throw error;
 
-      // Step 2: Wait for session (non-blocking timeout)
-      const session = await waitForSession({ timeoutMs: 20000 });
-      if (!session) {
-        console.warn('[auth] ⚠️ Session not ready, redirecting anyway');
-      }
-
-      // Step 3: Bootstrap user (profile, roles, permissions)
-      const bootstrap = await bootstrapUser();
-      
-      if (!bootstrap.ok) {
-        // Show warning but don't block - allow navigation anyway
-        console.warn('[auth] ⚠️ Bootstrap incomplete:', bootstrap.reason);
-        toast.info('Sesión iniciada, pero aún no se cargaron permisos. Actualiza en unos segundos.', {
-          duration: 5000,
-        });
-        // Force navigation even without permissions
-        navigate("/", { replace: true });
-        setIsLoading(false);
-        return;
-      }
-
-      // Step 4: Determine redirect based on roles
-      const roles = bootstrap.roles || [];
-      const hasClientRole = roles.some((r: any) => r.role === 'cliente');
-      const hasStaffRole = roles.some((r: any) => 
-        ['admin', 'colaborador', 'contador'].includes(r.role)
-      );
-
-      console.log('[auth] ✓ Roles:', roles);
-      console.log('[auth] ✓ Permissions:', bootstrap.permissions);
-      
-      toast.success("Inicio de sesión exitoso");
-      
-      // Pure clients go to portal
-      if (hasClientRole && !hasStaffRole) {
-        console.log('[auth] → Redirecting to client portal');
-        navigate("/client/home", { replace: true });
-      } else {
-        console.log('[auth] → Redirecting to dashboard');
-        navigate("/", { replace: true });
+      // Check user role for redirect
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        const role = roleData?.role;
+        
+        toast.success("Inicio de sesión exitoso");
+        
+        // Redirect clients to their portal
+        if (role === 'cliente') {
+          navigate("/client/home", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       }
     } catch (error: any) {
-      console.error('[auth] ❌ Login error:', error);
       toast.error(error.message || "Error al iniciar sesión");
     } finally {
       setIsLoading(false);

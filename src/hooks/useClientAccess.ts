@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from './useUserRole';
-import { useSessionReady } from './useSessionReady';
 import { getEffectiveClientMode } from '@/lib/auth/role';
 
 export function useClientAccess() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { status, isReady } = useSessionReady();
   const { role, loading: roleLoading } = useUserRole();
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -16,23 +14,14 @@ export function useClientAccess() {
 
   useEffect(() => {
     const checkAccess = async () => {
-      // Wait for both session and role to be ready
-      if (!isReady || roleLoading) return;
+      if (roleLoading) return;
 
       try {
-        // If not authenticated, redirect to login
-        if (status === 'unauthenticated') {
-          navigate('/auth/login', { replace: true });
-          setLoading(false);
-          return;
-        }
-
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError) throw userError;
         
         if (!user) {
           navigate('/auth/login', { replace: true });
-          setLoading(false);
           return;
         }
 
@@ -91,7 +80,7 @@ export function useClientAccess() {
         setHasAccess(true);
         setLoading(false);
       } catch (err) {
-        console.error('[useClientAccess] Error checking access:', err);
+        console.error('Error checking client access:', err);
         setError(err instanceof Error ? err : new Error('Error al verificar acceso'));
         setHasAccess(false);
         setLoading(false);
@@ -104,7 +93,7 @@ export function useClientAccess() {
     };
 
     checkAccess();
-  }, [status, isReady, role, roleLoading, navigate, location.pathname]);
+  }, [role, roleLoading, navigate, location.pathname]);
 
   return { hasAccess, loading, error };
 }

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 import { useDemoSession } from "@/auth/DemoGuard";
-import { waitForSession } from "@/lib/authClient";
-import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,76 +11,81 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const demoSession = useDemoSession();
-  const [sessionChecking, setSessionChecking] = useState(true);
-  const [hasSession, setHasSession] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Demo mode
+    // If demo mode is active, use demo session
     if (demoSession.isDemoMode) {
-      setHasSession(true);
+      setUser(demoSession.user);
+      setSession(demoSession.session);
       setIsAdmin(demoSession.role === 'admin');
-      setSessionChecking(false);
+      setLoading(false);
       return;
     }
 
-    // Check session rápidamente (max 5s)
-    const checkSession = async () => {
-      console.info('[route-guard] Checking session...');
-      const session = await waitForSession({ timeoutMs: 5000 });
-      
-      if (session) {
-        console.info('[route-guard] ✓ Session found');
-        setHasSession(true);
+    // Real auth flow
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
         
-        // Check admin in parallel if needed (non-blocking)
-        if (requireAdmin) {
-          (async () => {
-            try {
-              const { data } = await supabase
-                .from("user_roles")
-                .select("role")
-                .eq("user_id", session.user.id)
-                .eq("role", "admin")
-                .maybeSingle();
-              
-              setIsAdmin(!!data);
-              console.info('[route-guard] Admin:', !!data);
-            } catch (error) {
-              console.error('[route-guard] Error checking admin:', error);
-              setIsAdmin(false);
-            }
-          })();
+        if (session?.user && requireAdmin) {
+          setTimeout(() => {
+            checkAdminRole(session.user.id);
+          }, 0);
+        } else {
+          setLoading(false);
         }
-      } else {
-        console.warn('[route-guard] ⚠️ No session');
-        setHasSession(false);
       }
-      
-      setSessionChecking(false);
-    };
+    );
 
-    checkSession();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user && requireAdmin) {
+        checkAdminRole(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [requireAdmin, demoSession]);
 
-  // Spinner pequeño (max 5s)
-  if (sessionChecking) {
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .single();
+      
+      setIsAdmin(!!data);
+    } catch (error) {
+      setIsAdmin(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Verificando sesión… (máx. 5s)</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-muted-foreground">Cargando...</div>
       </div>
     );
   }
 
-  // Redirect to login
-  if (!hasSession && !demoSession.isDemoMode) {
-    console.info('[route-guard] → Redirecting to login');
+  if (!user) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  // Check admin (non-blocking ya que isAdmin se carga en paralelo)
-  if (requireAdmin && !isAdmin && !demoSession.isDemoMode) {
+  if (requireAdmin && !isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -92,7 +96,6 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     );
   }
 
-  console.info('[route-guard] ✓ Access granted');
   return <>{children}</>;
 };
 

@@ -1,82 +1,28 @@
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, ShieldAlert } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useEffect, useState } from "react";
 
 interface LoadingErrorProps {
   isLoading?: boolean;
   error?: any;
   isEmpty?: boolean;
-  isForbidden?: boolean;
   emptyMessage?: string;
-  forbiddenMessage?: string;
   onRetry?: () => void;
-  onHelp?: () => void;
-  children?: React.ReactNode;
 }
 
 export function LoadingError({
   isLoading = false,
   error = null,
   isEmpty = false,
-  isForbidden = false,
   emptyMessage = "No hay datos disponibles",
-  forbiddenMessage = "No tienes permisos para ver este módulo",
   onRetry,
-  onHelp,
-  children,
 }: LoadingErrorProps) {
-  const [loadingTooLong, setLoadingTooLong] = useState(false);
-
-  useEffect(() => {
-    if (isLoading) {
-      // After 5s of loading, show different message
-      const timer = setTimeout(() => {
-        setLoadingTooLong(true);
-      }, 5000);
-      return () => clearTimeout(timer);
-    } else {
-      setLoadingTooLong(false);
-    }
-  }, [isLoading]);
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">
-          {loadingTooLong 
-            ? "No se pudo verificar la sesión. Reintenta o contacta al administrador." 
-            : "Verificando sesión…"}
-        </p>
-        {loadingTooLong && onRetry && (
-          <Button onClick={onRetry} variant="outline" size="sm" className="mt-4">
-            Reintentar
-          </Button>
-        )}
+        <p className="text-muted-foreground">Cargando…</p>
       </div>
-    );
-  }
-
-  if (isForbidden) {
-    return (
-      <Alert variant="destructive" className="m-4">
-        <ShieldAlert className="h-4 w-4" />
-        <AlertTitle>Acceso Restringido</AlertTitle>
-        <AlertDescription className="flex items-center justify-between">
-          <span>{forbiddenMessage}</span>
-          {onHelp && (
-            <Button
-              onClick={onHelp}
-              variant="outline"
-              size="sm"
-              className="ml-4"
-            >
-              Ver Ayuda
-            </Button>
-          )}
-        </AlertDescription>
-      </Alert>
     );
   }
 
@@ -110,6 +56,5 @@ export function LoadingError({
     );
   }
 
-  // All checks passed - render children
-  return <>{children}</>;
+  return null;
 }
