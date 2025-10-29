@@ -2264,6 +2264,13 @@ export type Database = {
         }
         Returns: string
       }
+      seed_module_permissions_for: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "colaborador" | "cliente" | "contador"
