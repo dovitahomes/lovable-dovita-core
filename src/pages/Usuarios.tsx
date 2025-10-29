@@ -18,8 +18,7 @@ export default function Usuarios() {
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
-    phone: "",
-    sucursal_id: ""
+    phone: ""
   });
 
   const queryClient = useQueryClient();
@@ -28,29 +27,18 @@ export default function Usuarios() {
     queryKey: ['users'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('users')
-        .select('*, sucursales(nombre)')
+        .from('profiles')
+        .select('id, email, full_name, phone, created_at')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     }
   });
 
-  const { data: sucursales } = useQuery({
-    queryKey: ['sucursales'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sucursales')
-        .select('id, nombre')
-        .eq('activa', true);
-      if (error) throw error;
-      return data;
-    }
-  });
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('users').insert({ ...data, sucursal_id: data.sucursal_id === "none" ? null : data.sucursal_id });
+      const { error } = await supabase.from('profiles').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -63,7 +51,7 @@ export default function Usuarios() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: any) => {
-      const { error } = await supabase.from('users').update(data).eq('id', id);
+      const { error } = await supabase.from('profiles').update(data).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -76,7 +64,7 @@ export default function Usuarios() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('users').delete().eq('id', id);
+      const { error } = await supabase.from('profiles').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -88,20 +76,16 @@ export default function Usuarios() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
-      ...formData,
-      sucursal_id: formData.sucursal_id || null
-    };
     
     if (editingUser) {
-      updateMutation.mutate({ id: editingUser.id, data });
+      updateMutation.mutate({ id: editingUser.id, data: formData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(formData);
     }
   };
 
   const resetForm = () => {
-    setFormData({ full_name: "", email: "", phone: "", sucursal_id: "" });
+    setFormData({ full_name: "", email: "", phone: "" });
     setEditingUser(null);
     setOpen(false);
   };
@@ -111,8 +95,7 @@ export default function Usuarios() {
     setFormData({
       full_name: user.full_name,
       email: user.email,
-      phone: user.phone || "",
-      sucursal_id: user.sucursal_id || ""
+      phone: user.phone || ""
     });
     setOpen(true);
   };
@@ -156,20 +139,6 @@ export default function Usuarios() {
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
-              <div>
-                <Label>Sucursal</Label>
-                <Select value={formData.sucursal_id} onValueChange={(value) => setFormData({ ...formData, sucursal_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar sucursal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin sucursal</SelectItem>
-                    {sucursales?.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <div className="flex gap-2">
                 <Button type="submit">{editingUser ? 'Actualizar' : 'Crear'}</Button>
                 <Button type="button" variant="outline" onClick={resetForm}>Cancelar</Button>
@@ -198,7 +167,6 @@ export default function Usuarios() {
                   <TableHead>Nombre</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Teléfono</TableHead>
-                  <TableHead>Sucursal</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -208,7 +176,6 @@ export default function Usuarios() {
                     <TableCell>{user.full_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.phone || '-'}</TableCell>
-                    <TableCell>{user.sucursales?.nombre || '-'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>

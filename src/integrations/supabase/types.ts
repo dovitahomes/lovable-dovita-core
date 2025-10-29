@@ -2190,6 +2190,8 @@ export type Database = {
           variance_pct: number
         }[]
       }
+      ensure_default_role: { Args: never; Returns: undefined }
+      ensure_profile: { Args: never; Returns: undefined }
       extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
       get_accounts_payable: {
         Args: never
@@ -2261,6 +2263,13 @@ export type Database = {
           unidad_param: string
         }
         Returns: string
+      }
+      seed_module_permissions_for: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

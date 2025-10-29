@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,8 +16,9 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
 import { SidebarInset } from "@/components/ui/sidebar";
+import { useSessionReady } from "@/hooks/useSessionReady";
+import { bootstrapUser } from "@/lib/auth/bootstrapUser";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -225,15 +226,25 @@ const InternalLayout = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <DemoGuard>
-      <Routes>
+const App = () => {
+  const { status, session } = useSessionReady();
+
+  // Bootstrap user profile and role on authentication
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      bootstrapUser();
+    }
+  }, [status, session]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <DemoGuard>
+              <Routes>
         {/* Public routes */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/callback" element={<Callback />} />
@@ -270,13 +281,14 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-          </Routes>
-          </DemoGuard>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+              </Routes>
+            </DemoGuard>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
 

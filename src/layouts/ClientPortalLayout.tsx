@@ -1,38 +1,39 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { ClientAppShell } from "@/components/client/ClientAppShell";
 import { useClientAccess } from "@/hooks/useClientAccess";
-import { useEffect, useState } from "react";
-import { getSession } from "@/lib/auth";
+import { useEffect } from "react";
 import { LoadingError } from "@/components/common/LoadingError";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSessionReady } from "@/hooks/useSessionReady";
 
 export default function ClientPortalLayout() {
   const { hasAccess, loading: accessLoading, error: accessError } = useClientAccess();
+  const { status, isReady } = useSessionReady();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
-    const checkSession = async () => {
-      const session = await getSession();
-      
-      if (!session) {
-        // No session - redirect to login
-        navigate('/auth/login', { replace: true });
-        return;
-      }
-      
-      setSessionChecked(true);
-    };
+    // Redirect to login if not authenticated after session check
+    if (isReady && status === 'unauthenticated') {
+      navigate('/auth/login', { replace: true });
+    }
+  }, [status, isReady, navigate]);
 
-    checkSession();
-  }, [navigate]);
-
-  if (!sessionChecked || accessLoading || accessError || !hasAccess) {
+  if (!isReady || accessLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingError
-          isLoading={!sessionChecked || accessLoading}
+          isLoading={true}
+          emptyMessage="Verificando acceso..."
+        />
+      </div>
+    );
+  }
+
+  if (accessError || !hasAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingError
           error={accessError}
           emptyMessage="No tienes permisos para acceder al portal de cliente"
           onRetry={() => {
