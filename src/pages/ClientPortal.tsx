@@ -10,6 +10,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { FinancialSummary } from "@/components/client/FinancialSummary";
 import { ClientTabBar } from "@/components/client/ClientTabBar";
 import { PhotoViewer } from "@/components/client/PhotoViewer";
+// Legacy component - new dedicated chat page at /client/chat uses different implementation
 import { ClientChat } from "@/components/client/ClientChat";
 import { ClientCalendar } from "@/components/client/ClientCalendar";
 import { CACHE_CONFIG } from "@/lib/queryConfig";

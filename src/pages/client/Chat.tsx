@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useClientProjects, useProjectChat } from "@/features/client/hooks";
+import useClientProjects from "@/features/client/hooks/useClientProjects";
+import useProjectChat from "@/features/client/hooks/useProjectChat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";

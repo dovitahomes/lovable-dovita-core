@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { useProjectChat } from "@/features/client/hooks";
+import useProjectChat from "@/features/client/hooks/useProjectChat";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

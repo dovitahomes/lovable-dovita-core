@@ -9,7 +9,7 @@ export interface ChatMessage {
   created_at: string;
 }
 
-export function useProjectChat(projectId: string | null) {
+export default function useProjectChat(projectId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -116,7 +116,7 @@ export function useProjectChat(projectId: string | null) {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [projectId, isMounted]);
 

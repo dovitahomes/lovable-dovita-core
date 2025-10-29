@@ -10,7 +10,7 @@ export interface ClientProject {
 
 const STORAGE_KEY = 'client.selectedProjectId';
 
-export function useClientProjects() {
+export default function useClientProjects() {
   const [selectedProjectId, setSelectedProjectIdState] = useState<string | null>(() => {
     return localStorage.getItem(STORAGE_KEY);
   });
