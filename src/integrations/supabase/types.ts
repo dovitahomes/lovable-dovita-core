@@ -1943,68 +1943,54 @@ export type Database = {
       }
       user_module_permissions: {
         Row: {
-          can_create: boolean
-          can_delete: boolean
-          can_edit: boolean
-          can_view: boolean
-          created_at: string
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_view: boolean | null
+          created_at: string | null
           id: string
           module_name: string
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          can_create?: boolean
-          can_delete?: boolean
-          can_edit?: boolean
-          can_view?: boolean
-          created_at?: string
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
           id?: string
           module_name: string
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          can_create?: boolean
-          can_delete?: boolean
-          can_edit?: boolean
-          can_view?: boolean
-          created_at?: string
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
           id?: string
           module_name?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
       }
       user_roles: {
         Row: {
-          created_at: string
-          id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          created_at?: string
-          id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          created_at?: string
-          id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       users: {
         Row: {
@@ -2181,8 +2167,8 @@ export type Database = {
       }
     }
     Functions: {
-      admin_ensure_user_bootstrap: {
-        Args: { target_user_id: string }
+      bootstrap_user_access: {
+        Args: { target_user_id?: string }
         Returns: undefined
       }
       check_price_variance: {
@@ -2194,19 +2180,7 @@ export type Database = {
           variance_pct: number
         }[]
       }
-      ensure_default_role: { Args: never; Returns: undefined }
-      ensure_default_role_by: {
-        Args: {
-          p_role?: Database["public"]["Enums"]["app_role"]
-          p_user_id: string
-        }
-        Returns: undefined
-      }
       ensure_profile: { Args: never; Returns: undefined }
-      ensure_profile_by: {
-        Args: { p_email: string; p_full_name: string; p_user_id: string }
-        Returns: undefined
-      }
       extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
       get_accounts_payable: {
         Args: never
@@ -2279,7 +2253,7 @@ export type Database = {
         }
         Returns: string
       }
-      seed_module_permissions_for: {
+      seed_permissions_for_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
           p_user_id: string

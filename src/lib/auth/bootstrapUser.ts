@@ -15,11 +15,11 @@ export type BootstrapResult = {
  * NEVER throws - always returns a result object.
  * Safe to call after login; won't block UI indefinitely.
  * 
- * Uses the new admin_ensure_user_bootstrap RPC which:
+ * Uses the new bootstrap_user_access RPC which:
  * - Creates profile
- * - Assigns default role (colaborador)
+ * - Assigns default role (colaborador) if no role exists
  * - Assigns cliente role if user email exists in clients table
- * - Seeds permissions for all user roles
+ * - Seeds permissions for all user roles via trigger
  */
 export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapResult> {
   const startTime = Date.now();
@@ -37,9 +37,9 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
     try {
       console.info(`[bootstrap] Attempt ${attempt + 1}/${maxRetries}`);
       
-      // Step 1: Call unified bootstrap RPC (replaces ensure_profile + ensure_default_role + permissions seed)
+      // Step 1: Call unified bootstrap RPC (creates profile + roles + permissions)
       const bootstrapStart = Date.now();
-      const { error: bootstrapError } = await supabase.rpc('admin_ensure_user_bootstrap', {
+      const { error: bootstrapError } = await supabase.rpc('bootstrap_user_access', {
         target_user_id: userId
       });
       
