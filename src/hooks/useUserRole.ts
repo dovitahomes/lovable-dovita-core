@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDemoSession } from '@/auth/DemoGuard';
+import { useSessionReady } from './useSessionReady';
 
 export type UserRole = 'admin' | 'user' | 'colaborador' | 'cliente' | 'contador';
 
 export function useUserRole() {
   const demoSession = useDemoSession();
+  const { status, session } = useSessionReady();
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,25 +19,47 @@ export function useUserRole() {
       return;
     }
 
+    // Wait for session to be ready
+    if (status === 'loading') {
+      setLoading(true);
+      return;
+    }
+
+    if (status === 'unauthenticated') {
+      setRole(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      if (!session?.user) {
+        setRole(null);
         setLoading(false);
         return;
       }
 
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
 
-      setRole(data?.role as UserRole || 'user');
-      setLoading(false);
+        if (error) {
+          console.error('[useUserRole] Error fetching role:', error);
+        }
+
+        setRole(data?.role as UserRole || 'user');
+      } catch (error) {
+        console.error('[useUserRole] Exception fetching role:', error);
+        setRole('user');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchRole();
-  }, [demoSession]);
+  }, [demoSession, status, session]);
 
   return { role, loading };
 }

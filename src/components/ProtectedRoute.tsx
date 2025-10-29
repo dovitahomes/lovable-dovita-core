@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Session } from "@supabase/supabase-js";
 import { useDemoSession } from "@/auth/DemoGuard";
+import { useSessionReady } from "@/hooks/useSessionReady";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,50 +12,23 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const demoSession = useDemoSession();
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const { status, session } = useSessionReady();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [checkingAdmin, setCheckingAdmin] = useState(false);
 
   useEffect(() => {
     // If demo mode is active, use demo session
     if (demoSession.isDemoMode) {
-      setUser(demoSession.user);
-      setSession(demoSession.session);
       setIsAdmin(demoSession.role === 'admin');
-      setLoading(false);
       return;
     }
 
-    // Real auth flow
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user && requireAdmin) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id);
-          }, 0);
-        } else {
-          setLoading(false);
-        }
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user && requireAdmin) {
-        checkAdminRole(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [requireAdmin, demoSession]);
+    // Check admin role if required and authenticated
+    if (requireAdmin && status === 'authenticated' && session?.user) {
+      setCheckingAdmin(true);
+      checkAdminRole(session.user.id);
+    }
+  }, [requireAdmin, status, session, demoSession]);
 
   const checkAdminRole = async (userId: string) => {
     try {
@@ -63,29 +37,34 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
         .select("role")
         .eq("user_id", userId)
         .eq("role", "admin")
-        .single();
+        .maybeSingle();
       
       setIsAdmin(!!data);
     } catch (error) {
+      console.error('[ProtectedRoute] Error checking admin role:', error);
       setIsAdmin(false);
     } finally {
-      setLoading(false);
+      setCheckingAdmin(false);
     }
   };
 
-  if (loading) {
+  // Show loading state while checking session
+  if (status === 'loading' || (requireAdmin && checkingAdmin)) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-muted-foreground">Cargando...</div>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Verificando sesión...</p>
       </div>
     );
   }
 
-  if (!user) {
+  // Redirect to login if not authenticated
+  if (status === 'unauthenticated' && !demoSession.isDemoMode) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
+  // Check admin access
+  if (requireAdmin && !isAdmin && !demoSession.isDemoMode) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
