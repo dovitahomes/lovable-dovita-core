@@ -540,6 +540,7 @@ export type Database = {
         Row: {
           address_json: Json | null
           created_at: string
+          created_by: string | null
           email: string | null
           fiscal_json: Json | null
           id: string
@@ -551,6 +552,7 @@ export type Database = {
         Insert: {
           address_json?: Json | null
           created_at?: string
+          created_by?: string | null
           email?: string | null
           fiscal_json?: Json | null
           id?: string
@@ -562,6 +564,7 @@ export type Database = {
         Update: {
           address_json?: Json | null
           created_at?: string
+          created_by?: string | null
           email?: string | null
           fiscal_json?: Json | null
           id?: string
@@ -1565,6 +1568,7 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
+          created_by: string | null
           id: string
           notas: string | null
           status: Database["public"]["Enums"]["project_status"]
@@ -1576,6 +1580,7 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
+          created_by?: string | null
           id?: string
           notas?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -1587,6 +1592,7 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
+          created_by?: string | null
           id?: string
           notas?: string | null
           status?: Database["public"]["Enums"]["project_status"]
