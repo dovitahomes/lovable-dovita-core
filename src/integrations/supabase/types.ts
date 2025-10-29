@@ -2176,6 +2176,35 @@ export type Database = {
       }
     }
     Functions: {
+      _has_any_admin: { Args: never; Returns: boolean }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          roles: Database["public"]["Enums"]["app_role"][]
+          user_id: string
+        }[]
+      }
+      admin_set_module_permission: {
+        Args: {
+          p_can_create: boolean
+          p_can_delete: boolean
+          p_can_edit: boolean
+          p_can_view: boolean
+          p_module: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      admin_set_user_role: {
+        Args: {
+          p_enabled: boolean
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       bootstrap_user_access: {
         Args: { target_user_id?: string }
         Returns: undefined
@@ -2245,6 +2274,7 @@ export type Database = {
           qty_requested: number
         }[]
       }
+      grant_admin_by_email: { Args: { p_email: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
