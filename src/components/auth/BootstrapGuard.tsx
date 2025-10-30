@@ -22,12 +22,40 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
     try {
       setStatus('loading');
       setErrorMsg(null);
-      console.info('[BootstrapGuard] Starting bootstrap...');
+      console.info('[BootstrapGuard] Starting...');
+
+      // ✅ CACHE-FIRST: Check localStorage before making RPC
+      const cachedRoles = localStorage.getItem('dv_roles_v1');
+      const cachedPerms = localStorage.getItem('dv_permissions_v1');
+
+      if (cachedRoles && cachedPerms) {
+        try {
+          const roles = JSON.parse(cachedRoles);
+          const perms = JSON.parse(cachedPerms);
+          
+          if (roles.length > 0 && perms.length > 0) {
+            console.info('[BootstrapGuard] ✅ Cache hit - skipping RPC');
+            console.info(`[BootstrapGuard] Loaded from cache: roles=${JSON.stringify(roles)}, modules=${perms.length}`);
+            setStatus('ready');
+            setRetryCount(0);
+            return; // ⚠️ Skip RPC if valid cache exists
+          }
+        } catch (err) {
+          console.warn('[BootstrapGuard] Cache corrupto, limpiando...', err);
+          localStorage.removeItem('dv_roles_v1');
+          localStorage.removeItem('dv_permissions_v1');
+        }
+      }
+
+      // If we reach here, NO valid cache → run bootstrap
+      console.info('[BootstrapGuard] Cache miss → ejecutando bootstrap RPC');
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('No user found');
       }
+
+      console.info(`[BootstrapGuard] Bootstrapping user: ${user.email}`);
 
       // Single attempt - if it fails, user clicks "Retry"
       const { error: bootstrapErr } = await supabase.rpc('bootstrap_user_access', { 
@@ -85,14 +113,30 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
   useEffect(() => {
     runBootstrap();
     
-    // Timeout de 5s - suficiente para operaciones exitosas
-    const timeout = setTimeout(() => {
+    // Timeout de 15s - suficiente incluso para conexiones lentas
+    const timeout = setTimeout(async () => {
       if (status === 'loading') {
-        console.error('[BootstrapGuard] TIMEOUT: Bootstrap no completó en 5s');
-        setErrorMsg('El sistema no respondió a tiempo. Intenta de nuevo o contacta al administrador.');
+        console.error('[BootstrapGuard] TIMEOUT después de 15s');
+        
+        // Log debug info
+        const { data: { user } } = await supabase.auth.getUser();
+        console.error('[BootstrapGuard] Estado:', { 
+          user: user?.email,
+          cachedRoles: localStorage.getItem('dv_roles_v1'),
+          cachedPerms: localStorage.getItem('dv_permissions_v1')
+        });
+
+        setErrorMsg(`El sistema no respondió a tiempo (15s).
+
+Posibles causas:
+• Conexión lenta
+• Error en Supabase
+• Configuración de permisos incorrecta
+
+Intenta de nuevo o contacta al administrador.`);
         setStatus('error');
       }
-    }, 5000);
+    }, 15000);
 
     return () => clearTimeout(timeout);
   }, [retryCount]);

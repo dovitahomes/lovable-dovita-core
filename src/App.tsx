@@ -257,9 +257,13 @@ const App = () => {
         <Route
           path="/client"
           element={
-            <Suspense fallback={<PageHeaderSkeleton />}>
-              <ClientPortalLayout />
-            </Suspense>
+            <ProtectedRoute>
+              <BootstrapGuard>
+                <Suspense fallback={<PageHeaderSkeleton />}>
+                  <ClientPortalLayout />
+                </Suspense>
+              </BootstrapGuard>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="/client/home" replace />} />

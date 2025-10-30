@@ -54,25 +54,28 @@ export function useSessionReady() {
         }
 
         if (data?.session) {
+          console.log('[session] ✓ Session found, validando email...');
+          
           // Validar email confirmado
           const { data: userData, error: userError } = await supabase.auth.getUser();
           if (!mounted) return;
 
           if (userError) {
-            console.error('[session] getUser error', userError);
+            console.error('[session] ❌ getUser error:', userError);
             setStatus('error');
             setAuthError(userError.message);
             return;
           }
 
           if (!userData.user?.email_confirmed_at) {
-            console.warn('[session] Email no confirmado');
+            console.warn('[session] ❌ Email no confirmado para:', userData.user?.email);
             setSession(null);
             setStatus('no-session');
             setAuthError('Email no confirmado');
             return;
           }
 
+          console.log('[session] ✅ Email confirmado para:', userData.user?.email);
           console.log('[session] status=ready');
           setSession(data.session);
           setStatus('ready');

@@ -26,15 +26,19 @@ const Login = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Use cached roles to avoid unnecessary queries and race conditions
+        console.log('[auth/Login] Existing session detected');
+        // Use cached roles if available
         const cachedRoles = JSON.parse(localStorage.getItem('dv_roles_v1') || '[]');
         
         if (cachedRoles.includes('cliente')) {
+          console.log('[auth/Login] → Redirecting client to portal');
           navigate("/client/home", { replace: true });
         } else if (cachedRoles.length > 0) {
+          console.log('[auth/Login] → Redirecting staff to dashboard');
           navigate("/", { replace: true });
+        } else {
+          console.log('[auth/Login] No cached roles, staying on login');
         }
-        // If no cache exists, BootstrapGuard will handle the flow
       }
     };
     checkUser();
@@ -66,18 +70,57 @@ const Login = () => {
       if (authError) throw authError;
       console.log('[auth] ✓ Authentication successful');
 
-      // Step 2: Redirect immediately - BootstrapGuard handles the bootstrap
-      console.log('[auth] ✅ Authentication successful → redirecting');
-      toast.success('Inicio de sesión exitoso');
+      // Step 2: Bootstrap user (BLOCKING - wait for completion)
+      console.log('[auth] 🔧 Bootstrapping user...');
 
-      // Redirect based on cached role (or assume staff if no cache)
-      const cachedRoles = JSON.parse(localStorage.getItem('dv_roles_v1') || '[]');
-      if (cachedRoles.includes('cliente')) {
-        console.log('[auth] → Redirecting to client portal');
-        navigate("/client/home", { replace: true });
-      } else {
-        console.log('[auth] → Redirecting to dashboard');
-        navigate("/", { replace: true });
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('No user found after login');
+
+        const { error: bootstrapErr } = await supabase.rpc('bootstrap_user_access', { 
+          target_user_id: user.id 
+        });
+
+        if (bootstrapErr) {
+          console.error('[auth] ❌ Bootstrap failed:', bootstrapErr);
+          toast.error('Error al inicializar tu cuenta. Contacta al administrador.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Cargar roles inmediatamente
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+
+        const roleList = roles?.map(r => r.role) || [];
+        localStorage.setItem('dv_roles_v1', JSON.stringify(roleList));
+
+        // Cargar permisos
+        const { data: permissions } = await supabase
+          .from('user_module_permissions')
+          .select('*')
+          .eq('user_id', user.id);
+
+        localStorage.setItem('dv_permissions_v1', JSON.stringify(permissions || []));
+
+        console.log('[auth] ✅ Bootstrap complete, roles:', roleList);
+        toast.success('Inicio de sesión exitoso');
+
+        // Navegar según rol
+        if (roleList.includes('cliente')) {
+          console.log('[auth] → Redirecting to client portal');
+          navigate('/client/home', { replace: true });
+        } else {
+          console.log('[auth] → Redirecting to dashboard');
+          navigate('/', { replace: true });
+        }
+      } catch (error) {
+        console.error('[auth] ❌ Bootstrap error:', error);
+        toast.error('Error al configurar tu cuenta');
+        setIsLoading(false);
+        return;
       }
     } catch (error: any) {
       console.error('[auth] ❌ Login error:', error);
