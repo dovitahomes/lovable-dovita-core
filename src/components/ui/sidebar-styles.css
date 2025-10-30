@@ -9,3 +9,14 @@
   --sidebar-border: var(--sidebar-border-light);
   --sidebar-ring: var(--sidebar-ring-light);
 }
+
+/* Light sidebar - blue icons like the logo */
+[data-sidebar-theme="light"] .lucide {
+  color: hsl(221 83% 53%) !important;
+}
+
+/* Light sidebar - group labels */
+[data-sidebar-theme="light"] [data-sidebar="group-label"] {
+  color: hsl(222 47% 40%);
+  font-weight: 500;
+}
