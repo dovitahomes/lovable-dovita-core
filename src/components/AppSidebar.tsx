@@ -45,12 +45,28 @@ export function AppSidebar() {
   const showEmptyState = !permsLoading && !roleLoading && routesToShow.length === 0 && !isAdmin;
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error al cerrar sesión");
-    } else {
+    try {
+      console.info('[logout] Starting signOut...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('[logout] Error:', error);
+        toast.error("Error al cerrar sesión");
+        return;
+      }
+      
+      // Clear all local caches
+      console.info('[logout] Clearing caches...');
+      localStorage.removeItem('dv_roles_v1');
+      localStorage.removeItem('dv_permissions_v1');
+      localStorage.removeItem('dv_corporate_v1');
+      
+      console.info('[logout] signOut OK, caches cleared → /auth/login');
       toast.success("Sesión cerrada");
-      navigate("/auth");
+      navigate("/auth/login", { replace: true });
+    } catch (error) {
+      console.error('[logout] Unexpected error:', error);
+      toast.error("Error inesperado al cerrar sesión");
     }
   };
 

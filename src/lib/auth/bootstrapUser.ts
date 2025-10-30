@@ -31,13 +31,29 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
     return { ok: false, roles: [], permissions: [], reason: 'NO_SESSION' };
   }
 
-  console.info('[bootstrap] Starting bootstrap for user:', userId);
+  // Get user email for first admin bootstrap
+  const { data: { user } } = await supabase.auth.getUser();
+  const userEmail = user?.email || '';
+  
+  console.info('[bootstrap] Starting bootstrap for user:', userId, 'email:', userEmail);
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       console.info(`[bootstrap] Attempt ${attempt + 1}/${maxRetries}`);
       
-      // Step 1: Call unified bootstrap RPC (creates profile + roles + permissions)
+      // Step 1: Try to bootstrap first admin (before other bootstraps)
+      try {
+        console.info('[bootstrap] Attempting first admin bootstrap...');
+        const { data: firstAdminResult } = await supabase.rpc('bootstrap_first_admin', {
+          p_email: userEmail
+        });
+        console.info('[bootstrap] First admin bootstrap result:', firstAdminResult);
+      } catch (err) {
+        // Silently ignore - either admin already exists or other non-critical error
+        console.info('[bootstrap] First admin bootstrap skipped:', err);
+      }
+      
+      // Step 2: Call unified bootstrap RPC (creates profile + roles + permissions)
       const bootstrapStart = Date.now();
       const { error: bootstrapError } = await supabase.rpc('bootstrap_user_access', {
         target_user_id: userId
@@ -49,16 +65,6 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       }
       
       console.info(`[bootstrap] ✓ Bootstrap RPC completed (${Date.now() - bootstrapStart}ms)`);
-      
-      // Step 1.5: Try to bootstrap first admin (non-blocking, silently fails if admin already exists)
-      try {
-        console.info('[bootstrap] Attempting first admin bootstrap...');
-        await supabase.rpc('bootstrap_first_admin');
-        console.info('[bootstrap] ✓ First admin bootstrap completed');
-      } catch (err) {
-        // Silently ignore - either admin already exists or other non-critical error
-        console.info('[bootstrap] First admin bootstrap skipped (admin may already exist)');
-      }
       
       // Step 2: Load user roles
       const rolesStart = Date.now();
@@ -82,6 +88,15 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       
       const totalTime = Date.now() - startTime;
       console.info(`[bootstrap] ✅ Success in ${totalTime}ms (attempt ${attempt + 1})`);
+      console.info(`[login] email=${userEmail}, bootstrapAccess=ok, roles=[${(roles || []).map(r => r.role).join(', ')}], perms=${(permissions || []).length}`);
+      
+      // Persist to localStorage for quick access
+      try {
+        localStorage.setItem('dv_roles_v1', JSON.stringify((roles || []).map(r => r.role)));
+        localStorage.setItem('dv_permissions_v1', JSON.stringify(permissions || []));
+      } catch (err) {
+        console.warn('[bootstrap] Could not persist to localStorage:', err);
+      }
       
       return {
         ok: true,
