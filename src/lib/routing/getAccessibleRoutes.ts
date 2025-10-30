@@ -57,12 +57,6 @@ export const ALL_ROUTES: RouteGroup[] = [
     ],
   },
   {
-    label: "Operaciones",
-    items: [
-      { title: "Proveedores", url: "/proveedores", icon: Truck, moduleName: "proveedores" },
-    ],
-  },
-  {
     label: "Administración",
     items: [
       { title: "Finanzas", url: "/finanzas", icon: DollarSign, moduleName: "finanzas" },
@@ -75,6 +69,7 @@ export const ALL_ROUTES: RouteGroup[] = [
     items: [
       { title: "Transacciones Unificadas", url: "/erp/transactions", icon: ListTree, moduleName: "herramientas" },
       { title: "Presupuestos", url: "/erp/budgets", icon: Calculator, moduleName: "presupuestos" },
+      { title: "Proveedores", url: "/proveedores", icon: Truck, moduleName: "proveedores" },
     ],
   },
   {

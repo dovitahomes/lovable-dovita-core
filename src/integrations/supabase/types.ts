@@ -222,6 +222,7 @@ export type Database = {
           partida_id: string | null
           precio_unit: number | null
           proveedor_alias: string | null
+          provider_id: string | null
           subpartida_id: string | null
           total: number | null
           unidad: string
@@ -241,6 +242,7 @@ export type Database = {
           partida_id?: string | null
           precio_unit?: number | null
           proveedor_alias?: string | null
+          provider_id?: string | null
           subpartida_id?: string | null
           total?: number | null
           unidad: string
@@ -260,6 +262,7 @@ export type Database = {
           partida_id?: string | null
           precio_unit?: number | null
           proveedor_alias?: string | null
+          provider_id?: string | null
           subpartida_id?: string | null
           total?: number | null
           unidad?: string
@@ -284,6 +287,13 @@ export type Database = {
             columns: ["partida_id"]
             isOneToOne: false
             referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
             referencedColumns: ["id"]
           },
           {

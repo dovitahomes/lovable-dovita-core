@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { toast } from "sonner";
 import { ArrowLeft, Save, Send, FileDown, Plus, Trash2, ChevronDown } from "lucide-react";
 import { generateBudgetPDF } from "@/utils/pdfGenerator";
+import { useProviders } from "@/hooks/useProviders";
 
 interface BudgetItem {
   id?: string;
@@ -27,6 +28,7 @@ interface BudgetItem {
   costo_unit: number;
   honorarios_pct: number;
   order_index: number;
+  provider_id?: string;
 }
 
 export default function BudgetEditor() {
@@ -80,6 +82,8 @@ export default function BudgetEditor() {
     }
   });
 
+  const { data: providers } = useProviders();
+
   useEffect(() => {
     if (budget) {
       setIvaEnabled(budget.iva_enabled);
@@ -96,7 +100,8 @@ export default function BudgetEditor() {
         desperdicio_pct: item.desperdicio_pct,
         costo_unit: item.costo_unit,
         honorarios_pct: item.honorarios_pct,
-        order_index: item.order_index
+        order_index: item.order_index,
+        provider_id: item.provider_id
       }));
       setItems(mappedItems);
     }
@@ -121,7 +126,7 @@ export default function BudgetEditor() {
       if (items.length > 0) {
         const { error: itemsError } = await supabase
           .from('budget_items')
-          .insert(
+              .insert(
             items.map((item, idx) => ({
               budget_id: id,
               mayor_id: item.mayor_id,
@@ -133,6 +138,7 @@ export default function BudgetEditor() {
               desperdicio_pct: item.desperdicio_pct || 0,
               costo_unit: item.costo_unit || 0,
               honorarios_pct: item.honorarios_pct || 0,
+              provider_id: item.provider_id || null,
               order_index: idx
             }))
           );
@@ -321,8 +327,8 @@ export default function BudgetEditor() {
                         const globalIdx = items.findIndex(i => i === item);
                         return (
                           <div key={globalIdx} className="border rounded-lg p-3 space-y-3">
-                            <div className="flex justify-between items-start">
-                              <div className="grid grid-cols-2 gap-3 flex-1">
+                             <div className="flex justify-between items-start">
+                              <div className="grid grid-cols-3 gap-3 flex-1">
                                 <div>
                                   <Label>Partida *</Label>
                                   <Select
@@ -342,6 +348,25 @@ export default function BudgetEditor() {
                                       {mayorPartidas.map((p) => (
                                         <SelectItem key={p.id} value={p.id}>
                                           {p.code} - {p.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label>Proveedor</Label>
+                                  <Select
+                                    value={item.provider_id || ""}
+                                    onValueChange={(v) => handleItemChange(globalIdx, 'provider_id', v || undefined)}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Opcional" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="">Sin proveedor</SelectItem>
+                                      {providers?.map((p) => (
+                                        <SelectItem key={p.id} value={p.id}>
+                                          {p.code_short} - {p.name}
                                         </SelectItem>
                                       ))}
                                     </SelectContent>

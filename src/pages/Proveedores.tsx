@@ -60,6 +60,7 @@ export default function Proveedores() {
       const { data, error } = await supabase
         .from("providers")
         .select("*")
+        .eq("activo", true)
         .order("name");
 
       if (error) {
@@ -97,14 +98,15 @@ export default function Proveedores() {
 
     const { error } = await supabase
       .from("providers")
-      .delete()
+      .update({ activo: false })
       .eq("id", providerToDelete);
 
     if (error) {
-      toast.error("Error al eliminar proveedor");
+      toast.error("Error al desactivar proveedor");
       console.error(error);
     } else {
-      toast.success("Proveedor eliminado correctamente");
+      toast.success("Proveedor desactivado correctamente");
+      queryClient.invalidateQueries({ queryKey: ['providers'] });
     }
     setShowDeleteDialog(false);
     setProviderToDelete(null);
@@ -171,7 +173,11 @@ export default function Proveedores() {
 
       <ProviderDialog
         open={showDialog}
-        onOpenChange={setShowDialog}
+        onOpenChange={(open) => {
+          setShowDialog(open);
+          if (!open) setSelectedProvider(null);
+        }}
+        provider={selectedProvider}
       />
 
       <ProviderDetailsDialog
