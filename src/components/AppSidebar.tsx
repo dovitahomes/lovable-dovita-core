@@ -49,14 +49,25 @@ export function AppSidebar() {
     appSignOut();
   };
 
-  const getNavClass = ({ isActive }: { isActive: boolean }) =>
-    isActive
-      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-      : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
+  const getNavClass = ({ isActive }: { isActive: boolean }) => {
+    const baseClasses = isActive ? "font-medium" : "";
+    const colorClasses = sidebarTheme === "light"
+      ? isActive 
+        ? "bg-blue-50 text-blue-600" 
+        : "hover:bg-gray-100 text-gray-700"
+      : isActive
+        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+        : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
+    return `${baseClasses} ${colorClasses}`;
+  };
 
   return (
     <Sidebar 
-      className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"} 
+      className={
+        state === "collapsed" 
+          ? (sidebarTheme === "light" ? "w-14 xl:w-16 bg-white border-r" : "w-14 xl:w-16")
+          : (sidebarTheme === "light" ? "w-64 bg-white border-r" : "w-64")
+      }
       data-sidebar-theme={sidebarTheme}
     >
       <SidebarHeader className="flex items-center justify-center py-6 px-4">
@@ -76,7 +87,9 @@ export function AppSidebar() {
 
         {routesToShow.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupLabel className={sidebarTheme === "light" ? "text-gray-600" : ""}>
+              {group.label}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (
@@ -98,7 +111,7 @@ export function AppSidebar() {
                           }
                         }}
                       >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
                         {state !== "collapsed" && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
@@ -110,23 +123,35 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 space-y-2">
+      <SidebarFooter className={sidebarTheme === "light" ? "p-3 space-y-2 border-t border-gray-200" : "p-3 space-y-2"}>
         <Button
           variant="ghost"
           onClick={toggleSidebarTheme}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={
+            sidebarTheme === "light"
+              ? "w-full justify-start text-gray-700 hover:bg-gray-100"
+              : "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          }
           title={sidebarTheme === "dark" ? "Sidebar Claro" : "Sidebar Oscuro"}
         >
-          {sidebarTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {sidebarTheme === "dark" ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+          )}
           {state !== "collapsed" && <span className="ml-2 truncate">{sidebarTheme === "dark" ? "Sidebar Claro" : "Sidebar Oscuro"}</span>}
         </Button>
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={
+            sidebarTheme === "light"
+              ? "w-full justify-start text-gray-700 hover:bg-gray-100"
+              : "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          }
           title="Cerrar Sesión"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
           {state !== "collapsed" && <span className="ml-2 truncate">Cerrar Sesión</span>}
         </Button>
       </SidebarFooter>

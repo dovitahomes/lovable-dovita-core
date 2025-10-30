@@ -209,7 +209,12 @@ const Sidebar = React.forwardRef<
         <div
           data-sidebar="sidebar"
           data-sidebar-theme={props["data-sidebar-theme"]}
-          className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+          className={cn(
+            "flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow",
+            props["data-sidebar-theme"] === "light" 
+              ? "bg-white text-gray-900 border-gray-200" 
+              : "bg-sidebar text-sidebar-foreground border-sidebar-border"
+          )}
         >
           {children}
         </div>
