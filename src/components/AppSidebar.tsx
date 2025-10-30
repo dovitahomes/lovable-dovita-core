@@ -50,12 +50,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
-      <SidebarHeader className="flex items-center justify-center py-6">
+      <SidebarHeader className="flex items-center justify-center py-6 px-4">
         <img 
           src={dovitaLogo} 
           alt="Dovita"
           className="object-contain max-w-full h-auto"
-          style={{ maxHeight: state === "collapsed" ? "32px" : "48px" }}
+          style={{ maxHeight: state === "collapsed" ? "24px" : "40px" }}
         />
       </SidebarHeader>
       
