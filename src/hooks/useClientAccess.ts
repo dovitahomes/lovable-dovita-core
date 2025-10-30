@@ -21,7 +21,7 @@ export function useClientAccess() {
 
       try {
         // If not authenticated, redirect to login
-        if (status === 'signed_out') {
+        if (status === 'no-session') {
           navigate('/auth/login', { replace: true });
           setLoading(false);
           return;

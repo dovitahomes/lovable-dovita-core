@@ -41,32 +41,26 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
     try {
       console.info(`[bootstrap] Attempt ${attempt + 1}/${maxRetries}`);
       
-      // Step 1: Try to bootstrap first admin (before other bootstraps)
-      try {
-        console.info('[bootstrap] Attempting first admin bootstrap...');
-        const { data: firstAdminResult } = await supabase.rpc('bootstrap_first_admin', {
-          p_email: userEmail
-        });
-        console.info('[bootstrap] First admin bootstrap result:', firstAdminResult);
-      } catch (err) {
-        // Silently ignore - either admin already exists or other non-critical error
-        console.info('[bootstrap] First admin bootstrap skipped:', err);
-      }
-      
-      // Step 2: Call unified bootstrap RPC (creates profile + roles + permissions)
+      // Step 1: Call unified bootstrap RPC (creates profile + roles + permissions)
       const bootstrapStart = Date.now();
-      const { error: bootstrapError } = await supabase.rpc('bootstrap_user_access', {
-        target_user_id: userId
-      });
-      
-      if (bootstrapError) {
-        console.warn(`[bootstrap] Bootstrap RPC failed, continuing anyway:`, bootstrapError);
-        // No bloquear navegación - continuar con refetch
-      } else {
-        console.info(`[bootstrap] ✓ Bootstrap RPC completed (${Date.now() - bootstrapStart}ms)`);
+      try {
+        await supabase.rpc('bootstrap_user_access', {
+          target_user_id: userId
+        });
+        console.info(`[bootstrap] ✓ bootstrap_user_access completed (${Date.now() - bootstrapStart}ms)`);
+      } catch (err) {
+        console.warn('[bootstrap] bootstrap_user_access failed (non-blocking):', err);
+      }
+
+      // Step 2: Grant admin if whitelisted
+      try {
+        await supabase.rpc('grant_admin_if_whitelisted');
+        console.info('[bootstrap] ✓ grant_admin_if_whitelisted completed');
+      } catch (err) {
+        console.warn('[bootstrap] grant_admin_if_whitelisted failed (non-blocking):', err);
       }
       
-      // Step 2: Load user roles
+      // Step 3: Load user roles
       const rolesStart = Date.now();
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
@@ -76,7 +70,7 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       if (rolesError) throw rolesError;
       console.info(`[bootstrap] ✓ Roles loaded (${Date.now() - rolesStart}ms):`, roles);
       
-      // Step 3: Load module permissions
+      // Step 4: Load module permissions
       const permsStart = Date.now();
       const { data: permissions, error: permsError } = await supabase
         .from('user_module_permissions')
@@ -87,8 +81,10 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       console.info(`[bootstrap] ✓ Permissions loaded (${Date.now() - permsStart}ms):`, permissions);
       
       const totalTime = Date.now() - startTime;
+      const rolesArray = (roles || []).map(r => r.role);
       console.info(`[bootstrap] ✅ Success in ${totalTime}ms (attempt ${attempt + 1})`);
-      console.info(`[login] email=${userEmail}, bootstrapAccess=ok, roles=[${(roles || []).map(r => r.role).join(', ')}], perms=${(permissions || []).length}`);
+      console.info(`[login] roles=${JSON.stringify(rolesArray)}`);
+      console.info(`[login] modules=${(permissions || []).length}`);
       
       // Persist to localStorage for quick access
       try {

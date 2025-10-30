@@ -31,7 +31,7 @@ export function ClientAppShell({ children }: ClientAppShellProps) {
     if (!isReady) return;
 
     // Redirect if not authenticated
-    if (status === 'signed_out') {
+    if (status === 'no-session') {
       navigate('/auth/login', { replace: true });
       return;
     }

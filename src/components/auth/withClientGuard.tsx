@@ -15,7 +15,7 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
 
     useEffect(() => {
       // Redirect if not authenticated
-      if (status === 'signed_out') {
+      if (status === 'no-session') {
         navigate('/auth/login', { replace: true });
         return;
       }

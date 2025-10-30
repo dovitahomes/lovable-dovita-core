@@ -14,6 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_emails: {
+        Row: {
+          email: string
+        }
+        Insert: {
+          email: string
+        }
+        Update: {
+          email?: string
+        }
+        Relationships: []
+      }
       alianzas: {
         Row: {
           activa: boolean | null
@@ -2047,6 +2059,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "users_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "vw_users_basic"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "users_sucursal_id_fkey"
             columns: ["sucursal_id"]
             isOneToOne: false
@@ -2174,6 +2193,15 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_users_basic: {
+        Row: {
+          email: string | null
+          full_name: string | null
+          id: string | null
+          roles: Database["public"]["Enums"]["app_role"][] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _has_any_admin: { Args: never; Returns: boolean }
@@ -2280,6 +2308,7 @@ export type Database = {
         }[]
       }
       grant_admin_by_email: { Args: { p_email: string }; Returns: undefined }
+      grant_admin_if_whitelisted: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2300,6 +2329,13 @@ export type Database = {
       seed_permissions_for_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      set_user_roles: {
+        Args: {
+          p_roles: Database["public"]["Enums"]["app_role"][]
           p_user_id: string
         }
         Returns: undefined
