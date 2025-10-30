@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LogOut, Moon, Sun, Building2 } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
+import dovitaLogo from "@/assets/dovita-logo.png";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import {
   Sidebar,
@@ -11,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -24,7 +26,6 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { theme, toggle: toggleTheme } = useTheme();
   const { prefetch } = usePrefetchRoute();
-  const { data: corporate } = useCorporateContent();
 
   // TODO: Filter by permissions once seeded in Prompt 2
   // const { canView } = useModuleAccess();
@@ -49,30 +50,16 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
+      <SidebarHeader className="flex items-center justify-center py-6">
+        <img 
+          src={dovitaLogo} 
+          alt="Dovita"
+          className="object-contain max-w-full h-auto"
+          style={{ maxHeight: state === "collapsed" ? "32px" : "48px" }}
+        />
+      </SidebarHeader>
+      
       <SidebarContent>
-        <div className="px-3 py-4">
-          <div className="flex items-center gap-3 mb-2">
-            {corporate?.isotipo_url ? (
-              <img 
-                src={corporate.isotipo_url} 
-                alt={corporate.nombre_empresa}
-                className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-            )}
-            {state !== "collapsed" && (
-              <div className="min-w-0">
-                <h2 className="font-bold text-sidebar-foreground truncate">
-                  {corporate?.nombre_empresa || 'Dovita'}
-                </h2>
-                <p className="text-xs text-sidebar-foreground/70">CRM/ERP</p>
-              </div>
-            )}
-          </div>
-        </div>
 
         {routesToShow.map((group) => (
           <SidebarGroup key={group.label}>
