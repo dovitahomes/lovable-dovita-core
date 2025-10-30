@@ -11,6 +11,7 @@ import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
 import { ThemeProvider, useTheme } from "@/context/ThemeProvider";
+import { SidebarThemeProvider } from "@/context/SidebarThemeProvider";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/app/auth/AuthProvider";
@@ -119,11 +120,12 @@ const InternalLayout = () => {
 const App = () => {
   return <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+        <SidebarThemeProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
               <DemoGuard>
                 <Routes>
                   {/* Public routes */}
@@ -143,7 +145,8 @@ const App = () => {
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>;
+      </SidebarThemeProvider>
+    </ThemeProvider>
+  </QueryClientProvider>;
 };
 export default App;

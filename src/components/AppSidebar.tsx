@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
 import dovitaIcon from "@/assets/dovita-icon.png";
 import dovitaIconWhite from "@/assets/dovita-icon-white.png";
 import dovitaLogoDark from "@/assets/dovita-logo-dark.png";
@@ -21,12 +21,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/context/ThemeProvider";
+import { useSidebarTheme } from "@/context/SidebarThemeProvider";
 import { ALL_ROUTES } from "@/lib/routing/getAccessibleRoutes";
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { sidebarTheme, toggleSidebarTheme } = useSidebarTheme();
   const { prefetch } = usePrefetchRoute();
 
   // TODO: Filter by permissions once seeded in Prompt 2
@@ -51,13 +53,16 @@ export function AppSidebar() {
       : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
 
   return (
-    <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
+    <Sidebar 
+      className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"} 
+      data-sidebar-theme={sidebarTheme}
+    >
       <SidebarHeader className="flex items-center justify-center py-6 px-4">
         <img 
           src={
             state === "collapsed" 
-              ? (theme === "dark" ? dovitaIconWhite : dovitaIcon)
-              : (theme === "dark" ? dovitaLogoWhite : dovitaLogoDark)
+              ? (sidebarTheme === "dark" ? dovitaIconWhite : dovitaIcon)
+              : (sidebarTheme === "dark" ? dovitaLogoWhite : dovitaLogoDark)
           }
           alt="Dovita"
           className="object-contain max-w-full h-auto"
@@ -103,7 +108,16 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 space-y-2">
+        <Button
+          variant="ghost"
+          onClick={toggleSidebarTheme}
+          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          title={sidebarTheme === "dark" ? "Sidebar Claro" : "Sidebar Oscuro"}
+        >
+          {sidebarTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {state !== "collapsed" && <span className="ml-2 truncate">{sidebarTheme === "dark" ? "Sidebar Claro" : "Sidebar Oscuro"}</span>}
+        </Button>
         <Button
           variant="ghost"
           onClick={handleLogout}

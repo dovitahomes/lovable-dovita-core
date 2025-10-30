@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './components/ui/sidebar-styles.css';
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -59,7 +61,7 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Sidebar */
+    /* Sidebar (dark by default) */
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 220 17% 97%;
     --sidebar-primary: 221 83% 53%;
@@ -68,6 +70,16 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 220 17% 97%;
     --sidebar-border: 222 47% 16%;
     --sidebar-ring: 221 83% 53%;
+
+    /* Light sidebar (when data-sidebar-theme="light") */
+    --sidebar-background-light: 0 0% 100%;
+    --sidebar-foreground-light: 222 47% 11%;
+    --sidebar-primary-light: 221 83% 53%;
+    --sidebar-primary-foreground-light: 0 0% 100%;
+    --sidebar-accent-light: 220 14% 96%;
+    --sidebar-accent-foreground-light: 222 47% 11%;
+    --sidebar-border-light: 220 13% 91%;
+    --sidebar-ring-light: 221 83% 53%;
 
     /* Custom gradients */
     --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%), hsl(221 83% 45%));
