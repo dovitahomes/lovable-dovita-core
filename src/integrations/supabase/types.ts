@@ -2487,6 +2487,55 @@ export type Database = {
       }
     }
     Views: {
+      v_budget_consumption: {
+        Row: {
+          budget_id: string | null
+          pct_consumida: number | null
+          project_id: string | null
+          qty_ordenada: number | null
+          qty_planned: number | null
+          qty_recibida: number | null
+          qty_solicitada: number | null
+          subpartida_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_subpartida_id_fkey"
+            columns: ["subpartida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       vw_client_financial_summary: {
         Row: {
           balance: number | null

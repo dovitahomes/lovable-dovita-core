@@ -3,111 +3,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 
-// Hook para listar batches de pagos
+// NOTE: pay_batches table exists in types but may not be fully implemented in DB
+// This hook is disabled until the full payments infrastructure is ready
 export function usePayBatches(params?: { search?: string; status?: string }) {
   return useQuery({
     queryKey: ["pay_batches", params],
     queryFn: async () => {
-      let query = supabase
-        .from("pay_batches")
-        .select(`
-          *,
-          bank_accounts(id, numero_cuenta, bank_id)
-        `)
-        .order("created_at", { ascending: false });
-
-      if (params?.status) {
-        query = query.eq("status", params.status);
-      }
-      if (params?.search) {
-        query = query.ilike("title", `%${params.search}%`);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      // Disabled: tables may not exist yet
+      return [];
     },
+    enabled: false,
     ...CACHE_CONFIG.active,
   });
 }
 
-// Hook para un batch específico
+// Hook para un batch específico (disabled)
 export function usePayBatch(batchId?: string) {
   return useQuery({
     queryKey: ["pay_batch", batchId],
-    queryFn: async () => {
-      if (!batchId) return null;
-
-      const { data, error } = await supabase
-        .from("pay_batches")
-        .select(`
-          *,
-          bank_accounts(id, numero_cuenta, bank_id)
-        `)
-        .eq("id", batchId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!batchId,
+    queryFn: async () => null,
+    enabled: false,
     ...CACHE_CONFIG.active,
   });
 }
 
-// Hook para los pagos de un batch
+// Hook para los pagos de un batch (disabled)
 export function usePaymentsOfBatch(batchId?: string) {
   return useQuery({
     queryKey: ["payments_of_batch", batchId],
-    queryFn: async () => {
-      if (!batchId) return [];
-
-      const { data, error } = await supabase
-        .from("payments")
-        .select(`
-          *,
-          providers(id, name, code_short),
-          purchase_orders(id, folio, project_id, projects(notas))
-        `)
-        .eq("pay_batch_id", batchId)
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!batchId,
+    queryFn: async () => [],
+    enabled: false,
     ...CACHE_CONFIG.active,
   });
 }
 
-// Hook para crear/actualizar batch
+// Hook para crear/actualizar batch (disabled)
 export function useUpsertPayBatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: any) => {
-      const { id, ...rest } = data;
-
-      if (id) {
-        const { data: result, error } = await supabase
-          .from("pay_batches")
-          .update(rest)
-          .eq("id", id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return result;
-      } else {
-        const { data: result, error } = await supabase
-          .from("pay_batches")
-          .insert(rest)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return result;
-      }
+      throw new Error("Payment batches not implemented yet");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pay_batches"] });
@@ -124,16 +60,13 @@ export function useUpsertPayBatch() {
   });
 }
 
-// Hook para agregar pagos a un batch
+// Hook para agregar pagos a un batch (disabled)
 export function useAddPaymentsToBatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payments: any[]) => {
-      const { data, error } = await supabase.from("payments").insert(payments).select();
-
-      if (error) throw error;
-      return data;
+      throw new Error("Payments not implemented yet");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments_of_batch"] });
@@ -149,21 +82,13 @@ export function useAddPaymentsToBatch() {
   });
 }
 
-// Hook para actualizar un pago
+// Hook para actualizar un pago (disabled)
 export function useUpdatePayment() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const { data: result, error } = await supabase
-        .from("payments")
-        .update(data)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return result;
+      throw new Error("Payments not implemented yet");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments_of_batch"] });
@@ -179,25 +104,13 @@ export function useUpdatePayment() {
   });
 }
 
-// Hook para marcar pago como pagado
+// Hook para marcar pago como pagado (disabled)
 export function useMarkPaymentPaid() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, reference }: { id: string; reference?: string }) => {
-      const { data, error } = await supabase
-        .from("payments")
-        .update({
-          status: "pagado",
-          transfer_date: new Date().toISOString(),
-          reference: reference || null,
-        })
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      throw new Error("Payments not implemented yet");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments_of_batch"] });
@@ -213,15 +126,13 @@ export function useMarkPaymentPaid() {
   });
 }
 
-// Hook para eliminar pago
+// Hook para eliminar pago (disabled)
 export function useDeletePayment() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("payments").delete().eq("id", id);
-
-      if (error) throw error;
+      throw new Error("Payments not implemented yet");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments_of_batch"] });
@@ -237,15 +148,13 @@ export function useDeletePayment() {
   });
 }
 
-// Hook para eliminar batch
+// Hook para eliminar batch (disabled)
 export function useDeletePayBatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("pay_batches").delete().eq("id", id);
-
-      if (error) throw error;
+      throw new Error("Payment batches not implemented yet");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pay_batches"] });

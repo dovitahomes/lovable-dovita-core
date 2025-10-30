@@ -99,22 +99,12 @@ export default function PaymentBatchDetail() {
       return;
     }
 
-    upsertBatch.mutate(
-      {
-        id: isNew ? undefined : id,
-        title,
-        bank_account_id: bankAccountId || null,
-        scheduled_date: scheduledDate || null,
-        notes: notes || null,
-      },
-      {
-        onSuccess: (data) => {
-          if (isNew) {
-            navigate(`/finance/payments/${data.id}`);
-          }
-        },
-      }
-    );
+    // Payment batches not implemented yet
+    toast({ 
+      title: "Módulo no disponible",
+      description: "Los lotes de pagos aún no están implementados",
+      variant: "destructive" 
+    });
   };
 
   const handleAddPayments = () => {
