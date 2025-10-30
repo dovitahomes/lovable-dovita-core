@@ -40,6 +40,8 @@ const Cronograma = lazy(() => import("./pages/Cronograma"));
 const Proveedores = lazy(() => import("./pages/Proveedores"));
 const Construccion = lazy(() => import("./pages/Construccion"));
 const Finanzas = lazy(() => import("./pages/Finanzas"));
+const PaymentBatches = lazy(() => import("./pages/finance/PaymentBatches"));
+const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
@@ -116,6 +118,8 @@ const InternalLayout = () => {
                 <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
+                <Route path="/finance/payments" element={<Suspense fallback={<TableSkeleton />}><PaymentBatches /></Suspense>} />
+                <Route path="/finance/payments/:id" element={<Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>} />
                 <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
                 <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />

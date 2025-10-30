@@ -99,9 +99,13 @@ export type Database = {
       }
       bank_accounts: {
         Row: {
+          account_alias: string | null
           activa: boolean
           bank_id: string
+          bank_name: string | null
+          clabe: string | null
           created_at: string
+          currency: string | null
           id: string
           moneda: Database["public"]["Enums"]["currency_type"]
           numero_cuenta: string
@@ -110,9 +114,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_alias?: string | null
           activa?: boolean
           bank_id: string
+          bank_name?: string | null
+          clabe?: string | null
           created_at?: string
+          currency?: string | null
           id?: string
           moneda?: Database["public"]["Enums"]["currency_type"]
           numero_cuenta: string
@@ -121,9 +129,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_alias?: string | null
           activa?: boolean
           bank_id?: string
+          bank_name?: string | null
+          clabe?: string | null
           created_at?: string
+          currency?: string | null
           id?: string
           moneda?: Database["public"]["Enums"]["currency_type"]
           numero_cuenta?: string
@@ -1398,6 +1410,117 @@ export type Database = {
             columns: ["sucursal_id"]
             isOneToOne: false
             referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_batches: {
+        Row: {
+          bank_account_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          scheduled_date: string | null
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank_account_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank_account_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_batches_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          evidence_url: string | null
+          id: string
+          notes: string | null
+          pay_batch_id: string | null
+          po_id: string | null
+          proveedor_id: string
+          reference: string | null
+          status: string
+          transfer_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          pay_batch_id?: string | null
+          po_id?: string | null
+          proveedor_id: string
+          reference?: string | null
+          status?: string
+          transfer_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          pay_batch_id?: string | null
+          po_id?: string | null
+          proveedor_id?: string
+          reference?: string | null
+          status?: string
+          transfer_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_pay_batch_id_fkey"
+            columns: ["pay_batch_id"]
+            isOneToOne: false
+            referencedRelation: "pay_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
             referencedColumns: ["id"]
           },
         ]

@@ -92,6 +92,18 @@ export const ALL_ROUTES: RouteGroup[] = [
       { title: "Centro de Reglas", url: "/herramientas/reglas", icon: FileText, moduleName: "herramientas" },
     ],
   },
+  {
+    label: "Construcción",
+    items: [
+      { title: "Órdenes de Compra", url: "/construction/purchase-orders", icon: ShoppingCart, moduleName: "construccion" },
+    ],
+  },
+  {
+    label: "Finanzas",
+    items: [
+      { title: "Pagos a Proveedores", url: "/finance/payments", icon: DollarSign, moduleName: "finanzas" },
+    ],
+  },
 ];
 
 export const MINIMAL_ROUTES: RouteGroup[] = [
