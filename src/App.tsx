@@ -10,10 +10,12 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
-import { ThemeProvider } from "@/context/ThemeProvider";
+import { ThemeProvider, useTheme } from "@/context/ThemeProvider";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/app/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
+import { Moon, Sun } from "lucide-react";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -52,6 +54,8 @@ const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 const InternalLayout = () => {
+  const { theme, toggle: toggleTheme } = useTheme();
+  
   return <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
@@ -65,6 +69,14 @@ const InternalLayout = () => {
                 
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4">
             <Suspense fallback={<PageHeaderSkeleton />}>

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut } from "lucide-react";
 import dovitaIcon from "@/assets/dovita-icon.png";
 import dovitaIconWhite from "@/assets/dovita-icon-white.png";
 import dovitaLogoDark from "@/assets/dovita-logo-dark.png";
@@ -21,13 +21,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/context/ThemeProvider";
-import { useCorporateContent } from "@/hooks/useCorporateContent";
 import { ALL_ROUTES } from "@/lib/routing/getAccessibleRoutes";
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { prefetch } = usePrefetchRoute();
 
   // TODO: Filter by permissions once seeded in Prompt 2
@@ -104,16 +103,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 space-y-2">
-        <Button
-          variant="ghost"
-          onClick={toggleTheme}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          title={theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
-        >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          {state !== "collapsed" && <span className="ml-2 truncate">{theme === "dark" ? "Modo Claro" : "Modo Oscuro"}</span>}
-        </Button>
+      <SidebarFooter className="p-3">
         <Button
           variant="ghost"
           onClick={handleLogout}
