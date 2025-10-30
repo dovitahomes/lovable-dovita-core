@@ -46,7 +46,7 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     const { appSignOut } = await import('@/lib/auth/logout');
-    await appSignOut();
+    appSignOut(); // No await - let it run and force redirect
   };
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>

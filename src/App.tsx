@@ -17,8 +17,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { useAuthState } from "@/lib/auth/AuthContext";
-import { bootstrapUser } from "@/lib/auth/bootstrapUser";
+import { BootstrapGuard } from "@/components/auth/BootstrapGuard";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -238,18 +237,6 @@ const InternalLayout = () => {
 };
 
 const App = () => {
-  const { status, session } = useAuthState();
-
-  // Bootstrap user profile and role on authentication (non-blocking)
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      console.log('[App] Bootstrapping user in background...');
-      bootstrapUser().catch(err => 
-        console.warn('[App] Bootstrap failed (non-blocking):', err)
-      );
-    }
-  }, [status, session]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -291,7 +278,9 @@ const App = () => {
           path="/*"
           element={
             <ProtectedRoute>
-              <InternalLayout />
+              <BootstrapGuard>
+                <InternalLayout />
+              </BootstrapGuard>
             </ProtectedRoute>
           }
         />

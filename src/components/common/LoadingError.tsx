@@ -46,8 +46,8 @@ export function LoadingError({
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground">
           {loadingTooLong 
-            ? "No se pudo verificar la sesión. Reintenta o contacta al administrador." 
-            : "Verificando sesión…"}
+            ? "La carga está tomando más tiempo de lo esperado..." 
+            : "Cargando datos…"}
         </p>
         {loadingTooLong && onRetry && (
           <Button onClick={onRetry} variant="outline" size="sm" className="mt-4">

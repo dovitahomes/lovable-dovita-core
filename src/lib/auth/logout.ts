@@ -1,21 +1,31 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export async function appSignOut() {
+  console.info('[logout] Starting signOut...');
+  
   try {
-    console.info('[logout] Starting signOut...');
-    
-    // Cierra sesión
     await supabase.auth.signOut();
-    
-    // Limpia todo el almacenamiento local
+  } catch (e) {
+    console.warn('[logout] signOut error (non-blocking):', e);
+  }
+  
+  try {
     localStorage.clear();
     sessionStorage.clear();
-    
-    console.info('[logout] signOut OK → redirecting to /auth/login');
   } catch (e) {
-    console.error('[logout] error', e);
-  } finally {
-    // Redirección dura para garantizar estado limpio
-    window.location.assign('/auth/login');
+    console.warn('[logout] storage clear error (non-blocking):', e);
   }
+  
+  console.info('[logout] signOut OK → redirecting to /auth/login');
+  
+  // Force redirect after 100ms to ensure cleanup completes
+  setTimeout(() => {
+    window.location.assign('/auth/login');
+  }, 100);
+  
+  // Fallback safety timeout (2s)
+  setTimeout(() => {
+    console.warn('[logout] Forcing redirect after timeout');
+    window.location.assign('/auth/login');
+  }, 2000);
 }
