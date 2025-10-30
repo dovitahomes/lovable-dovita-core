@@ -8,13 +8,12 @@ import { WishlistForm } from "@/components/WishlistForm";
 import { DocumentManager } from "@/components/DocumentManager";
 import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
-import { useUserRole } from "@/hooks/useUserRole";
 import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar } from "lucide-react";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { role } = useUserRole();
+  const role = 'admin'; // Temporarily hardcoded - will be restored in Prompt 2
 
   const { data: project, isLoading, refetch } = useQuery({
     queryKey: ['project', id],

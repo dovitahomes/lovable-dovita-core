@@ -14,7 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Upload, Download, Eye, Trash2, FileText, FolderOpen, CheckCircle2 } from "lucide-react";
-import { UserRole } from "@/hooks/useUserRole";
+
+type UserRole = 'admin' | 'colaborador' | 'contador' | 'cliente' | 'user';
 
 interface DocumentManagerProps {
   projectId: string;

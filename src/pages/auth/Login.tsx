@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,28 +22,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('[auth/Login] Existing session detected');
-        // Use cached roles if available
-        const cachedRoles = JSON.parse(localStorage.getItem('dv_roles_v1') || '[]');
-        
-        if (cachedRoles.includes('cliente')) {
-          console.log('[auth/Login] → Redirecting client to portal');
-          navigate("/client/home", { replace: true });
-        } else if (cachedRoles.length > 0) {
-          console.log('[auth/Login] → Redirecting staff to dashboard');
-          navigate("/", { replace: true });
-        } else {
-          console.log('[auth/Login] No cached roles, staying on login');
-        }
-      }
-    };
-    checkUser();
-  }, [navigate]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -59,32 +37,17 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('[auth] 🔐 Attempting login...');
-      
-      // Step 1: Authentication (1-2 segundos)
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) throw authError;
-      console.log('[auth] ✓ Authentication successful');
-
-      // Step 2: Navegar INMEDIATAMENTE - BootstrapGuard se encarga del resto
-      toast.success('Inicio de sesión exitoso');
-
-      // Usar caché para decidir a dónde ir (si existe)
-      const cachedRoles = JSON.parse(localStorage.getItem('dv_roles_v1') || '[]');
       
-      if (cachedRoles.includes('cliente')) {
-        console.log('[auth] → Redirecting to client portal (cached)');
-        navigate('/client/home', { replace: true });
-      } else {
-        console.log('[auth] → Redirecting to dashboard (cached)');
-        navigate('/', { replace: true });
-      }
+      toast.success('Inicio de sesión exitoso');
+      navigate('/', { replace: true });
     } catch (error: any) {
-      console.error('[auth] ❌ Login error:', error);
+      console.error('[auth] Login error:', error);
       toast.error(error.message || "Error al iniciar sesión");
     } finally {
       setIsLoading(false);

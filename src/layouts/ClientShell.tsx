@@ -8,14 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ModernMobileMenu } from "@/components/ui/modern-mobile-menu";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
-import { useClientAccess, useImpersonateMode } from "@/hooks/useClientAccess";
 import { Home, FileText, PenTool, Calendar, MessageSquare } from "lucide-react";
 
 export default function ClientShell() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { hasAccess, loading: accessLoading } = useClientAccess();
-  const { isImpersonating, exitImpersonate } = useImpersonateMode();
+  
+  // Temporarily disabled - will be restored in Prompt 2
+  const hasAccess = true;
+  const accessLoading = false;
+  const isImpersonating = false;
+  const exitImpersonate = () => {};
   
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() => {
     // Check URL first, then localStorage

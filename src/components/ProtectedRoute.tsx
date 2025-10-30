@@ -1,52 +1,26 @@
-import { Navigate } from "react-router-dom";
-import { useSessionReady } from "@/hooks/useSessionReady";
-import { Loader2, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/app/auth/AuthProvider';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requireAdmin?: boolean;
+  children: ReactNode;
 }
 
-const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { status, refresh, authError } = useSessionReady();
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { user, loading } = useAuth();
 
-  if (status === 'loading') {
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen text-center">
-        <Loader2 className="w-6 h-6 animate-spin mb-3 text-primary" />
-        <p className="text-sm text-muted-foreground">Verificando sesión…</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (status === 'error') {
-    return (
-      <div className="flex items-center justify-center h-screen p-4">
-        <Alert variant="destructive" className="max-w-md">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error de sesión</AlertTitle>
-          <AlertDescription className="space-y-3">
-            <p>No se pudo verificar la sesión</p>
-            <Button onClick={refresh} variant="outline" size="sm">
-              Reintentar
-            </Button>
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  if (!user) {
+    return <Navigate to="/auth/login" replace />;
   }
 
-  if (status === 'no-session') {
-    const params = authError?.includes('Email no confirmado') 
-      ? '?status=unconfirmed' 
-      : '';
-    return <Navigate to={`/auth/login${params}`} replace />;
-  }
-
-  // status === 'ready'
   return <>{children}</>;
-};
-
-export default ProtectedRoute;
+}

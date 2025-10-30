@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, RefreshCw, Calendar as CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserRole } from "@/hooks/useUserRole";
 import { FinancialSummary } from "@/components/client/FinancialSummary";
 import { ClientTabBar } from "@/components/client/ClientTabBar";
 import { PhotoViewer } from "@/components/client/PhotoViewer";
@@ -18,7 +17,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 export default function ClientPortal() {
   const navigate = useNavigate();
-  const { role } = useUserRole();
+  // Temporarily disabled - will be restored in Prompt 2
+  const role = 'cliente';
   const [userEmail, setUserEmail] = useState<string>("");
   const [activeTab, setActiveTab] = useState("resumen");
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);

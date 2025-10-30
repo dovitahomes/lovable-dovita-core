@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,14 +10,10 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
-import { ViewAsClientToggle } from "@/components/ViewAsClientToggle";
-import { shouldUseClientShell } from "@/lib/auth/role";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { useUserRole } from "@/hooks/useUserRole";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { BootstrapGuard } from "@/components/auth/BootstrapGuard";
+import { AuthProvider } from "@/app/auth/AuthProvider";
 
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
@@ -44,13 +40,6 @@ const Finanzas = lazy(() => import("./pages/Finanzas"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
-const ClientPortalLayout = lazy(() => import("./layouts/ClientPortalLayout"));
-const ClientHomeView = lazy(() => import("./pages/client/Home"));
-const ClientFinanzas = lazy(() => import("./pages/client/Finanzas"));
-const ClientDocumentos = lazy(() => import("./pages/client/Documentos"));
-const ClientChat = lazy(() => import("./pages/client/Chat"));
-const ClientCalendarioView = lazy(() => import("./pages/client/Calendario"));
-const ClientPagosView = lazy(() => import("./pages/client/Payments"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 
 // Admin tools (lazy loaded)
@@ -65,22 +54,6 @@ const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"))
 const Metrics = lazy(() => import("./pages/Metrics"));
 
 const InternalLayout = () => {
-  const { role } = useUserRole();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Redirect clients to client portal - clients should NEVER see this layout
-  useEffect(() => {
-    if (role === 'cliente' && !location.pathname.startsWith('/client')) {
-      navigate('/client/home', { replace: true });
-    }
-  }, [role, location.pathname, navigate]);
-
-  // Don't render internal layout for clients at all
-  if (role === 'cliente') {
-    return null;
-  }
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -95,105 +68,21 @@ const InternalLayout = () => {
                 <span className="font-semibold text-foreground">Dovita</span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <ViewAsClientToggle />
-            </div>
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4">
             <Suspense fallback={<PageHeaderSkeleton />}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 
-                <Route
-                  path="/herramientas/contenido-corporativo"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <ContenidoCorporativo />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/sucursales"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <Sucursales />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/alianzas"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <Alianzas />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/identidades"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <Identidades />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/accesos"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <Accesos />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/reglas"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <Reglas />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/catalogo-tu"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <CatalogoTU />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/herramientas/usuarios"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <HerramientasUsuarios />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/metrics"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TableSkeleton />}>
-                        <Metrics />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/herramientas/contenido-corporativo" element={<Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>} />
+                <Route path="/herramientas/sucursales" element={<Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>} />
+                <Route path="/herramientas/alianzas" element={<Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>} />
+                <Route path="/herramientas/identidades" element={<Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>} />
+                <Route path="/herramientas/accesos" element={<Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>} />
+                <Route path="/herramientas/reglas" element={<Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>} />
+                <Route path="/herramientas/catalogo-tu" element={<Suspense fallback={<TableSkeleton />}><CatalogoTU /></Suspense>} />
+                <Route path="/herramientas/usuarios" element={<Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>} />
+                <Route path="/metrics" element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
                 <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
                 <Route path="/clientes" element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
                 <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
@@ -207,26 +96,8 @@ const InternalLayout = () => {
                 <Route path="/cronograma" element={<Suspense fallback={<TableSkeleton />}><Cronograma /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
-                <Route
-                  path="/contabilidad"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TabsSkeleton />}>
-                        <Contabilidad />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/comisiones"
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <Suspense fallback={<TabsSkeleton />}>
-                        <Comisiones />
-                      </Suspense>
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
+                <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
                 <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -242,63 +113,38 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <DemoGuard>
-              <Routes>
-        {/* Public routes */}
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/debug" element={<Suspense fallback={<PageHeaderSkeleton />}><Debug /></Suspense>} />
-        <Route path="/auth/callback" element={<Callback />} />
-        <Route path="/auth/reset" element={<ResetPassword />} />
-        <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
-        <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
-        
-        {/* Client portal routes (isolated, no sidebar) */}
-        <Route
-          path="/client"
-          element={
-            <ProtectedRoute>
-              <BootstrapGuard>
-                <Suspense fallback={<PageHeaderSkeleton />}>
-                  <ClientPortalLayout />
-                </Suspense>
-              </BootstrapGuard>
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/client/home" replace />} />
-          <Route path="home" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientHomeView /></Suspense>} />
-          <Route path="finanzas" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientFinanzas /></Suspense>} />
-          <Route path="documentos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentos /></Suspense>} />
-          <Route path="docs" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientDocumentos /></Suspense>} />
-          <Route path="chat" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientChat /></Suspense>} />
-          <Route path="calendario" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientCalendarioView /></Suspense>} />
-          <Route path="pagos" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientPagosView /></Suspense>} />
-          <Route path="payments" element={<Suspense fallback={<PageHeaderSkeleton />}><ClientPagosView /></Suspense>} />
-        </Route>
-
-        {/* Internal admin routes (with sidebar) */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <BootstrapGuard>
-                <InternalLayout />
-              </BootstrapGuard>
-            </ProtectedRoute>
-          }
-        />
-              </Routes>
-            </DemoGuard>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <DemoGuard>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/auth/login" element={<Login />} />
+                  <Route path="/debug" element={<Suspense fallback={<PageHeaderSkeleton />}><Debug /></Suspense>} />
+                  <Route path="/auth/callback" element={<Callback />} />
+                  <Route path="/auth/reset" element={<ResetPassword />} />
+                  <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
+                  <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
+                  
+                  {/* All internal routes */}
+                  <Route
+                    path="/*"
+                    element={
+                      <ProtectedRoute>
+                        <InternalLayout />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </DemoGuard>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
 };
 
 export default App;
-

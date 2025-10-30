@@ -11,7 +11,6 @@ import {
   Receipt, 
   Percent, 
   UserCog,
-  Settings,
   Building2,
   MapPin,
   Handshake,
@@ -20,8 +19,6 @@ import {
   FileText,
   ListTree
 } from "lucide-react";
-import type { ModulePermission } from "@/hooks/useUserPermissions";
-import type { UserRole } from "@/hooks/useUserRole";
 
 export type RouteItem = {
   title: string;
@@ -35,7 +32,7 @@ export type RouteGroup = {
   items: RouteItem[];
 };
 
-const ALL_ROUTES: RouteGroup[] = [
+export const ALL_ROUTES: RouteGroup[] = [
   {
     label: "Principal",
     items: [
@@ -89,7 +86,6 @@ const ALL_ROUTES: RouteGroup[] = [
   },
 ];
 
-// Rutas mínimas (fallback cuando no hay permisos pero hay sesión)
 export const MINIMAL_ROUTES: RouteGroup[] = [
   {
     label: "Principal",
@@ -99,48 +95,7 @@ export const MINIMAL_ROUTES: RouteGroup[] = [
   },
 ];
 
-/**
- * Filtra las rutas accesibles según los permisos del usuario.
- * Solo muestra rutas donde el usuario tiene permiso de visualización.
- */
-export function getAccessibleRoutes(
-  permissions: ModulePermission[] = [],
-  roles: UserRole[] = []
-): RouteGroup[] {
-  // Admin siempre ve todo
-  const isAdmin = roles.includes('admin');
-  if (isAdmin) {
-    return ALL_ROUTES;
-  }
-
-  // Clientes solo ven su portal (no rutas internas)
-  if (roles.includes('cliente') && !roles.some(r => ['admin', 'colaborador', 'contador'].includes(r))) {
-    return [];
-  }
-
-  // Si no hay permisos todavía, mostrar solo dashboard (no bloquear)
-  if (!permissions.length) {
-    console.info('[getAccessibleRoutes] No permissions yet, showing minimal routes');
-    return MINIMAL_ROUTES;
-  }
-
-  // Crear set de claves de módulos permitidos
-  const allowedKeys = new Set(
-    permissions.filter(p => p.can_view).map(p => p.module_name)
-  );
-
-  // Filtrar según permisos
-  const filtered = ALL_ROUTES.map(group => ({
-    ...group,
-    items: group.items.filter(item => {
-      // Si no tiene moduleName asociado, mostrar siempre (rutas públicas internas)
-      if (!item.moduleName) return true;
-
-      // Verificar si tiene permiso
-      return allowedKeys.has(item.moduleName);
-    }),
-  })).filter(group => group.items.length > 0); // Eliminar grupos vacíos
-
-  // Si después de filtrar no quedó nada, retornar mínimas
-  return filtered.length > 0 ? filtered : MINIMAL_ROUTES;
+// Temporarily simplified - will be restored in Prompt 2
+export function getAccessibleRoutes(): RouteGroup[] {
+  return ALL_ROUTES;
 }

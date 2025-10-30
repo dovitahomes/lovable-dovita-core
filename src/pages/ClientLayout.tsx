@@ -6,14 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { ModernMobileMenu } from "@/components/ui/modern-mobile-menu";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useClientAccess, useImpersonateMode } from "@/hooks/useClientAccess";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ClientLayout() {
   const navigate = useNavigate();
-  const { hasAccess, loading: accessLoading } = useClientAccess();
-  const { isImpersonating, exitImpersonate } = useImpersonateMode();
+  // Temporarily disabled - will be restored in Prompt 2
+  const hasAccess = true;
+  const accessLoading = false;
+  const isImpersonating = false;
+  const exitImpersonate = () => {};
   
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() =>
     localStorage.getItem("client.activeProject")

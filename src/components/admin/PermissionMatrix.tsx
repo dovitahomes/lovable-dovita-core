@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { adminSetModulePermission } from "@/services/adminUsers";
 import { MODULES } from "@/config/modules";
 
 interface PermissionMatrixProps {
@@ -22,18 +21,9 @@ type ModulePermission = {
 export function PermissionMatrix({ userId }: PermissionMatrixProps) {
   const queryClient = useQueryClient();
 
-  const { data: permissions, isLoading } = useQuery({
-    queryKey: ["user-module-permissions", userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_module_permissions")
-        .select("*")
-        .eq("user_id", userId);
-
-      if (error) throw error;
-      return data as ModulePermission[];
-    },
-  });
+  // Temporarily disabled - will be restored in Prompt 2
+  const permissions: ModulePermission[] = [];
+  const isLoading = false;
 
   const updatePermissionMutation = useMutation({
     mutationFn: async ({
@@ -45,17 +35,9 @@ export function PermissionMatrix({ userId }: PermissionMatrixProps) {
       field: 'can_view' | 'can_create' | 'can_edit' | 'can_delete';
       value: boolean;
     }) => {
-      const existing = permissions?.find((p) => p.module_name === module);
-      
-      const perms = {
-        can_view: existing?.can_view ?? false,
-        can_create: existing?.can_create ?? false,
-        can_edit: existing?.can_edit ?? false,
-        can_delete: existing?.can_delete ?? false,
-        [field]: value,
-      };
-
-      await adminSetModulePermission(userId, module, perms);
+      // Temporarily disabled - will be restored in Prompt 2
+      toast.error("Sistema de permisos deshabilitado temporalmente");
+      throw new Error("Temporarily disabled");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-module-permissions", userId] });

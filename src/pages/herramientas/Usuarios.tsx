@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Users, Search, UserPlus } from "lucide-react";
-import { adminListUsers, adminSetUserRole, adminSetModulePermission } from "@/services/adminUsers";
 import { UserRoleBadges } from "@/components/admin/UserRoleBadges";
 import { PermissionMatrix } from "@/components/admin/PermissionMatrix";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { adminSetUserRole } from "@/services/adminUsers";
 
 type AppRole = 'admin' | 'colaborador' | 'contador' | 'cliente';
 
@@ -21,7 +20,9 @@ interface UserRoleBadgesProps {
 export function UserRoleBadges({ userId, currentRoles, onRoleChange }: UserRoleBadgesProps) {
   const toggleRoleMutation = useMutation({
     mutationFn: async ({ role, enabled }: { role: AppRole; enabled: boolean }) => {
-      await adminSetUserRole(userId, role, enabled);
+      // Temporarily disabled - will be restored in Prompt 2
+      toast.error("Sistema de roles deshabilitado temporalmente");
+      throw new Error("Temporarily disabled");
     },
     onSuccess: (_, variables) => {
       toast.success(`Rol ${variables.role} ${variables.enabled ? 'asignado' : 'removido'} exitosamente`);

@@ -7,10 +7,10 @@ import { BirthdayWidget } from "@/components/BirthdayWidget";
 import { KpiCards } from "@/components/kpi/KpiCards";
 import { KpiCharts } from "@/components/kpi/KpiCharts";
 import { KpiFilters } from "@/components/kpi/KpiFilters";
-import { useUserRole } from "@/hooks/useUserRole";
 
 const Dashboard = () => {
-  const { role } = useUserRole();
+  // Temporarily show all features - permissions will be restored in Prompt 2
+  const role = 'admin';
   const [userName, setUserName] = useState("");
   const [dateRange, setDateRange] = useState("180");
   const [stats, setStats] = useState({
