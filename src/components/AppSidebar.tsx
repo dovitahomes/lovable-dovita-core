@@ -2,6 +2,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { LogOut, Moon, Sun } from "lucide-react";
 import dovitaIcon from "@/assets/dovita-icon.png";
 import dovitaIconWhite from "@/assets/dovita-icon-white.png";
+import dovitaLogoDark from "@/assets/dovita-logo-dark.png";
+import dovitaLogoWhite from "@/assets/dovita-logo-white.png";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import {
   Sidebar,
@@ -53,7 +55,11 @@ export function AppSidebar() {
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
       <SidebarHeader className="flex items-center justify-center py-6 px-4">
         <img 
-          src={theme === "dark" ? dovitaIconWhite : dovitaIcon} 
+          src={
+            state === "collapsed" 
+              ? (theme === "dark" ? dovitaIconWhite : dovitaIcon)
+              : (theme === "dark" ? dovitaLogoWhite : dovitaLogoDark)
+          }
           alt="Dovita"
           className="object-contain max-w-full h-auto"
           style={{ maxHeight: state === "collapsed" ? "24px" : "40px" }}
