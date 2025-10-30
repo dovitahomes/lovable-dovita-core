@@ -777,6 +777,209 @@ export type Database = {
         }
         Relationships: []
       }
+      design_change_logs: {
+        Row: {
+          changes_json: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          meeting_date: string
+          notes: string | null
+          phase_id: string | null
+          project_id: string
+          requested_by: string | null
+          signature_url: string | null
+          signed: boolean
+          updated_at: string
+        }
+        Insert: {
+          changes_json: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_date?: string
+          notes?: string | null
+          phase_id?: string | null
+          project_id: string
+          requested_by?: string | null
+          signature_url?: string | null
+          signed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          changes_json?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_date?: string
+          notes?: string | null
+          phase_id?: string | null
+          project_id?: string
+          requested_by?: string | null
+          signature_url?: string | null
+          signed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_change_logs_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "design_phases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_change_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_change_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "design_change_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      design_deliverables: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          phase_id: string | null
+          project_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          phase_id?: string | null
+          project_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          phase_id?: string | null
+          project_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_deliverables_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "design_phases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      design_phases: {
+        Row: {
+          created_at: string
+          end_at: string | null
+          id: string
+          order_index: number
+          phase_key: string
+          phase_name: string
+          project_id: string
+          start_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          order_index?: number
+          phase_key: string
+          phase_name: string
+          project_id: string
+          start_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          order_index?: number
+          phase_key?: string
+          phase_name?: string
+          project_id?: string
+          start_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "design_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           created_at: string

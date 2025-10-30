@@ -8,7 +8,8 @@ import { WishlistForm } from "@/components/WishlistForm";
 import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText } from "lucide-react";
+import { DesignTab } from "@/components/design/DesignTab";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool } from "lucide-react";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
@@ -122,6 +123,10 @@ export default function ProyectoDetalle() {
             <FileText className="h-4 w-4" />
             Documentos
           </TabsTrigger>
+          <TabsTrigger value="diseno" className="gap-2">
+            <PenTool className="h-4 w-4" />
+            Diseño
+          </TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
           <TabsTrigger value="chat" className="gap-2">
             <MessageSquare className="h-4 w-4" />
@@ -136,6 +141,10 @@ export default function ProyectoDetalle() {
         
         <TabsContent value="documentos" className="mt-6">
           <DocumentsTab projectId={id!} />
+        </TabsContent>
+        
+        <TabsContent value="diseno" className="mt-6">
+          <DesignTab projectId={id!} />
         </TabsContent>
         
         <TabsContent value="wishlist" className="mt-6">
