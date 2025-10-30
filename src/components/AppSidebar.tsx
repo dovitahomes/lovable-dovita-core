@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { LogOut, Moon, Sun, Building2 } from "lucide-react";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
 import dovitaLogo from "@/assets/dovita-logo.png";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/context/ThemeProvider";
@@ -46,13 +46,17 @@ export function AppSidebar() {
     isActive: boolean;
   }) => isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
   return <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
-      <SidebarContent>
-        <div className="px-3 py-4">
-          <div className="flex items-center justify-center">
-            
-          </div>
+      <SidebarHeader className="px-3 py-4">
+        <div className="flex items-center justify-center">
+          <img 
+            src={dovitaLogo} 
+            alt="Logo" 
+            className={state === "collapsed" ? "w-8 h-8" : "w-24 h-24"}
+          />
         </div>
+      </SidebarHeader>
 
+      <SidebarContent>
         {routesToShow.map(group => <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
