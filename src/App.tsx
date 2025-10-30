@@ -60,6 +60,7 @@ const Identidades = lazy(() => import("./pages/herramientas/Identidades"));
 const Accesos = lazy(() => import("./pages/herramientas/Accesos"));
 const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
+const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 
 const InternalLayout = () => {
@@ -168,6 +169,16 @@ const InternalLayout = () => {
                     <ProtectedRoute requireAdmin>
                       <Suspense fallback={<TableSkeleton />}>
                         <CatalogoTU />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/herramientas/usuarios"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <Suspense fallback={<TableSkeleton />}>
+                        <HerramientasUsuarios />
                       </Suspense>
                     </ProtectedRoute>
                   }
