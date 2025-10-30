@@ -65,19 +65,16 @@ export default function PresupuestoParametrico() {
   });
 
   const { data: partidas } = useQuery({
-    queryKey: ['tu_partidas', selectedMayor],
+    queryKey: ['tu_partidas'],
     queryFn: async () => {
-      if (!selectedMayor) return [];
       const { data, error } = await supabase
         .from('tu_nodes')
         .select('*')
         .eq('type', 'partida')
-        .eq('parent_id', selectedMayor)
         .order('code');
       if (error) throw error;
       return data;
-    },
-    enabled: !!selectedMayor
+    }
   });
 
   const { data: budget } = useQuery({
@@ -153,12 +150,13 @@ export default function PresupuestoParametrico() {
               budget_id: budgetId,
               mayor_id: item.mayor_id,
               partida_id: item.partida_id,
+              subpartida_id: null,
               descripcion: item.descripcion,
-              unidad: item.unidad,
-              cant_real: item.cant_real,
-              desperdicio_pct: item.desperdicio_pct,
-              costo_unit: item.costo_unit,
-              honorarios_pct: item.honorarios_pct,
+              unidad: item.unidad || 'pieza',
+              cant_real: item.cant_real || 1,
+              desperdicio_pct: item.desperdicio_pct || 0,
+              costo_unit: item.costo_unit || 0,
+              honorarios_pct: item.honorarios_pct || 0,
               order_index: idx
             }))
           );
@@ -187,8 +185,8 @@ export default function PresupuestoParametrico() {
       mayor_id: selectedMayor,
       partida_id: "",
       descripcion: "",
-      unidad: "",
-      cant_real: 0,
+      unidad: "pieza",
+      cant_real: 1,
       desperdicio_pct: 0,
       costo_unit: 0,
       honorarios_pct: 0,
@@ -212,6 +210,12 @@ export default function PresupuestoParametrico() {
     return cantNecesaria * precioUnit;
   };
 
+  const calculateMayorSubtotal = (mayorId: string) => {
+    return items
+      .filter(item => item.mayor_id === mayorId)
+      .reduce((sum, item) => sum + calculateItemTotal(item), 0);
+  };
+
   const calculateSubtotal = () => {
     return items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
   };
@@ -224,46 +228,63 @@ export default function PresupuestoParametrico() {
     return calculateSubtotal() + calculateIVA();
   };
 
+  const getMayoresUsed = () => {
+    const mayorIds = [...new Set(items.map(item => item.mayor_id))];
+    return mayores?.filter(m => mayorIds.includes(m.id)) || [];
+  };
+
   const handleExportPDF = async () => {
     if (!projectId) {
       toast.error("Selecciona un proyecto");
       return;
     }
 
-    const { data: project } = await supabase
-      .from('projects')
-      .select('*, clients(*)')
-      .eq('id', projectId)
-      .single();
+    try {
+      const { data: project } = await supabase
+        .from('projects')
+        .select('*, clients(*)')
+        .eq('id', projectId)
+        .single();
 
-    const { data: corporateContent } = await supabase
-      .from('contenido_corporativo')
-      .select('*')
-      .limit(1)
-      .single();
+      const { data: corporateContent } = await supabase
+        .from('contenido_corporativo')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
 
-    generateBudgetPDF({
-      budget: {
-        type: 'parametrico',
-        version: budget?.version || 1,
-        iva_enabled: ivaEnabled,
-        notas
-      },
-      project,
-      items: items.map(item => {
+      // Preparar items agrupados por mayor para el PDF
+      const itemsWithDetails = items.map(item => {
         const mayor = mayores?.find(m => m.id === item.mayor_id);
         const partida = partidas?.find(p => p.id === item.partida_id);
         return {
           ...item,
+          mayor_code: mayor?.code || '',
           mayor_name: mayor?.name || '',
-          partida_name: partida?.name || ''
+          partida_code: partida?.code || '',
+          partida_name: partida?.name || item.descripcion || '',
+          total_item: calculateItemTotal(item)
         };
-      }),
-      corporateContent,
-      subtotal: calculateSubtotal(),
-      iva: calculateIVA(),
-      total: calculateTotal()
-    });
+      });
+
+      generateBudgetPDF({
+        budget: {
+          type: 'parametrico',
+          version: budget?.version || 1,
+          iva_enabled: ivaEnabled,
+          notas
+        },
+        project,
+        items: itemsWithDetails,
+        corporateContent,
+        subtotal: calculateSubtotal(),
+        iva: calculateIVA(),
+        total: calculateTotal()
+      });
+
+      toast.success("PDF generado correctamente");
+    } catch (error: any) {
+      toast.error("Error al generar PDF: " + error.message);
+    }
   };
 
   return (
@@ -354,7 +375,7 @@ export default function PresupuestoParametrico() {
             <div className="flex gap-2">
               <Select value={selectedMayor} onValueChange={setSelectedMayor}>
                 <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Seleccionar mayor" />
+                  <SelectValue placeholder="Seleccionar mayor para agregar" />
                 </SelectTrigger>
                 <SelectContent>
                   {mayores?.map((m) => (
@@ -364,7 +385,7 @@ export default function PresupuestoParametrico() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleAddItem}>
+              <Button onClick={handleAddItem} disabled={!selectedMayor}>
                 <Plus className="h-4 w-4 mr-2" /> Agregar Partida
               </Button>
             </div>
@@ -372,107 +393,123 @@ export default function PresupuestoParametrico() {
         </CardHeader>
         <CardContent>
           {items.length > 0 ? (
-            <div className="space-y-4">
-              {items.map((item, idx) => {
-                const mayor = mayores?.find(m => m.id === item.mayor_id);
+            <div className="space-y-6">
+              {getMayoresUsed().map((mayor) => {
+                const mayorItems = items.filter(item => item.mayor_id === mayor.id);
                 return (
-                  <div key={idx} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-semibold">
-                        {mayor?.code} - {mayor?.name}
-                      </h4>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveItem(idx)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <div>
-                        <Label>Partida</Label>
-                        <Select
-                          value={item.partida_id}
-                          onValueChange={(v) => handleItemChange(idx, 'partida_id', v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {partidas?.filter(p => p.parent_id === item.mayor_id).map((p) => (
-                              <SelectItem key={p.id} value={p.id}>
-                                {p.code} - {p.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                  <Card key={mayor.id} className="border-2">
+                    <CardHeader className="bg-muted/50">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg">
+                          {mayor.code} - {mayor.name}
+                        </CardTitle>
+                        <div className="text-right">
+                          <span className="text-sm text-muted-foreground">Subtotal: </span>
+                          <span className="font-bold text-primary">
+                            {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(calculateMayorSubtotal(mayor.id))}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <Label>Unidad</Label>
-                        <Input
-                          value={item.unidad}
-                          onChange={(e) => handleItemChange(idx, 'unidad', e.target.value)}
-                          placeholder="m2, m3, kg"
-                        />
-                      </div>
-                      <div>
-                        <Label>Cantidad</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={item.cant_real}
-                          onChange={(e) => handleItemChange(idx, 'cant_real', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Costo Unit.</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={item.costo_unit}
-                          onChange={(e) => handleItemChange(idx, 'costo_unit', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label>Descripción</Label>
-                        <Input
-                          value={item.descripcion}
-                          onChange={(e) => handleItemChange(idx, 'descripcion', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Desperdicio %</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={item.desperdicio_pct}
-                          onChange={(e) => handleItemChange(idx, 'desperdicio_pct', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div>
-                        <Label>Honorarios %</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={item.honorarios_pct}
-                          onChange={(e) => handleItemChange(idx, 'honorarios_pct', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-muted-foreground">Total partida: </span>
-                      <span className="font-semibold">
-                        {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(calculateItemTotal(item))}
-                      </span>
-                    </div>
-                  </div>
+                    </CardHeader>
+                    <CardContent className="pt-4 space-y-3">
+                      {mayorItems.map((item, idx) => {
+                        const globalIdx = items.findIndex(i => i === item);
+                        const partida = partidas?.find(p => p.id === item.partida_id);
+                        return (
+                          <div key={globalIdx} className="border rounded-lg p-3 space-y-3 bg-background">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1 space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label className="text-xs">Partida *</Label>
+                                    <Select
+                                      value={item.partida_id}
+                                      onValueChange={(v) => {
+                                        handleItemChange(globalIdx, 'partida_id', v);
+                                        const p = partidas?.find(p => p.id === v);
+                                        if (p) handleItemChange(globalIdx, 'descripcion', p.name);
+                                      }}
+                                    >
+                                      <SelectTrigger className="h-9">
+                                        <SelectValue placeholder="Seleccionar" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {partidas?.filter(p => p.parent_id === mayor.id).map((p) => (
+                                          <SelectItem key={p.id} value={p.id}>
+                                            {p.code} - {p.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">Descripción</Label>
+                                    <Input
+                                      className="h-9"
+                                      value={item.descripcion}
+                                      onChange={(e) => handleItemChange(globalIdx, 'descripcion', e.target.value)}
+                                      placeholder={partida?.name || ''}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-4 gap-3">
+                                  <div>
+                                    <Label className="text-xs">Costo *</Label>
+                                    <Input
+                                      className="h-9"
+                                      type="number"
+                                      step="0.01"
+                                      value={item.costo_unit}
+                                      onChange={(e) => handleItemChange(globalIdx, 'costo_unit', parseFloat(e.target.value) || 0)}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">Unidad</Label>
+                                    <Input
+                                      className="h-9"
+                                      value={item.unidad}
+                                      onChange={(e) => handleItemChange(globalIdx, 'unidad', e.target.value)}
+                                      placeholder="pieza"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">Cantidad</Label>
+                                    <Input
+                                      className="h-9"
+                                      type="number"
+                                      step="0.01"
+                                      value={item.cant_real}
+                                      onChange={(e) => handleItemChange(globalIdx, 'cant_real', parseFloat(e.target.value) || 0)}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">Total</Label>
+                                    <div className="h-9 flex items-center font-semibold text-sm">
+                                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(calculateItemTotal(item))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveItem(globalIdx)}
+                                className="ml-2"
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              Agrega partidas al presupuesto
+              Selecciona un mayor y agrega partidas al presupuesto
             </div>
           )}
         </CardContent>
