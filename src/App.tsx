@@ -28,6 +28,7 @@ const Debug = lazy(() => import("./pages/Debug"));
 
 // Lazy loaded (code-split by route)
 const Clientes = lazy(() => import("./pages/Clientes"));
+const ClienteDetalle = lazy(() => import("./pages/ClienteDetalle"));
 const Proyectos = lazy(() => import("./pages/Proyectos"));
 const ProyectoDetalle = lazy(() => import("./pages/ProyectoDetalle"));
 const Leads = lazy(() => import("./pages/Leads"));
@@ -95,6 +96,7 @@ const InternalLayout = () => {
                 <Route path="/metrics" element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
                 <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
                 <Route path="/clientes" element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
+                <Route path="/clientes/:id" element={<Suspense fallback={<TabsSkeleton />}><ClienteDetalle /></Suspense>} />
                 <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
                 <Route path="/proyectos" element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
                 <Route path="/proyectos/:id" element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />

@@ -124,11 +124,13 @@ export function useConvertLead() {
 
       return { client, projects: createdProjects };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      toast.success("Lead convertido exitosamente");
+      
+      // Return data for the caller to handle navigation
+      return data;
     },
     onError: (error: any) => {
       toast.error("Error al convertir lead: " + error.message);

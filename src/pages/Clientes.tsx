@@ -1,30 +1,25 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useClientsList } from "@/hooks/useClients";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Trash2, Eye } from "lucide-react";
 import { ClientDialog } from "@/components/forms/ClientDialog";
 import { LoadingError } from "@/components/common/LoadingError";
 
 export default function Clientes() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const queryClient = useQueryClient();
-
-  const { data: clients, isLoading, error } = useQuery({
-    queryKey: ['clients'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    }
-  });
+  const { data: clients, isLoading, error } = useClientsList(search);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -50,8 +45,14 @@ export default function Clientes() {
       <ClientDialog open={open} onOpenChange={setOpen} />
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Lista de Clientes</CardTitle>
+          <Input
+            placeholder="Buscar por nombre, email o teléfono..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-sm"
+          />
         </CardHeader>
         <CardContent>
           <LoadingError
@@ -69,18 +70,27 @@ export default function Clientes() {
                   <TableHead>Nombre</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Teléfono</TableHead>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {clients.map((client) => (
                   <TableRow key={client.id}>
-                    <TableCell className="capitalize">{client.person_type}</TableCell>
+                    <TableCell>
+                      <Badge variant={client.person_type === 'fisica' ? 'default' : 'secondary'}>
+                        {client.person_type}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{client.name}</TableCell>
                     <TableCell>{client.email || '-'}</TableCell>
                     <TableCell>{client.phone || '-'}</TableCell>
+                    <TableCell>{new Date(client.created_at).toLocaleDateString('es-MX')}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/clientes/${client.id}`)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(client.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>

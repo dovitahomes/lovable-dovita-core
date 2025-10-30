@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useConvertLead } from "@/hooks/useLeads";
 import { Loader2, Plus, X } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface ConvertLeadDialogProps {
   open: boolean;
@@ -17,6 +19,7 @@ interface ConvertLeadDialogProps {
 }
 
 export function ConvertLeadDialog({ open, onOpenChange, lead }: ConvertLeadDialogProps) {
+  const navigate = useNavigate();
   const [personType, setPersonType] = useState<'fisica' | 'moral'>('fisica');
   const [clientName, setClientName] = useState(lead?.nombre_completo || "");
   const [clientEmail, setClientEmail] = useState(lead?.email || "");
@@ -58,18 +61,52 @@ export function ConvertLeadDialog({ open, onOpenChange, lead }: ConvertLeadDialo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await convertMutation.mutateAsync({
-      leadId: lead.id,
-      lead,
-      personType,
-      clientName,
-      clientEmail,
-      clientPhone,
-      sucursalId: sucursalId === "none" ? undefined : sucursalId,
-      projects
-    });
-    
-    onOpenChange(false);
+    try {
+      const result = await convertMutation.mutateAsync({
+        leadId: lead.id,
+        lead,
+        personType,
+        clientName,
+        clientEmail,
+        clientPhone,
+        sucursalId: sucursalId === "none" ? undefined : sucursalId,
+        projects
+      });
+      
+      const client = result?.client;
+      const project = result?.projects?.[0];
+      
+      toast.success(
+        <div className="space-y-2">
+          <p className="font-medium">Lead convertido exitosamente</p>
+          <div className="flex gap-2">
+            {client && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(`/clientes/${client.id}`)}
+              >
+                Ver Cliente
+              </Button>
+            )}
+            {project && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(`/proyectos/${project.id}`)}
+              >
+                Ver Proyecto
+              </Button>
+            )}
+          </div>
+        </div>,
+        { duration: 8000 }
+      );
+      
+      onOpenChange(false);
+    } catch (error) {
+      // Error is already handled by the mutation
+    }
   };
 
   return (

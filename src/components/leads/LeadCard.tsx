@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Mail, Phone, MapPin } from "lucide-react";
+import { UserPlus, Mail, Phone, MapPin, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface LeadCardProps {
   lead: any;
@@ -10,7 +11,9 @@ interface LeadCardProps {
 }
 
 export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
+  const navigate = useNavigate();
   const canConvert = ['nuevo', 'contactado', 'calificado'].includes(lead.status);
+  const isConverted = lead.status === 'convertido';
   
   return (
     <Card 
@@ -83,6 +86,21 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Convertir
+          </Button>
+        )}
+        
+        {isConverted && lead.client_id && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full mt-3"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/clientes/${lead.client_id}`);
+            }}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Ver Cliente
           </Button>
         )}
       </CardContent>
