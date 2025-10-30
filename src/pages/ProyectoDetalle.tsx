@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WishlistForm } from "@/components/WishlistForm";
-import { DocumentManager } from "@/components/DocumentManager";
 import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar } from "lucide-react";
+import { DocumentsTab } from "@/components/project/DocumentsTab";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText } from "lucide-react";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
@@ -118,7 +118,10 @@ export default function ProyectoDetalle() {
 
       <Tabs defaultValue="documentos" className="w-full">
         <TabsList>
-          <TabsTrigger value="documentos">Documentos</TabsTrigger>
+          <TabsTrigger value="documentos" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Documentos
+          </TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
           <TabsTrigger value="chat" className="gap-2">
             <MessageSquare className="h-4 w-4" />
@@ -132,7 +135,7 @@ export default function ProyectoDetalle() {
         </TabsList>
         
         <TabsContent value="documentos" className="mt-6">
-          <DocumentManager projectId={id!} userRole={role || undefined} />
+          <DocumentsTab projectId={id!} />
         </TabsContent>
         
         <TabsContent value="wishlist" className="mt-6">
