@@ -17,6 +17,7 @@ export function useModuleAccess() {
 
   useEffect(() => {
     let active = true;
+    let timeoutId: NodeJS.Timeout;
     
     async function load() {
       if (!user) {
@@ -27,7 +28,15 @@ export function useModuleAccess() {
       
       setLoading(true);
       
-      // Direct query to user_permissions table (bypass type checking until types regenerate)
+      // Safety timeout - if permissions don't load in 3s, use empty array
+      timeoutId = setTimeout(() => {
+        if (active) {
+          console.warn('[useModuleAccess] Timeout loading permissions, using empty array');
+          setPerms([]);
+          setLoading(false);
+        }
+      }, 3000);
+      
       try {
         const { data, error } = await (supabase as any)
           .from('user_permissions')
@@ -36,10 +45,13 @@ export function useModuleAccess() {
 
         if (!active) return;
         
+        clearTimeout(timeoutId);
+        
         if (error) {
-          console.warn('Could not load module permissions:', error.message);
+          console.warn('[useModuleAccess] Error loading permissions:', error.message);
           setPerms([]);
         } else {
+          console.info(`[useModuleAccess] ✓ Loaded ${data?.length || 0} permissions`);
           setPerms((data ?? []).map((d: any) => ({
             module_name: d.module_name,
             can_view: !!d.can_view,
@@ -49,7 +61,8 @@ export function useModuleAccess() {
           })));
         }
       } catch (err) {
-        console.warn('Error loading permissions:', err);
+        clearTimeout(timeoutId);
+        console.warn('[useModuleAccess] Exception loading permissions:', err);
         setPerms([]);
       }
       
@@ -59,9 +72,10 @@ export function useModuleAccess() {
     load();
     
     return () => { 
-      active = false; 
+      active = false;
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [user]);
+  }, [user])
 
   const canView = (moduleName: string) => 
     perms.some(p => p.module_name === moduleName && p.can_view);

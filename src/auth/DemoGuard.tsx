@@ -39,19 +39,12 @@ export function DemoGuard({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session) {
-        // Real session exists, use it
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role_name')
-          .eq('user_id', session.user.id);
-
-        const firstRole = roleData && roleData.length > 0 ? roleData[0].role_name : 'user';
-
+        // Real session exists, use it (no need to query roles here)
         setDemoSession({
           user: session.user,
           session: session,
           isDemoMode: false,
-          role: (firstRole as any) || 'user'
+          role: 'admin' // Default, not used for permissions
         });
       } else if (isDemoMode) {
         // No real session, but demo mode is enabled
@@ -78,18 +71,11 @@ export function DemoGuard({ children }: { children: ReactNode }) {
     // Listen for auth changes (real sessions only)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role_name')
-          .eq('user_id', session.user.id);
-
-        const firstRole = roleData && roleData.length > 0 ? roleData[0].role_name : 'user';
-
         setDemoSession({
           user: session.user,
           session: session,
           isDemoMode: false,
-          role: (firstRole as any) || 'user'
+          role: 'admin' // Default, not used for permissions
         });
       } else if (isDemoMode) {
         // Maintain demo session if no real session

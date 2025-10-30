@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth();
+  const { loading: permsLoading } = useModuleAccess();
   
   if (loading) {
     return (
@@ -17,6 +18,12 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   
   if (!user) {
     return <Navigate to="/auth/login" replace />;
+  }
+  
+  // If permissions are still loading but user is authenticated, show content anyway
+  // (permissions will load in background and update UI when ready)
+  if (permsLoading) {
+    console.info('[RequireAuth] Permissions loading, allowing access');
   }
   
   return <>{children}</>;
