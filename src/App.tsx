@@ -21,7 +21,6 @@ import Login from "./pages/auth/Login";
 import Callback from "./pages/auth/Callback";
 import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/NotFound";
-
 const Debug = lazy(() => import("./pages/Debug"));
 
 // Lazy loaded (code-split by route)
@@ -52,10 +51,8 @@ const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
 const Metrics = lazy(() => import("./pages/Metrics"));
-
 const InternalLayout = () => {
-  return (
-    <SidebarProvider>
+  return <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset>
@@ -64,8 +61,8 @@ const InternalLayout = () => {
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <div className="flex items-center gap-2">
-                <img src="/lovable-uploads/d5eef59f-dd35-4dc2-9a50-12e8dd8e4c19.png" alt="Logo" className="h-8" />
-                <span className="font-semibold text-foreground">Dovita</span>
+                
+                
               </div>
             </div>
           </header>
@@ -105,13 +102,10 @@ const InternalLayout = () => {
           </div>
         </SidebarInset>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 };
-
 const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
+  return <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
           <TooltipProvider>
@@ -129,22 +123,15 @@ const App = () => {
                   <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
                   
                   {/* All internal routes */}
-                  <Route
-                    path="/*"
-                    element={
-                      <ProtectedRoute>
+                  <Route path="/*" element={<ProtectedRoute>
                         <InternalLayout />
-                      </ProtectedRoute>
-                    }
-                  />
+                      </ProtectedRoute>} />
                 </Routes>
               </DemoGuard>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
-    </QueryClientProvider>
-  );
+    </QueryClientProvider>;
 };
-
 export default App;
