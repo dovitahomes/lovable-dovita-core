@@ -1,23 +1,30 @@
-import { 
-  LayoutDashboard, 
-  TrendingUp, 
-  BriefcaseIcon, 
-  FolderKanban, 
+import {
+  LayoutDashboard,
+  UserPlus,
+  Users,
+  Folder,
+  Palette,
+  DollarSign,
+  Calendar,
+  HardHat,
+  Truck,
+  Briefcase,
+  FileText,
+  TrendingUp,
+  Award,
+  Wrench,
+  ShoppingCart,
+  FolderKanban,
   PenTool,
-  Calculator, 
-  Calendar, 
-  Truck, 
-  DollarSign, 
-  Receipt, 
-  Percent, 
+  Calculator,
+  Receipt,
+  Percent,
+  ListTree,
   UserCog,
   Building2,
   MapPin,
   Handshake,
-  Users,
   ShieldCheck,
-  FileText,
-  ListTree
 } from "lucide-react";
 
 export type RouteItem = {
@@ -43,7 +50,7 @@ export const ALL_ROUTES: RouteGroup[] = [
     label: "CRM",
     items: [
       { title: "Leads", url: "/leads", icon: TrendingUp, moduleName: "leads" },
-      { title: "Clientes", url: "/clientes", icon: BriefcaseIcon, moduleName: "clientes" },
+      { title: "Clientes", url: "/clientes", icon: Briefcase, moduleName: "clientes" },
     ],
   },
   {

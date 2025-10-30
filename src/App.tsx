@@ -113,6 +113,7 @@ const InternalLayout = () => {
                 <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
                 <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
                 <Route path="/cronograma" element={<Suspense fallback={<TableSkeleton />}><Cronograma /></Suspense>} />
+                <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
                 <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
