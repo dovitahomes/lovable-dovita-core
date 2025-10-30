@@ -74,6 +74,7 @@ export const ALL_ROUTES: RouteGroup[] = [
     label: "ERP",
     items: [
       { title: "Transacciones Unificadas", url: "/erp/transactions", icon: ListTree, moduleName: "herramientas" },
+      { title: "Presupuestos", url: "/erp/budgets", icon: Calculator, moduleName: "presupuestos" },
     ],
   },
   {

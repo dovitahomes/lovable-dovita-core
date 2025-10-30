@@ -55,6 +55,9 @@ const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
 const Metrics = lazy(() => import("./pages/Metrics"));
+const Budgets = lazy(() => import("./pages/erp/Budgets"));
+const BudgetWizard = lazy(() => import("./pages/erp/BudgetWizard"));
+const BudgetEditor = lazy(() => import("./pages/erp/BudgetEditor"));
 const InternalLayout = () => {
   const { theme, toggle: toggleTheme } = useTheme();
   
@@ -93,6 +96,9 @@ const InternalLayout = () => {
                 <Route path="/herramientas/reglas" element={<Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>} />
                 <Route path="/herramientas/catalogo-tu" element={<Navigate to="/erp/transactions" replace />} />
                 <Route path="/erp/transactions" element={<Suspense fallback={<TableSkeleton />}><CatalogoTU /></Suspense>} />
+                <Route path="/erp/budgets" element={<Suspense fallback={<TableSkeleton />}><Budgets /></Suspense>} />
+                <Route path="/erp/budgets/new" element={<Suspense fallback={<TableSkeleton />}><BudgetWizard /></Suspense>} />
+                <Route path="/erp/budgets/:id" element={<Suspense fallback={<TableSkeleton />}><BudgetEditor /></Suspense>} />
                 <Route path="/herramientas/usuarios" element={<Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>} />
                 <Route path="/metrics" element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
                 <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
