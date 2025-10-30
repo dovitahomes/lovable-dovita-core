@@ -50,22 +50,14 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       
       console.info(`[bootstrap] ✓ Bootstrap RPC completed (${Date.now() - bootstrapStart}ms)`);
       
-      // Step 1.5: Try to promote admin (silently fails if already exists)
+      // Step 1.5: Try to bootstrap first admin (non-blocking, silently fails if admin already exists)
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email === 'e@dovitahomes.com') {
-          console.info('[bootstrap] Attempting admin promotion...');
-          const { error: adminError } = await supabase.rpc('grant_admin_by_email', {
-            p_email: 'e@dovitahomes.com'
-          });
-          if (adminError && !adminError.message.includes('Solo un admin')) {
-            console.warn('[bootstrap] Admin promotion warning:', adminError);
-          } else {
-            console.info('[bootstrap] ✓ Admin promotion completed');
-          }
-        }
+        console.info('[bootstrap] Attempting first admin bootstrap...');
+        await supabase.rpc('bootstrap_first_admin');
+        console.info('[bootstrap] ✓ First admin bootstrap completed');
       } catch (err) {
-        console.warn('[bootstrap] Admin promotion skipped:', err);
+        // Silently ignore - either admin already exists or other non-critical error
+        console.info('[bootstrap] First admin bootstrap skipped (admin may already exist)');
       }
       
       // Step 2: Load user roles

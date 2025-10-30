@@ -2205,6 +2205,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      bootstrap_first_admin: { Args: never; Returns: undefined }
       bootstrap_user_access: {
         Args: { target_user_id?: string }
         Returns: undefined
@@ -2242,6 +2243,7 @@ export type Database = {
           total_paid: number
         }[]
       }
+      get_admin_count: { Args: never; Returns: number }
       get_budget_subtotals: {
         Args: { budget_id_param: string }
         Returns: {
