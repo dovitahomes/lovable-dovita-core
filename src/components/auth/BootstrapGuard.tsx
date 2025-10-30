@@ -4,16 +4,19 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { appSignOut } from '@/lib/auth/logout';
+import { useNavigate } from 'react-router-dom';
 
 interface BootstrapGuardProps {
   children: ReactNode;
 }
 
-type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';
+type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error' | 'unconfirmed';
 
 export function BootstrapGuard({ children }: BootstrapGuardProps) {
   const [status, setStatus] = useState<BootstrapStatus>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const navigate = useNavigate();
 
   const runBootstrap = async () => {
     try {
@@ -21,44 +24,49 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
       setErrorMsg(null);
       console.info('[BootstrapGuard] Starting bootstrap...');
 
-      // 1) Ensure profile exists
-      try {
-        await supabase.rpc('ensure_profile');
-        console.info('[BootstrapGuard] ✓ ensure_profile');
-      } catch (err) {
-        console.warn('[BootstrapGuard] ensure_profile failed (non-blocking):', err);
-      }
-
-      // 2) Bootstrap user access (base role + permissions)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('No user found');
       }
 
-      try {
-        await supabase.rpc('bootstrap_user_access', { target_user_id: user.id });
-        console.info('[BootstrapGuard] ✓ bootstrap_user_access');
-      } catch (err) {
-        console.warn('[BootstrapGuard] bootstrap_user_access failed (non-blocking):', err);
+      // Reintentos con backoff: 300ms, 900ms, 1800ms
+      const delays = [300, 900, 1800];
+      let lastError: any = null;
+
+      for (let i = 0; i <= Math.min(retryCount, 2); i++) {
+        try {
+          if (i > 0) {
+            console.info(`[BootstrapGuard] Retry ${i}/${delays.length} after ${delays[i - 1]}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delays[i - 1]));
+          }
+
+          // Llamar bootstrap_user_access
+          const { error: bootstrapErr } = await supabase.rpc('bootstrap_user_access', { 
+            target_user_id: user.id 
+          });
+
+          if (bootstrapErr) {
+            // Si es error de email no confirmado, redirigir
+            if (bootstrapErr.message?.includes('Email no confirmado')) {
+              console.warn('[BootstrapGuard] Email no confirmado');
+              setStatus('unconfirmed');
+              navigate('/auth/login?status=unconfirmed');
+              return;
+            }
+            throw bootstrapErr;
+          }
+
+          console.info('[BootstrapGuard] ✓ bootstrap_user_access');
+          break; // Éxito, salir del loop
+        } catch (err) {
+          lastError = err;
+          if (i === Math.min(retryCount, 2)) {
+            throw err; // Último intento falló
+          }
+        }
       }
 
-      // 3) Upsert admin email to whitelist
-      try {
-        await supabase.from('admin_emails').upsert({ email: 'e@dovitahomes.com' }, { onConflict: 'email' });
-        console.info('[BootstrapGuard] ✓ admin email whitelisted');
-      } catch (err) {
-        console.warn('[BootstrapGuard] admin_emails upsert failed (non-blocking):', err);
-      }
-
-      // 4) Grant admin if whitelisted
-      try {
-        await supabase.rpc('grant_admin_if_whitelisted');
-        console.info('[BootstrapGuard] ✓ grant_admin_if_whitelisted');
-      } catch (err) {
-        console.warn('[BootstrapGuard] grant_admin_if_whitelisted failed (non-blocking):', err);
-      }
-
-      // 5) Load roles and permissions
+      // Cargar roles y permisos
       const { data: roles, error: rolesErr } = await supabase
         .from('user_roles')
         .select('role')
@@ -75,7 +83,7 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
 
       console.info(`[BootstrapGuard] ✅ Bootstrap complete - roles=${JSON.stringify(roles?.map(r => r.role))}, modules=${permissions?.length}`);
       
-      // Persist to localStorage for quick access
+      // Persistir a localStorage
       try {
         localStorage.setItem('dv_roles_v1', JSON.stringify(roles?.map(r => r.role) || []));
         localStorage.setItem('dv_permissions_v1', JSON.stringify(permissions || []));
@@ -84,6 +92,7 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
       }
 
       setStatus('ready');
+      setRetryCount(0);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[BootstrapGuard] ❌ Bootstrap failed:', msg);
@@ -94,7 +103,18 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
 
   useEffect(() => {
     runBootstrap();
-  }, []);
+    
+    // Timeout de 8s para evitar bloqueos infinitos
+    const timeout = setTimeout(() => {
+      if (status === 'loading') {
+        console.warn('[BootstrapGuard] Timeout de 8s alcanzado');
+        setErrorMsg('La configuración está tomando más tiempo del esperado');
+        setStatus('error');
+      }
+    }, 8000);
+
+    return () => clearTimeout(timeout);
+  }, [retryCount]);
 
   if (status === 'loading' || status === 'idle') {
     return (
@@ -103,6 +123,10 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
         <p className="text-muted-foreground">Configurando tu cuenta...</p>
       </div>
     );
+  }
+
+  if (status === 'unconfirmed') {
+    return null; // Ya redirigió a /auth/login?status=unconfirmed
   }
 
   if (status === 'error') {
@@ -114,7 +138,13 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
           <AlertDescription className="space-y-3">
             <p>{errorMsg || 'No se pudo completar la configuración inicial'}</p>
             <div className="flex gap-2">
-              <Button onClick={runBootstrap} variant="outline" size="sm">
+              <Button 
+                onClick={() => {
+                  setRetryCount(prev => prev + 1);
+                }} 
+                variant="outline" 
+                size="sm"
+              >
                 Reintentar
               </Button>
               <Button onClick={appSignOut} variant="outline" size="sm">

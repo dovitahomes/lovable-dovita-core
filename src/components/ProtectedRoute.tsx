@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { status, refresh } = useSessionReady();
+  const { status, refresh, authError } = useSessionReady();
 
   if (status === 'loading') {
     return (
@@ -39,7 +39,10 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   }
 
   if (status === 'no-session') {
-    return <Navigate to="/auth/login" replace />;
+    const params = authError?.includes('Email no confirmado') 
+      ? '?status=unconfirmed' 
+      : '';
+    return <Navigate to={`/auth/login${params}`} replace />;
   }
 
   // status === 'ready'

@@ -54,6 +54,25 @@ export function useSessionReady() {
         }
 
         if (data?.session) {
+          // Validar email confirmado
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (!mounted) return;
+
+          if (userError) {
+            console.error('[session] getUser error', userError);
+            setStatus('error');
+            setAuthError(userError.message);
+            return;
+          }
+
+          if (!userData.user?.email_confirmed_at) {
+            console.warn('[session] Email no confirmado');
+            setSession(null);
+            setStatus('no-session');
+            setAuthError('Email no confirmado');
+            return;
+          }
+
           console.log('[session] status=ready');
           setSession(data.session);
           setStatus('ready');

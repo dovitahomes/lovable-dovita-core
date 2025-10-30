@@ -81,13 +81,21 @@ export function LoadingError({
   }
 
   if (error) {
+    const isPermissionError = error?.message?.includes('permission') || 
+                              error?.message?.includes('policy') ||
+                              error?.code === 'PGRST301';
+    
     return (
       <Alert variant="destructive" className="m-4">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>{isPermissionError ? 'Sin Permisos' : 'Error'}</AlertTitle>
         <AlertDescription className="flex items-center justify-between">
-          <span>Hubo un problema al cargar la información</span>
-          {onRetry && (
+          <span>
+            {isPermissionError 
+              ? 'No tienes permisos para este módulo.' 
+              : 'Hubo un problema al cargar la información'}
+          </span>
+          {onRetry && !isPermissionError && (
             <Button
               onClick={onRetry}
               variant="outline"

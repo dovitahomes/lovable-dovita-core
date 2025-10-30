@@ -67,6 +67,15 @@ export function useStablePermissions() {
     // Initial fetch
     fetchOnce();
     
+    // Timeout de 3s: si no cargó, mostrar mensaje "Sin permisos asignados"
+    const timeout = setTimeout(() => {
+      if (loading && perms.length === 0) {
+        console.warn('[perms] Timeout de 3s alcanzado sin permisos');
+        setLoading(false);
+        setError('timeout');
+      }
+    }, 3000);
+    
     // Re-fetch only on real auth events
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       console.log('[perms] Auth event:', event);
@@ -80,6 +89,7 @@ export function useStablePermissions() {
     });
     
     return () => {
+      clearTimeout(timeout);
       sub?.subscription?.unsubscribe?.();
     };
   }, []);
