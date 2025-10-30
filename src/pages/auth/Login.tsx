@@ -80,23 +80,21 @@ const Login = () => {
         console.warn('[auth] ⚠️ Session not ready, redirecting anyway');
       }
 
-      // Step 3: Bootstrap user (non-blocking, triggers permission refresh)
-      console.log('[auth] 🔧 Bootstrapping user in background...');
-      bootstrapUser().catch(err => 
-        console.warn('[auth] ⚠️ Bootstrap failed (non-blocking):', err)
-      );
+      // Step 3: Bootstrap user (BLOCKING - wait for completion)
+      console.log('[auth] 🔧 Bootstrapping user...');
+      const bootstrapResult = await bootstrapUser({ maxRetries: 3 });
 
-      // Step 4: Quick role check for redirect (don't wait for bootstrap)
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session!.user.id)
-        .limit(1);
+      if (!bootstrapResult.ok) {
+        console.error('[auth] ❌ Bootstrap failed:', bootstrapResult.reason);
+        toast.error('Error al configurar tu cuenta. Contacta al administrador.');
+        setIsLoading(false);
+        return;
+      }
 
-      const roles = rolesData?.map(r => r.role) || [];
-      
-      toast.success("Inicio de sesión exitoso");
-      
+      console.log('[auth] ✅ Bootstrap complete');
+      const roles = bootstrapResult.roles.map(r => r.role);
+      toast.success('Inicio de sesión exitoso');
+
       // Pure clients go to portal
       if (roles.includes('cliente')) {
         console.log('[auth] → Redirecting to client portal');

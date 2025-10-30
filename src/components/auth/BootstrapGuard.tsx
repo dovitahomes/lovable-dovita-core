@@ -104,14 +104,14 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
   useEffect(() => {
     runBootstrap();
     
-    // Timeout de 8s para evitar bloqueos infinitos
+    // Timeout de 12s para evitar bloqueos infinitos
     const timeout = setTimeout(() => {
       if (status === 'loading') {
-        console.warn('[BootstrapGuard] Timeout de 8s alcanzado');
-        setErrorMsg('La configuración está tomando más tiempo del esperado');
+        console.error('[BootstrapGuard] TIMEOUT: Bootstrap no completó en 12s');
+        setErrorMsg('El sistema no respondió. Intenta de nuevo o contacta al administrador.');
         setStatus('error');
       }
-    }, 8000);
+    }, 12000);
 
     return () => clearTimeout(timeout);
   }, [retryCount]);

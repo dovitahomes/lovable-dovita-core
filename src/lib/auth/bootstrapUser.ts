@@ -102,9 +102,13 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       const errorCode = (error as any)?.code;
+      const errorDetails = (error as any)?.details;
+      const errorHint = (error as any)?.hint;
       console.error(`[bootstrap] ❌ Attempt ${attempt + 1}/${maxRetries} failed:`, {
         message: errorMsg,
         code: errorCode,
+        details: errorDetails,
+        hint: errorHint,
         error
       });
       
