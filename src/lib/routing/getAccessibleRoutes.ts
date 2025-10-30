@@ -87,7 +87,6 @@ export const ALL_ROUTES: RouteGroup[] = [
       { title: "Identidades", url: "/herramientas/identidades", icon: Users, moduleName: "herramientas" },
       { title: "Accesos", url: "/herramientas/accesos", icon: ShieldCheck, moduleName: "herramientas" },
       { title: "Centro de Reglas", url: "/herramientas/reglas", icon: FileText, moduleName: "herramientas" },
-      { title: "Catálogo TU", url: "/herramientas/catalogo-tu", icon: ListTree, moduleName: "herramientas" },
     ],
   },
 ];

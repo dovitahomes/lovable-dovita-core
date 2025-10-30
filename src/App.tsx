@@ -91,7 +91,7 @@ const InternalLayout = () => {
                 <Route path="/herramientas/identidades" element={<Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>} />
                 <Route path="/herramientas/accesos" element={<Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>} />
                 <Route path="/herramientas/reglas" element={<Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>} />
-                <Route path="/herramientas/catalogo-tu" element={<Suspense fallback={<TableSkeleton />}><CatalogoTU /></Suspense>} />
+                <Route path="/herramientas/catalogo-tu" element={<Navigate to="/erp/transactions" replace />} />
                 <Route path="/erp/transactions" element={<Suspense fallback={<TableSkeleton />}><CatalogoTU /></Suspense>} />
                 <Route path="/herramientas/usuarios" element={<Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>} />
                 <Route path="/metrics" element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
