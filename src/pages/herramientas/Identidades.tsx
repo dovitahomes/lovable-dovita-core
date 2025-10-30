@@ -98,7 +98,7 @@ const Identidades = () => {
       // Finally, assign role
       const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: authData.user.id,
-        role: userData.role,
+        role_name: userData.role,
       });
 
       if (roleError) throw roleError;
@@ -132,7 +132,7 @@ const Identidades = () => {
       if (userData.data.role) {
         const { error: roleError } = await supabase
           .from("user_roles")
-          .update({ role: userData.data.role })
+          .update({ role_name: userData.data.role })
           .eq("user_id", userData.id);
 
         if (roleError) throw roleError;

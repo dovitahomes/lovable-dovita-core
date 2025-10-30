@@ -35,7 +35,7 @@ export async function requireClientRole() {
 
   const { data: roles, error } = await supabase
     .from('user_roles')
-    .select('role')
+    .select('role_name')
     .eq('user_id', user.id);
 
   if (error) {
@@ -43,7 +43,7 @@ export async function requireClientRole() {
     return false;
   }
 
-  const isClient = roles?.some(r => r.role === 'cliente');
+  const isClient = roles?.some(r => r.role_name === 'cliente');
   
   if (!isClient) {
     console.warn("[requireClientRole] User is not a client, but UI is not blocked");

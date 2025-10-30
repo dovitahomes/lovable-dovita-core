@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Building2 } from "lucide-react";
+import { bootstrapUserAfterLogin } from "@/lib/auth/bootstrap";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -44,6 +45,12 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.session) {
+        // 🆕 LLAMAR BOOTSTRAP
+        const bootstrapOk = await bootstrapUserAfterLogin();
+        if (!bootstrapOk) {
+          console.warn('[login] Bootstrap falló, pero permitir navegación');
+        }
+        
         // Update last login
         await supabase
           .from("users")

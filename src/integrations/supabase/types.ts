@@ -14,18 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_emails: {
-        Row: {
-          email: string
-        }
-        Insert: {
-          email: string
-        }
-        Update: {
-          email?: string
-        }
-        Relationships: []
-      }
       alianzas: {
         Row: {
           activa: boolean | null
@@ -1753,6 +1741,21 @@ export type Database = {
           },
         ]
       }
+      roles: {
+        Row: {
+          description: string | null
+          role_name: string
+        }
+        Insert: {
+          description?: string | null
+          role_name: string
+        }
+        Update: {
+          description?: string | null
+          role_name?: string
+        }
+        Relationships: []
+      }
       sucursales: {
         Row: {
           activa: boolean | null
@@ -1962,56 +1965,70 @@ export type Database = {
           },
         ]
       }
-      user_module_permissions: {
+      user_permissions: {
         Row: {
-          can_create: boolean | null
-          can_delete: boolean | null
-          can_edit: boolean | null
-          can_view: boolean | null
-          created_at: string | null
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
           id: string
           module_name: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          can_create?: boolean | null
-          can_delete?: boolean | null
-          can_edit?: boolean | null
-          can_view?: boolean | null
-          created_at?: string | null
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
           id?: string
           module_name: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          can_create?: boolean | null
-          can_delete?: boolean | null
-          can_edit?: boolean | null
-          can_view?: boolean | null
-          created_at?: string | null
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
           id?: string
           module_name?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
       }
       user_roles: {
         Row: {
-          role: Database["public"]["Enums"]["app_role"]
+          granted_at: string
+          granted_by: string | null
+          role_name: string
           user_id: string
         }
         Insert: {
-          role: Database["public"]["Enums"]["app_role"]
+          granted_at?: string
+          granted_by?: string | null
+          role_name: string
           user_id: string
         }
         Update: {
-          role?: Database["public"]["Enums"]["app_role"]
+          granted_at?: string
+          granted_by?: string | null
+          role_name?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_name_fkey"
+            columns: ["role_name"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["role_name"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -2062,7 +2079,7 @@ export type Database = {
             foreignKeyName: "users_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "vw_users_basic"
+            referencedRelation: "vw_users_with_roles"
             referencedColumns: ["id"]
           },
           {
@@ -2193,54 +2210,24 @@ export type Database = {
         }
         Relationships: []
       }
-      vw_users_basic: {
+      vw_users_with_roles: {
         Row: {
           email: string | null
           full_name: string | null
           id: string | null
-          roles: Database["public"]["Enums"]["app_role"][] | null
+          phone: string | null
+          roles: string[] | null
         }
         Relationships: []
       }
     }
     Functions: {
-      _has_any_admin: { Args: never; Returns: boolean }
-      admin_list_users: {
-        Args: never
-        Returns: {
-          email: string
-          full_name: string
-          roles: Database["public"]["Enums"]["app_role"][]
-          user_id: string
-        }[]
-      }
-      admin_set_module_permission: {
-        Args: {
-          p_can_create: boolean
-          p_can_delete: boolean
-          p_can_edit: boolean
-          p_can_view: boolean
-          p_module: string
-          p_user_id: string
-        }
+      admin_set_user_roles: {
+        Args: { p_roles: string[]; p_user_id: string }
         Returns: undefined
       }
-      admin_set_user_role: {
-        Args: {
-          p_enabled: boolean
-          p_role: Database["public"]["Enums"]["app_role"]
-          p_user_id: string
-        }
-        Returns: undefined
-      }
-      any_admin_exists: { Args: never; Returns: boolean }
-      bootstrap_first_admin:
-        | { Args: { p_email: string }; Returns: boolean }
-        | { Args: never; Returns: undefined }
-      bootstrap_user_access: {
-        Args: { target_user_id?: string }
-        Returns: undefined
-      }
+      bootstrap_first_admin: { Args: never; Returns: undefined }
+      bootstrap_user_on_login: { Args: never; Returns: undefined }
       check_price_variance: {
         Args: { new_price: number; subpartida_id_param: string }
         Returns: {
@@ -2250,6 +2237,7 @@ export type Database = {
           variance_pct: number
         }[]
       }
+      current_user_has_role: { Args: { p_role_name: string }; Returns: boolean }
       ensure_profile: { Args: never; Returns: undefined }
       extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
       get_accounts_payable: {
@@ -2274,7 +2262,6 @@ export type Database = {
           total_paid: number
         }[]
       }
-      get_admin_count: { Args: never; Returns: number }
       get_budget_subtotals: {
         Args: { budget_id_param: string }
         Returns: {
@@ -2307,15 +2294,6 @@ export type Database = {
           qty_requested: number
         }[]
       }
-      grant_admin_by_email: { Args: { p_email: string }; Returns: undefined }
-      grant_admin_if_whitelisted: { Args: never; Returns: undefined }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
       save_price_history: {
         Args: {
           precio_param: number
@@ -2326,23 +2304,16 @@ export type Database = {
         }
         Returns: string
       }
-      seed_permissions_for_role: {
-        Args: {
-          p_role: Database["public"]["Enums"]["app_role"]
-          p_user_id: string
-        }
+      seed_role_permissions: {
+        Args: { p_role_name: string; p_user_id: string }
         Returns: undefined
       }
-      set_user_roles: {
-        Args: {
-          p_roles: Database["public"]["Enums"]["app_role"][]
-          p_user_id: string
-        }
-        Returns: undefined
+      user_has_role: {
+        Args: { p_role_name: string; p_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "colaborador" | "cliente" | "contador"
       budget_status: "borrador" | "publicado"
       budget_type: "parametrico" | "ejecutivo"
       commission_status: "calculada" | "pendiente" | "pagada"
@@ -2492,7 +2463,6 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "colaborador", "cliente", "contador"],
       budget_status: ["borrador", "publicado"],
       budget_type: ["parametrico", "ejecutivo"],
       commission_status: ["calculada", "pendiente", "pagada"],

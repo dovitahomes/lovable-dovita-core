@@ -23,7 +23,7 @@ export default function Debug() {
           roles = r;
           
           const { data: p } = await supabase
-            .from('user_module_permissions')
+            .from('user_permissions')
             .select('*')
             .eq('user_id', user.id);
           permissions = p;

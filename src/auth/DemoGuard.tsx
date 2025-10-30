@@ -42,15 +42,16 @@ export function DemoGuard({ children }: { children: ReactNode }) {
         // Real session exists, use it
         const { data: roleData } = await supabase
           .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+          .select('role_name')
+          .eq('user_id', session.user.id);
+
+        const firstRole = roleData && roleData.length > 0 ? roleData[0].role_name : 'user';
 
         setDemoSession({
           user: session.user,
           session: session,
           isDemoMode: false,
-          role: roleData?.role || 'user'
+          role: (firstRole as any) || 'user'
         });
       } else if (isDemoMode) {
         // No real session, but demo mode is enabled
@@ -79,15 +80,16 @@ export function DemoGuard({ children }: { children: ReactNode }) {
       if (session) {
         const { data: roleData } = await supabase
           .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+          .select('role_name')
+          .eq('user_id', session.user.id);
+
+        const firstRole = roleData && roleData.length > 0 ? roleData[0].role_name : 'user';
 
         setDemoSession({
           user: session.user,
           session: session,
           isDemoMode: false,
-          role: roleData?.role || 'user'
+          role: (firstRole as any) || 'user'
         });
       } else if (isDemoMode) {
         // Maintain demo session if no real session

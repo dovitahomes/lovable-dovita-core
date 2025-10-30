@@ -49,10 +49,10 @@ export default function Accesos() {
 
   // Fetch users
   const { data: users, isLoading: usersLoading, error: usersError } = useQuery({
-    queryKey: ['vw_users_basic'],
+    queryKey: ['vw_users_with_roles'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('vw_users_basic')
+        .from('vw_users_with_roles')
         .select('*')
         .order('email');
       
@@ -68,7 +68,7 @@ export default function Accesos() {
       if (!selectedUserId) return [];
       
       const { data, error } = await supabase
-        .from('user_module_permissions')
+        .from('user_permissions')
         .select('*')
         .eq('user_id', selectedUserId);
       
@@ -81,9 +81,9 @@ export default function Accesos() {
   // Update user roles mutation
   const updatePermissionMutation = useMutation({
     mutationFn: async ({ userId, roles }: { userId: string; roles: string[] }) => {
-      const { error } = await supabase.rpc('set_user_roles', {
+      const { error } = await supabase.rpc('admin_set_user_roles', {
         p_user_id: userId,
-        p_roles: roles as any,
+        p_roles: roles,
       });
       
       if (error) throw error;
@@ -93,7 +93,7 @@ export default function Accesos() {
         title: 'Éxito',
         description: 'Roles actualizados correctamente',
       });
-      queryClient.invalidateQueries({ queryKey: ['vw_users_basic'] });
+      queryClient.invalidateQueries({ queryKey: ['vw_users_with_roles'] });
       queryClient.invalidateQueries({ queryKey: ['user_permissions', selectedUserId] });
       
       // Refresh localStorage if current user
@@ -140,7 +140,7 @@ export default function Accesos() {
     return (
       <LoadingError 
         error={usersError instanceof Error ? usersError : new Error('Error cargando usuarios')}
-        onRetry={() => queryClient.invalidateQueries({ queryKey: ['vw_users_basic'] })}
+        onRetry={() => queryClient.invalidateQueries({ queryKey: ['vw_users_with_roles'] })}
       />
     );
   }

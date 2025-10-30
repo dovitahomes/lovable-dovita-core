@@ -22,11 +22,10 @@ const Callback = () => {
         if (session) {
           const { data: roleData } = await supabase
             .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
+            .select('role_name')
+            .eq('user_id', session.user.id);
           
-          const role = roleData?.role;
+          const role = roleData && roleData.length > 0 ? roleData[0].role_name : null;
           
           // Redirect after a short delay
           setTimeout(() => {

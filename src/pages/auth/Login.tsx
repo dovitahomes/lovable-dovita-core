@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { LogIn, Mail } from "lucide-react";
 import { z } from "zod";
+import { bootstrapUserAfterLogin } from "@/lib/auth/bootstrap";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -43,6 +44,12 @@ const Login = () => {
       });
 
       if (authError) throw authError;
+      
+      // 🆕 LLAMAR BOOTSTRAP
+      const bootstrapOk = await bootstrapUserAfterLogin();
+      if (!bootstrapOk) {
+        console.warn('[login] Bootstrap falló, pero permitir navegación');
+      }
       
       toast.success('Inicio de sesión exitoso');
       navigate('/', { replace: true });

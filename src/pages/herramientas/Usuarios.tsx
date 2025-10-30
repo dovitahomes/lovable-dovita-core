@@ -30,9 +30,9 @@ export default function Usuarios() {
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      // Read from vw_users_basic view created in migration
+      // Read from vw_users_with_roles view created in migration
       const { data, error } = await supabase
-        .from('vw_users_basic')
+        .from('vw_users_with_roles')
         .select('id, email, full_name, roles');
       
       if (error) {
