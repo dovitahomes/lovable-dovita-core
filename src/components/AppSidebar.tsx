@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { LogOut, Moon, Sun, Building2 } from "lucide-react";
 import { usePrefetchRoute } from "@/hooks/usePrefetchRoute";
+import dovitaLogo from "@/assets/dovita-logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -52,21 +53,15 @@ export function AppSidebar() {
       <SidebarContent>
         <div className="px-3 py-4">
           <div className="flex items-center gap-3 mb-2">
-            {corporate?.isotipo_url ? (
-              <img 
-                src={corporate.isotipo_url} 
-                alt={corporate.nombre_empresa}
-                className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-            )}
+            <img 
+              src={dovitaLogo} 
+              alt="Dovita"
+              className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
+            />
             {state !== "collapsed" && (
               <div className="min-w-0">
                 <h2 className="font-bold text-sidebar-foreground truncate">
-                  {corporate?.nombre_empresa || 'Dovita'}
+                  Dovita
                 </h2>
                 <p className="text-xs text-sidebar-foreground/70">CRM/ERP</p>
               </div>
