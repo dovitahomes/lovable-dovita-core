@@ -1,13 +1,19 @@
-/* Sidebar theme-specific styles */
+/* Sidebar theme-specific styles - Override CSS variables */
 [data-sidebar-theme="light"] {
-  --sidebar-background: var(--sidebar-background-light);
-  --sidebar-foreground: var(--sidebar-foreground-light);
-  --sidebar-primary: var(--sidebar-primary-light);
-  --sidebar-primary-foreground: var(--sidebar-primary-foreground-light);
-  --sidebar-accent: var(--sidebar-accent-light);
-  --sidebar-accent-foreground: var(--sidebar-accent-foreground-light);
-  --sidebar-border: var(--sidebar-border-light);
-  --sidebar-ring: var(--sidebar-ring-light);
+  --sidebar-background: 0 0% 100% !important;
+  --sidebar-foreground: 222 47% 11% !important;
+  --sidebar-primary: 221 83% 53% !important;
+  --sidebar-primary-foreground: 0 0% 100% !important;
+  --sidebar-accent: 220 14% 96% !important;
+  --sidebar-accent-foreground: 222 47% 11% !important;
+  --sidebar-border: 220 13% 91% !important;
+  --sidebar-ring: 221 83% 53% !important;
+}
+
+/* Force background and text colors for light sidebar */
+[data-sidebar-theme="light"] {
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(222 47% 11%) !important;
 }
 
 /* Light sidebar - blue icons like the logo */
@@ -19,4 +25,14 @@
 [data-sidebar-theme="light"] [data-sidebar="group-label"] {
   color: hsl(222 47% 40%);
   font-weight: 500;
+}
+
+/* Override bg-sidebar class for light theme */
+[data-sidebar-theme="light"] .bg-sidebar {
+  background-color: hsl(0 0% 100%) !important;
+}
+
+/* Override text-sidebar-foreground class for light theme */
+[data-sidebar-theme="light"] .text-sidebar-foreground {
+  color: hsl(222 47% 11%) !important;
 }
