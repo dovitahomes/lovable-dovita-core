@@ -24,7 +24,21 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
       setErrorMsg(null);
       console.info('[BootstrapGuard] Starting...');
 
-      // ✅ CACHE-FIRST: Check localStorage before making RPC
+      // ✅ PASO 0: Verificar que hay sesión válida
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.warn('[BootstrapGuard] No session found');
+        setStatus('error');
+        setErrorMsg('No se encontró una sesión válida');
+        return;
+      }
+      console.info('[BootstrapGuard] ✓ Session found:', session.user.email);
+
+      // ⏳ ESPERAR 500ms para que las políticas RLS se propaguen
+      console.info('[BootstrapGuard] ⏳ Waiting 500ms for RLS propagation...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // ✅ PASO 1: Verificar caché primero (CACHE-FIRST)
       const cachedRoles = localStorage.getItem('dv_roles_v1');
       const cachedPerms = localStorage.getItem('dv_permissions_v1');
 
@@ -47,7 +61,7 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
         }
       }
 
-      // If we reach here, NO valid cache → run bootstrap
+      // Si llegamos aquí, NO hay caché válido → ejecutar bootstrap
       console.info('[BootstrapGuard] Cache miss → ejecutando bootstrap RPC');
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -57,38 +71,66 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
 
       console.info(`[BootstrapGuard] Bootstrapping user: ${user.email}`);
 
-      // Single attempt - if it fails, user clicks "Retry"
+      // PASO 2: Ejecutar bootstrap RPC (1 solo intento)
       const { error: bootstrapErr } = await supabase.rpc('bootstrap_user_access', { 
         target_user_id: user.id 
       });
 
       if (bootstrapErr) {
-        // Check for unconfirmed email
+        // Verificar si es error de email no confirmado
         if (bootstrapErr.message?.includes('Email no confirmado')) {
           console.warn('[BootstrapGuard] Email no confirmado');
           setStatus('unconfirmed');
           navigate('/auth/login?status=unconfirmed');
           return;
         }
+        
+        console.error('[BootstrapGuard] ❌ bootstrap_user_access error:', {
+          message: bootstrapErr.message,
+          code: bootstrapErr.code,
+          details: bootstrapErr.details,
+          hint: bootstrapErr.hint
+        });
         throw bootstrapErr;
       }
 
       console.info('[BootstrapGuard] ✓ bootstrap_user_access');
 
-      // Cargar roles y permisos
+      // PASO 3: Cargar roles con manejo de errores detallado
+      console.info('[BootstrapGuard] Loading roles...');
       const { data: roles, error: rolesErr } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id);
 
-      if (rolesErr) throw rolesErr;
+      if (rolesErr) {
+        console.error('[BootstrapGuard] ❌ Error loading roles:', {
+          message: rolesErr.message,
+          code: rolesErr.code,
+          details: rolesErr.details,
+          hint: rolesErr.hint
+        });
+        throw rolesErr;
+      }
 
+      console.info('[BootstrapGuard] ✓ Roles loaded:', roles);
+
+      // PASO 4: Cargar permisos con manejo de errores detallado
+      console.info('[BootstrapGuard] Loading permissions...');
       const { data: permissions, error: permsErr } = await supabase
         .from('user_module_permissions')
         .select('*')
         .eq('user_id', user.id);
 
-      if (permsErr) throw permsErr;
+      if (permsErr) {
+        console.error('[BootstrapGuard] ❌ Error loading permissions:', {
+          message: permsErr.message,
+          code: permsErr.code,
+          details: permsErr.details,
+          hint: permsErr.hint
+        });
+        throw permsErr;
+      }
 
       console.info(`[BootstrapGuard] ✅ Bootstrap complete - roles=${JSON.stringify(roles?.map(r => r.role))}, modules=${permissions?.length}`);
       
@@ -105,6 +147,17 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[BootstrapGuard] ❌ Bootstrap failed:', msg);
+      
+      // Log estado completo para debugging
+      const { data: { user } } = await supabase.auth.getUser();
+      console.error('[BootstrapGuard] Debug info:', {
+        user: user?.email,
+        userId: user?.id,
+        emailConfirmed: user?.email_confirmed_at,
+        cachedRoles: localStorage.getItem('dv_roles_v1'),
+        cachedPerms: localStorage.getItem('dv_permissions_v1')
+      });
+      
       setErrorMsg(msg);
       setStatus('error');
     }

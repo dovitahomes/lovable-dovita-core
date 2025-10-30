@@ -26,6 +26,8 @@ import Callback from "./pages/auth/Callback";
 import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/NotFound";
 
+const Debug = lazy(() => import("./pages/Debug"));
+
 // Lazy loaded (code-split by route)
 const Clientes = lazy(() => import("./pages/Clientes"));
 const Proyectos = lazy(() => import("./pages/Proyectos"));
@@ -248,6 +250,7 @@ const App = () => {
               <Routes>
         {/* Public routes */}
         <Route path="/auth/login" element={<Login />} />
+        <Route path="/debug" element={<Suspense fallback={<PageHeaderSkeleton />}><Debug /></Suspense>} />
         <Route path="/auth/callback" element={<Callback />} />
         <Route path="/auth/reset" element={<ResetPassword />} />
         <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
