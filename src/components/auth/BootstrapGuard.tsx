@@ -29,42 +29,23 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
         throw new Error('No user found');
       }
 
-      // Reintentos con backoff: 300ms, 900ms, 1800ms
-      const delays = [300, 900, 1800];
-      let lastError: any = null;
+      // Single attempt - if it fails, user clicks "Retry"
+      const { error: bootstrapErr } = await supabase.rpc('bootstrap_user_access', { 
+        target_user_id: user.id 
+      });
 
-      for (let i = 0; i <= Math.min(retryCount, 2); i++) {
-        try {
-          if (i > 0) {
-            console.info(`[BootstrapGuard] Retry ${i}/${delays.length} after ${delays[i - 1]}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delays[i - 1]));
-          }
-
-          // Llamar bootstrap_user_access
-          const { error: bootstrapErr } = await supabase.rpc('bootstrap_user_access', { 
-            target_user_id: user.id 
-          });
-
-          if (bootstrapErr) {
-            // Si es error de email no confirmado, redirigir
-            if (bootstrapErr.message?.includes('Email no confirmado')) {
-              console.warn('[BootstrapGuard] Email no confirmado');
-              setStatus('unconfirmed');
-              navigate('/auth/login?status=unconfirmed');
-              return;
-            }
-            throw bootstrapErr;
-          }
-
-          console.info('[BootstrapGuard] ✓ bootstrap_user_access');
-          break; // Éxito, salir del loop
-        } catch (err) {
-          lastError = err;
-          if (i === Math.min(retryCount, 2)) {
-            throw err; // Último intento falló
-          }
+      if (bootstrapErr) {
+        // Check for unconfirmed email
+        if (bootstrapErr.message?.includes('Email no confirmado')) {
+          console.warn('[BootstrapGuard] Email no confirmado');
+          setStatus('unconfirmed');
+          navigate('/auth/login?status=unconfirmed');
+          return;
         }
+        throw bootstrapErr;
       }
+
+      console.info('[BootstrapGuard] ✓ bootstrap_user_access');
 
       // Cargar roles y permisos
       const { data: roles, error: rolesErr } = await supabase
@@ -104,14 +85,14 @@ export function BootstrapGuard({ children }: BootstrapGuardProps) {
   useEffect(() => {
     runBootstrap();
     
-    // Timeout de 12s para evitar bloqueos infinitos
+    // Timeout de 5s - suficiente para operaciones exitosas
     const timeout = setTimeout(() => {
       if (status === 'loading') {
-        console.error('[BootstrapGuard] TIMEOUT: Bootstrap no completó en 12s');
-        setErrorMsg('El sistema no respondió. Intenta de nuevo o contacta al administrador.');
+        console.error('[BootstrapGuard] TIMEOUT: Bootstrap no completó en 5s');
+        setErrorMsg('El sistema no respondió a tiempo. Intenta de nuevo o contacta al administrador.');
         setStatus('error');
       }
-    }, 12000);
+    }, 5000);
 
     return () => clearTimeout(timeout);
   }, [retryCount]);

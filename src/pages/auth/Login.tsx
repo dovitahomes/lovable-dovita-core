@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { LogIn, Mail } from "lucide-react";
 import { z } from "zod";
-import { bootstrapUser } from "@/lib/auth/bootstrapUser";
-import { waitForSession } from "@/lib/authClient";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -28,21 +26,15 @@ const Login = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Check user role and redirect accordingly
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+        // Use cached roles to avoid unnecessary queries and race conditions
+        const cachedRoles = JSON.parse(localStorage.getItem('dv_roles_v1') || '[]');
         
-        const role = roleData?.role;
-        
-        // Redirect clients to their portal
-        if (role === 'cliente') {
+        if (cachedRoles.includes('cliente')) {
           navigate("/client/home", { replace: true });
-        } else {
+        } else if (cachedRoles.length > 0) {
           navigate("/", { replace: true });
         }
+        // If no cache exists, BootstrapGuard will handle the flow
       }
     };
     checkUser();
@@ -74,29 +66,13 @@ const Login = () => {
       if (authError) throw authError;
       console.log('[auth] ✓ Authentication successful');
 
-      // Step 2: Wait for session (non-blocking timeout)
-      const session = await waitForSession({ timeoutMs: 20000 });
-      if (!session) {
-        console.warn('[auth] ⚠️ Session not ready, redirecting anyway');
-      }
-
-      // Step 3: Bootstrap user (BLOCKING - wait for completion)
-      console.log('[auth] 🔧 Bootstrapping user...');
-      const bootstrapResult = await bootstrapUser({ maxRetries: 3 });
-
-      if (!bootstrapResult.ok) {
-        console.error('[auth] ❌ Bootstrap failed:', bootstrapResult.reason);
-        toast.error('Error al configurar tu cuenta. Contacta al administrador.');
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('[auth] ✅ Bootstrap complete');
-      const roles = bootstrapResult.roles.map(r => r.role);
+      // Step 2: Redirect immediately - BootstrapGuard handles the bootstrap
+      console.log('[auth] ✅ Authentication successful → redirecting');
       toast.success('Inicio de sesión exitoso');
 
-      // Pure clients go to portal
-      if (roles.includes('cliente')) {
+      // Redirect based on cached role (or assume staff if no cache)
+      const cachedRoles = JSON.parse(localStorage.getItem('dv_roles_v1') || '[]');
+      if (cachedRoles.includes('cliente')) {
         console.log('[auth] → Redirecting to client portal');
         navigate("/client/home", { replace: true });
       } else {
