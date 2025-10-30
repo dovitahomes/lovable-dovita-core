@@ -13,9 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type UserRow = {
-  user_id: string;
+  id: string;
   email: string;
-  full_name: string | null;
+  full_name: string;
   roles: string[];
 };
 
@@ -30,9 +30,22 @@ export default function Usuarios() {
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      // Temporarily disabled - will be restored in Prompt 2
-      const data: UserRow[] = [];
-      return data;
+      // Read from vw_users_basic view created in migration
+      const { data, error } = await supabase
+        .from('vw_users_basic')
+        .select('id, email, full_name, roles');
+      
+      if (error) {
+        console.warn('Could not load users:', error.message);
+        return [];
+      }
+      
+      return (data ?? []).map((r: any) => ({
+        id: r.id,
+        email: r.email,
+        full_name: r.full_name ?? '',
+        roles: Array.isArray(r.roles) ? r.roles : [],
+      }));
     },
   });
 
@@ -70,7 +83,7 @@ export default function Usuarios() {
       user.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const selectedUser = users?.find(u => u.user_id === selectedUserId);
+  const selectedUser = users?.find(u => u.id === selectedUserId);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -165,40 +178,48 @@ export default function Usuarios() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow 
-                      key={user.user_id}
-                      className={selectedUserId === user.user_id ? "bg-muted" : ""}
-                    >
-                      <TableCell className="font-medium">{user.email}</TableCell>
-                      <TableCell>{user.full_name || "-"}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {user.roles.length > 0 ? (
-                            user.roles.map((role) => (
-                              <span
-                                key={role}
-                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary"
-                              >
-                                {role}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Sin roles</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant={selectedUserId === user.user_id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedUserId(user.user_id)}
-                        >
-                          {selectedUserId === user.user_id ? "Seleccionado" : "Seleccionar"}
-                        </Button>
+                  {filteredUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                        {isLoading ? 'Cargando usuarios...' : 'No hay usuarios disponibles'}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <TableRow 
+                        key={user.id}
+                        className={selectedUserId === user.id ? "bg-muted" : ""}
+                      >
+                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell>{user.full_name || "-"}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1 flex-wrap">
+                            {user.roles.length > 0 ? (
+                              user.roles.map((role) => (
+                                <span
+                                  key={role}
+                                  className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary"
+                                >
+                                  {role}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-muted-foreground text-sm">Sin roles</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant={selectedUserId === user.id ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setSelectedUserId(user.id)}
+                          >
+                            {selectedUserId === user.id ? "Seleccionado" : "Seleccionar"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             )}
@@ -217,7 +238,7 @@ export default function Usuarios() {
             </CardHeader>
             <CardContent>
               <UserRoleBadges
-                userId={selectedUser.user_id}
+                userId={selectedUser.id}
                 currentRoles={selectedUser.roles as any[]}
                 onRoleChange={() => queryClient.invalidateQueries({ queryKey: ["admin-users"] })}
               />
@@ -232,7 +253,7 @@ export default function Usuarios() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PermissionMatrix userId={selectedUser.user_id} />
+              <PermissionMatrix userId={selectedUser.id} />
             </CardContent>
           </Card>
         </>

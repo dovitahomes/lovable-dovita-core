@@ -26,7 +26,15 @@ export function AppSidebar() {
   const { prefetch } = usePrefetchRoute();
   const { data: corporate } = useCorporateContent();
 
-  // Temporarily show all routes without permission checks
+  // TODO: Filter by permissions once seeded in Prompt 2
+  // const { canView } = useModuleAccess();
+  // const routesToShow = ALL_ROUTES.map(group => ({
+  //   ...group,
+  //   items: group.items.filter(item => 
+  //     item.moduleName ? canView(item.moduleName) : true
+  //   )
+  // })).filter(group => group.items.length > 0);
+  
   const routesToShow = ALL_ROUTES;
 
   const handleLogout = async () => {

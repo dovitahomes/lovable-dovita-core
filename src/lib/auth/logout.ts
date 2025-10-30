@@ -7,8 +7,10 @@ export async function appSignOut() {
   } catch (e) {
     console.error('[logout] error', e);
   } finally {
-    localStorage.clear();
-    sessionStorage.clear();
+    try {
+      sessionStorage.clear();
+      localStorage.clear();
+    } catch {}
     window.location.assign('/auth/login');
   }
 }
