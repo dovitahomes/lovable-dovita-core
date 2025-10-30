@@ -14,13 +14,14 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-      // No esperar si aún cargando sesión
-      if (status === 'loading') return;
-
-      if (status === 'unauthenticated') {
+      // Redirect if not authenticated
+      if (status === 'signed_out') {
         navigate('/auth/login', { replace: true });
         return;
       }
+
+      // Wait for session ready
+      if (status !== 'ready') return;
 
       // Fetch role en paralelo (non-blocking)
       if (session?.user && !role && !loading) {
@@ -58,7 +59,7 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
     }, [status, session, role, loading, navigate]);
 
     // Spinner pequeño solo si verificando sesión
-    if (status === 'loading') {
+    if (status !== 'ready') {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-3">
@@ -67,10 +68,6 @@ export function withClientGuard<P extends object>(Component: ComponentType<P>) {
           </div>
         </div>
       );
-    }
-
-    if (status === 'unauthenticated') {
-      return null;
     }
 
     // Render children inmediatamente con sesión (rol se carga en background)

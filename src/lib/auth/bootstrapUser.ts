@@ -60,11 +60,11 @@ export async function bootstrapUser({ maxRetries = 3 } = {}): Promise<BootstrapR
       });
       
       if (bootstrapError) {
-        console.warn(`[bootstrap] Bootstrap RPC warning:`, bootstrapError);
-        throw bootstrapError;
+        console.warn(`[bootstrap] Bootstrap RPC failed, continuing anyway:`, bootstrapError);
+        // No bloquear navegación - continuar con refetch
+      } else {
+        console.info(`[bootstrap] ✓ Bootstrap RPC completed (${Date.now() - bootstrapStart}ms)`);
       }
-      
-      console.info(`[bootstrap] ✓ Bootstrap RPC completed (${Date.now() - bootstrapStart}ms)`);
       
       // Step 2: Load user roles
       const rolesStart = Date.now();

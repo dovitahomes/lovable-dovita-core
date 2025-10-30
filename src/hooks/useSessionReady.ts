@@ -2,62 +2,65 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 
-type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
+type SessionStatus = 'ready' | 'signed_out' | 'error';
 
 export function useSessionReady() {
-  const [status, setStatus] = useState<SessionStatus>('loading');
+  const [status, setStatus] = useState<SessionStatus>('signed_out');
   const [session, setSession] = useState<Session | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
 
     async function checkSession() {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
         if (!mounted) return;
+        
+        if (error) {
+          console.error('[session] error', error);
+          setStatus('error');
+          setAuthError(error.message);
+          return;
+        }
+
         if (data?.session) {
-          console.log('[useSessionReady] ✅ Session found, authenticating immediately');
+          console.log('[session] status=ready');
           setSession(data.session);
-          // ⚡ No esperar permisos - liberar UI inmediatamente
-          setStatus('authenticated');
+          setStatus('ready');
+          setAuthError(null);
         } else {
-          console.warn('[useSessionReady] ⚠️ No session found');
-          setStatus('unauthenticated');
+          console.log('[session] status=signed_out');
+          setSession(null);
+          setStatus('signed_out');
         }
       } catch (err) {
-        console.error('[useSessionReady] ❌ Error checking session', err);
-        setStatus('unauthenticated');
+        console.error('[session] unexpected error', err);
+        setStatus('error');
+        setAuthError(err instanceof Error ? err.message : 'Unknown error');
       }
     }
 
     checkSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mounted) return;
-      if (newSession) {
-        console.log('[useSessionReady] 🔁 Session refreshed');
-        setSession(newSession);
-        // ⚡ Autenticar inmediatamente, permisos cargarán después
-        setStatus('authenticated');
-      } else {
-        console.log('[useSessionReady] 🔒 Session cleared');
+      
+      console.log('[session] auth event:', event);
+      
+      if (event === 'SIGNED_OUT') {
         setSession(null);
-        setStatus('unauthenticated');
+        setStatus('signed_out');
+        setAuthError(null);
+      } else if (newSession && ['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
+        setSession(newSession);
+        setStatus('ready');
+        setAuthError(null);
       }
     });
 
-    // Timeout reducido - si hay sesión ya estamos authenticated
-    timeoutId = setTimeout(() => {
-      if (mounted && status === 'loading') {
-        console.warn('[useSessionReady] ⏰ Timeout reached (6s) — assuming unauthenticated');
-        setStatus('unauthenticated');
-      }
-    }, 6000);
-
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
       listener?.subscription.unsubscribe();
     };
   }, []);
@@ -65,7 +68,8 @@ export function useSessionReady() {
   return {
     session,
     status,
-    isReady: status !== 'loading',
-    isAuthenticated: status === 'authenticated',
+    authError,
+    isReady: status === 'ready',
+    isSignedOut: status === 'signed_out',
   };
 }

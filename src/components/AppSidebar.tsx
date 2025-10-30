@@ -45,38 +45,14 @@ export function AppSidebar() {
   const showEmptyState = !permsLoading && !roleLoading && routesToShow.length === 0 && !isAdmin;
 
   const handleLogout = async () => {
-    try {
-      console.info('[logout] Starting signOut...');
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('[logout] Error:', error);
-        toast.error("Error al cerrar sesión");
-        return;
-      }
-      
-      // Clear all local caches
-      console.info('[logout] Clearing caches...');
-      localStorage.removeItem('dv_roles_v1');
-      localStorage.removeItem('dv_permissions_v1');
-      localStorage.removeItem('dv_corporate_v1');
-      
-      console.info('[logout] signOut OK, caches cleared → /auth/login');
-      toast.success("Sesión cerrada");
-      navigate("/auth/login", { replace: true });
-    } catch (error) {
-      console.error('[logout] Unexpected error:', error);
-      toast.error("Error inesperado al cerrar sesión");
-    }
+    const { appSignOut } = await import('@/lib/auth/logout');
+    await appSignOut();
   };
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
       : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground";
-
-  // NO mostrar skeleton — renderizar sidebar vacío con logo
-  // (permisos cargan en background)
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
@@ -105,7 +81,7 @@ export function AppSidebar() {
           </div>
         </div>
 
-        {permsLoading && (
+        {permsLoading && routesToShow.length === 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>Cargando módulos…</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -134,7 +110,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {!showEmptyState && routesToShow.map((group) => (
+        {routesToShow.length > 0 && routesToShow.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>

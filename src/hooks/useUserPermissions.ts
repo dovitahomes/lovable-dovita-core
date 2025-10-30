@@ -18,25 +18,21 @@ export function useUserPermissions() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Never leave in infinite loading
+    // Timeout de 10s para no bloquear UI
     const timeout = setTimeout(() => {
       if (isLoading) {
-        console.warn('[useUserPermissions] Timeout — returning empty permissions');
+        console.warn('[permissions] timeout');
         setIsLoading(false);
         setPermissions([]);
-        setError(null);
+        setError('timeout');
       }
-    }, 15000);
+    }, 10000);
 
-    if (status === 'loading') {
-      setIsLoading(true);
-      return () => clearTimeout(timeout);
-    }
-
-    if (status === 'unauthenticated') {
-      setPermissions([]);
+    if (status !== 'ready') {
       setIsLoading(false);
+      setPermissions([]);
       setIsForbidden(false);
+      setError(null);
       clearTimeout(timeout);
       return;
     }
@@ -58,7 +54,6 @@ export function useUserPermissions() {
           .eq('user_id', session.user.id);
 
         if (fetchError) {
-          // Check if it's a 403/RLS/401 error
           if (fetchError.code === 'PGRST301' || 
               fetchError.code === '401' || 
               fetchError.code === '403' ||
@@ -72,21 +67,13 @@ export function useUserPermissions() {
             throw fetchError;
           }
         } else {
-          // Detect empty results explicitly
-          if (data && data.length === 0) {
-            console.warn('[useUserPermissions] No permissions found, treating as empty (not blocking)');
-            setPermissions([]);
-            setIsForbidden(false);
-            setError(null);
-          } else {
-            console.info('[useUserPermissions] ✓ Loaded:', data?.length || 0, 'permissions');
-            setPermissions(data || []);
-            setIsForbidden(false);
-            setError(null);
-          }
+          console.info('[permissions] loaded', data?.length || 0);
+          setPermissions(data || []);
+          setIsForbidden(false);
+          setError(null);
         }
       } catch (err) {
-        console.error('[permissions] Error:', err);
+        console.error('[permissions] error', err);
         const errorMsg = err instanceof Error ? err.message : 'Error cargando permisos';
         setError(errorMsg);
         setPermissions([]);

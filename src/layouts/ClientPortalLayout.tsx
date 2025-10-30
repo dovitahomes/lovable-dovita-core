@@ -14,10 +14,10 @@ export default function ClientPortalLayout() {
 
   useEffect(() => {
     // Redirect to login if not authenticated after session check
-    if (isReady && status === 'unauthenticated') {
+    if (status === 'signed_out') {
       navigate('/auth/login', { replace: true });
     }
-  }, [status, isReady, navigate]);
+  }, [status, navigate]);
 
   if (!isReady || accessLoading) {
     return (

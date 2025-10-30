@@ -33,11 +33,7 @@ export function useUserRole() {
     }
 
     // Si no hay sesión aún, no cargar
-    if (status === 'loading') {
-      return () => clearTimeout(timeout);
-    }
-
-    if (status === 'unauthenticated') {
+    if (status !== 'ready') {
       setRole(null);
       setLoading(false);
       setErrorRole(false);

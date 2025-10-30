@@ -31,7 +31,7 @@ export function ClientAppShell({ children }: ClientAppShellProps) {
     if (!isReady) return;
 
     // Redirect if not authenticated
-    if (status === 'unauthenticated') {
+    if (status === 'signed_out') {
       navigate('/auth/login', { replace: true });
       return;
     }
@@ -64,7 +64,7 @@ export function ClientAppShell({ children }: ClientAppShellProps) {
   });
 
   // Show loading state while checking session or loading projects
-  if (status === 'loading' || (isReady && !userEmail) || projectsLoading) {
+  if (status !== 'ready' || (isReady && !userEmail) || projectsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
