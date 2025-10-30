@@ -52,20 +52,12 @@ export function AppSidebar() {
     <Sidebar className={state === "collapsed" ? "w-14 xl:w-16" : "w-64"}>
       <SidebarContent>
         <div className="px-3 py-4">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center justify-center">
             <img 
               src={dovitaLogo} 
               alt="Dovita"
-              className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
+              className={state === "collapsed" ? "w-8 h-8" : "w-24 h-24"}
             />
-            {state !== "collapsed" && (
-              <div className="min-w-0">
-                <h2 className="font-bold text-sidebar-foreground truncate">
-                  Dovita
-                </h2>
-                <p className="text-xs text-sidebar-foreground/70">CRM/ERP</p>
-              </div>
-            )}
           </div>
         </div>
 
