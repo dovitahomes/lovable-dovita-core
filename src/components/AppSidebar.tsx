@@ -29,6 +29,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { sidebarTheme, toggleSidebarTheme } = useSidebarTheme();
+
+  console.log('Sidebar theme:', sidebarTheme);
   const { prefetch } = usePrefetchRoute();
 
   // TODO: Filter by permissions once seeded in Prompt 2
