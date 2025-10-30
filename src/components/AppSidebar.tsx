@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { LogOut, Moon, Sun } from "lucide-react";
+import { useRef, useEffect } from "react";
 import dovitaIcon from "@/assets/dovita-icon.png";
 import dovitaIconWhite from "@/assets/dovita-icon-white.png";
 import dovitaLogoDark from "@/assets/dovita-logo-dark.png";
@@ -25,13 +26,38 @@ import { useSidebarTheme } from "@/context/SidebarThemeProvider";
 import { ALL_ROUTES } from "@/lib/routing/getAccessibleRoutes";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpen } = useSidebar();
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { sidebarTheme, toggleSidebarTheme } = useSidebarTheme();
-
-  console.log('Sidebar theme:', sidebarTheme);
   const { prefetch } = usePrefetchRoute();
+  
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   // TODO: Filter by permissions once seeded in Prompt 2
   // const { canView } = useModuleAccess();
@@ -69,6 +95,9 @@ export function AppSidebar() {
           : (sidebarTheme === "light" ? "w-64 bg-white border-r" : "w-64")
       }
       data-sidebar-theme={sidebarTheme}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      collapsible="icon"
     >
       <SidebarHeader className="flex items-center justify-center py-6 px-4">
         <img 

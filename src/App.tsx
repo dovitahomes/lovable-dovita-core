@@ -57,7 +57,7 @@ const Metrics = lazy(() => import("./pages/Metrics"));
 const InternalLayout = () => {
   const { theme, toggle: toggleTheme } = useTheme();
   
-  return <SidebarProvider>
+  return <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset>
