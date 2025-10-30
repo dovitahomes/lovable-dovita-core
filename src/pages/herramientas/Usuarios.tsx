@@ -30,8 +30,9 @@ export default function Usuarios() {
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const data = await adminListUsers();
-      return data as UserRow[];
+      // Temporarily disabled - will be restored in Prompt 2
+      const data: UserRow[] = [];
+      return data;
     },
   });
 
