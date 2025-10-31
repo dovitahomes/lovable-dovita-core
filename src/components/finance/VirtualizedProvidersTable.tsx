@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Eye } from "lucide-react";
+import { Edit, Trash2, Eye, FileBarChart } from "lucide-react";
 
 interface Provider {
   id: string;
@@ -25,6 +25,7 @@ interface VirtualizedProvidersTableProps {
   providers: Provider[];
   onEdit: (provider: Provider) => void;
   onView: (provider: Provider) => void;
+  onViewUsage: (provider: Provider) => void;
   onDelete: (id: string) => void;
 }
 
@@ -33,11 +34,13 @@ const ProviderRow = memo(
     provider,
     onEdit,
     onView,
+    onViewUsage,
     onDelete,
   }: {
     provider: Provider;
     onEdit: (provider: Provider) => void;
     onView: (provider: Provider) => void;
+    onViewUsage: (provider: Provider) => void;
     onDelete: (id: string) => void;
   }) => {
     return (
@@ -52,14 +55,17 @@ const ProviderRow = memo(
           </Badge>
         </TableCell>
         <TableCell className="text-right">
-          <div className="flex justify-end gap-2">
-            <Button size="sm" variant="ghost" onClick={() => onView(provider)}>
+          <div className="flex justify-end gap-1">
+            <Button size="sm" variant="ghost" onClick={() => onView(provider)} title="Ver detalles">
               <Eye className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => onEdit(provider)}>
+            <Button size="sm" variant="ghost" onClick={() => onViewUsage(provider)} title="Ver uso">
+              <FileBarChart className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => onEdit(provider)} title="Editar">
               <Edit className="h-4 w-4" />
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => onDelete(provider.id)}>
+            <Button size="sm" variant="ghost" onClick={() => onDelete(provider.id)} title="Desactivar">
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
@@ -72,7 +78,7 @@ const ProviderRow = memo(
 ProviderRow.displayName = "ProviderRow";
 
 export const VirtualizedProvidersTable = memo(
-  ({ providers, onEdit, onView, onDelete }: VirtualizedProvidersTableProps) => {
+  ({ providers, onEdit, onView, onViewUsage, onDelete }: VirtualizedProvidersTableProps) => {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const rowVirtualizer = useVirtualizer({
@@ -118,6 +124,7 @@ export const VirtualizedProvidersTable = memo(
                     provider={provider}
                     onEdit={onEdit}
                     onView={onView}
+                    onViewUsage={onViewUsage}
                     onDelete={onDelete}
                   />
                 </tr>

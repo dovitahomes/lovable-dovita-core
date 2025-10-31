@@ -30,10 +30,9 @@ const providerSchema = z.object({
   code_short: z
     .string()
     .trim()
-    .min(1, "El código es requerido")
     .max(6, "El código debe tener máximo 6 caracteres")
-    .regex(/^[A-Z0-9]+$/, "Solo letras mayúsculas y números")
-    .transform((val) => val.toUpperCase()),
+    .optional()
+    .or(z.literal("")),
   name: z
     .string()
     .trim()
@@ -139,8 +138,24 @@ export function ProviderDialog({ open, onClose, provider }: ProviderDialogProps)
 
   const onSubmit = async (data: ProviderFormData) => {
     try {
-      const providerData = {
-        code_short: data.code_short,
+      // Check for duplicate name before insert/update
+      if (!isEditing && data.name) {
+        const { data: similar } = await supabase
+          .from("providers")
+          .select("id, name")
+          .ilike("name", `%${data.name}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (similar) {
+          const confirm = window.confirm(
+            `Ya existe un proveedor similar: "${similar.name}". ¿Desea continuar de todos modos?`
+          );
+          if (!confirm) return;
+        }
+      }
+
+      const providerData: any = {
         name: data.name,
         activo: data.activo,
         fiscales_json: {
@@ -162,6 +177,11 @@ export function ProviderDialog({ open, onClose, provider }: ProviderDialogProps)
         },
       };
 
+      // Only add code_short for new providers if provided
+      if (!isEditing && data.code_short) {
+        providerData.code_short = data.code_short;
+      }
+
       if (isEditing) {
         const { error } = await supabase
           .from("providers")
@@ -171,7 +191,11 @@ export function ProviderDialog({ open, onClose, provider }: ProviderDialogProps)
         if (error) throw error;
         toast.success("Proveedor actualizado correctamente");
       } else {
-        const { error } = await supabase.from("providers").insert([providerData]);
+        const { data: result, error } = await supabase
+          .from("providers")
+          .insert([providerData])
+          .select()
+          .single();
 
         if (error) {
           if (error.code === "23505") {
@@ -180,7 +204,9 @@ export function ProviderDialog({ open, onClose, provider }: ProviderDialogProps)
           }
           throw error;
         }
-        toast.success("Proveedor creado correctamente");
+        toast.success(
+          `Proveedor creado correctamente (código: ${result.code_short})`
+        );
       }
 
       onClose(true);
@@ -206,17 +232,22 @@ export function ProviderDialog({ open, onClose, provider }: ProviderDialogProps)
                 name="code_short"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Código Corto *</FormLabel>
+                    <FormLabel>Código Corto {!isEditing && "(opcional)"}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Ej: PRV001"
+                        placeholder="Autogenerado si se deja vacío"
                         maxLength={6}
                         className="uppercase font-mono"
                         disabled={isEditing}
                       />
                     </FormControl>
                     <FormMessage />
+                    {!isEditing && (
+                      <p className="text-xs text-muted-foreground">
+                        Si se deja vacío, se generará automáticamente
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />

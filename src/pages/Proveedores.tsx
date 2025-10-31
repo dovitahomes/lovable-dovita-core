@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,19 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { VirtualizedProvidersTable } from "@/components/finance/VirtualizedProvidersTable";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
-import { ProviderDialog } from "@/components/forms/ProviderDialog";
+import { Plus, Search, Download, Upload, FileBarChart } from "lucide-react";
+import { ProviderDialog } from "@/components/ProviderDialog";
 import { ProviderDetailsDialog } from "@/components/ProviderDetailsDialog";
+import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +24,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { LoadingError } from "@/components/common/LoadingError";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { exportProvidersToCSV, importProvidersFromCSV } from "@/utils/exports/providersExport";
 
 interface Provider {
   id: string;
@@ -47,21 +43,27 @@ export default function Proveedores() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showUsageDialog, setShowUsageDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
+  const [showInactive, setShowInactive] = useState(false);
+  const [filterHasTerms, setFilterHasTerms] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
   const { data: providers = [], isLoading, error } = useQuery({
-    queryKey: ["providers"],
+    queryKey: ["providers", showInactive],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("providers")
-        .select("*")
-        .eq("activo", true)
-        .order("name");
+      let query = supabase.from("providers").select("*");
+
+      if (!showInactive) {
+        query = query.eq("activo", true);
+      }
+
+      const { data, error } = await query.order("name");
 
       if (error) {
         toast.error("Error al cargar proveedores");
@@ -72,16 +74,24 @@ export default function Proveedores() {
     ...CACHE_CONFIG.catalogs,
   });
 
-  const filteredProviders = debouncedSearch.trim()
-    ? providers.filter((p) => {
-        const term = debouncedSearch.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(term) ||
-          p.code_short.toLowerCase().includes(term) ||
-          (p.fiscales_json?.rfc && p.fiscales_json.rfc.toLowerCase().includes(term))
-        );
-      })
-    : providers;
+  const filteredProviders = providers.filter((p) => {
+    // Search filter
+    if (debouncedSearch.trim()) {
+      const term = debouncedSearch.toLowerCase();
+      const matchesSearch =
+        p.name.toLowerCase().includes(term) ||
+        p.code_short.toLowerCase().includes(term) ||
+        (p.fiscales_json?.rfc && p.fiscales_json.rfc.toLowerCase().includes(term));
+      if (!matchesSearch) return false;
+    }
+
+    // Has terms filter
+    if (filterHasTerms && !p.terms_json) {
+      return false;
+    }
+
+    return true;
+  });
 
   const handleEdit = (provider: Provider) => {
     setSelectedProvider(provider);
@@ -91,6 +101,11 @@ export default function Proveedores() {
   const handleViewDetails = (provider: Provider) => {
     setSelectedProvider(provider);
     setShowDetailsDialog(true);
+  };
+
+  const handleViewUsage = (provider: Provider) => {
+    setSelectedProvider(provider);
+    setShowUsageDialog(true);
   };
 
   const handleDelete = async () => {
@@ -117,35 +132,95 @@ export default function Proveedores() {
     setShowDeleteDialog(true);
   };
 
-  const handleDialogSuccess = () => {
-    setShowDialog(false);
-    setSelectedProvider(null);
+  const handleExport = () => {
+    exportProvidersToCSV(providers);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const result = await importProvidersFromCSV(file);
+      toast.success(
+        `Importación completada: ${result.created} creados, ${result.updated} actualizados`
+      );
+      if (result.errors.length > 0) {
+        console.error("Errores de importación:", result.errors);
+        toast.warning(`${result.errors.length} filas con errores (ver consola)`);
+      }
+      queryClient.invalidateQueries({ queryKey: ["providers"] });
+    } catch (err: any) {
+      toast.error("Error al importar: " + err.message);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Proveedores</h1>
-        <Button onClick={() => setShowDialog(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nuevo Proveedor
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleExport} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Exportar
+          </Button>
+          <Button onClick={handleImportClick} variant="outline" className="gap-2">
+            <Upload className="h-4 w-4" />
+            Importar
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <Button onClick={() => setShowDialog(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nuevo Proveedor
+          </Button>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Buscar Proveedores</CardTitle>
+          <CardTitle>Buscar y Filtrar</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nombre, código o RFC..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nombre, código o RFC..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="show-inactive"
+                checked={showInactive}
+                onCheckedChange={setShowInactive}
               />
+              <Label htmlFor="show-inactive">Mostrar inactivos</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="has-terms"
+                checked={filterHasTerms}
+                onCheckedChange={setFilterHasTerms}
+              />
+              <Label htmlFor="has-terms">Solo con términos</Label>
             </div>
           </div>
         </CardContent>
@@ -165,6 +240,7 @@ export default function Proveedores() {
               providers={filteredProviders}
               onEdit={handleEdit}
               onView={handleViewDetails}
+              onViewUsage={handleViewUsage}
               onDelete={confirmDelete}
             />
           )}
@@ -173,9 +249,12 @@ export default function Proveedores() {
 
       <ProviderDialog
         open={showDialog}
-        onOpenChange={(open) => {
-          setShowDialog(open);
-          if (!open) setSelectedProvider(null);
+        onClose={(shouldReload) => {
+          setShowDialog(false);
+          setSelectedProvider(null);
+          if (shouldReload) {
+            queryClient.invalidateQueries({ queryKey: ["providers"] });
+          }
         }}
         provider={selectedProvider}
       />
@@ -187,6 +266,16 @@ export default function Proveedores() {
           setSelectedProvider(null);
         }}
         provider={selectedProvider}
+      />
+
+      <ProviderUsageDialog
+        open={showUsageDialog}
+        onClose={() => {
+          setShowUsageDialog(false);
+          setSelectedProvider(null);
+        }}
+        providerId={selectedProvider?.id || null}
+        providerName={selectedProvider?.name}
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
