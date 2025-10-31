@@ -288,6 +288,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_exec_budget_mayor_totals"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "budget_items_mayor_id_fkey"
             columns: ["mayor_id"]
             isOneToOne: false
@@ -1140,6 +1147,7 @@ export type Database = {
       }
       gantt_ministrations: {
         Row: {
+          accumulated_percent: number | null
           alcance: string | null
           created_at: string
           date: string
@@ -1147,8 +1155,10 @@ export type Database = {
           id: string
           label: string
           order_index: number
+          percent: number | null
         }
         Insert: {
+          accumulated_percent?: number | null
           alcance?: string | null
           created_at?: string
           date: string
@@ -1156,8 +1166,10 @@ export type Database = {
           id?: string
           label: string
           order_index?: number
+          percent?: number | null
         }
         Update: {
+          accumulated_percent?: number | null
           alcance?: string | null
           created_at?: string
           date?: string
@@ -1165,6 +1177,7 @@ export type Database = {
           id?: string
           label?: string
           order_index?: number
+          percent?: number | null
         }
         Relationships: [
           {
@@ -2507,8 +2520,56 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_exec_budget_mayor_totals"
+            referencedColumns: ["budget_id"]
+          },
+          {
             foreignKeyName: "budget_items_subpartida_id_fkey"
             columns: ["subpartida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      v_project_exec_budget_mayor_totals: {
+        Row: {
+          budget_id: string | null
+          importe: number | null
+          mayor_id: string | null
+          mayor_name: string | null
+          pct_of_total: number | null
+          project_id: string | null
+          total_budget: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_mayor_id_fkey"
+            columns: ["mayor_id"]
             isOneToOne: false
             referencedRelation: "tu_nodes"
             referencedColumns: ["id"]
