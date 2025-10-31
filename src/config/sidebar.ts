@@ -68,7 +68,30 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     ],
   },
   {
-    label: "Proyectos",
+    label: "ERP",
+    items: [
+      { 
+        title: "Transacciones Unificadas", 
+        url: "/erp/transactions", 
+        icon: ListTree, 
+        moduleName: "herramientas" 
+      },
+      { 
+        title: "Presupuestos", 
+        url: "/presupuestos", 
+        icon: Calculator, 
+        moduleName: "presupuestos" 
+      },
+      { 
+        title: "Proveedores", 
+        url: "/proveedores", 
+        icon: Truck, 
+        moduleName: "proveedores" 
+      },
+    ],
+  },
+  {
+    label: "Proyectos / Construcción",
     items: [
       { 
         title: "Proyectos", 
@@ -83,38 +106,16 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "diseno" 
       },
       { 
-        title: "Presupuestos", 
-        url: "/presupuestos", 
-        icon: Calculator, 
-        moduleName: "presupuestos" 
-      },
-      { 
         title: "Cronograma de Gantt", 
         url: "/gantt", 
         icon: Calendar, 
         moduleName: "cronograma" 
       },
-    ],
-  },
-  {
-    label: "Construcción",
-    items: [
       { 
         title: "Construcción", 
         url: "/construccion", 
         icon: Truck, 
         moduleName: "construccion" 
-      },
-    ],
-  },
-  {
-    label: "Abastecimiento",
-    items: [
-      { 
-        title: "Proveedores", 
-        url: "/proveedores", 
-        icon: Truck, 
-        moduleName: "proveedores" 
       },
       { 
         title: "Órdenes de Compra", 
@@ -122,36 +123,16 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: ShoppingCart, 
         moduleName: "ordenes_compra" 
       },
-      { 
-        title: "Pagos", 
-        url: "/pagos", 
-        icon: DollarSign, 
-        moduleName: "pagos" 
-      },
-      { 
-        title: "Lotes de Pago", 
-        url: "/lotes-pago", 
-        icon: Receipt, 
-        moduleName: "lotes_pago" 
-      },
     ],
   },
   {
-    label: "Administración",
+    label: "Finanzas",
     items: [
       { 
-        title: "Finanzas", 
-        url: "/finanzas", 
+        title: "Pagos a Proveedores", 
+        url: "/lotes-pago", 
         icon: DollarSign, 
-        moduleName: "finanzas",
-        children: [
-          {
-            title: "Pagos a Proveedores",
-            url: "/finanzas/pagos-proveedores",
-            icon: DollarSign,
-            moduleName: "finanzas"
-          }
-        ]
+        moduleName: "lotes_pago" 
       },
       { 
         title: "Contabilidad", 
@@ -217,17 +198,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: "/herramientas/reglas", 
         icon: FileText, 
         moduleName: "centro_reglas" 
-      },
-    ],
-  },
-  {
-    label: "ERP",
-    items: [
-      { 
-        title: "Transacciones Unificadas", 
-        url: "/erp/transactions", 
-        icon: ListTree, 
-        moduleName: "herramientas" 
       },
     ],
   },

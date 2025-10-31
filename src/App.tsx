@@ -116,10 +116,14 @@ const InternalLayout = () => {
                 <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
                 <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
                 
-                {/* Unified Gantt route with tabs */}
-                <Route path="/gantt" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
+                {/* Unified Gantt route - single route with internal tabs */}
+                <Route path="/gantt" element={
+                  <ProtectedRoute moduleName="cronograma">
+                    <Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
-                {/* Legacy redirects */}
+                {/* Legacy Gantt redirects - not shown in sidebar but still functional */}
                 <Route path="/cronograma" element={<Navigate to="/gantt" replace />} />
                 <Route path="/cronograma-parametrico" element={<Navigate to="/gantt" replace />} />
                 <Route path="/construccion/gantt" element={<Navigate to="/gantt" replace />} />
@@ -130,21 +134,40 @@ const InternalLayout = () => {
                 <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
                 
-                {/* Abastecimiento */}
-                <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
-                <Route path="/ordenes-compra" element={<Suspense fallback={<TableSkeleton />}><OrdenesCompra /></Suspense>} />
-                <Route path="/pagos" element={<Suspense fallback={<TableSkeleton />}><Pagos /></Suspense>} />
-                <Route path="/lotes-pago" element={<Suspense fallback={<TableSkeleton />}><LotesPago /></Suspense>} />
-                <Route path="/lotes-pago/:id" element={<Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>} />
+                {/* Proveedores y Órdenes de Compra */}
+                <Route path="/proveedores" element={
+                  <ProtectedRoute moduleName="proveedores">
+                    <Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path="/ordenes-compra" element={
+                  <ProtectedRoute moduleName="ordenes_compra">
+                    <Suspense fallback={<TableSkeleton />}><OrdenesCompra /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
-                {/* Legacy redirects for Abastecimiento */}
+                {/* Legacy redirects for purchase orders */}
                 <Route path="/construccion/ordenes-compra" element={<Navigate to="/ordenes-compra" replace />} />
                 <Route path="/purchase-intake" element={<Navigate to="/ordenes-compra" replace />} />
                 <Route path="/purchase-batch" element={<Navigate to="/ordenes-compra" replace />} />
                 <Route path="/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
                 <Route path="/construction/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
+                <Route path="/pagos" element={<Navigate to="/lotes-pago" replace />} />
                 
-                <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
+                {/* Pagos a Proveedores (Lotes de Pago) */}
+                <Route path="/lotes-pago" element={
+                  <ProtectedRoute moduleName="lotes_pago">
+                    <Suspense fallback={<TableSkeleton />}><LotesPago /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path="/lotes-pago/:id" element={
+                  <ProtectedRoute moduleName="lotes_pago">
+                    <Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Legacy finance redirects */}
+                <Route path="/finanzas" element={<Navigate to="/contabilidad" replace />} />
                 <Route path="/finanzas/pagos-proveedores" element={<Navigate to="/lotes-pago" replace />} />
                 <Route path="/finanzas/pagos-proveedores/:id" element={<Navigate to="/lotes-pago" replace />} />
                 <Route path="/finance/payments" element={<Navigate to="/lotes-pago" replace />} />
