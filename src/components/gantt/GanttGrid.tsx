@@ -16,6 +16,7 @@ type GanttGridProps = {
   totalBudget?: number;
   onRemoveItem: (index: number) => void;
   onUpdateItem?: (index: number, updates: Partial<GanttItem>) => void;
+  readOnly?: boolean;
 };
 
 export function GanttGrid({
@@ -28,6 +29,7 @@ export function GanttGrid({
   totalBudget = 0,
   onRemoveItem,
   onUpdateItem,
+  readOnly = false,
 }: GanttGridProps) {
   const [draggingItem, setDraggingItem] = useState<number | null>(null);
   const [resizingItem, setResizingItem] = useState<number | null>(null);
@@ -42,7 +44,7 @@ export function GanttGrid({
 
   // Handle drag to reposition bar
   const handleBarMouseDown = (e: React.MouseEvent, itemIndex: number) => {
-    if (!onUpdateItem) return;
+    if (!onUpdateItem || readOnly) return;
     e.stopPropagation();
     e.preventDefault();
     setDraggingItem(itemIndex);
@@ -50,7 +52,7 @@ export function GanttGrid({
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent, itemIndex: number) => {
-    if (!onUpdateItem) return;
+    if (!onUpdateItem || readOnly) return;
     e.stopPropagation();
     e.preventDefault();
     setResizingItem(itemIndex);
@@ -186,7 +188,7 @@ export function GanttGrid({
                 {/* Gantt Bar */}
                 <div
                   className={`absolute top-1/2 -translate-y-1/2 h-6 rounded flex items-center justify-center text-white text-xs font-medium ${
-                    onUpdateItem ? 'cursor-move group' : ''
+                    onUpdateItem && !readOnly ? 'cursor-move group' : ''
                   }`}
                   style={{
                     left: `${barPos.left}%`,
@@ -194,13 +196,13 @@ export function GanttGrid({
                     background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
                     minWidth: "2px",
                   }}
-                  onMouseDown={(e) => onUpdateItem && handleBarMouseDown(e, index)}
+                  onMouseDown={(e) => onUpdateItem && !readOnly && handleBarMouseDown(e, index)}
                 >
-                  {onUpdateItem && (
+                  {onUpdateItem && !readOnly && (
                     <GripHorizontal className="h-3 w-3 mr-1 opacity-0 group-hover:opacity-100" />
                   )}
                   {barPos.width > 10 && (item.tu_nodes?.name || "")}
-                  {onUpdateItem && (
+                  {onUpdateItem && !readOnly && (
                     <div
                       className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 rounded-r"
                       onMouseDown={(e) => handleResizeMouseDown(e, index)}
@@ -209,14 +211,16 @@ export function GanttGrid({
                 </div>
               </div>
               <div className="w-12 flex-shrink-0 p-2 flex items-center justify-center">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onRemoveItem(index)}
-                  className="h-6 w-6 p-0"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                {!readOnly && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onRemoveItem(index)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
               </div>
             </div>
           );

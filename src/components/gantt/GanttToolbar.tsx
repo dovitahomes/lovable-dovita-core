@@ -20,6 +20,7 @@ type GanttToolbarProps = {
   onShare: () => void;
   onAddMinistration: () => void;
   canShare: boolean;
+  isShared?: boolean;
 };
 
 export function GanttToolbar({
@@ -33,6 +34,7 @@ export function GanttToolbar({
   onShare,
   onAddMinistration,
   canShare,
+  isShared = false,
 }: GanttToolbarProps) {
   return (
     <div className="space-y-4">
@@ -77,9 +79,9 @@ export function GanttToolbar({
           Exportar PDF
         </Button>
         {canShare && (
-          <Button onClick={onShare} variant="outline" className="gap-2">
+          <Button onClick={onShare} variant="outline" className="gap-2" disabled={isShared}>
             <Share2 className="h-4 w-4" />
-            Compartir con Construcción
+            {isShared ? "Compartido ✓" : "Compartir con Construcción"}
           </Button>
         )}
         <Button onClick={onAddMinistration} variant="outline" className="gap-2">

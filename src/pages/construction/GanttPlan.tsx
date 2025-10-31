@@ -25,6 +25,7 @@ import { GanttMinistrations } from "@/components/gantt/GanttMinistrations";
 import { GanttSummary } from "@/components/gantt/GanttSummary";
 import { AddMajorSelector } from "@/components/gantt/AddMajorSelector";
 import { useGanttPlanByProject, useUpsertGanttPlan, useShareGanttWithConstruction } from "@/hooks/useGanttPlan";
+import type { BudgetMajor } from "@/hooks/useBudgetMajors";
 import { useBudgetMajors } from "@/hooks/useBudgetMajors";
 import { useCorporateContent } from "@/hooks/useCorporateContent";
 import { calculateGanttWeeks, type WeekCell } from "@/utils/ganttTime";
@@ -290,6 +291,7 @@ export default function GanttPlan() {
               onShare={handleShare}
               onAddMinistration={() => setShowMinistrationDialog(true)}
               canShare={false}
+              isShared={false}
             />
           </Card>
 
@@ -347,6 +349,7 @@ export default function GanttPlan() {
               onShare={handleShare}
               onAddMinistration={() => setShowMinistrationDialog(true)}
               canShare={true}
+              isShared={ganttPlan?.shared_with_construction || false}
             />
           </Card>
 

@@ -42,6 +42,7 @@ const Construccion = lazy(() => import("./pages/Construccion"));
 const OrdenesCompra = lazy(() => import("./pages/OrdenesCompra"));
 const Pagos = lazy(() => import("./pages/Pagos"));
 const LotesPago = lazy(() => import("./pages/LotesPago"));
+const ProjectSchedule = lazy(() => import("./pages/construction/ProjectSchedule"));
 const Finanzas = lazy(() => import("./pages/Finanzas"));
 const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
@@ -133,6 +134,11 @@ const InternalLayout = () => {
                 
                 <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
+                <Route path="/construccion/proyectos/:projectId/cronograma" element={
+                  <ProtectedRoute moduleName="construccion">
+                    <Suspense fallback={<TableSkeleton />}><ProjectSchedule /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
                 {/* Proveedores y Órdenes de Compra */}
                 <Route path="/proveedores" element={
