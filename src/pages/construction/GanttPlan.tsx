@@ -225,7 +225,9 @@ export default function GanttPlan() {
       ministrations,
       weeks,
       monthsMap,
-      corporateData,
+      corporateData: corporateData || null,
+      timelineStart,
+      timelineEnd,
     });
 
     toast.success("PDF exportado correctamente");
