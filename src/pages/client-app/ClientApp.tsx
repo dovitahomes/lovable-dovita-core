@@ -32,7 +32,7 @@ export default function ClientApp() {
       <div className="min-h-screen flex flex-col bg-background">
         <DovitaHeader />
         
-        <main className="flex-1 overflow-y-auto pb-24">
+        <main className="flex-1 overflow-y-auto pb-24 pt-[60px]">
           <Outlet />
         </main>
         
