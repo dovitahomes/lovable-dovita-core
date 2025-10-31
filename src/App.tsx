@@ -115,13 +115,21 @@ const InternalLayout = () => {
                 <Route path="/presupuestos" element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
                 <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
                 <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
-                <Route path="/cronograma" element={<Navigate to="/construccion/gantt" replace />} />
-                <Route path="/construccion/gantt" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
+                {/* Cronograma routes */}
+                <Route path="/cronograma" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
+                <Route path="/cronograma-parametrico" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
+                
+                {/* Legacy redirects */}
+                <Route path="/construccion/gantt" element={<Navigate to="/cronograma" replace />} />
+                <Route path="/schedule" element={<Navigate to="/cronograma" replace />} />
+                <Route path="/legacy-schedule" element={<Navigate to="/cronograma" replace />} />
+                <Route path="/gantt-ejecutivo" element={<Navigate to="/cronograma" replace />} />
+                <Route path="/construction/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
+                <Route path="/finance/payments" element={<Navigate to="/finanzas" replace />} />
                 <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
+                <Route path="/ordenes-compra" element={<Suspense fallback={<TableSkeleton />}><div>Órdenes de Compra</div></Suspense>} />
                 <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
-                <Route path="/finance/payments" element={<Suspense fallback={<TableSkeleton />}><PaymentBatches /></Suspense>} />
-                <Route path="/finance/payments/:id" element={<Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>} />
                 <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
                 <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />

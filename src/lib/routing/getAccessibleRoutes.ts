@@ -1,30 +1,22 @@
 import {
   LayoutDashboard,
-  UserPlus,
   Users,
-  Folder,
-  Palette,
-  DollarSign,
-  Calendar,
-  HardHat,
-  Truck,
   Briefcase,
-  FileText,
-  TrendingUp,
-  Award,
-  Wrench,
-  ShoppingCart,
   FolderKanban,
   PenTool,
   Calculator,
+  Calendar,
+  Truck,
+  ShoppingCart,
+  DollarSign,
   Receipt,
   Percent,
-  ListTree,
   UserCog,
-  Building2,
-  MapPin,
-  Handshake,
   ShieldCheck,
+  MapPin,
+  FileText,
+  Building2,
+  TrendingUp,
 } from "lucide-react";
 
 export type RouteItem = {
@@ -59,9 +51,21 @@ export const ALL_ROUTES: RouteGroup[] = [
       { title: "Proyectos", url: "/proyectos", icon: FolderKanban, moduleName: "proyectos" },
       { title: "Diseño", url: "/diseno", icon: PenTool, moduleName: "diseno" },
       { title: "Presupuestos", url: "/presupuestos", icon: Calculator, moduleName: "presupuestos" },
-      { title: "Cronograma (Legacy)", url: "/cronograma", icon: Calendar, moduleName: "cronograma" },
-      { title: "Gantt Ejecutivo", url: "/construccion/gantt", icon: Calendar, moduleName: "construccion" },
+      { title: "Cronograma de Gantt (Ejecutivo)", url: "/cronograma", icon: Calendar, moduleName: "cronograma" },
+      { title: "Cronograma Paramétrico", url: "/cronograma-parametrico", icon: Calendar, moduleName: "cronograma_parametrico" },
+    ],
+  },
+  {
+    label: "Construcción",
+    items: [
       { title: "Construcción", url: "/construccion", icon: Truck, moduleName: "construccion" },
+    ],
+  },
+  {
+    label: "Abastecimiento",
+    items: [
+      { title: "Proveedores", url: "/proveedores", icon: Truck, moduleName: "proveedores" },
+      { title: "Órdenes de Compra", url: "/ordenes-compra", icon: ShoppingCart, moduleName: "ordenes_compra" },
     ],
   },
   {
@@ -73,37 +77,13 @@ export const ALL_ROUTES: RouteGroup[] = [
     ],
   },
   {
-    label: "ERP",
-    items: [
-      { title: "Transacciones Unificadas", url: "/erp/transactions", icon: ListTree, moduleName: "herramientas" },
-      { title: "Presupuestos", url: "/erp/budgets", icon: Calculator, moduleName: "presupuestos" },
-      { title: "Proveedores", url: "/proveedores", icon: Truck, moduleName: "proveedores" },
-    ],
-  },
-  {
     label: "Gestión",
     items: [
       { title: "Usuarios", url: "/usuarios", icon: UserCog, moduleName: "usuarios" },
-      { title: "Métricas", url: "/metrics", icon: TrendingUp, moduleName: "herramientas" },
-      { title: "Contenido Corporativo", url: "/herramientas/contenido-corporativo", icon: Building2, moduleName: "herramientas" },
-      { title: "Sucursales", url: "/herramientas/sucursales", icon: MapPin, moduleName: "herramientas" },
-      { title: "Alianzas", url: "/herramientas/alianzas", icon: Handshake, moduleName: "herramientas" },
-      { title: "Identidades", url: "/herramientas/identidades", icon: Users, moduleName: "herramientas" },
-      { title: "Accesos", url: "/herramientas/accesos", icon: ShieldCheck, moduleName: "herramientas" },
-      { title: "Centro de Reglas", url: "/herramientas/reglas", icon: FileText, moduleName: "herramientas" },
-    ],
-  },
-  {
-    label: "Construcción",
-    items: [
-      { title: "Cronograma de Gantt", url: "/construccion/gantt", icon: Calendar, moduleName: "construccion" },
-      { title: "Órdenes de Compra", url: "/construction/purchase-orders", icon: ShoppingCart, moduleName: "construccion" },
-    ],
-  },
-  {
-    label: "Finanzas",
-    items: [
-      { title: "Pagos a Proveedores", url: "/finance/payments", icon: DollarSign, moduleName: "finanzas" },
+      { title: "Accesos", url: "/herramientas/accesos", icon: ShieldCheck, moduleName: "accesos" },
+      { title: "Sucursales", url: "/herramientas/sucursales", icon: MapPin, moduleName: "sucursales" },
+      { title: "Centro de Reglas", url: "/herramientas/reglas", icon: FileText, moduleName: "centro_reglas" },
+      { title: "Contenido Corporativo", url: "/herramientas/contenido-corporativo", icon: Building2, moduleName: "contenido_corporativo" },
     ],
   },
 ];

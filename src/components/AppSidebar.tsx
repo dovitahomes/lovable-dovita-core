@@ -152,37 +152,44 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className={sidebarTheme === "light" ? "p-3 space-y-2 border-t border-gray-200" : "p-3 space-y-2"}>
-        <Button
-          variant="ghost"
-          onClick={toggleSidebarTheme}
-          className={
-            sidebarTheme === "light"
-              ? "w-full justify-start text-gray-700 hover:bg-gray-100"
-              : "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          }
-          title={sidebarTheme === "dark" ? "Sidebar Claro" : "Sidebar Oscuro"}
-        >
-          {sidebarTheme === "dark" ? (
-            <Sun className="h-4 w-4" />
-          ) : (
-            <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-          )}
-          {state !== "collapsed" && <span className="ml-2 truncate">{sidebarTheme === "dark" ? "Sidebar Claro" : "Sidebar Oscuro"}</span>}
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className={
-            sidebarTheme === "light"
-              ? "w-full justify-start text-gray-700 hover:bg-gray-100"
-              : "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          }
-          title="Cerrar Sesión"
-        >
-          <LogOut className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-          {state !== "collapsed" && <span className="ml-2 truncate">Cerrar Sesión</span>}
-        </Button>
+      <SidebarFooter className={sidebarTheme === "light" ? "border-t border-gray-200" : ""}>
+        <SidebarGroup>
+          <SidebarGroupLabel className={sidebarTheme === "light" ? "text-gray-600" : ""}>
+            Sesión
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={toggleSidebarTheme} asChild>
+                  <div className={
+                    sidebarTheme === "light"
+                      ? "cursor-pointer text-gray-700 hover:bg-gray-100"
+                      : "cursor-pointer hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  }>
+                    {sidebarTheme === "dark" ? (
+                      <Sun className="h-4 w-4" />
+                    ) : (
+                      <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                    )}
+                    {state !== "collapsed" && <span>Sidebar {sidebarTheme === "dark" ? "Claro" : "Oscuro"}</span>}
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout} asChild>
+                  <div className={
+                    sidebarTheme === "light"
+                      ? "cursor-pointer text-gray-700 hover:bg-gray-100"
+                      : "cursor-pointer hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  }>
+                    <LogOut className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                    {state !== "collapsed" && <span>Cerrar Sesión</span>}
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarFooter>
     </Sidebar>
   );
