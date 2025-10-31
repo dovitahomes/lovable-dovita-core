@@ -10,6 +10,30 @@ export const mockProjectData = {
   totalPending: 2250000,
   startDate: "2024-03-15",
   estimatedEndDate: "2025-03-15",
+  heroImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80", // Modern house render
+  renders: [
+    {
+      id: 1,
+      url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
+      title: "Fachada Principal",
+      phase: "Diseño",
+      date: "2024-03-20"
+    },
+    {
+      id: 2,
+      url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80",
+      title: "Vista Interior Sala",
+      phase: "Diseño",
+      date: "2024-03-22"
+    },
+    {
+      id: 3,
+      url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80",
+      title: "Vista Posterior",
+      phase: "Diseño",
+      date: "2024-03-25"
+    }
+  ],
   team: [
     {
       id: 1,
