@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Paperclip, Smile } from 'lucide-react';
@@ -9,6 +9,17 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSendMessage }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const maxHeight = 24 * 5; // ~5 lines (line-height * 5)
+      textareaRef.current.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
+    }
+  }, [message]);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -25,7 +36,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t bg-background p-3 pb-safe">
+    <div className="border-t bg-background p-3">
       <div className="flex items-end gap-2">
         <Button
           variant="ghost"
@@ -37,11 +48,12 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
 
         <div className="flex-1 relative">
           <Textarea
+            ref={textareaRef}
             placeholder="Escribe un mensaje..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="min-h-[44px] max-h-[120px] resize-none pr-10"
+            className="min-h-[44px] max-h-[120px] resize-none pr-10 overflow-y-auto"
             rows={1}
           />
           <Button
