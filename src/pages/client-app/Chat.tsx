@@ -93,8 +93,8 @@ export default function Chat() {
       <ChatHeader />
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 px-2">
-        <div className="py-2">
+      <ScrollArea className="flex-1 px-1">
+        <div className="py-1">
           {/* Team Members Info */}
           <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
