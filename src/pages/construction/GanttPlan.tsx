@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -256,76 +257,149 @@ export default function GanttPlan() {
         </Button>
       </div>
 
-      <Card className="p-6">
-        <GanttToolbar
-          projects={projects}
-          selectedProject={selectedProject}
-          onProjectChange={setSelectedProject}
-          ganttType={ganttType}
-          onTypeChange={setGanttType}
-          onSave={handleSave}
-          onExportPDF={handleExportPDF}
-          onShare={handleShare}
-          onAddMinistration={() => setShowMinistrationDialog(true)}
-          canShare={ganttType === "ejecutivo"}
-        />
-      </Card>
+      <Tabs value={ganttType} onValueChange={(v) => setGanttType(v as "parametrico" | "ejecutivo")} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="parametrico">Paramétrico</TabsTrigger>
+          <TabsTrigger value="ejecutivo">Ejecutivo</TabsTrigger>
+        </TabsList>
 
-      {ganttType === "ejecutivo" && selectedProject && !hasExecutiveBudget && !majorsLoading && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            No hay presupuesto ejecutivo publicado para este proyecto
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {selectedProject && hasExecutiveBudget && (
-        <>
+        <TabsContent value="parametrico" className="space-y-6 mt-6">
           <Card className="p-6">
-            <div className="mb-4">
-              <Label>Añadir Mayor al Cronograma</Label>
-              <Select onValueChange={handleAddMajor}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un mayor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableMajors.map((major) => (
-                    <SelectItem key={major.mayor_id} value={major.mayor_id}>
-                      {major.mayor_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <GanttGrid
-              items={itemsWithMajors}
-              weeks={weeks}
-              timelineStart={timelineStart}
-              timelineEnd={timelineEnd}
-              primaryColor={corporateData?.color_primario || "#1e40af"}
-              secondaryColor={corporateData?.color_secundario || "#059669"}
-              onRemoveItem={handleRemoveItem}
+            <GanttToolbar
+              projects={projects}
+              selectedProject={selectedProject}
+              onProjectChange={setSelectedProject}
+              ganttType={ganttType}
+              onTypeChange={setGanttType}
+              onSave={handleSave}
+              onExportPDF={handleExportPDF}
+              onShare={handleShare}
+              onAddMinistration={() => setShowMinistrationDialog(true)}
+              canShare={false}
             />
           </Card>
 
-          <GanttMinistrations
-            ministrations={ministrations}
-            weeks={weeks}
-            timelineStart={timelineStart}
-            timelineEnd={timelineEnd}
-            onRemoveMinistration={handleRemoveMinistration}
-          />
+          {selectedProject && (
+            <>
+              <Card className="p-6">
+                <div className="mb-4">
+                  <Label>Añadir Mayor al Cronograma</Label>
+                  <Select onValueChange={handleAddMajor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un mayor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMajors.map((major) => (
+                        <SelectItem key={major.mayor_id} value={major.mayor_id}>
+                          {major.mayor_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <GanttSummary
-            ministrations={ministrations}
-            timelineStart={timelineStart}
-            timelineEnd={timelineEnd}
-            totalBudget={budgetMajors?.reduce((sum, m) => sum + m.importe, 0) || 0}
-          />
-        </>
-      )}
+                <GanttGrid
+                  items={itemsWithMajors}
+                  weeks={weeks}
+                  timelineStart={timelineStart}
+                  timelineEnd={timelineEnd}
+                  primaryColor={corporateData?.color_primario || "#1e40af"}
+                  secondaryColor={corporateData?.color_secundario || "#059669"}
+                  onRemoveItem={handleRemoveItem}
+                />
+              </Card>
+
+              <GanttMinistrations
+                ministrations={ministrations}
+                weeks={weeks}
+                timelineStart={timelineStart}
+                timelineEnd={timelineEnd}
+                onRemoveMinistration={handleRemoveMinistration}
+              />
+
+              <GanttSummary
+                ministrations={ministrations}
+                timelineStart={timelineStart}
+                timelineEnd={timelineEnd}
+                totalBudget={budgetMajors?.reduce((sum, m) => sum + m.importe, 0) || 0}
+              />
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="ejecutivo" className="space-y-6 mt-6">
+          <Card className="p-6">
+            <GanttToolbar
+              projects={projects}
+              selectedProject={selectedProject}
+              onProjectChange={setSelectedProject}
+              ganttType={ganttType}
+              onTypeChange={setGanttType}
+              onSave={handleSave}
+              onExportPDF={handleExportPDF}
+              onShare={handleShare}
+              onAddMinistration={() => setShowMinistrationDialog(true)}
+              canShare={true}
+            />
+          </Card>
+
+          {ganttType === "ejecutivo" && selectedProject && !hasExecutiveBudget && !majorsLoading && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No hay presupuesto ejecutivo publicado para este proyecto
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {selectedProject && hasExecutiveBudget && (
+            <>
+              <Card className="p-6">
+                <div className="mb-4">
+                  <Label>Añadir Mayor al Cronograma</Label>
+                  <Select onValueChange={handleAddMajor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un mayor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMajors.map((major) => (
+                        <SelectItem key={major.mayor_id} value={major.mayor_id}>
+                          {major.mayor_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <GanttGrid
+                  items={itemsWithMajors}
+                  weeks={weeks}
+                  timelineStart={timelineStart}
+                  timelineEnd={timelineEnd}
+                  primaryColor={corporateData?.color_primario || "#1e40af"}
+                  secondaryColor={corporateData?.color_secundario || "#059669"}
+                  onRemoveItem={handleRemoveItem}
+                />
+              </Card>
+
+              <GanttMinistrations
+                ministrations={ministrations}
+                weeks={weeks}
+                timelineStart={timelineStart}
+                timelineEnd={timelineEnd}
+                onRemoveMinistration={handleRemoveMinistration}
+              />
+
+              <GanttSummary
+                ministrations={ministrations}
+                timelineStart={timelineStart}
+                timelineEnd={timelineEnd}
+                totalBudget={budgetMajors?.reduce((sum, m) => sum + m.importe, 0) || 0}
+              />
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Ministration Dialog */}
       <Dialog open={showMinistrationDialog} onOpenChange={setShowMinistrationDialog}>

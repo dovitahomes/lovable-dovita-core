@@ -96,6 +96,7 @@ export const ALL_ROUTES: RouteGroup[] = [
   {
     label: "Construcción",
     items: [
+      { title: "Cronograma de Gantt", url: "/construccion/gantt", icon: Calendar, moduleName: "construccion" },
       { title: "Órdenes de Compra", url: "/construction/purchase-orders", icon: ShoppingCart, moduleName: "construccion" },
     ],
   },
