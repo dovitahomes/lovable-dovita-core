@@ -1,21 +1,21 @@
 import Logo from "../Logo";
-import platformDashboard from "@/assets/platform-dashboard.jpg";
-import platformPhotos from "@/assets/platform-photos.jpg";
-import platformChat from "@/assets/platform-chat.jpg";
+import appDashboard from "@/assets/app-dashboard.png";
+import appPhotos from "@/assets/app-photos.png";
+import appChat from "@/assets/app-chat.png";
 
 const platformFeatures = [
   {
-    image: platformDashboard,
+    image: appDashboard,
     title: "Portal del Cliente",
     description: "Dashboard completo con información del proyecto, presupuestos y cronogramas en tiempo real"
   },
   {
-    image: platformPhotos,
+    image: appPhotos,
     title: "Fotos de Progreso",
     description: "Galería de avances con categorización automática y actualizaciones semanales de obra"
   },
   {
-    image: platformChat,
+    image: appChat,
     title: "Comunicación Directa",
     description: "Chat integrado y seguimiento financiero transparente de cada peso invertido"
   }
@@ -48,16 +48,28 @@ const TechnologySlide = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {platformFeatures.map((feature, index) => (
                 <div key={index} className="group">
-                  <div className="relative overflow-hidden rounded-2xl shadow-lg mb-4 aspect-[9/16] bg-gray-100">
-                    <img 
-                      src={feature.image} 
-                      alt={feature.title}
-                      className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* iPhone Frame */}
+                  <div className="relative mb-4 mx-auto" style={{ maxWidth: '300px' }}>
+                    {/* iPhone body */}
+                    <div className="relative bg-black rounded-[3rem] p-3 shadow-2xl">
+                      {/* Notch */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-black rounded-b-3xl z-10"></div>
+                      
+                      {/* Screen */}
+                      <div className="relative overflow-hidden rounded-[2.5rem] aspect-[9/19.5] bg-white">
+                        <img 
+                          src={feature.image} 
+                          alt={feature.title}
+                          className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      
+                      {/* Home indicator */}
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full"></div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-primary">{feature.title}</h3>
-                  <p className="text-foreground/70 leading-relaxed text-sm">{feature.description}</p>
+                  <h3 className="text-xl font-bold mb-2 text-primary text-center">{feature.title}</h3>
+                  <p className="text-foreground/70 leading-relaxed text-sm text-center">{feature.description}</p>
                 </div>
               ))}
             </div>
