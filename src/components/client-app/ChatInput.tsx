@@ -16,7 +16,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       const scrollHeight = textareaRef.current.scrollHeight;
-      const maxHeight = 24 * 5; // ~5 lines (line-height * 5)
+      const maxHeight = 20 * 5; // ~5 lines (line-height * 5)
       textareaRef.current.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
     }
   }, [message]);
@@ -36,7 +36,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t bg-background p-3">
+    <div className="border-t bg-background p-2">
       <div className="flex items-end gap-2">
         <Button
           variant="ghost"
@@ -53,7 +53,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="min-h-[44px] max-h-[120px] resize-none pr-10 overflow-y-auto"
+            className="min-h-[40px] max-h-[100px] resize-none pr-10 overflow-y-auto"
             rows={1}
           />
           <Button
