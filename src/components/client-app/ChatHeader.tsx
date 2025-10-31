@@ -1,8 +1,19 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Phone, Video, MoreVertical } from 'lucide-react';
 import { mockProjectData } from '@/lib/client-data';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-export default function ChatHeader() {
+interface ChatHeaderProps {
+  onAvatarCustomize: () => void;
+}
+
+export default function ChatHeader({ onAvatarCustomize }: ChatHeaderProps) {
   const teamMembers = mockProjectData.team;
 
   return (
@@ -44,9 +55,18 @@ export default function ChatHeader() {
         <Button variant="ghost" size="icon" className="text-muted-foreground">
           <Video className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-muted-foreground">
-          <MoreVertical className="h-5 w-5" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-muted-foreground">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onAvatarCustomize}>
+              Personalizar mi avatar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

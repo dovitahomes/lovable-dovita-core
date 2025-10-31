@@ -4,6 +4,7 @@ import { Users, Info } from 'lucide-react';
 import ChatHeader from '@/components/client-app/ChatHeader';
 import ChatMessage from '@/components/client-app/ChatMessage';
 import ChatInput from '@/components/client-app/ChatInput';
+import AvatarCustomizationDialog from '@/components/client-app/AvatarCustomizationDialog';
 import { mockChatMessages, mockProjectData } from '@/lib/client-data';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -11,8 +12,18 @@ import { toast } from 'sonner';
 
 export default function Chat() {
   const [messages, setMessages] = useState(mockChatMessages);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [clientAvatar, setClientAvatar] = useState<{ type: "icon" | "image"; value: string } | null>(() => {
+    const saved = localStorage.getItem("clientAvatar");
+    return saved ? JSON.parse(saved) : null;
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveAvatar = (avatar: { type: "icon" | "image"; value: string }) => {
+    setClientAvatar(avatar);
+    localStorage.setItem("clientAvatar", JSON.stringify(avatar));
+  };
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
@@ -89,7 +100,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <ChatHeader />
+      <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-4">
@@ -124,7 +135,7 @@ export default function Chat() {
 
               {/* Messages for this date */}
               {dateMessages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                <ChatMessage key={message.id} message={message} clientAvatar={clientAvatar} />
               ))}
             </div>
           ))}
@@ -135,6 +146,13 @@ export default function Chat() {
 
       {/* Input Area */}
       <ChatInput onSendMessage={handleSendMessage} />
+
+      <AvatarCustomizationDialog
+        open={avatarDialogOpen}
+        onOpenChange={setAvatarDialogOpen}
+        currentAvatar={clientAvatar}
+        onSave={handleSaveAvatar}
+      />
     </div>
   );
 }
