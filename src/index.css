@@ -129,6 +129,9 @@ All colors MUST be HSL.
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
   z-index: 50;
 }
 
