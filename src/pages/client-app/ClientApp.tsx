@@ -28,10 +28,10 @@ export default function ClientApp() {
 
   return (
     <MobileFrame>
-      <div className="h-screen flex flex-col bg-background overflow-hidden">
+      <div className="h-screen flex flex-col bg-background">
         <DovitaHeader />
 
-        <main className="flex-1 overflow-hidden pt-[60px] pb-[80px]">
+        <main className="flex-1 overflow-hidden">
           <Outlet />
         </main>
 

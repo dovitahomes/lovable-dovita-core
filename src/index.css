@@ -141,14 +141,10 @@ All colors MUST be HSL.
   padding: 0.5rem;
   background: hsl(var(--card));
   border-top: 1px solid hsl(var(--border));
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   width: 100%;
-  max-width: 428px;
-  margin: 0 auto;
   z-index: 50;
+  flex-shrink: 0;
   zoom: reset;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
@@ -157,7 +153,6 @@ All colors MUST be HSL.
 @supports not (zoom: reset) {
   .menu {
     transform: scale(1);
-    transform-origin: bottom center;
   }
 }
 
