@@ -13,14 +13,14 @@ import { toast } from 'sonner';
 export default function Chat() {
   const [messages, setMessages] = useState(mockChatMessages);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [clientAvatar, setClientAvatar] = useState<{ type: "icon" | "image"; value: string } | null>(() => {
+  const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
     return saved ? JSON.parse(saved) : null;
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSaveAvatar = (avatar: { type: "icon" | "image"; value: string }) => {
+  const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
     setClientAvatar(avatar);
     localStorage.setItem("clientAvatar", JSON.stringify(avatar));
   };

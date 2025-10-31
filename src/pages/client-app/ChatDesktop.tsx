@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, Phone, Video, MoreVertical, User, Smile, Camera } from "lucide-react";
+import { Send, Phone, Video, MoreVertical } from "lucide-react";
 import { mockChatMessages, mockProjectData } from "@/lib/client-data";
 import {
   DropdownMenu,
@@ -40,31 +40,27 @@ export default function ChatDesktop() {
   );
   const [inputValue, setInputValue] = useState("");
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [clientAvatar, setClientAvatar] = useState<{ type: "icon" | "image"; value: string } | null>(() => {
+  const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
     return saved ? JSON.parse(saved) : null;
   });
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleSaveAvatar = (avatar: { type: "icon" | "image"; value: string }) => {
+  const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
     setClientAvatar(avatar);
     localStorage.setItem("clientAvatar", JSON.stringify(avatar));
   };
 
   const getAvatarContent = () => {
-    if (!clientAvatar) return <User className="h-4 w-4" />;
-    
-    if (clientAvatar.type === "image") {
-      return <img src={clientAvatar.value} alt="Avatar" className="object-cover" />;
+    if (!clientAvatar) {
+      return <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Default" />;
     }
     
-    const iconMap: { [key: string]: typeof User } = {
-      user: User,
-      smile: Smile,
-      camera: Camera,
-    };
-    const IconComponent = iconMap[clientAvatar.value] || User;
-    return <IconComponent className="h-4 w-4" />;
+    if (clientAvatar.type === "preset") {
+      return <AvatarImage src={clientAvatar.value} />;
+    }
+    
+    return <AvatarImage src={clientAvatar.value} />;
   };
 
   useEffect(() => {
@@ -141,13 +137,7 @@ export default function ChatDesktop() {
                     <div className="flex items-center gap-2 mb-1 justify-end">
                       <span className="text-xs text-muted-foreground">Tú</span>
                       <Avatar className="h-6 w-6">
-                        {clientAvatar?.type === "image" ? (
-                          <AvatarImage src={clientAvatar.value} />
-                        ) : (
-                          <AvatarFallback className="bg-primary/10">
-                            {getAvatarContent()}
-                          </AvatarFallback>
-                        )}
+                        {getAvatarContent()}
                       </Avatar>
                     </div>
                   )}

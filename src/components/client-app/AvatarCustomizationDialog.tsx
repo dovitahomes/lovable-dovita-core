@@ -1,21 +1,24 @@
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Smile, Camera, Upload, Check } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Upload, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const predefinedIcons = [
-  { id: "user", icon: User, label: "Usuario" },
-  { id: "smile", icon: Smile, label: "Sonrisa" },
-  { id: "camera", icon: Camera, label: "Cámara" },
+const predefinedAvatars = [
+  { id: "avatar1", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", label: "Avatar 1" },
+  { id: "avatar2", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka", label: "Avatar 2" },
+  { id: "avatar3", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna", label: "Avatar 3" },
+  { id: "avatar4", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Max", label: "Avatar 4" },
+  { id: "avatar5", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie", label: "Avatar 5" },
+  { id: "avatar6", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver", label: "Avatar 6" },
 ];
 
 interface AvatarCustomizationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentAvatar: { type: "icon" | "image"; value: string } | null;
-  onSave: (avatar: { type: "icon" | "image"; value: string }) => void;
+  currentAvatar: { type: "preset" | "custom"; value: string } | null;
+  onSave: (avatar: { type: "preset" | "custom"; value: string }) => void;
 }
 
 export default function AvatarCustomizationDialog({
@@ -24,12 +27,12 @@ export default function AvatarCustomizationDialog({
   currentAvatar,
   onSave,
 }: AvatarCustomizationDialogProps) {
-  const [selectedType, setSelectedType] = useState<"icon" | "image">(
-    currentAvatar?.type || "icon"
+  const [selectedType, setSelectedType] = useState<"preset" | "custom">(
+    currentAvatar?.type || "preset"
   );
-  const [selectedIcon, setSelectedIcon] = useState(currentAvatar?.type === "icon" ? currentAvatar.value : "user");
+  const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar?.type === "preset" ? currentAvatar.value : "avatar1");
   const [uploadedImage, setUploadedImage] = useState<string | null>(
-    currentAvatar?.type === "image" ? currentAvatar.value : null
+    currentAvatar?.type === "custom" ? currentAvatar.value : null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -60,17 +63,17 @@ export default function AvatarCustomizationDialog({
     reader.onload = (event) => {
       if (event.target?.result) {
         setUploadedImage(event.target.result as string);
-        setSelectedType("image");
+        setSelectedType("custom");
       }
     };
     reader.readAsDataURL(file);
   };
 
   const handleSave = () => {
-    if (selectedType === "icon") {
-      onSave({ type: "icon", value: selectedIcon });
+    if (selectedType === "preset") {
+      onSave({ type: "preset", value: selectedAvatar });
     } else if (uploadedImage) {
-      onSave({ type: "image", value: uploadedImage });
+      onSave({ type: "custom", value: uploadedImage });
     }
     onOpenChange(false);
     toast({
@@ -90,43 +93,38 @@ export default function AvatarCustomizationDialog({
           {/* Preview */}
           <div className="flex justify-center">
             <Avatar className="h-24 w-24">
-              {selectedType === "image" && uploadedImage ? (
-                <img src={uploadedImage} alt="Avatar" className="object-cover" />
+              {selectedType === "custom" && uploadedImage ? (
+                <AvatarImage src={uploadedImage} />
               ) : (
-                <AvatarFallback className="bg-primary/10">
-                  {(() => {
-                    const IconComponent = predefinedIcons.find(i => i.id === selectedIcon)?.icon || User;
-                    return <IconComponent className="h-12 w-12 text-primary" />;
-                  })()}
-                </AvatarFallback>
+                <AvatarImage src={predefinedAvatars.find(a => a.id === selectedAvatar)?.url} />
               )}
             </Avatar>
           </div>
 
-          {/* Icon Selection */}
+          {/* Avatar Selection */}
           <div>
-            <h4 className="text-sm font-medium mb-3">Seleccionar Ícono</h4>
+            <h4 className="text-sm font-medium mb-3">Seleccionar Avatar</h4>
             <div className="grid grid-cols-3 gap-3">
-              {predefinedIcons.map((item) => {
-                const IconComponent = item.icon;
-                const isSelected = selectedType === "icon" && selectedIcon === item.id;
+              {predefinedAvatars.map((avatar) => {
+                const isSelected = selectedType === "preset" && selectedAvatar === avatar.id;
                 return (
                   <Button
-                    key={item.id}
+                    key={avatar.id}
                     variant="outline"
-                    className={`h-20 flex flex-col gap-2 relative ${
+                    className={`h-20 p-2 relative ${
                       isSelected ? "border-primary border-2" : ""
                     }`}
                     onClick={() => {
-                      setSelectedIcon(item.id);
-                      setSelectedType("icon");
+                      setSelectedAvatar(avatar.id);
+                      setSelectedType("preset");
                     }}
                   >
                     {isSelected && (
-                      <Check className="absolute top-1 right-1 h-4 w-4 text-primary" />
+                      <Check className="absolute top-1 right-1 h-4 w-4 text-primary z-10" />
                     )}
-                    <IconComponent className="h-6 w-6" />
-                    <span className="text-xs">{item.label}</span>
+                    <Avatar className="h-full w-full">
+                      <AvatarImage src={avatar.url} />
+                    </Avatar>
                   </Button>
                 );
               })}

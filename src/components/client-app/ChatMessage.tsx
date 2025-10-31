@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Check, CheckCheck, User, Smile, Camera } from 'lucide-react';
+import { Check, CheckCheck } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ChatMessageProps {
@@ -16,7 +16,7 @@ interface ChatMessageProps {
     };
     status?: 'sent' | 'delivered' | 'read';
   };
-  clientAvatar?: { type: "icon" | "image"; value: string } | null;
+  clientAvatar?: { type: "preset" | "custom"; value: string } | null;
 }
 
 export default function ChatMessage({ message, clientAvatar }: ChatMessageProps) {
@@ -24,19 +24,11 @@ export default function ChatMessage({ message, clientAvatar }: ChatMessageProps)
   const timeString = format(messageDate, 'HH:mm', { locale: es });
 
   const getAvatarContent = () => {
-    if (!clientAvatar) return <User className="h-4 w-4" />;
-    
-    if (clientAvatar.type === "image") {
-      return <AvatarImage src={clientAvatar.value} />;
+    if (!clientAvatar) {
+      return <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Default" />;
     }
     
-    const iconMap: { [key: string]: typeof User } = {
-      user: User,
-      smile: Smile,
-      camera: Camera,
-    };
-    const IconComponent = iconMap[clientAvatar.value] || User;
-    return <IconComponent className="h-4 w-4" />;
+    return <AvatarImage src={clientAvatar.value} />;
   };
 
   if (message.isClient) {
@@ -47,13 +39,7 @@ export default function ChatMessage({ message, clientAvatar }: ChatMessageProps)
           <div className="flex items-center justify-end gap-2 mb-1">
             <span className="text-xs text-muted-foreground">Tú</span>
             <Avatar className="h-6 w-6">
-              {clientAvatar?.type === "image" ? (
-                <AvatarImage src={clientAvatar.value} />
-              ) : (
-                <AvatarFallback className="bg-primary/10">
-                  {getAvatarContent()}
-                </AvatarFallback>
-              )}
+              {getAvatarContent()}
             </Avatar>
           </div>
           <div className="bg-primary text-white rounded-2xl rounded-tr-sm px-4 py-2.5">
