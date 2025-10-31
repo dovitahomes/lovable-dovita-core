@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,12 @@ export default function PhotoViewer({
   onNavigate 
 }: PhotoViewerProps) {
   const [zoom, setZoom] = useState(1);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const currentPhoto = photos[currentIndex];
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev + 0.5, 3));
@@ -78,6 +83,48 @@ export default function PhotoViewer({
     }
   };
 
+  // Keyboard navigation
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        handlePrevious();
+      } else if (e.key === 'ArrowRight') {
+        handleNext();
+      } else if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, currentIndex, photos.length]);
+
+  // Touch/Swipe navigation
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
+  };
+
   if (!currentPhoto) return null;
 
   return (
@@ -116,7 +163,12 @@ export default function PhotoViewer({
         </div>
 
         {/* Image Container */}
-        <div className="flex items-center justify-center h-full w-full overflow-hidden p-16">
+        <div 
+          className="flex items-center justify-center h-full w-full overflow-hidden p-16"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div 
             className="transition-transform duration-200 ease-out"
             style={{ transform: `scale(${zoom})` }}
