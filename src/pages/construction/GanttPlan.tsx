@@ -23,10 +23,11 @@ import { GanttToolbar } from "@/components/gantt/GanttToolbar";
 import { GanttGrid } from "@/components/gantt/GanttGrid";
 import { GanttMinistrations } from "@/components/gantt/GanttMinistrations";
 import { GanttSummary } from "@/components/gantt/GanttSummary";
+import { AddMajorSelector } from "@/components/gantt/AddMajorSelector";
 import { useGanttPlanByProject, useUpsertGanttPlan, useShareGanttWithConstruction } from "@/hooks/useGanttPlan";
 import { useBudgetMajors } from "@/hooks/useBudgetMajors";
 import { useCorporateContent } from "@/hooks/useCorporateContent";
-import { calculateGanttWeeks } from "@/utils/ganttTime";
+import { calculateGanttWeeks, type WeekCell } from "@/utils/ganttTime";
 import { exportGanttToPDF } from "@/utils/pdf/ganttExport";
 import type { GanttItem, GanttMinistration } from "@/hooks/useGanttPlan";
 
@@ -159,6 +160,10 @@ export default function GanttPlan() {
     setItems(items.filter((_, i) => i !== index));
   };
 
+  const handleUpdateItem = (index: number, updates: Partial<GanttItem>) => {
+    setItems(items.map((item, i) => (i === index ? { ...item, ...updates } : item)));
+  };
+
   const handleAddMinistration = () => {
     const newM: any = {
       date: newMinistration.date,
@@ -218,6 +223,15 @@ export default function GanttPlan() {
       toast.error("Selecciona un proyecto primero");
       return;
     }
+
+    // Recalculate monthsMap from weeks
+    const monthsMap = new Map<number, WeekCell[]>();
+    weeks.forEach(week => {
+      if (!monthsMap.has(week.monthNumber)) {
+        monthsMap.set(week.monthNumber, []);
+      }
+      monthsMap.get(week.monthNumber)!.push(week);
+    });
 
     await exportGanttToPDF({
       projectName: selectedProj.clients?.name || "Sin nombre",
@@ -283,19 +297,10 @@ export default function GanttPlan() {
             <>
               <Card className="p-6">
                 <div className="mb-4">
-                  <Label>Añadir Mayor al Cronograma</Label>
-                  <Select onValueChange={handleAddMajor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un mayor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableMajors.map((major) => (
-                        <SelectItem key={major.mayor_id} value={major.mayor_id}>
-                          {major.mayor_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <AddMajorSelector
+                    availableMajors={availableMajors}
+                    onAddMajor={handleAddMajor}
+                  />
                 </div>
 
                 <GanttGrid
@@ -305,7 +310,9 @@ export default function GanttPlan() {
                   timelineEnd={timelineEnd}
                   primaryColor={corporateData?.color_primario || "#1e40af"}
                   secondaryColor={corporateData?.color_secundario || "#059669"}
+                  totalBudget={budgetMajors?.reduce((sum, m) => sum + m.importe, 0) || 0}
                   onRemoveItem={handleRemoveItem}
+                  onUpdateItem={handleUpdateItem}
                 />
               </Card>
 
@@ -356,19 +363,10 @@ export default function GanttPlan() {
             <>
               <Card className="p-6">
                 <div className="mb-4">
-                  <Label>Añadir Mayor al Cronograma</Label>
-                  <Select onValueChange={handleAddMajor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un mayor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableMajors.map((major) => (
-                        <SelectItem key={major.mayor_id} value={major.mayor_id}>
-                          {major.mayor_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <AddMajorSelector
+                    availableMajors={availableMajors}
+                    onAddMajor={handleAddMajor}
+                  />
                 </div>
 
                 <GanttGrid
@@ -378,7 +376,9 @@ export default function GanttPlan() {
                   timelineEnd={timelineEnd}
                   primaryColor={corporateData?.color_primario || "#1e40af"}
                   secondaryColor={corporateData?.color_secundario || "#059669"}
+                  totalBudget={budgetMajors?.reduce((sum, m) => sum + m.importe, 0) || 0}
                   onRemoveItem={handleRemoveItem}
+                  onUpdateItem={handleUpdateItem}
                 />
               </Card>
 

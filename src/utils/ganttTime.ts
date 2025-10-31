@@ -22,7 +22,7 @@ export type WeekCell = {
  */
 export function calculateGanttWeeks(startDate: Date, endDate: Date): WeekCell[] {
   const start = startOfDay(startOfWeek(startDate, { weekStartsOn: 1 })); // Monday
-  const end = startOfDay(endDate);
+  const end = startOfDay(endOfWeek(endDate, { weekStartsOn: 1 }));
   
   const weeks = eachWeekOfInterval({ start, end }, { weekStartsOn: 1 });
   
@@ -39,6 +39,13 @@ export function calculateGanttWeeks(startDate: Date, endDate: Date): WeekCell[] 
       endDate: endOfWeek(weekStart, { weekStartsOn: 1 }),
     };
   });
+}
+
+/**
+ * Calculate weeks needed to fit a duration (in days)
+ */
+export function weeksForDuration(durationDays: number): number {
+  return Math.ceil(durationDays / 7);
 }
 
 /**

@@ -17,7 +17,13 @@ export function GanttSummary({
   timelineEnd,
   totalBudget = 0,
 }: GanttSummaryProps) {
-  const { timeProgress, investmentProgress, accumulatedAmount, nextMinistration } = useMemo(() => {
+  const { 
+    timeProgress, 
+    investmentProgress, 
+    accumulatedAmount, 
+    nextMinistration,
+    monthlyProgress 
+  } = useMemo(() => {
     const now = new Date();
     const totalDays = differenceInDays(timelineEnd, timelineStart);
     const elapsedDays = Math.max(0, differenceInDays(now, timelineStart));
@@ -36,11 +42,27 @@ export function GanttSummary({
     const investmentProgress = pastMinistrations[0]?.accumulated_percent || 0;
     const accumulatedAmount = (totalBudget * investmentProgress) / 100;
 
+    // Calculate monthly progress
+    const monthlyProgress = ministrations.reduce((acc, m, idx) => {
+      const prevPercent = idx > 0 ? (ministrations[idx - 1]?.accumulated_percent || 0) : 0;
+      const monthPercent = (m.accumulated_percent || 0) - prevPercent;
+      const monthDate = new Date(m.date);
+      const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = 0;
+      }
+      acc[monthKey] += monthPercent;
+      
+      return acc;
+    }, {} as Record<string, number>);
+
     return {
       timeProgress,
       investmentProgress,
       accumulatedAmount,
       nextMinistration: upcoming,
+      monthlyProgress,
     };
   }, [ministrations, timelineStart, timelineEnd, totalBudget]);
 
@@ -83,6 +105,31 @@ export function GanttSummary({
               Monto: {nextMinistration.percent.toFixed(1)}%
             </p>
           )}
+        </div>
+      )}
+
+      {/* Detalle de Ministraciones */}
+      {ministrations.length > 0 && (
+        <div className="pt-4 border-t">
+          <h4 className="font-semibold mb-3">Detalle de Ministraciones</h4>
+          <div className="space-y-2">
+            {ministrations.map((m, idx) => (
+              <div key={m.id || idx} className="flex justify-between items-start text-sm p-2 rounded bg-muted/30">
+                <div className="flex-1">
+                  <p className="font-medium">{m.label}</p>
+                  {m.alcance && (
+                    <p className="text-xs text-muted-foreground mt-1">{m.alcance}</p>
+                  )}
+                </div>
+                <div className="text-right ml-4">
+                  <p className="font-mono">{m.percent?.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">
+                    Acum: {m.accumulated_percent?.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </Card>
