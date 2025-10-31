@@ -322,6 +322,7 @@ export default function GanttPlan() {
             ministrations={ministrations}
             timelineStart={timelineStart}
             timelineEnd={timelineEnd}
+            totalBudget={budgetMajors?.reduce((sum, m) => sum + m.importe, 0) || 0}
           />
         </>
       )}

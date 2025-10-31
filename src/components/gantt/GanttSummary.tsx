@@ -8,14 +8,16 @@ type GanttSummaryProps = {
   ministrations: GanttMinistration[];
   timelineStart: Date;
   timelineEnd: Date;
+  totalBudget?: number;
 };
 
 export function GanttSummary({
   ministrations,
   timelineStart,
   timelineEnd,
+  totalBudget = 0,
 }: GanttSummaryProps) {
-  const { timeProgress, investmentProgress, nextMinistration } = useMemo(() => {
+  const { timeProgress, investmentProgress, accumulatedAmount, nextMinistration } = useMemo(() => {
     const now = new Date();
     const totalDays = differenceInDays(timelineEnd, timelineStart);
     const elapsedDays = Math.max(0, differenceInDays(now, timelineStart));
@@ -32,13 +34,15 @@ export function GanttSummary({
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const investmentProgress = pastMinistrations[0]?.accumulated_percent || 0;
+    const accumulatedAmount = (totalBudget * investmentProgress) / 100;
 
     return {
       timeProgress,
       investmentProgress,
+      accumulatedAmount,
       nextMinistration: upcoming,
     };
-  }, [ministrations, timelineStart, timelineEnd]);
+  }, [ministrations, timelineStart, timelineEnd, totalBudget]);
 
   return (
     <Card className="p-6 space-y-4">
@@ -55,9 +59,14 @@ export function GanttSummary({
 
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Inversión Acumulada</span>
+            <span className="text-muted-foreground">Inversión Acumulada Programada</span>
             <span className="font-semibold">{investmentProgress.toFixed(1)}%</span>
           </div>
+          {totalBudget > 0 && (
+            <div className="text-xs text-muted-foreground mb-1">
+              ${accumulatedAmount.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+            </div>
+          )}
           <Progress value={investmentProgress} className="h-2" />
         </div>
       </div>
