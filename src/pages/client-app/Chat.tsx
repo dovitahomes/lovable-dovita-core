@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Users, Info } from 'lucide-react';
 import ChatHeader from '@/components/client-app/ChatHeader';
@@ -88,13 +87,13 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full -mb-40">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <ChatHeader />
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 px-1">
-        <div className="py-1">
+      <div className="flex-1 overflow-y-auto px-4">
+        <div className="py-4">
           {/* Team Members Info */}
           <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
@@ -132,7 +131,7 @@ export default function Chat() {
 
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input Area */}
       <ChatInput onSendMessage={handleSendMessage} />

@@ -32,8 +32,8 @@ export default function ClientApp() {
         <DovitaHeader />
 
         <main
-          className="flex-1 overflow-y-auto pt-[60px] pb-25"
-          style={{ overscrollBehavior: "none", WebkitOverflowScrolling: "touch" }}
+          className="flex-1 overflow-hidden pt-[60px] pb-25"
+          style={{ overscrollBehavior: "none" }}
         >
           <Outlet />
         </main>
