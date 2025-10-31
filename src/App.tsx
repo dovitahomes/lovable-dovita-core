@@ -4,14 +4,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
-import ClientApp from "./pages/client-app/ClientApp";
-import Dashboard from "./pages/client-app/Dashboard";
-import Photos from "./pages/client-app/Photos";
-import Financial from "./pages/client-app/Financial";
-import Chat from "./pages/client-app/Chat";
-import Documents from "./pages/client-app/Documents";
-import Schedule from "./pages/client-app/Schedule";
-import Appointments from "./pages/client-app/Appointments";
+import ResponsiveClientApp from "./pages/client-app/ResponsiveClientApp";
+import ResponsiveDashboard from "./pages/client-app/ResponsiveDashboard";
+import ResponsivePhotos from "./pages/client-app/ResponsivePhotos";
+import ResponsiveFinancial from "./pages/client-app/ResponsiveFinancial";
+import ResponsiveChat from "./pages/client-app/ResponsiveChat";
+import ResponsiveDocuments from "./pages/client-app/ResponsiveDocuments";
+import ResponsiveSchedule from "./pages/client-app/ResponsiveSchedule";
+import ResponsiveAppointments from "./pages/client-app/ResponsiveAppointments";
 
 const queryClient = new QueryClient();
 
@@ -23,14 +23,14 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/app" replace />} />
-          <Route path="/app" element={<ClientApp />}>
-            <Route index element={<Dashboard />} />
-            <Route path="photos" element={<Photos />} />
-            <Route path="financial" element={<Financial />} />
-            <Route path="chat" element={<Chat />} />
-            <Route path="documents" element={<Documents />} />
-            <Route path="schedule" element={<Schedule />} />
-            <Route path="appointments" element={<Appointments />} />
+          <Route path="/app" element={<ResponsiveClientApp />}>
+            <Route index element={<ResponsiveDashboard />} />
+            <Route path="photos" element={<ResponsivePhotos />} />
+            <Route path="financial" element={<ResponsiveFinancial />} />
+            <Route path="chat" element={<ResponsiveChat />} />
+            <Route path="documents" element={<ResponsiveDocuments />} />
+            <Route path="schedule" element={<ResponsiveSchedule />} />
+            <Route path="appointments" element={<ResponsiveAppointments />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
