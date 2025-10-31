@@ -29,7 +29,7 @@ export default function Photos() {
   };
 
   return (
-    <div className="pb-4">
+    <div className="h-full overflow-y-auto pb-4">
       {/* Header */}
       <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4">
         <div className="flex items-start justify-between mb-2">
