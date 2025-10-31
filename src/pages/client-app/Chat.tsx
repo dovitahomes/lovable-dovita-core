@@ -87,13 +87,13 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <ChatHeader />
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4">
-        <div className="py-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        <div className="pt-4">
           {/* Team Members Info */}
           <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
