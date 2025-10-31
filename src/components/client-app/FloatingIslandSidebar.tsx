@@ -25,7 +25,7 @@ export default function FloatingIslandSidebar() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className="hidden md:flex fixed left-4 top-24 bottom-4 w-16 bg-card/80 backdrop-blur-xl rounded-full shadow-2xl border border-border/50 flex-col items-center py-6 gap-2 z-40 transition-all duration-300">
+      <aside className="hidden md:flex fixed left-4 top-20 w-16 bg-card/80 backdrop-blur-xl rounded-full shadow-2xl border border-border/50 flex-col items-center py-3 gap-1 z-40 transition-all duration-300">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
