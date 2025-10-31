@@ -109,3 +109,120 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile Frame Styles */
+.mobile-frame {
+  border-radius: 24px;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+/* Menu Styles */
+.menu {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5rem;
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+.menu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  color: hsl(var(--muted-foreground));
+  flex: 1;
+  max-width: 60px;
+}
+
+.menu__item.active {
+  color: hsl(var(--primary));
+}
+
+.menu__icon {
+  position: relative;
+}
+
+.menu__item.active .menu__icon .icon {
+  animation: iconBounce 0.6s ease-in-out;
+}
+
+.menu__icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.menu__text {
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  position: relative;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.menu__text.active {
+  opacity: 1;
+  max-height: 2rem;
+}
+
+.menu__text.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  width: var(--lineWidth, 0);
+  height: 2px;
+  background: hsl(var(--primary));
+  transition: width 0.3s ease;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-0.3em);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-0.1em);
+  }
+  80% {
+    transform: translateY(0);
+  }
+}
+
+/* Appointment Calendar Styles */
+.appointment-calendar .has-appointment {
+  position: relative;
+}
+
+.appointment-calendar .has-appointment::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: hsl(var(--secondary));
+}

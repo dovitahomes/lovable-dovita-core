@@ -1,4 +1,7 @@
 import Logo from "../Logo";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import familyOption1 from "@/assets/family-option-1.jpg";
 import familyOption2 from "@/assets/family-option-2.jpg";
 import familyOption3 from "@/assets/family-option-3.jpg";
@@ -46,6 +49,24 @@ const ImageOptionsSlide = () => {
                 </div>
               </div>
             ))}
+          </div>
+          
+          {/* Client App Demo Link */}
+          <div className="mt-12 text-center">
+            <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-primary to-primary-light rounded-2xl text-white">
+              <h3 className="text-2xl font-bold mb-3">
+                Aplicación para Clientes
+              </h3>
+              <p className="mb-6 opacity-90">
+                Explora nuestra plataforma móvil donde los clientes pueden ver el avance de su proyecto, gestionar pagos, comunicarse con el equipo y agendar citas.
+              </p>
+              <Link to="/app">
+                <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-primary font-semibold">
+                  Ver Demo de la App
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

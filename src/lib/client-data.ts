@@ -110,7 +110,7 @@ export const mockAppointments = [
   {
     id: 1,
     type: "Revisión de Avances",
-    date: "2024-05-15",
+    date: "2025-11-05",
     time: "10:00",
     duration: 60,
     status: "confirmed" as const,
@@ -127,7 +127,7 @@ export const mockAppointments = [
   {
     id: 2,
     type: "Junta de Avances",
-    date: "2024-05-20",
+    date: "2025-11-10",
     time: "16:00",
     duration: 45,
     status: "pending" as const,
@@ -145,7 +145,7 @@ export const mockAppointments = [
   {
     id: 3,
     type: "Entrega de Documentos",
-    date: "2024-05-10",
+    date: "2025-10-25",
     time: "11:00",
     duration: 30,
     status: "completed" as const,
@@ -162,7 +162,7 @@ export const mockAppointments = [
   {
     id: 4,
     type: "Visita al terreno/obra",
-    date: "2024-05-22",
+    date: "2025-11-15",
     time: "09:00",
     duration: 90,
     status: "confirmed" as const,

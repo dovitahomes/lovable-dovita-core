@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 export default function DovitaHeader() {
   return (
     <header className="bg-primary text-white px-4 py-3 flex items-center justify-between border-b border-primary/20 sticky top-0 z-40">
-      <Logo variant="white" size="small" />
+      <Logo size="small" className="brightness-0 invert" />
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 relative">
           <Bell className="h-5 w-5" />
