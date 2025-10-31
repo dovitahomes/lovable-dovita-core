@@ -39,9 +39,10 @@ const PresupuestoEjecutivo = lazy(() => import("./pages/PresupuestoEjecutivo"));
 const GanttPlan = lazy(() => import("./pages/construction/GanttPlan"));
 const Proveedores = lazy(() => import("./pages/Proveedores"));
 const Construccion = lazy(() => import("./pages/Construccion"));
-const OrdenesCompra = lazy(() => import("./pages/construccion/OrdenesCompra"));
+const OrdenesCompra = lazy(() => import("./pages/OrdenesCompra"));
+const Pagos = lazy(() => import("./pages/Pagos"));
+const LotesPago = lazy(() => import("./pages/LotesPago"));
 const Finanzas = lazy(() => import("./pages/Finanzas"));
-const PaymentBatches = lazy(() => import("./pages/finance/PaymentBatches"));
 const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
@@ -107,7 +108,6 @@ const InternalLayout = () => {
                 <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
                 <Route path="/clientes" element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
                 <Route path="/clientes/:id" element={<Suspense fallback={<TabsSkeleton />}><ClienteDetalle /></Suspense>} />
-                <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
                 <Route path="/proyectos" element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
                 <Route path="/proyectos/:id" element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
                 <Route path="/leads" element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
@@ -129,15 +129,25 @@ const InternalLayout = () => {
                 
                 <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
-                <Route path="/construccion/ordenes-compra" element={<Suspense fallback={<TableSkeleton />}><OrdenesCompra /></Suspense>} />
-                <Route path="/ordenes-compra" element={<Navigate to="/construccion/ordenes-compra" replace />} />
-                <Route path="/construction/purchase-orders" element={<Navigate to="/construccion/ordenes-compra" replace />} />
+                
+                {/* Abastecimiento */}
+                <Route path="/proveedores" element={<Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>} />
+                <Route path="/ordenes-compra" element={<Suspense fallback={<TableSkeleton />}><OrdenesCompra /></Suspense>} />
+                <Route path="/pagos" element={<Suspense fallback={<TableSkeleton />}><Pagos /></Suspense>} />
+                <Route path="/lotes-pago" element={<Suspense fallback={<TableSkeleton />}><LotesPago /></Suspense>} />
+                <Route path="/lotes-pago/:id" element={<Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>} />
+                
+                {/* Legacy redirects for Abastecimiento */}
+                <Route path="/construccion/ordenes-compra" element={<Navigate to="/ordenes-compra" replace />} />
+                <Route path="/purchase-intake" element={<Navigate to="/ordenes-compra" replace />} />
+                <Route path="/purchase-batch" element={<Navigate to="/ordenes-compra" replace />} />
+                <Route path="/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
+                <Route path="/construction/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
                 
                 <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
-                <Route path="/finanzas/pagos-proveedores" element={<Suspense fallback={<TableSkeleton />}><PaymentBatches /></Suspense>} />
-                <Route path="/finanzas/pagos-proveedores/:id" element={<Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>} />
-                <Route path="/finance/payments" element={<Navigate to="/finanzas/pagos-proveedores" replace />} />
-                <Route path="/finance/payments/:id" element={<Navigate to="/finanzas/pagos-proveedores/$1" replace />} />
+                <Route path="/finanzas/pagos-proveedores" element={<Navigate to="/lotes-pago" replace />} />
+                <Route path="/finanzas/pagos-proveedores/:id" element={<Navigate to="/lotes-pago" replace />} />
+                <Route path="/finance/payments" element={<Navigate to="/lotes-pago" replace />} />
                 <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
                 <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />

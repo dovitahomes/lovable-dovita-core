@@ -23,6 +23,8 @@ export const MODULES = [
   // Abastecimiento
   { key: 'proveedores', path: '/proveedores', label: 'Proveedores', group: 'Abastecimiento' },
   { key: 'ordenes_compra', path: '/ordenes-compra', label: 'Órdenes de Compra', group: 'Abastecimiento' },
+  { key: 'pagos', path: '/pagos', label: 'Pagos', group: 'Abastecimiento' },
+  { key: 'lotes_pago', path: '/lotes-pago', label: 'Lotes de Pago', group: 'Abastecimiento' },
 
   // Administración
   { key: 'finanzas', path: '/finanzas', label: 'Finanzas', group: 'Administración' },

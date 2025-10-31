@@ -105,11 +105,34 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: Truck, 
         moduleName: "construccion" 
       },
+    ],
+  },
+  {
+    label: "Abastecimiento",
+    items: [
+      { 
+        title: "Proveedores", 
+        url: "/proveedores", 
+        icon: Truck, 
+        moduleName: "proveedores" 
+      },
       { 
         title: "Órdenes de Compra", 
-        url: "/construccion/ordenes-compra", 
+        url: "/ordenes-compra", 
         icon: ShoppingCart, 
         moduleName: "ordenes_compra" 
+      },
+      { 
+        title: "Pagos", 
+        url: "/pagos", 
+        icon: DollarSign, 
+        moduleName: "pagos" 
+      },
+      { 
+        title: "Lotes de Pago", 
+        url: "/lotes-pago", 
+        icon: Receipt, 
+        moduleName: "lotes_pago" 
       },
     ],
   },
@@ -205,12 +228,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: "/erp/transactions", 
         icon: ListTree, 
         moduleName: "herramientas" 
-      },
-      { 
-        title: "Proveedores", 
-        url: "/proveedores", 
-        icon: Truck, 
-        moduleName: "proveedores" 
       },
     ],
   },
