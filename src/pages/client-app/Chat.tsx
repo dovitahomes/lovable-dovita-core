@@ -88,7 +88,7 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full absolute inset-0">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <ChatHeader />
 
