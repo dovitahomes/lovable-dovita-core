@@ -6,12 +6,12 @@ import { Upload, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const predefinedAvatars = [
-  { id: "avatar1", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", label: "Avatar 1" },
-  { id: "avatar2", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka", label: "Avatar 2" },
-  { id: "avatar3", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna", label: "Avatar 3" },
-  { id: "avatar4", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Max", label: "Avatar 4" },
-  { id: "avatar5", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie", label: "Avatar 5" },
-  { id: "avatar6", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver", label: "Avatar 6" },
+  { id: "avatar1", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Happy", label: "Avatar 1" },
+  { id: "avatar2", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sunny", label: "Avatar 2" },
+  { id: "avatar3", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Joy", label: "Avatar 3" },
+  { id: "avatar4", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Cheerful", label: "Avatar 4" },
+  { id: "avatar5", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Smile", label: "Avatar 5" },
+  { id: "avatar6", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Delight", label: "Avatar 6" },
 ];
 
 interface AvatarCustomizationDialogProps {
