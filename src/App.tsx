@@ -6,7 +6,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
@@ -34,12 +34,12 @@ const ProyectoDetalle = lazy(() => import("./pages/ProyectoDetalle"));
 const Leads = lazy(() => import("./pages/Leads"));
 const Diseno = lazy(() => import("./pages/Diseno"));
 const Presupuestos = lazy(() => import("./pages/Presupuestos"));
-  const PresupuestoParametrico = lazy(() => import("./pages/PresupuestoParametrico"));
-  const PresupuestoEjecutivo = lazy(() => import("./pages/PresupuestoEjecutivo"));
-  const Cronograma = lazy(() => import("./pages/Cronograma"));
-  const GanttPlan = lazy(() => import("./pages/construction/GanttPlan"));
+const PresupuestoParametrico = lazy(() => import("./pages/PresupuestoParametrico"));
+const PresupuestoEjecutivo = lazy(() => import("./pages/PresupuestoEjecutivo"));
+const GanttPlan = lazy(() => import("./pages/construction/GanttPlan"));
 const Proveedores = lazy(() => import("./pages/Proveedores"));
 const Construccion = lazy(() => import("./pages/Construccion"));
+const OrdenesCompra = lazy(() => import("./pages/construccion/OrdenesCompra"));
 const Finanzas = lazy(() => import("./pages/Finanzas"));
 const PaymentBatches = lazy(() => import("./pages/finance/PaymentBatches"));
 const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
@@ -115,21 +115,29 @@ const InternalLayout = () => {
                 <Route path="/presupuestos" element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
                 <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
                 <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
-                {/* Cronograma routes */}
-                <Route path="/cronograma" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
-                <Route path="/cronograma-parametrico" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
+                
+                {/* Unified Gantt route with tabs */}
+                <Route path="/gantt" element={<Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>} />
                 
                 {/* Legacy redirects */}
-                <Route path="/construccion/gantt" element={<Navigate to="/cronograma" replace />} />
-                <Route path="/schedule" element={<Navigate to="/cronograma" replace />} />
-                <Route path="/legacy-schedule" element={<Navigate to="/cronograma" replace />} />
-                <Route path="/gantt-ejecutivo" element={<Navigate to="/cronograma" replace />} />
-                <Route path="/construction/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
-                <Route path="/finance/payments" element={<Navigate to="/finanzas" replace />} />
+                <Route path="/cronograma" element={<Navigate to="/gantt" replace />} />
+                <Route path="/cronograma-parametrico" element={<Navigate to="/gantt" replace />} />
+                <Route path="/construccion/gantt" element={<Navigate to="/gantt" replace />} />
+                <Route path="/schedule" element={<Navigate to="/gantt" replace />} />
+                <Route path="/legacy-schedule" element={<Navigate to="/gantt" replace />} />
+                <Route path="/gantt-ejecutivo" element={<Navigate to="/gantt" replace />} />
+                
                 <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
-                <Route path="/ordenes-compra" element={<Suspense fallback={<TableSkeleton />}><div>Órdenes de Compra</div></Suspense>} />
+                <Route path="/construccion/ordenes-compra" element={<Suspense fallback={<TableSkeleton />}><OrdenesCompra /></Suspense>} />
+                <Route path="/ordenes-compra" element={<Navigate to="/construccion/ordenes-compra" replace />} />
+                <Route path="/construction/purchase-orders" element={<Navigate to="/construccion/ordenes-compra" replace />} />
+                
                 <Route path="/finanzas" element={<Suspense fallback={<TabsSkeleton />}><Finanzas /></Suspense>} />
+                <Route path="/finanzas/pagos-proveedores" element={<Suspense fallback={<TableSkeleton />}><PaymentBatches /></Suspense>} />
+                <Route path="/finanzas/pagos-proveedores/:id" element={<Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>} />
+                <Route path="/finance/payments" element={<Navigate to="/finanzas/pagos-proveedores" replace />} />
+                <Route path="/finance/payments/:id" element={<Navigate to="/finanzas/pagos-proveedores/$1" replace />} />
                 <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
                 <Route path="/portal-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPortal /></Suspense>} />
@@ -160,10 +168,12 @@ const App = () => {
                   <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
                   <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
                   
-                  {/* All internal routes */}
-                  <Route path="/*" element={<ProtectedRoute>
-                        <InternalLayout />
-                      </ProtectedRoute>} />
+                  {/* All internal routes - wrapped with ProtectedRoute */}
+                  <Route path="/*" element={
+                    <ProtectedRoute>
+                      <InternalLayout />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
               </DemoGuard>
             </BrowserRouter>

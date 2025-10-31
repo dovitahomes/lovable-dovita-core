@@ -23,7 +23,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/context/ThemeProvider";
 import { useSidebarTheme } from "@/context/SidebarThemeProvider";
-import { ALL_ROUTES } from "@/lib/routing/getAccessibleRoutes";
+import { SIDEBAR_SECTIONS } from "@/config/sidebar";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
 
 export function AppSidebar() {
   const { state, setOpen } = useSidebar();
@@ -59,16 +60,13 @@ export function AppSidebar() {
     };
   }, []);
 
-  // TODO: Filter by permissions once seeded in Prompt 2
-  // const { canView } = useModuleAccess();
-  // const routesToShow = ALL_ROUTES.map(group => ({
-  //   ...group,
-  //   items: group.items.filter(item => 
-  //     item.moduleName ? canView(item.moduleName) : true
-  //   )
-  // })).filter(group => group.items.length > 0);
+  const { canView } = useModuleAccess();
   
-  const routesToShow = ALL_ROUTES;
+  // Filter sidebar items based on user permissions
+  const routesToShow = SIDEBAR_SECTIONS.map(section => ({
+    ...section,
+    items: section.items.filter(item => canView(item.moduleName))
+  })).filter(section => section.items.length > 0);
 
   const handleLogout = async () => {
     const { appSignOut } = await import('@/lib/auth/logout');
