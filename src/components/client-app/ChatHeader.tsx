@@ -6,7 +6,7 @@ export default function ChatHeader() {
   const teamMembers = mockProjectData.team;
 
   return (
-    <div className="bg-card border-b px-4 py-3 flex items-center justify-between">
+    <div className="bg-card border-b px-4 py-3 flex items-center justify-between sticky top-0 z-10">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Team Avatars */}
         <div className="flex -space-x-2">
