@@ -41,7 +41,7 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="h-full overflow-y-auto px-4 pt-4 pb-5 space-y-4">
+    <div className="h-full overflow-y-auto p-4 space-y-4">
       {/* Welcome Card with Hero Image */}
       <Card className="border-0 overflow-hidden relative min-h-[180px]">
         {/* Background Image */}
