@@ -73,7 +73,7 @@ export const mockPhotos = [
   },
   {
     id: 2,
-    url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800",
+    url: "/src/assets/construction-progress.jpg",
     phase: "Estructura",
     date: "2024-05-05",
     description: "Columnas de planta baja terminadas",
@@ -81,7 +81,7 @@ export const mockPhotos = [
   },
   {
     id: 3,
-    url: "https://images.unsplash.com/photo-1590496793907-3dc8f7661e9f?w=800",
+    url: "/src/assets/process-construction.jpg",
     phase: "Estructura",
     date: "2024-05-12",
     description: "Losa de entrepiso en proceso",
