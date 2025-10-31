@@ -85,6 +85,9 @@ export default function AppointmentModal({ open, onOpenChange, onAppointmentCrea
                 <SelectValue placeholder="Selecciona quién te atenderá" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">
+                  <span className="font-semibold text-primary">Todo el Equipo</span>
+                </SelectItem>
                 {mockProjectData.team.map((member) => (
                   <SelectItem key={member.id} value={member.id.toString()}>
                     {member.name} - {member.role}
