@@ -2,13 +2,33 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { mockPhotos } from "@/lib/client-data";
 import { Download, Maximize2 } from "lucide-react";
+import PhotoViewer from "@/components/client-app/PhotoViewer";
 
 export default function PhotosDesktop() {
-  const [selectedPhoto, setSelectedPhoto] = useState<typeof mockPhotos[0] | null>(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const photos = mockPhotos;
+
+  const handleDownloadAll = async () => {
+    for (const photo of photos) {
+      try {
+        const response = await fetch(photo.url);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${photo.description}-${photo.date}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error('Error downloading image:', error);
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -17,18 +37,18 @@ export default function PhotosDesktop() {
           <h1 className="text-3xl font-bold mb-2">Galería de Fotos</h1>
           <p className="text-muted-foreground">{photos.length} fotos del progreso de tu obra</p>
         </div>
-        <Button>
+        <Button onClick={handleDownloadAll}>
           <Download className="mr-2 h-4 w-4" />
           Descargar Todas
         </Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {photos.map((photo) => (
+        {photos.map((photo, index) => (
           <Card 
             key={photo.id}
             className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all"
-            onClick={() => setSelectedPhoto(photo)}
+            onClick={() => setSelectedPhotoIndex(index)}
           >
             <div className="relative aspect-square">
               <img 
@@ -51,27 +71,15 @@ export default function PhotosDesktop() {
         ))}
       </div>
 
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-4xl">
-          {selectedPhoto && (
-            <div className="space-y-4">
-              <img 
-                src={selectedPhoto.url} 
-                alt={selectedPhoto.description}
-                className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
-              />
-              <div>
-                <h3 className="font-bold text-xl mb-2">{selectedPhoto.description}</h3>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{selectedPhoto.phase}</span>
-                  <span>•</span>
-                  <span>{selectedPhoto.date}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedPhotoIndex !== null && (
+        <PhotoViewer
+          photos={photos}
+          currentIndex={selectedPhotoIndex}
+          open={selectedPhotoIndex !== null}
+          onOpenChange={(open) => !open && setSelectedPhotoIndex(null)}
+          onNavigate={setSelectedPhotoIndex}
+        />
+      )}
     </div>
   );
 }

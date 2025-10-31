@@ -60,6 +60,24 @@ export default function PhotoViewer({
     setZoom(1);
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(currentPhoto.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentPhoto.description}-${currentPhoto.date}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      window.open(currentPhoto.url, '_blank');
+    }
+  };
+
   if (!currentPhoto) return null;
 
   return (
@@ -172,7 +190,8 @@ export default function PhotoViewer({
               variant="ghost"
               size="icon"
               className="text-white hover:bg-white/10"
-              onClick={() => window.open(currentPhoto.url, '_blank')}
+              onClick={handleDownload}
+              title="Descargar foto"
             >
               <Download className="h-5 w-5" />
             </Button>
