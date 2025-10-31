@@ -8,8 +8,8 @@ export default function ClientAppDesktop() {
       <DovitaHeaderDesktop />
       <FloatingIslandSidebar />
       
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4 md:pl-20 py-3">
+      <main className="flex-1 overflow-hidden">
+        <div className="container mx-auto px-4 md:pl-20 py-3 h-full">
           <Outlet />
         </div>
       </main>

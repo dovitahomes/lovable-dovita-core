@@ -54,8 +54,8 @@ export default function ChatDesktop() {
   };
 
   return (
-    <div className="h-[calc(100vh-180px)] grid grid-cols-12 gap-6">
-      <Card className="col-span-8 flex flex-col">
+    <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
+      <Card className="col-span-8 flex flex-col overflow-hidden">
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar>
@@ -132,7 +132,7 @@ export default function ChatDesktop() {
         </div>
       </Card>
 
-      <Card className="col-span-4 p-6">
+      <Card className="col-span-4 p-6 overflow-y-auto">
         <h3 className="font-semibold mb-4">Información del Proyecto</h3>
         <div className="space-y-6">
           <div>

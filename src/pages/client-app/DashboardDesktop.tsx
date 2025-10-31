@@ -8,7 +8,7 @@ export default function DashboardDesktop() {
   const project = mockProjectData;
 
   return (
-    <div className="space-y-4">
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
       <div>
         <h1 className="text-2xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
         <p className="text-muted-foreground">Resumen general de tu construcción</p>

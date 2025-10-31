@@ -19,7 +19,7 @@ export default function FinancialDesktop() {
   const percentSpent = (project.totalPaid / project.totalAmount) * 100;
 
   return (
-    <div className="space-y-6">
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
         <h1 className="text-3xl font-bold mb-2">Información Financiera</h1>
         <p className="text-muted-foreground">Gestión de pagos y presupuesto</p>
