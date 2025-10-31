@@ -9,7 +9,7 @@ export default function ClientAppDesktop() {
       <FloatingIslandSidebar />
       
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4 md:pl-24 py-6">
+        <div className="container mx-auto px-4 md:pl-20 py-3">
           <Outlet />
         </div>
       </main>

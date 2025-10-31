@@ -20,10 +20,10 @@ export default function DovitaHeaderDesktop() {
   const currentLabel = routeLabels[location.pathname] || 'Inicio';
 
   return (
-    <header className="bg-card/80 backdrop-blur-xl border-b border-border/50 px-8 py-4 flex items-center justify-between sticky top-0 z-30">
+    <header className="bg-card/80 backdrop-blur-xl border-b border-border/50 px-4 py-2 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-6">
-        <Logo size="large" />
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Logo size="small" />
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>Mi Proyecto</span>
           <span>/</span>
           <span className="text-foreground font-medium">{currentLabel}</span>

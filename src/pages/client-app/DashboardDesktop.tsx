@@ -2,29 +2,52 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { mockProjectData, mockPhotos } from "@/lib/client-data";
-import { Calendar, DollarSign, Image, Clock } from "lucide-react";
+import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 
 export default function DashboardDesktop() {
   const project = mockProjectData;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
+        <h1 className="text-2xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
         <p className="text-muted-foreground">Resumen general de tu construcción</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <Card className="col-span-1 lg:col-span-2 xl:col-span-3">
-          <CardHeader>
-            <CardTitle>{project.name}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <img 
-              src={project.heroImage} 
-              alt={project.name} 
-              className="w-full h-[400px] object-cover rounded-lg"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <Card className="col-span-1 lg:col-span-2 xl:col-span-3 relative overflow-hidden h-[220px]">
+          <div 
+            className="absolute inset-0 bg-cover bg-center" 
+            style={{ backgroundImage: `url(${project.heroImage})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/80" />
+          </div>
+          
+          <CardContent className="relative z-10 h-full flex flex-col justify-between p-6">
+            <div>
+              <Badge variant="secondary" className="mb-3 bg-white/20 text-white border-white/30">
+                {project.currentPhase}
+              </Badge>
+              <h2 className="text-2xl font-bold text-white mb-2">{project.name}</h2>
+              <p className="text-white/90 flex items-center gap-1 text-sm">
+                <MapPin className="h-4 w-4" />
+                {project.location}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-8 text-white">
+              <div>
+                <p className="text-4xl font-bold">{project.progress}%</p>
+                <p className="text-sm text-white/80">Progreso</p>
+              </div>
+              <div className="h-12 w-px bg-white/30" />
+              <div>
+                <p className="text-sm text-white/80">Presupuesto</p>
+                <p className="text-xl font-semibold">
+                  ${(project.totalPaid / 1000000).toFixed(1)}M / ${(project.totalAmount / 1000000).toFixed(1)}M
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -79,7 +102,7 @@ export default function DashboardDesktop() {
           <CardHeader>
             <CardTitle>Fases del Proyecto</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {[
               { name: "Cimentación", progress: 100, status: "Completado" },
               { name: "Estructura", progress: 85, status: "En progreso" },
