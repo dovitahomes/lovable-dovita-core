@@ -117,6 +117,22 @@ All colors MUST be HSL.
   background: hsl(var(--background));
 }
 
+/* Fixed size elements that don't scale with zoom */
+.no-zoom {
+  zoom: reset;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+@supports not (zoom: reset) {
+  .no-zoom {
+    transform: scale(1);
+    transform-origin: top left;
+  }
+}
+
 /* Menu Styles */
 .menu {
   display: flex;
@@ -133,6 +149,16 @@ All colors MUST be HSL.
   max-width: 428px;
   margin: 0 auto;
   z-index: 50;
+  zoom: reset;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+@supports not (zoom: reset) {
+  .menu {
+    transform: scale(1);
+    transform-origin: bottom center;
+  }
 }
 
 .menu__item {
