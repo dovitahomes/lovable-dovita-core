@@ -36,8 +36,8 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t bg-background p-2">
-      <div className="flex items-end gap-2">
+    <div className="border-t bg-background px-2 py-1">
+      <div className="flex items-end gap-1">
         <Button
           variant="ghost"
           size="icon"
