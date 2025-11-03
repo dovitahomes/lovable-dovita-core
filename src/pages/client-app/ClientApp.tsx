@@ -26,13 +26,11 @@ export default function ClientApp() {
   };
 
   return (
-    <div className="flex flex-col bg-background" style={{ height: '100vh' }}>
+    <div className="min-h-screen flex flex-col bg-background">
       <DovitaHeader />
 
-      <main className="flex-1 overflow-hidden flex flex-col" style={{ paddingTop: 'calc(80px + env(safe-area-inset-top))', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))', height: 0 }}>
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <Outlet />
-        </div>
+      <main className="pt-[calc(56px+env(safe-area-inset-top))] h-[calc(100vh-env(safe-area-inset-bottom))] overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))]">
+        <Outlet />
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 z-50">
