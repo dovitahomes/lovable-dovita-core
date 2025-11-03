@@ -29,16 +29,18 @@ export default function ClientApp() {
     <div className="min-h-screen flex flex-col bg-background">
       <DovitaHeader />
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden pb-16">
         <Outlet />
       </main>
 
-      <InteractiveMenu
-        items={menuItems.map((item) => ({ label: item.label, icon: item.icon }))}
-        accentColor="hsl(var(--primary))"
-        activeIndex={activeIndex >= 0 ? activeIndex : 0}
-        onItemClick={handleMenuClick}
-      />
+      <footer className="fixed bottom-0 left-0 right-0 z-50">
+        <InteractiveMenu
+          items={menuItems.map((item) => ({ label: item.label, icon: item.icon }))}
+          accentColor="hsl(var(--primary))"
+          activeIndex={activeIndex >= 0 ? activeIndex : 0}
+          onItemClick={handleMenuClick}
+        />
+      </footer>
     </div>
   );
 }
