@@ -98,11 +98,13 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
+    <div className="flex flex-col h-full">
+      {/* Header - Fixed */}
+      <div className="sticky top-0 z-10 bg-background">
+        <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
+      </div>
 
-      {/* Messages Area */}
+      {/* Messages Area - Scrollable */}
       <div className="flex-1 overflow-y-auto px-4">
         <div className="pt-4">
           {/* Team Members Info */}
@@ -144,8 +146,10 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Input Area */}
-      <ChatInput onSendMessage={handleSendMessage} />
+      {/* Input Area - Fixed */}
+      <div className="sticky bottom-0 z-10 bg-background">
+        <ChatInput onSendMessage={handleSendMessage} />
+      </div>
 
       <AvatarCustomizationDialog
         open={avatarDialogOpen}
