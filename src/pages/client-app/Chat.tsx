@@ -123,10 +123,10 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header - Fixed with slide animation */}
+    <div className="flex flex-col h-full relative">
+      {/* Header - Floating with slide animation */}
       <div 
-        className={`flex-shrink-0 bg-background border-b transition-transform duration-300 ease-in-out ${
+        className={`absolute top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-b transition-transform duration-300 ease-in-out ${
           headerVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
