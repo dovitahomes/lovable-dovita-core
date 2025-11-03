@@ -8,6 +8,12 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Layout heights */
+    --header-height: 68px;
+    --header-total-height: calc(68px + env(safe-area-inset-top));
+    --footer-height: 65px;
+    --footer-total-height: calc(65px + env(safe-area-inset-bottom));
+    
     --background: 0 0% 100%;
     --foreground: 0 0% 10%;
 
