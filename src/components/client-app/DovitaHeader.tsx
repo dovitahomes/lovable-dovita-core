@@ -5,11 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 export default function DovitaHeader() {
   return (
-    <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20">
-      {/* Safe area spacer */}
-      <div className="h-[env(safe-area-inset-top)] bg-primary" />
-      
-      {/* Header content - exactly 68px */}
+    <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)]">
       <div className="h-[68px] px-6 flex items-center justify-between">
         <Logo size="small" className="brightness-0 invert" />
         <div className="flex items-center gap-2">
