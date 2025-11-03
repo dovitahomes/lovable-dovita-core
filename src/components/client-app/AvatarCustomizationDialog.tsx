@@ -6,12 +6,12 @@ import { Upload, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const predefinedAvatars = [
-  { id: "avatar1", url: "https://api.dicebear.com/7.x/lorelei/svg?seed=John&flip=false", label: "Hombre 1" },
-  { id: "avatar2", url: "https://api.dicebear.com/7.x/lorelei/svg?seed=Mike&flip=false", label: "Hombre 2" },
-  { id: "avatar3", url: "https://api.dicebear.com/7.x/lorelei/svg?seed=David&flip=false", label: "Hombre 3" },
-  { id: "avatar4", url: "https://api.dicebear.com/7.x/lorelei/svg?seed=Anna&flip=false", label: "Mujer 1" },
-  { id: "avatar5", url: "https://api.dicebear.com/7.x/lorelei/svg?seed=Maria&flip=false", label: "Mujer 2" },
-  { id: "avatar6", url: "https://api.dicebear.com/7.x/lorelei/svg?seed=Sofia&flip=false", label: "Mujer 3" },
+  { id: "avatar1", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Carlos", label: "Hombre 1" },
+  { id: "avatar2", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Miguel", label: "Hombre 2" },
+  { id: "avatar3", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Roberto", label: "Hombre 3" },
+  { id: "avatar4", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Laura", label: "Mujer 1" },
+  { id: "avatar5", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Patricia", label: "Mujer 2" },
+  { id: "avatar6", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Gabriela", label: "Mujer 3" },
 ];
 
 interface AvatarCustomizationDialogProps {
