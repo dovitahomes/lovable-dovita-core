@@ -6,12 +6,12 @@ import { Upload, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const predefinedAvatars = [
-  { id: "avatar1", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Carlos", label: "Hombre 1" },
-  { id: "avatar2", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Miguel", label: "Hombre 2" },
-  { id: "avatar3", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Roberto", label: "Hombre 3" },
-  { id: "avatar4", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Laura", label: "Mujer 1" },
-  { id: "avatar5", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Patricia", label: "Mujer 2" },
-  { id: "avatar6", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Gabriela", label: "Mujer 3" },
+  { id: "avatar1", url: "https://api.dicebear.com/7.x/personas/svg?seed=Carlos&backgroundColor=b6e3f4", label: "Hombre 1" },
+  { id: "avatar2", url: "https://api.dicebear.com/7.x/personas/svg?seed=Miguel&backgroundColor=c0aede", label: "Hombre 2" },
+  { id: "avatar3", url: "https://api.dicebear.com/7.x/personas/svg?seed=Roberto&backgroundColor=d1d4f9", label: "Hombre 3" },
+  { id: "avatar4", url: "https://api.dicebear.com/7.x/personas/svg?seed=Laura&backgroundColor=ffd5dc", label: "Mujer 1" },
+  { id: "avatar5", url: "https://api.dicebear.com/7.x/personas/svg?seed=Patricia&backgroundColor=ffdfbf", label: "Mujer 2" },
+  { id: "avatar6", url: "https://api.dicebear.com/7.x/personas/svg?seed=Gabriela&backgroundColor=c5f4e0", label: "Mujer 3" },
 ];
 
 interface AvatarCustomizationDialogProps {
