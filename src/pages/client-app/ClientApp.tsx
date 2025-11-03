@@ -29,7 +29,7 @@ export default function ClientApp() {
     <div className="flex flex-col bg-background" style={{ height: '100vh' }}>
       <DovitaHeader />
 
-      <main className="flex-1 overflow-hidden flex flex-col" style={{ paddingTop: 'calc(56px + env(safe-area-inset-top))', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))', height: 0 }}>
+      <main className="flex-1 overflow-hidden flex flex-col" style={{ paddingTop: 'calc(68px + env(safe-area-inset-top))', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))', height: 0 }}>
         <div className="flex-1 overflow-hidden flex flex-col">
           <Outlet />
         </div>
