@@ -105,7 +105,7 @@ export default function Chat() {
       </div>
 
       {/* Messages Area - Scrollable */}
-      <div className="h-[calc(100%-65px)] overflow-y-auto px-4">
+      <div className="h-[calc(100%-65px-58px)] overflow-y-auto px-4">
         <div className="pt-4">
           {/* Team Members Info */}
           <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
