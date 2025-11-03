@@ -9,27 +9,32 @@ import { mockChatMessages, mockProjectData } from '@/lib/client-data';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
-
 export default function Chat() {
   const [messages, setMessages] = useState(mockChatMessages);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
+  const [clientAvatar, setClientAvatar] = useState<{
+    type: "preset" | "custom";
+    value: string;
+  } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
     return saved ? JSON.parse(saved) : null;
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
+  const handleSaveAvatar = (avatar: {
+    type: "preset" | "custom";
+    value: string;
+  }) => {
     setClientAvatar(avatar);
     localStorage.setItem("clientAvatar", JSON.stringify(avatar));
   };
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
   }, [messages]);
-
   const handleSendMessage = (content: string) => {
     const newMessage = {
       id: messages.length + 1,
@@ -38,70 +43,58 @@ export default function Chat() {
       isClient: true,
       status: 'sent' as const
     } as any;
-
     setMessages([...messages, newMessage]);
-    
+
     // Simulate message delivery
     setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, status: 'delivered' as const }
-            : msg
-        )
-      );
+      setMessages(prev => prev.map(msg => msg.id === newMessage.id ? {
+        ...msg,
+        status: 'delivered' as const
+      } : msg));
     }, 1000);
 
     // Simulate read receipt
     setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, status: 'read' as const }
-            : msg
-        )
-      );
+      setMessages(prev => prev.map(msg => msg.id === newMessage.id ? {
+        ...msg,
+        status: 'read' as const
+      } : msg));
     }, 2000);
-
     toast.success('Mensaje enviado');
   };
 
   // Group messages by date
   const groupMessagesByDate = () => {
-    const groups: { [key: string]: typeof messages } = {};
-    
+    const groups: {
+      [key: string]: typeof messages;
+    } = {};
     messages.forEach(message => {
       const messageDate = new Date(message.timestamp);
       const dateKey = format(messageDate, 'yyyy-MM-dd');
-      
       if (!groups[dateKey]) {
         groups[dateKey] = [];
       }
       groups[dateKey].push(message);
     });
-    
     return groups;
   };
-
   const getDateLabel = (dateString: string) => {
     const date = new Date(dateString);
-    
     if (isToday(date)) {
       return 'Hoy';
     } else if (isYesterday(date)) {
       return 'Ayer';
     } else {
-      return format(date, "d 'de' MMMM", { locale: es });
+      return format(date, "d 'de' MMMM", {
+        locale: es
+      });
     }
   };
-
   const groupedMessages = groupMessagesByDate();
-
-  return (
-    <div className="flex flex-col h-full">
+  return <div className="flex flex-col h-full">
       {/* Header - Fixed */}
       <div className="flex-shrink-0 bg-background border-b">
-        <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
+        <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} className="my-0 py-[30px]" />
       </div>
 
       {/* Messages Area - Scrollable */}
@@ -114,18 +107,15 @@ export default function Chat() {
               <span>Chat grupal del equipo</span>
             </div>
             <div className="flex flex-wrap justify-center gap-2 text-xs">
-              {mockProjectData.team.map((member, index) => (
-                <span key={member.id} className="text-muted-foreground">
+              {mockProjectData.team.map((member, index) => <span key={member.id} className="text-muted-foreground">
                   {member.name}
                   {index < mockProjectData.team.length - 1 && ', '}
-                </span>
-              ))}
+                </span>)}
             </div>
           </div>
 
           {/* Messages grouped by date */}
-          {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
-            <div key={dateKey}>
+          {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => <div key={dateKey}>
               {/* Date Separator */}
               <div className="flex items-center justify-center my-4">
                 <div className="bg-muted px-3 py-1 rounded-full">
@@ -136,11 +126,8 @@ export default function Chat() {
               </div>
 
               {/* Messages for this date */}
-              {dateMessages.map((message) => (
-                <ChatMessage key={message.id} message={message} clientAvatar={clientAvatar} />
-              ))}
-            </div>
-          ))}
+              {dateMessages.map(message => <ChatMessage key={message.id} message={message} clientAvatar={clientAvatar} />)}
+            </div>)}
 
           <div ref={messagesEndRef} />
         </div>
@@ -151,12 +138,6 @@ export default function Chat() {
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
-      <AvatarCustomizationDialog
-        open={avatarDialogOpen}
-        onOpenChange={setAvatarDialogOpen}
-        currentAvatar={clientAvatar}
-        onSave={handleSaveAvatar}
-      />
-    </div>
-  );
+      <AvatarCustomizationDialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen} currentAvatar={clientAvatar} onSave={handleSaveAvatar} />
+    </div>;
 }
