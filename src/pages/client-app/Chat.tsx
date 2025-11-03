@@ -100,7 +100,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-full">
       {/* Header - Fixed */}
-      <div className="sticky top-0 z-10 bg-background">
+      <div className="flex-shrink-0 bg-background border-b">
         <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
       </div>
 
@@ -147,7 +147,7 @@ export default function Chat() {
       </div>
 
       {/* Input Area - Fixed */}
-      <div className="sticky bottom-0 z-10 bg-background">
+      <div className="flex-shrink-0 bg-background border-t">
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
