@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 export default function DovitaHeader() {
   return (
-    <header className="bg-primary text-white px-6 py-3 flex items-center justify-between border-b border-primary/20 fixed top-0 left-0 right-0 z-50 no-zoom flex-shrink-0 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+    <header className="bg-primary text-white px-6 flex items-center justify-between border-b border-primary/20 fixed top-0 left-0 right-0 z-50 no-zoom flex-shrink-0 h-14" style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '0.75rem' }}>
       <Logo size="small" className="brightness-0 invert" />
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 relative">
