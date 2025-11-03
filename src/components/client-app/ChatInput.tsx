@@ -53,7 +53,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="min-h-[40px] max-h-[100px] resize-none pr-10 overflow-y-auto"
+            className="min-h-[40px] max-h-[100px] resize-none pr-10 overflow-y-auto text-base"
             rows={1}
           />
           <Button
