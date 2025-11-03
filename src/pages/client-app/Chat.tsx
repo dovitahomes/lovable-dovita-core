@@ -13,42 +13,18 @@ import { toast } from 'sonner';
 export default function Chat() {
   const [messages, setMessages] = useState(mockChatMessages);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [headerVisible, setHeaderVisible] = useState(true);
   const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
     return saved ? JSON.parse(saved) : null;
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
 
   const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
     setClientAvatar(avatar);
     localStorage.setItem("clientAvatar", JSON.stringify(avatar));
   };
 
-  // Handle scroll to show/hide header
-  useEffect(() => {
-    const scrollContainer = scrollAreaRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const currentScrollY = scrollContainer.scrollTop;
-      
-      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-        // Scrolling down
-        setHeaderVisible(false);
-      } else {
-        // Scrolling up
-        setHeaderVisible(true);
-      }
-      
-      lastScrollY.current = currentScrollY;
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
@@ -123,19 +99,15 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Header - Floating with slide animation */}
-      <div 
-        className={`absolute top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-b transition-transform duration-300 ease-in-out ${
-          headerVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
+    <div className="flex flex-col h-full">
+      {/* Header - Static at top */}
+      <div className="flex-shrink-0 bg-background border-b">
         <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
       </div>
 
       {/* Messages Area - Scrollable */}
       <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4">
-        <div className="pt-4">
+        <div className="py-4">
           {/* Team Members Info */}
           <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">

@@ -29,7 +29,7 @@ export default function ClientApp() {
     <div className="min-h-screen flex flex-col bg-background">
       <DovitaHeader />
 
-      <main className="h-[calc(100vh-68px-env(safe-area-inset-top)-65px-env(safe-area-inset-bottom))] overflow-hidden mt-[calc(68px+env(safe-area-inset-top))]">
+      <main className="h-[calc(100vh-68px-env(safe-area-inset-top)-65px-env(safe-area-inset-bottom))] overflow-auto mt-[calc(68px+env(safe-area-inset-top))]">
         <Outlet />
       </main>
 
