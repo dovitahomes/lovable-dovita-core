@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Download, Image as ImageIcon } from 'lucide-react';
+import { FileText, Download, Image as ImageIcon, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import DocumentViewer from '@/components/client-app/DocumentViewer';
 
 const documents = {
   arquitectonico: [
@@ -20,6 +22,20 @@ const documents = {
 };
 
 export default function Documents() {
+  const [selectedDocument, setSelectedDocument] = useState<{
+    name: string;
+    type: string;
+  } | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+
+  const handleViewDocument = (doc: typeof documents.arquitectonico[0]) => {
+    setSelectedDocument({
+      name: doc.name,
+      type: doc.type,
+    });
+    setViewerOpen(true);
+  };
+
   const renderDocumentList = (docs: typeof documents.arquitectonico) => (
     <div className="space-y-2">
       {docs.map((doc) => (
@@ -43,9 +59,14 @@ export default function Documents() {
                 </div>
               </div>
               
-              <Button size="icon" variant="ghost">
-                <Download className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" onClick={() => handleViewDocument(doc)}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -81,6 +102,12 @@ export default function Documents() {
           {renderDocumentList(documents.legal)}
         </TabsContent>
       </Tabs>
+
+      <DocumentViewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        document={selectedDocument}
+      />
     </div>
   );
 }
