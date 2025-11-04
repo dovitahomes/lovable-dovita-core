@@ -97,3 +97,44 @@ export const calculateProjectProgress = (project: Project | null): number => {
   
   return Math.round(totalProgress);
 };
+
+/**
+ * Obtiene la fase actual del proyecto
+ * Prioriza: la fase en progreso más reciente (progress > 0 y < 100)
+ * Si hay varias en progreso, toma la más reciente (última en el array)
+ */
+export const getCurrentPhase = (project: Project | null): { name: string; progress: number } | null => {
+  if (!project || !project.phases || project.phases.length === 0) {
+    return null;
+  }
+  
+  // Buscar fases en progreso (progress > 0 y < 100)
+  const inProgressPhases = project.phases.filter(
+    phase => phase.progress > 0 && phase.progress < 100
+  );
+  
+  // Si hay fases en progreso, tomar la última (más reciente)
+  if (inProgressPhases.length > 0) {
+    const currentPhase = inProgressPhases[inProgressPhases.length - 1];
+    return {
+      name: currentPhase.name,
+      progress: currentPhase.progress
+    };
+  }
+  
+  // Si no hay fases en progreso, buscar la primera pendiente
+  const pendingPhase = project.phases.find(phase => phase.progress === 0);
+  if (pendingPhase) {
+    return {
+      name: pendingPhase.name,
+      progress: 0
+    };
+  }
+  
+  // Si todas están completas, mostrar la última
+  const lastPhase = project.phases[project.phases.length - 1];
+  return {
+    name: lastPhase.name,
+    progress: lastPhase.progress
+  };
+};
