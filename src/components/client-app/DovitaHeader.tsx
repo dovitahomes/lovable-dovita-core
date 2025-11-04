@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import Logo from '@/components/Logo';
+import logo from '@/assets/logo-dovita.png';
 import ProjectSelector from './ProjectSelector';
 
 export default function DovitaHeader() {
@@ -13,7 +13,11 @@ export default function DovitaHeader() {
   return (
     <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)]">
       <div className="h-[68px] px-6 flex items-center justify-between">
-        <Logo size="small" className="h-8" />
+        <img 
+          src={logo} 
+          alt="Dovita" 
+          className="h-8 w-auto object-contain brightness-0 invert"
+        />
         
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 relative">
