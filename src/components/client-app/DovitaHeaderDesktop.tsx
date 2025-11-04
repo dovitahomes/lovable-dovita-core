@@ -90,7 +90,7 @@ export default function DovitaHeaderDesktop() {
           
           <div className="mt-6 space-y-6">
             <div>
-              <p className="text-sm font-medium mb-2 text-muted-foreground">Proyecto Actual</p>
+              <p className="text-sm font-medium mb-4 text-muted-foreground">Proyecto Actual</p>
               <ProjectSelector variant="mobile" />
             </div>
 
