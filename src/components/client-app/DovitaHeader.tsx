@@ -10,8 +10,10 @@ import GlobalSearch from './GlobalSearch';
 import NotificationPanel from './NotificationPanel';
 import { useProject } from '@/contexts/ProjectContext';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function DovitaHeader() {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -79,7 +81,14 @@ export default function DovitaHeader() {
                 <User className="h-4 w-4" />
                 Mi Perfil
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-3"
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/app/settings');
+                }}
+              >
                 <Settings className="h-4 w-4" />
                 Configuración
               </Button>

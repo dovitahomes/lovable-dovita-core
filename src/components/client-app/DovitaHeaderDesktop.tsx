@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
 import NotificationPanel from './NotificationPanel';
@@ -21,10 +21,12 @@ const routeLabels: Record<string, string> = {
   '/app/documents': 'Documentos',
   '/app/schedule': 'Cronograma',
   '/app/appointments': 'Citas',
+  '/app/settings': 'Configuración',
 };
 
 export default function DovitaHeaderDesktop() {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentLabel = routeLabels[location.pathname] || 'Inicio';
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -85,6 +87,14 @@ export default function DovitaHeaderDesktop() {
         <Button 
           variant="ghost" 
           size="icon" 
+          className="hidden lg:flex text-white hover:bg-white/10"
+          onClick={() => navigate('/app/settings')}
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
           className="lg:hidden text-white hover:bg-white/10"
           onClick={() => setMenuOpen(true)}
         >
@@ -112,7 +122,14 @@ export default function DovitaHeaderDesktop() {
                 <User className="h-4 w-4" />
                 Mi Perfil
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-3"
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/app/settings');
+                }}
+              >
                 <Settings className="h-4 w-4" />
                 Configuración
               </Button>

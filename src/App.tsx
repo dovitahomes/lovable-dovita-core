@@ -15,6 +15,7 @@ import ResponsiveChat from "./pages/client-app/ResponsiveChat";
 import ResponsiveDocuments from "./pages/client-app/ResponsiveDocuments";
 import ResponsiveSchedule from "./pages/client-app/ResponsiveSchedule";
 import ResponsiveAppointments from "./pages/client-app/ResponsiveAppointments";
+import ResponsiveSettings from "./pages/client-app/ResponsiveSettings";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="documents" element={<ResponsiveDocuments />} />
                 <Route path="schedule" element={<ResponsiveSchedule />} />
                 <Route path="appointments" element={<ResponsiveAppointments />} />
+                <Route path="settings" element={<ResponsiveSettings />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
