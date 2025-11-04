@@ -135,7 +135,7 @@ export default function AppointmentsDesktop() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No hay citas para este día</p>
                 <Button variant="outline" className="mt-4">
                   <Plus className="mr-2 h-4 w-4" />
