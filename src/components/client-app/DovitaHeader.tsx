@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Menu, Bell, X, Settings, LogOut, User } from 'lucide-react';
+import { Menu, Bell, X, Settings, LogOut, User, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo-dovita.png';
 import ProjectSelector from './ProjectSelector';
+import GlobalSearch from './GlobalSearch';
 
 export default function DovitaHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)]">
@@ -20,6 +22,14 @@ export default function DovitaHeader() {
         />
         
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-white hover:bg-white/10"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 relative">
             <Bell className="h-5 w-5" />
             <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-secondary text-primary text-[10px]">
@@ -68,6 +78,9 @@ export default function DovitaHeader() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Global Search Dialog */}
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }
