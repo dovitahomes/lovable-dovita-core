@@ -45,7 +45,10 @@ export default function ProjectSelector({ variant = 'mobile' }: ProjectSelectorP
       <SelectContent className="bg-background">
         {availableProjects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
-            <span className="font-medium">{project.name}</span>
+            <div className="flex flex-col">
+              <span className="font-medium">{project.name}</span>
+              <span className="text-xs text-muted-foreground">{project.location}</span>
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

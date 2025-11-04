@@ -7,10 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo-dovita.png';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
-import { useProject } from '@/contexts/ProjectContext';
 
 export default function DovitaHeader() {
-  const { currentProject } = useProject();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -58,7 +56,6 @@ export default function DovitaHeader() {
           <div className="mt-6 space-y-6">
             <div>
               <p className="text-sm font-medium mb-2 text-muted-foreground">Proyecto Actual</p>
-              <p className="text-base font-semibold">{currentProject?.name}</p>
               <ProjectSelector variant="mobile" />
             </div>
 
