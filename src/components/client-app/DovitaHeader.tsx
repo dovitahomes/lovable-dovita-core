@@ -7,12 +7,16 @@ import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo-dovita.png';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
+import NotificationPanel from './NotificationPanel';
 import { useProject } from '@/contexts/ProjectContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function DovitaHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { currentProject, hasMultipleProjects } = useProject();
+  const { unreadCount } = useNotifications();
 
   return (
     <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)]">
@@ -32,11 +36,18 @@ export default function DovitaHeader() {
           >
             <Search className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-white hover:bg-white/10 relative"
+            onClick={() => setNotificationsOpen(true)}
+          >
             <Bell className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-secondary text-primary text-[10px]">
-              3
-            </Badge>
+            {unreadCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-secondary text-primary text-[10px]">
+                {unreadCount}
+              </Badge>
+            )}
           </Button>
           <Button 
             variant="ghost" 
@@ -83,6 +94,9 @@ export default function DovitaHeader() {
 
       {/* Global Search Dialog */}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      
+      {/* Notifications Panel */}
+      <NotificationPanel open={notificationsOpen} onOpenChange={setNotificationsOpen} />
     </header>
   );
 }

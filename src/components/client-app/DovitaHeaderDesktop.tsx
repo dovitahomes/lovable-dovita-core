@@ -9,7 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { useLocation } from 'react-router-dom';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
+import NotificationPanel from './NotificationPanel';
 import { useProject } from '@/contexts/ProjectContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 const routeLabels: Record<string, string> = {
   '/app': 'Inicio',
@@ -26,7 +28,9 @@ export default function DovitaHeaderDesktop() {
   const currentLabel = routeLabels[location.pathname] || 'Inicio';
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { currentProject, hasMultipleProjects } = useProject();
+  const { unreadCount } = useNotifications();
 
   return (
     <header className="bg-primary text-white px-4 py-2 flex items-center justify-between sticky top-0 z-30 border-b border-primary/20">
@@ -62,11 +66,18 @@ export default function DovitaHeaderDesktop() {
         >
           <Search className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative text-white hover:bg-white/10"
+          onClick={() => setNotificationsOpen(true)}
+        >
           <Bell className="h-5 w-5" />
-          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-secondary text-primary text-[10px]">
-            3
-          </Badge>
+          {unreadCount > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-secondary text-primary text-[10px]">
+              {unreadCount}
+            </Badge>
+          )}
         </Button>
         <Button variant="ghost" size="icon" className="hidden lg:flex text-white hover:bg-white/10">
           <User className="h-5 w-5" />
@@ -116,6 +127,9 @@ export default function DovitaHeaderDesktop() {
 
       {/* Global Search Dialog */}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      
+      {/* Notifications Panel */}
+      <NotificationPanel open={notificationsOpen} onOpenChange={setNotificationsOpen} />
     </header>
   );
 }

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProjectProvider } from "@/contexts/ProjectContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { mockClientData } from "@/lib/client-data";
 import NotFound from "./pages/NotFound";
 import ResponsiveClientApp from "./pages/client-app/ResponsiveClientApp";
@@ -20,26 +21,28 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ProjectProvider projects={mockClientData.projects}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/app" replace />} />
-            <Route path="/app" element={<ResponsiveClientApp />}>
-              <Route index element={<ResponsiveDashboard />} />
-              <Route path="photos" element={<ResponsivePhotos />} />
-              <Route path="financial" element={<ResponsiveFinancial />} />
-              <Route path="chat" element={<ResponsiveChat />} />
-              <Route path="documents" element={<ResponsiveDocuments />} />
-              <Route path="schedule" element={<ResponsiveSchedule />} />
-              <Route path="appointments" element={<ResponsiveAppointments />} />
-            </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <NotificationProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/app" replace />} />
+              <Route path="/app" element={<ResponsiveClientApp />}>
+                <Route index element={<ResponsiveDashboard />} />
+                <Route path="photos" element={<ResponsivePhotos />} />
+                <Route path="financial" element={<ResponsiveFinancial />} />
+                <Route path="chat" element={<ResponsiveChat />} />
+                <Route path="documents" element={<ResponsiveDocuments />} />
+                <Route path="schedule" element={<ResponsiveSchedule />} />
+                <Route path="appointments" element={<ResponsiveAppointments />} />
+              </Route>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </NotificationProvider>
     </ProjectProvider>
   </QueryClientProvider>
 );
