@@ -6,9 +6,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProject } from '@/contexts/ProjectContext';
 import { mockAppointments, mockChatMessages } from '@/lib/client-data';
 import { Search, Calendar, FileText, MessageSquare, Users, Image, Clock, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface GlobalSearchProps {
   open: boolean;
@@ -17,7 +18,18 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const { currentProject } = useProject();
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
+
+  const handleClear = () => {
+    setQuery('');
+  };
+
+  const handleNavigate = (path: string) => {
+    onOpenChange(false);
+    setQuery('');
+    navigate(path);
+  };
 
   // Search results
   const searchResults = useMemo(() => {
@@ -65,10 +77,6 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
 
     return hasResults ? { appointments, documents, messages, team, phases } : null;
   }, [query, currentProject]);
-
-  const handleClear = () => {
-    setQuery('');
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,6 +138,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={apt.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleNavigate('/app/appointments')}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -162,6 +171,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={doc.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleNavigate('/app/documents')}
                         >
                           <div className="flex items-center gap-3">
                             {doc.type === 'pdf' ? (
@@ -196,6 +206,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={msg.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleNavigate('/app/chat')}
                         >
                           <div className="flex items-start gap-3">
                             <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -231,6 +242,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={member.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleNavigate('/app/chat')}
                         >
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -262,6 +274,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={phase.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleNavigate('/app/schedule')}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
