@@ -1,67 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
-
-const phases = [
-  { 
-    id: 1, 
-    name: 'Diseño Arquitectónico', 
-    status: 'completed', 
-    progress: 100,
-    startDate: '15 Mar 2024',
-    endDate: '30 Mar 2024'
-  },
-  { 
-    id: 2, 
-    name: 'Permisos y Licencias', 
-    status: 'completed', 
-    progress: 100,
-    startDate: '1 Abr 2024',
-    endDate: '5 Abr 2024'
-  },
-  { 
-    id: 3, 
-    name: 'Cimentación', 
-    status: 'completed', 
-    progress: 100,
-    startDate: '8 Abr 2024',
-    endDate: '25 Abr 2024'
-  },
-  { 
-    id: 4, 
-    name: 'Estructura', 
-    status: 'in-progress', 
-    progress: 45,
-    startDate: '28 Abr 2024',
-    endDate: '30 May 2024'
-  },
-  { 
-    id: 5, 
-    name: 'Instalaciones', 
-    status: 'pending', 
-    progress: 0,
-    startDate: '1 Jun 2024',
-    endDate: '30 Jun 2024'
-  },
-  { 
-    id: 6, 
-    name: 'Acabados', 
-    status: 'pending', 
-    progress: 0,
-    startDate: '1 Jul 2024',
-    endDate: '31 Ago 2024'
-  },
-  { 
-    id: 7, 
-    name: 'Entrega', 
-    status: 'pending', 
-    progress: 0,
-    startDate: '1 Sep 2024',
-    endDate: '15 Sep 2024'
-  },
-];
+import { useProject } from '@/contexts/ProjectContext';
 
 export default function Schedule() {
+  const { currentProject } = useProject();
+  const phases = currentProject?.phases || [];
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
       <div>

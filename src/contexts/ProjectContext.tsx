@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { Document, Phase } from '@/lib/client-data';
 
 export interface Project {
   id: string;
@@ -28,6 +29,8 @@ export interface Project {
     phone: string;
     email: string;
   }>;
+  documents: Document[];
+  phases: Phase[];
 }
 
 interface ProjectContextType {

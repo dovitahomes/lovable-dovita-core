@@ -2,73 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
-
-const phases = [
-  {
-    id: 1,
-    name: "Planificación y Diseño",
-    status: "completed",
-    progress: 100,
-    startDate: "1 Ago 2024",
-    endDate: "31 Ago 2024",
-  },
-  {
-    id: 2,
-    name: "Preparación del Terreno",
-    status: "completed",
-    progress: 100,
-    startDate: "1 Sep 2024",
-    endDate: "15 Sep 2024",
-  },
-  {
-    id: 3,
-    name: "Cimentación",
-    status: "completed",
-    progress: 100,
-    startDate: "16 Sep 2024",
-    endDate: "30 Sep 2024",
-  },
-  {
-    id: 4,
-    name: "Estructura",
-    status: "in-progress",
-    progress: 85,
-    startDate: "1 Oct 2024",
-    endDate: "15 Nov 2024",
-  },
-  {
-    id: 5,
-    name: "Instalaciones",
-    status: "in-progress",
-    progress: 60,
-    startDate: "10 Nov 2024",
-    endDate: "30 Nov 2024",
-  },
-  {
-    id: 6,
-    name: "Acabados Interiores",
-    status: "pending",
-    progress: 0,
-    startDate: "1 Dic 2024",
-    endDate: "31 Dic 2024",
-  },
-  {
-    id: 7,
-    name: "Acabados Exteriores",
-    status: "pending",
-    progress: 0,
-    startDate: "15 Dic 2024",
-    endDate: "15 Ene 2025",
-  },
-  {
-    id: 8,
-    name: "Inspección Final",
-    status: "pending",
-    progress: 0,
-    startDate: "16 Ene 2025",
-    endDate: "31 Ene 2025",
-  },
-];
+import { useProject } from "@/contexts/ProjectContext";
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -93,6 +27,14 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function ScheduleDesktop() {
+  const { currentProject } = useProject();
+  const phases = currentProject?.phases || [];
+  
+  const completedPhases = phases.filter(p => p.status === 'completed').length;
+  const inProgressPhases = phases.filter(p => p.status === 'in-progress').length;
+  const pendingPhases = phases.filter(p => p.status === 'pending').length;
+  const completionPercentage = phases.length > 0 ? (completedPhases / phases.length) * 100 : 0;
+
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
@@ -174,33 +116,17 @@ export default function ScheduleDesktop() {
               <CardTitle>Próximos Hitos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">15 Nov 2024</span>
+              {phases.filter(p => p.status === 'in-progress' || p.status === 'pending').slice(0, 3).map((phase) => (
+                <div key={phase.id} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{phase.endDate}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pl-6">
+                    {phase.status === 'in-progress' ? 'Finalización de' : 'Inicio de'} {phase.name}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground pl-6">
-                  Finalización de Estructura
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">30 Nov 2024</span>
-                </div>
-                <p className="text-sm text-muted-foreground pl-6">
-                  Finalización de Instalaciones
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">31 Ene 2025</span>
-                </div>
-                <p className="text-sm text-muted-foreground pl-6">
-                  Entrega Final del Proyecto
-                </p>
-              </div>
+              ))}
             </CardContent>
           </Card>
         </div>

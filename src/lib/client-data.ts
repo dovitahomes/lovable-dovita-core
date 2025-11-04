@@ -1,3 +1,23 @@
+// Document interface
+export interface Document {
+  id: number;
+  name: string;
+  size: string;
+  date: string;
+  type: 'pdf' | 'image';
+  category: 'cliente' | 'proyecto' | 'legal' | 'diseno' | 'construccion';
+}
+
+// Phase interface
+export interface Phase {
+  id: number;
+  name: string;
+  status: 'completed' | 'in-progress' | 'pending';
+  progress: number;
+  startDate: string;
+  endDate: string;
+}
+
 // Client with multiple projects
 export const mockClientData = {
   clientId: "client_1",
@@ -64,7 +84,30 @@ export const mockClientData = {
           phone: "+52 442 345 6789",
           email: "ana.torres@dovita.mx"
         }
-      ]
+      ],
+      documents: [
+        { id: 1, name: 'Escrituras.pdf', size: '3.1 MB', date: '1 Mar 2024', type: 'pdf' as const, category: 'cliente' as const },
+        { id: 2, name: 'Identificación Oficial.pdf', size: '450 KB', date: '1 Mar 2024', type: 'pdf' as const, category: 'cliente' as const },
+        { id: 3, name: 'Planos Arquitectónicos.pdf', size: '2.5 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'proyecto' as const },
+        { id: 4, name: 'Especificaciones Técnicas.pdf', size: '890 KB', date: '8 Mar 2024', type: 'pdf' as const, category: 'proyecto' as const },
+        { id: 5, name: 'Contrato de Construcción.pdf', size: '2.8 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
+        { id: 6, name: 'Permiso de Construcción.pdf', size: '1.5 MB', date: '20 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
+        { id: 7, name: 'Diseño Interior.pdf', size: '4.2 MB', date: '12 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 8, name: 'Renders 3D.jpg', size: '2.1 MB', date: '10 Mar 2024', type: 'image' as const, category: 'diseno' as const },
+        { id: 9, name: 'Paleta de Colores.pdf', size: '650 KB', date: '8 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 10, name: 'Avance Semana 1.pdf', size: '1.8 MB', date: '22 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
+        { id: 11, name: 'Fotos Obra.jpg', size: '3.5 MB', date: '21 Mar 2024', type: 'image' as const, category: 'construccion' as const },
+        { id: 12, name: 'Bitácora Construcción.pdf', size: '920 KB', date: '20 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
+      ] as Document[],
+      phases: [
+        { id: 1, name: 'Diseño Arquitectónico', status: 'completed' as const, progress: 100, startDate: '15 Mar 2024', endDate: '30 Mar 2024' },
+        { id: 2, name: 'Permisos y Licencias', status: 'completed' as const, progress: 100, startDate: '1 Abr 2024', endDate: '5 Abr 2024' },
+        { id: 3, name: 'Cimentación', status: 'completed' as const, progress: 100, startDate: '8 Abr 2024', endDate: '25 Abr 2024' },
+        { id: 4, name: 'Estructura', status: 'in-progress' as const, progress: 45, startDate: '28 Abr 2024', endDate: '30 May 2024' },
+        { id: 5, name: 'Instalaciones', status: 'pending' as const, progress: 0, startDate: '1 Jun 2024', endDate: '30 Jun 2024' },
+        { id: 6, name: 'Acabados', status: 'pending' as const, progress: 0, startDate: '1 Jul 2024', endDate: '31 Ago 2024' },
+        { id: 7, name: 'Entrega', status: 'pending' as const, progress: 0, startDate: '1 Sep 2024', endDate: '15 Sep 2024' },
+      ] as Phase[]
     },
     {
       id: "project_playa",
@@ -112,7 +155,30 @@ export const mockClientData = {
           phone: "+52 984 234 5678",
           email: "roberto.sanchez@dovita.mx"
         }
-      ]
+      ],
+      documents: [
+        { id: 13, name: 'Escrituras Terreno Playa.pdf', size: '2.8 MB', date: '10 Feb 2024', type: 'pdf' as const, category: 'cliente' as const },
+        { id: 14, name: 'INE Propietario.pdf', size: '380 KB', date: '10 Feb 2024', type: 'pdf' as const, category: 'cliente' as const },
+        { id: 15, name: 'Planos Casa Playa.pdf', size: '3.2 MB', date: '20 Feb 2024', type: 'pdf' as const, category: 'proyecto' as const },
+        { id: 16, name: 'Especificaciones Técnicas Playa.pdf', size: '1.1 MB', date: '18 Feb 2024', type: 'pdf' as const, category: 'proyecto' as const },
+        { id: 17, name: 'Contrato Construcción Playa.pdf', size: '3.0 MB', date: '25 Feb 2024', type: 'pdf' as const, category: 'legal' as const },
+        { id: 18, name: 'Permisos Municipales.pdf', size: '1.8 MB', date: '1 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
+        { id: 19, name: 'Diseño Interior Playa.pdf', size: '5.1 MB', date: '15 Feb 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 20, name: 'Renders Vista al Mar.jpg', size: '2.8 MB', date: '12 Feb 2024', type: 'image' as const, category: 'diseno' as const },
+        { id: 21, name: 'Paleta Tropical.pdf', size: '720 KB', date: '10 Feb 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 22, name: 'Avance Cimentación.pdf', size: '2.0 MB', date: '5 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
+        { id: 23, name: 'Fotos Obra Playa.jpg', size: '4.1 MB', date: '3 Mar 2024', type: 'image' as const, category: 'construccion' as const },
+      ] as Document[],
+      phases: [
+        { id: 1, name: 'Planificación y Diseño', status: 'completed' as const, progress: 100, startDate: '1 Ago 2024', endDate: '31 Ago 2024' },
+        { id: 2, name: 'Preparación del Terreno', status: 'completed' as const, progress: 100, startDate: '1 Sep 2024', endDate: '15 Sep 2024' },
+        { id: 3, name: 'Cimentación', status: 'completed' as const, progress: 100, startDate: '16 Sep 2024', endDate: '30 Sep 2024' },
+        { id: 4, name: 'Estructura', status: 'in-progress' as const, progress: 85, startDate: '1 Oct 2024', endDate: '15 Nov 2024' },
+        { id: 5, name: 'Instalaciones', status: 'in-progress' as const, progress: 60, startDate: '10 Nov 2024', endDate: '30 Nov 2024' },
+        { id: 6, name: 'Acabados Interiores', status: 'pending' as const, progress: 0, startDate: '1 Dic 2024', endDate: '31 Dic 2024' },
+        { id: 7, name: 'Acabados Exteriores', status: 'pending' as const, progress: 0, startDate: '15 Dic 2024', endDate: '15 Ene 2025' },
+        { id: 8, name: 'Inspección Final', status: 'pending' as const, progress: 0, startDate: '16 Ene 2025', endDate: '31 Ene 2025' },
+      ] as Phase[]
     }
   ]
 };

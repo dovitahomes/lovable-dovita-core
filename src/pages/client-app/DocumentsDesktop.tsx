@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Download, Search, Upload, Eye } from "lucide-react";
 import DocumentViewer from '@/components/client-app/DocumentViewer';
+import { useProject } from '@/contexts/ProjectContext';
+import type { Document } from '@/lib/client-data';
 import {
   Table,
   TableBody,
@@ -15,41 +17,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const documents = {
-  cliente: [
-    { id: 1, name: "Contrato de Obra.pdf", size: "890 KB", date: "1 Oct 2024", type: "pdf" },
-    { id: 2, name: "Factura #001.pdf", size: "245 KB", date: "5 Oct 2024", type: "pdf" },
-    { id: 3, name: "Factura #002.pdf", size: "238 KB", date: "20 Oct 2024", type: "pdf" },
-  ],
-  proyecto: [
-    { id: 4, name: "Planos Arquitectónicos.pdf", size: "2.4 MB", date: "15 Oct 2024", type: "pdf" },
-    { id: 5, name: "Especificaciones Técnicas.pdf", size: "1.8 MB", date: "10 Oct 2024", type: "pdf" },
-  ],
-  legal: [
-    { id: 6, name: "Permiso de Construcción.pdf", size: "1.2 MB", date: "25 Sep 2024", type: "pdf" },
-    { id: 7, name: "Licencias.pdf", size: "650 KB", date: "20 Sep 2024", type: "pdf" },
-    { id: 8, name: "Póliza de Seguro.pdf", size: "420 KB", date: "15 Sep 2024", type: "pdf" },
-  ],
-  diseno: [
-    { id: 9, name: "Diseño Interior.pdf", size: "4.2 MB", date: "12 Oct 2024", type: "pdf" },
-    { id: 10, name: "Renders 3D.jpg", size: "5.2 MB", date: "10 Oct 2024", type: "image" },
-    { id: 11, name: "Paleta de Colores.pdf", size: "650 KB", date: "8 Oct 2024", type: "pdf" },
-  ],
-  construccion: [
-    { id: 12, name: "Avance Semana 1.pdf", size: "1.8 MB", date: "22 Oct 2024", type: "pdf" },
-    { id: 13, name: "Fotos de Obra.jpg", size: "3.5 MB", date: "21 Oct 2024", type: "image" },
-    { id: 14, name: "Bitácora Construcción.pdf", size: "920 KB", date: "20 Oct 2024", type: "pdf" },
-  ],
-};
-
 export default function DocumentsDesktop() {
+  const { currentProject } = useProject();
   const [selectedDocument, setSelectedDocument] = useState<{
     name: string;
     type: string;
   } | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
 
-  const handleViewDocument = (doc: typeof documents.cliente[0]) => {
+  // Group documents by category
+  const documents = {
+    cliente: currentProject?.documents.filter(d => d.category === 'cliente') || [],
+    proyecto: currentProject?.documents.filter(d => d.category === 'proyecto') || [],
+    legal: currentProject?.documents.filter(d => d.category === 'legal') || [],
+    diseno: currentProject?.documents.filter(d => d.category === 'diseno') || [],
+    construccion: currentProject?.documents.filter(d => d.category === 'construccion') || [],
+  };
+
+  const handleViewDocument = (doc: Document) => {
     setSelectedDocument({
       name: doc.name,
       type: doc.type,
@@ -57,7 +42,7 @@ export default function DocumentsDesktop() {
     setViewerOpen(true);
   };
 
-  const renderDocumentTable = (docs: typeof documents.cliente) => (
+  const renderDocumentTable = (docs: Document[]) => (
     <Table>
       <TableHeader>
         <TableRow>
