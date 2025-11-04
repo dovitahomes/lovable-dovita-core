@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockPhotos } from "@/lib/client-data";
+import { mockPhotos, mockMinistraciones } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
-import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase } from "@/lib/project-utils";
+import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase, isInDesignPhase } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 
 export default function DashboardDesktop() {
@@ -22,6 +22,27 @@ export default function DashboardDesktop() {
   
   // Obtener la fase actual
   const currentPhase = getCurrentPhase(project);
+
+  // Calcular pagos según la fase del proyecto
+  const inDesignPhase = isInDesignPhase(project);
+  const projectPayments = mockMinistraciones.filter(m => m.projectId === project.id);
+  
+  let displayPaid = project.totalPaid;
+  let displayPending = project.totalPending;
+  let displayTotal = project.totalAmount;
+  
+  if (inDesignPhase) {
+    // En fase de diseño, solo mostrar pagos de diseño
+    displayPaid = projectPayments
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    displayPending = projectPayments
+      .filter(p => p.status === 'pending' || p.status === 'future')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    displayTotal = displayPaid + displayPending;
+  }
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
@@ -58,9 +79,9 @@ export default function DashboardDesktop() {
               </div>
               <div className="h-12 w-px bg-white/30" />
               <div>
-                <p className="text-sm text-white/80">Presupuesto</p>
+                <p className="text-sm text-white/80">{inDesignPhase ? 'Pagos Diseño' : 'Presupuesto'}</p>
                 <p className="text-xl font-semibold">
-                  ${(project.totalPaid / 1000000).toFixed(1)}M / ${(project.totalAmount / 1000000).toFixed(1)}M
+                  ${(displayPaid / 1000000).toFixed(1)}M / ${(displayTotal / 1000000).toFixed(1)}M
                 </p>
               </div>
             </div>
@@ -83,18 +104,20 @@ export default function DashboardDesktop() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Presupuesto</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {inDesignPhase ? 'Pagos Diseño' : 'Presupuesto'}
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold mb-2">
-              ${project.totalPaid.toLocaleString()}
+              ${displayPaid.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              de ${project.totalAmount.toLocaleString()} total
+              de ${displayTotal.toLocaleString()} total
             </p>
             <Progress 
-              value={(project.totalPaid / project.totalAmount) * 100} 
+              value={(displayPaid / displayTotal) * 100} 
               className="mt-2"
             />
           </CardContent>

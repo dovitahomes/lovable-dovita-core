@@ -2,9 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockAppointments } from '@/lib/client-data';
+import { mockAppointments, mockMinistraciones } from '@/lib/client-data';
 import { useProject } from '@/contexts/ProjectContext';
-import { calculateProjectProgress, getCurrentPhase } from '@/lib/project-utils';
+import { calculateProjectProgress, getCurrentPhase, isInDesignPhase } from '@/lib/project-utils';
 import { Calendar, MapPin, Video, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -52,6 +52,27 @@ export default function Dashboard() {
   
   // Obtener la fase actual
   const currentPhase = getCurrentPhase(project);
+
+  // Calcular pagos según la fase del proyecto
+  const inDesignPhase = isInDesignPhase(project);
+  const projectPayments = mockMinistraciones.filter(m => m.projectId === project.id);
+  
+  let displayPaid = project.totalPaid;
+  let displayPending = project.totalPending;
+  let displayTotal = project.totalAmount;
+  
+  if (inDesignPhase) {
+    // En fase de diseño, solo mostrar pagos de diseño
+    displayPaid = projectPayments
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    displayPending = projectPayments
+      .filter(p => p.status === 'pending' || p.status === 'future')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    displayTotal = displayPaid + displayPending;
+  }
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
@@ -128,28 +149,32 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground">Pagado</CardTitle>
+            <CardTitle className="text-xs text-muted-foreground">
+              {inDesignPhase ? 'Pagado Diseño' : 'Pagado'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-green-600">
-              ${(project.totalPaid / 1000).toFixed(0)}k
+              ${(displayPaid / 1000).toFixed(0)}k
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {Math.round((project.totalPaid / project.totalAmount) * 100)}% del total
+              {Math.round((displayPaid / displayTotal) * 100)}% del total
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs text-muted-foreground">Por Pagar</CardTitle>
+            <CardTitle className="text-xs text-muted-foreground">
+              {inDesignPhase ? 'Por Pagar Diseño' : 'Por Pagar'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-orange-600">
-              ${(project.totalPending / 1000).toFixed(0)}k
+              ${(displayPending / 1000).toFixed(0)}k
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {Math.round((project.totalPending / project.totalAmount) * 100)}% restante
+              {Math.round((displayPending / displayTotal) * 100)}% restante
             </p>
           </CardContent>
         </Card>
