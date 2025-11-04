@@ -81,7 +81,10 @@ export default function DashboardDesktop() {
               <div>
                 <p className="text-sm text-white/80">{inDesignPhase ? 'Pagos Diseño' : 'Presupuesto'}</p>
                 <p className="text-xl font-semibold">
-                  ${(displayPaid / 1000000).toFixed(1)}M / ${(displayTotal / 1000000).toFixed(1)}M
+                  {inDesignPhase 
+                    ? `$${displayPaid.toLocaleString()} / $${displayTotal.toLocaleString()}`
+                    : `$${(displayPaid / 1000000).toFixed(1)}M / $${(displayTotal / 1000000).toFixed(1)}M`
+                  }
                 </p>
               </div>
             </div>
