@@ -176,7 +176,10 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-green-600">
-              ${(displayPaid / 1000).toFixed(0)}k
+              {inDesignPhase 
+                ? `$${(displayPaid / 1000).toFixed(0)}k`
+                : `$${(displayPaid / 1000000).toFixed(1)}M`
+              }
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {Math.round((displayPaid / displayTotal) * 100)}% del total
@@ -195,7 +198,10 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-bold text-orange-600">
-              ${(displayPending / 1000).toFixed(0)}k
+              {inDesignPhase 
+                ? `$${(displayPending / 1000).toFixed(0)}k`
+                : `$${(displayPending / 1000000).toFixed(1)}M`
+              }
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {Math.round((displayPending / displayTotal) * 100)}% restante

@@ -145,10 +145,16 @@ export default function DashboardDesktop() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold mb-2">
-              ${displayPaid.toLocaleString()}
+              {inDesignPhase 
+                ? `$${displayPaid.toLocaleString()}`
+                : `$${(displayPaid / 1000000).toFixed(1)}M`
+              }
             </div>
             <p className="text-xs text-muted-foreground">
-              de ${displayTotal.toLocaleString()} total
+              de {inDesignPhase 
+                ? `$${displayTotal.toLocaleString()}`
+                : `$${(displayTotal / 1000000).toFixed(1)}M`
+              } total
             </p>
             <Progress 
               value={(displayPaid / displayTotal) * 100} 

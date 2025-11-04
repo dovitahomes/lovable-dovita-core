@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { mockMinistraciones } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
+import { isInDesignPhase } from "@/lib/project-utils";
 import { DollarSign, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
 import {
   Table,
@@ -24,8 +25,16 @@ export default function FinancialDesktop() {
     return <div className="h-full flex items-center justify-center">Cargando datos financieros...</div>;
   }
   
+  const inDesignPhase = isInDesignPhase(project);
   const remaining = project.totalAmount - project.totalPaid;
   const percentSpent = (project.totalPaid / project.totalAmount) * 100;
+
+  const formatAmount = (amount: number) => {
+    if (inDesignPhase) {
+      return `$${amount.toLocaleString()}`;
+    }
+    return `$${(amount / 1000000).toFixed(1)}M`;
+  };
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
@@ -41,7 +50,7 @@ export default function FinancialDesktop() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${project.totalAmount.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatAmount(project.totalAmount)}</div>
             <p className="text-xs text-muted-foreground mt-1">Costo total del proyecto</p>
           </CardContent>
         </Card>
@@ -52,7 +61,7 @@ export default function FinancialDesktop() {
             <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${project.totalPaid.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatAmount(project.totalPaid)}</div>
             <p className="text-xs text-muted-foreground mt-1">{percentSpent.toFixed(1)}% del presupuesto</p>
           </CardContent>
         </Card>
@@ -63,7 +72,7 @@ export default function FinancialDesktop() {
             <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${remaining.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatAmount(remaining)}</div>
             <p className="text-xs text-muted-foreground mt-1">{(100 - percentSpent).toFixed(1)}% disponible</p>
           </CardContent>
         </Card>
@@ -87,13 +96,13 @@ export default function FinancialDesktop() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm">
-              <span>Gastado: ${project.totalPaid.toLocaleString()}</span>
+              <span>Gastado: {formatAmount(project.totalPaid)}</span>
               <span className="text-muted-foreground">{percentSpent.toFixed(1)}%</span>
             </div>
             <Progress value={percentSpent} className="h-3" />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>$0</span>
-              <span>${project.totalAmount.toLocaleString()}</span>
+              <span>{formatAmount(project.totalAmount)}</span>
             </div>
           </div>
         </CardContent>
@@ -119,7 +128,7 @@ export default function FinancialDesktop() {
                 <TableRow key={payment.id}>
                   <TableCell className="font-medium">{payment.date}</TableCell>
                   <TableCell>{payment.concept}</TableCell>
-                  <TableCell className="font-bold">${payment.amount.toLocaleString()}</TableCell>
+                  <TableCell className="font-bold">{formatAmount(payment.amount)}</TableCell>
                   <TableCell>
                     <Badge variant={payment.status === "paid" ? "default" : payment.status === "pending" ? "secondary" : "outline"}>
                       {payment.status === "paid" ? "Pagado" : payment.status === "pending" ? "Pendiente" : "Futuro"}
