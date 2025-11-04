@@ -116,7 +116,10 @@ export default function DashboardDesktop() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => navigate('/app/schedule')}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Fase Actual</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -171,7 +174,10 @@ export default function DashboardDesktop() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1 lg:col-span-2">
+        <Card 
+          className="col-span-1 lg:col-span-2 cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => navigate('/app/schedule')}
+        >
           <CardHeader>
             <CardTitle>Fases del Proyecto</CardTitle>
           </CardHeader>
