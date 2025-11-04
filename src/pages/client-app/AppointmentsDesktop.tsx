@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import AppointmentModal from "@/components/client-app/AppointmentModal";
 import { mockAppointments } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
 import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
@@ -14,6 +15,7 @@ export default function AppointmentsDesktop() {
   const { currentProject } = useProject();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Filter appointments by current project
   const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
@@ -45,7 +47,7 @@ export default function AppointmentsDesktop() {
           <h1 className="text-3xl font-bold mb-2">Citas y Reuniones</h1>
           <p className="text-muted-foreground">Gestiona tus citas con el equipo</p>
         </div>
-        <Button>
+        <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nueva Cita
         </Button>
@@ -137,7 +139,7 @@ export default function AppointmentsDesktop() {
               <div className="text-center py-12">
                 <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No hay citas para este día</p>
-                <Button variant="outline" className="mt-4">
+                <Button variant="outline" className="mt-4" onClick={() => setIsModalOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Agendar Cita
                 </Button>
@@ -205,6 +207,15 @@ export default function AppointmentsDesktop() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Appointment Modal */}
+      <AppointmentModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onAppointmentCreated={() => {
+          // Refresh appointments
+        }}
+      />
     </div>
   );
 }

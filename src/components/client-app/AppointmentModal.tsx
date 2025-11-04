@@ -8,11 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TimePicker from './TimePicker';
-import { mockProjectData, appointmentTypes } from '@/lib/client-data';
+import { appointmentTypes } from '@/lib/client-data';
+import { useProject } from '@/contexts/ProjectContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface AppointmentModalProps {
   open: boolean;
@@ -21,6 +23,7 @@ interface AppointmentModalProps {
 }
 
 export default function AppointmentModal({ open, onOpenChange, onAppointmentCreated }: AppointmentModalProps) {
+  const { currentProject } = useProject();
   const [appointmentType, setAppointmentType] = useState<string>('');
   const [teamMemberId, setTeamMemberId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -88,7 +91,7 @@ export default function AppointmentModal({ open, onOpenChange, onAppointmentCrea
                 <SelectItem value="all">
                   <span className="font-semibold text-primary">Todo el Equipo</span>
                 </SelectItem>
-                {mockProjectData.team.map((member) => (
+                {currentProject?.team.map((member) => (
                   <SelectItem key={member.id} value={member.id.toString()}>
                     {member.name} - {member.role}
                   </SelectItem>
@@ -118,7 +121,7 @@ export default function AppointmentModal({ open, onOpenChange, onAppointmentCrea
                   locale={es}
                   disabled={(date) => date < new Date()}
                   initialFocus
-                  className="pointer-events-auto"
+                  className={cn("pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
