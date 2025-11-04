@@ -93,12 +93,12 @@ export default function Documents() {
       </div>
 
       <Tabs defaultValue="cliente" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="cliente">Cliente</TabsTrigger>
-          <TabsTrigger value="proyecto">Proyecto</TabsTrigger>
-          <TabsTrigger value="legal">Legal</TabsTrigger>
-          <TabsTrigger value="diseno">Diseño</TabsTrigger>
-          <TabsTrigger value="construccion">Construcción</TabsTrigger>
+        <TabsList className="h-auto flex flex-wrap gap-1 p-1">
+          <TabsTrigger value="cliente" className="flex-1 min-w-[30%]">Cliente</TabsTrigger>
+          <TabsTrigger value="proyecto" className="flex-1 min-w-[30%]">Proyecto</TabsTrigger>
+          <TabsTrigger value="legal" className="flex-1 min-w-[30%]">Legal</TabsTrigger>
+          <TabsTrigger value="diseno" className="flex-1 min-w-[45%]">Diseño</TabsTrigger>
+          <TabsTrigger value="construccion" className="flex-1 min-w-[45%]">Construcción</TabsTrigger>
         </TabsList>
         
         <TabsContent value="cliente" className="mt-4">
