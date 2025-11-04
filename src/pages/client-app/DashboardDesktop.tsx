@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { mockPhotos } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
-import { getProjectHeroImage } from "@/lib/project-utils";
+import { getProjectHeroImage, calculateProjectProgress } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 
 export default function DashboardDesktop() {
@@ -16,6 +16,9 @@ export default function DashboardDesktop() {
   if (!project) {
     return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
   }
+
+  // Calcular progreso dinámicamente basado en fases
+  const projectProgress = calculateProjectProgress(project);
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
@@ -47,7 +50,7 @@ export default function DashboardDesktop() {
             
             <div className="flex items-center gap-8 text-white">
               <div>
-                <p className="text-4xl font-bold">{project.progress}%</p>
+                <p className="text-4xl font-bold">{projectProgress}%</p>
                 <p className="text-sm text-white/80">Progreso</p>
               </div>
               <div className="h-12 w-px bg-white/30" />
@@ -67,8 +70,8 @@ export default function DashboardDesktop() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold mb-2">{project.progress}%</div>
-            <Progress value={project.progress} className="mb-2" />
+            <div className="text-2xl font-bold mb-2">{projectProgress}%</div>
+            <Progress value={projectProgress} className="mb-2" />
             <p className="text-xs text-muted-foreground">
               {project.currentPhase}
             </p>

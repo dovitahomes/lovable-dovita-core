@@ -76,3 +76,24 @@ export const getScheduleSubtitle = (project: Project | null): string => {
   
   return 'Seguimiento de fases y avance temporal';
 };
+
+/**
+ * Calcula el progreso general del proyecto basándose en sus fases
+ * Cada fase vale (100 / número_de_fases)%
+ * El progreso se calcula sumando: fases completadas + (fase_actual.progress * valor_fase / 100)
+ */
+export const calculateProjectProgress = (project: Project | null): number => {
+  if (!project || !project.phases || project.phases.length === 0) return 0;
+  
+  const phases = project.phases;
+  const phaseValue = 100 / phases.length; // Valor de cada fase
+  
+  let totalProgress = 0;
+  
+  phases.forEach(phase => {
+    // Cada fase aporta su progreso multiplicado por su valor proporcional
+    totalProgress += (phase.progress * phaseValue) / 100;
+  });
+  
+  return Math.round(totalProgress);
+};

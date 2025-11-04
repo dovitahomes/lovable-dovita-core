@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { mockAppointments } from '@/lib/client-data';
 import { useProject } from '@/contexts/ProjectContext';
+import { calculateProjectProgress } from '@/lib/project-utils';
 import { Calendar, MapPin, Video, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -45,6 +46,9 @@ export default function Dashboard() {
   if (!project) {
     return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
   }
+
+  // Calcular progreso dinámicamente basado en fases
+  const projectProgress = calculateProjectProgress(project);
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
@@ -104,10 +108,10 @@ export default function Dashboard() {
           <CardTitle className="text-sm text-muted-foreground">Progreso de Obra</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Progress value={project.progress} className="h-3" />
+          <Progress value={projectProgress} className="h-3" />
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-3xl font-bold text-primary">{project.progress}%</p>
+              <p className="text-3xl font-bold text-primary">{projectProgress}%</p>
               <p className="text-sm text-muted-foreground">{project.currentPhase}</p>
             </div>
             <Button variant="outline" size="sm">

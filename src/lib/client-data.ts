@@ -115,7 +115,7 @@ export const mockClientData = {
       clientName: "Familia Martínez",
       name: "Casa Playa del Carmen",
       location: "Playa del Carmen, Q. Roo",
-      progress: 65,
+      progress: 53, // 2 fases completas (40%) + fase actual 65% de 20% = 53%
       currentPhase: "Diseño de Interiores",
       projectStage: "design" as const,
       totalAmount: 6200000,
