@@ -5,10 +5,12 @@ import { mockPhotos, mockMinistraciones } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
 import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase, isInDesignPhase } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardDesktop() {
   const { currentProject } = useProject();
   const project = currentProject;
+  const navigate = useNavigate();
 
   // Filter photos by current project
   const projectPhotos = mockPhotos.filter(photo => photo.projectId === project?.id);
@@ -43,6 +45,29 @@ export default function DashboardDesktop() {
     
     displayTotal = displayPaid + displayPending;
   }
+
+  // Obtener imágenes correctas según la fase
+  const recentImages = inDesignPhase
+    ? project.documents
+        .filter(doc => doc.category === 'diseno' && doc.type === 'image')
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 6)
+        .map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          url: project.renders?.find(r => r.title.toLowerCase().includes(doc.name.split('.')[0].toLowerCase()))?.url || 
+               project.renders?.[0]?.url || 
+               project.heroImage
+        }))
+    : projectPhotos.slice(0, 6);
+
+  const handleImageClick = () => {
+    if (inDesignPhase) {
+      navigate('/app/documents');
+    } else {
+      navigate('/app/photos');
+    }
+  };
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
@@ -164,21 +189,29 @@ export default function DashboardDesktop() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fotos Recientes</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {inDesignPhase ? 'Diseños Recientes' : 'Fotos Recientes'}
+            </CardTitle>
             <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold mb-2">{projectPhotos.length}</div>
+            <div className="text-2xl font-bold mb-2">
+              {inDesignPhase 
+                ? project.documents.filter(doc => doc.category === 'diseno' && doc.type === 'image').length
+                : projectPhotos.length
+              }
+            </div>
             <p className="text-xs text-muted-foreground mb-4">
-              Total de fotos subidas
+              {inDesignPhase ? 'Total de diseños' : 'Total de fotos subidas'}
             </p>
             <div className="grid grid-cols-3 gap-2">
-              {projectPhotos.slice(0, 6).map((photo) => (
+              {recentImages.map((item) => (
                 <img 
-                  key={photo.id}
-                  src={photo.url} 
-                  alt={photo.description}
-                  className="aspect-square object-cover rounded-md"
+                  key={item.id}
+                  src={item.url || (inDesignPhase ? item.url : item.url)} 
+                  alt={inDesignPhase ? item.name : item.description}
+                  className="aspect-square object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={handleImageClick}
                 />
               ))}
             </div>
