@@ -16,7 +16,7 @@ export default function DovitaHeader() {
         <img 
           src={logo} 
           alt="Dovita" 
-          className="h-8 w-auto object-contain brightness-0 invert"
+          className="h-11 w-auto object-contain brightness-0 invert"
         />
         
         <div className="flex items-center gap-2">
