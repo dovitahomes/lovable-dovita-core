@@ -14,20 +14,29 @@ import {
 } from "@/components/ui/table";
 
 const documents = {
-  proyecto: [
-    { id: 1, name: "Planos Arquitectónicos", size: "2.4 MB", date: "15 Oct 2024", type: "PDF" },
-    { id: 2, name: "Especificaciones Técnicas", size: "1.8 MB", date: "10 Oct 2024", type: "PDF" },
-    { id: 3, name: "Renders 3D", size: "5.2 MB", date: "8 Oct 2024", type: "ZIP" },
-  ],
   cliente: [
-    { id: 4, name: "Contrato de Obra", size: "890 KB", date: "1 Oct 2024", type: "PDF" },
-    { id: 5, name: "Factura #001", size: "245 KB", date: "5 Oct 2024", type: "PDF" },
-    { id: 6, name: "Factura #002", size: "238 KB", date: "20 Oct 2024", type: "PDF" },
+    { id: 1, name: "Contrato de Obra", size: "890 KB", date: "1 Oct 2024", type: "PDF" },
+    { id: 2, name: "Factura #001", size: "245 KB", date: "5 Oct 2024", type: "PDF" },
+    { id: 3, name: "Factura #002", size: "238 KB", date: "20 Oct 2024", type: "PDF" },
+  ],
+  proyecto: [
+    { id: 4, name: "Planos Arquitectónicos", size: "2.4 MB", date: "15 Oct 2024", type: "PDF" },
+    { id: 5, name: "Especificaciones Técnicas", size: "1.8 MB", date: "10 Oct 2024", type: "PDF" },
   ],
   legal: [
-    { id: 7, name: "Permiso de Construcción", size: "1.2 MB", date: "25 Sep 2024", type: "PDF" },
-    { id: 8, name: "Licencias", size: "650 KB", date: "20 Sep 2024", type: "PDF" },
-    { id: 9, name: "Póliza de Seguro", size: "420 KB", date: "15 Sep 2024", type: "PDF" },
+    { id: 6, name: "Permiso de Construcción", size: "1.2 MB", date: "25 Sep 2024", type: "PDF" },
+    { id: 7, name: "Licencias", size: "650 KB", date: "20 Sep 2024", type: "PDF" },
+    { id: 8, name: "Póliza de Seguro", size: "420 KB", date: "15 Sep 2024", type: "PDF" },
+  ],
+  diseno: [
+    { id: 9, name: "Diseño Interior", size: "4.2 MB", date: "12 Oct 2024", type: "PDF" },
+    { id: 10, name: "Renders 3D", size: "5.2 MB", date: "10 Oct 2024", type: "ZIP" },
+    { id: 11, name: "Paleta de Colores", size: "650 KB", date: "8 Oct 2024", type: "PDF" },
+  ],
+  construccion: [
+    { id: 12, name: "Avance Semana 1", size: "1.8 MB", date: "22 Oct 2024", type: "PDF" },
+    { id: 13, name: "Fotos de Obra", size: "3.5 MB", date: "21 Oct 2024", type: "ZIP" },
+    { id: 14, name: "Bitácora Construcción", size: "920 KB", date: "20 Oct 2024", type: "PDF" },
   ],
 };
 
@@ -93,20 +102,28 @@ export default function DocumentsDesktop() {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="proyecto" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="proyecto">Proyecto</TabsTrigger>
+          <Tabs defaultValue="cliente" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="cliente">Cliente</TabsTrigger>
+              <TabsTrigger value="proyecto">Proyecto</TabsTrigger>
               <TabsTrigger value="legal">Legal</TabsTrigger>
+              <TabsTrigger value="diseno">Diseño</TabsTrigger>
+              <TabsTrigger value="construccion">Construcción</TabsTrigger>
             </TabsList>
-            <TabsContent value="proyecto" className="mt-6">
-              {renderDocumentTable(documents.proyecto)}
-            </TabsContent>
             <TabsContent value="cliente" className="mt-6">
               {renderDocumentTable(documents.cliente)}
             </TabsContent>
+            <TabsContent value="proyecto" className="mt-6">
+              {renderDocumentTable(documents.proyecto)}
+            </TabsContent>
             <TabsContent value="legal" className="mt-6">
               {renderDocumentTable(documents.legal)}
+            </TabsContent>
+            <TabsContent value="diseno" className="mt-6">
+              {renderDocumentTable(documents.diseno)}
+            </TabsContent>
+            <TabsContent value="construccion" className="mt-6">
+              {renderDocumentTable(documents.construccion)}
             </TabsContent>
           </Tabs>
         </CardContent>
