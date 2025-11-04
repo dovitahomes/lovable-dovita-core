@@ -16,6 +16,7 @@ export default function AppointmentsDesktop() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<typeof mockAppointments[0] | undefined>();
 
   // Filter appointments by current project
   const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
@@ -99,7 +100,14 @@ export default function AppointmentsDesktop() {
             {appointmentsOnSelectedDate.length > 0 ? (
               <div className="space-y-4">
                 {appointmentsOnSelectedDate.map((appointment) => (
-                  <Card key={appointment.id} className="border-l-4 border-l-primary">
+                  <Card 
+                    key={appointment.id} 
+                    className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => {
+                      setEditingAppointment(appointment);
+                      setIsModalOpen(true);
+                    }}
+                  >
                     <CardContent className="pt-6">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
@@ -159,7 +167,15 @@ export default function AppointmentsDesktop() {
           <div className="space-y-4 mt-4">
             {upcomingAppointments.length > 0 ? (
               upcomingAppointments.map((appointment) => (
-                <Card key={appointment.id} className="border-l-4 border-l-primary">
+                <Card 
+                  key={appointment.id} 
+                  className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => {
+                    setEditingAppointment(appointment);
+                    setIsModalOpen(true);
+                    setUpcomingDialogOpen(false);
+                  }}
+                >
                   <CardContent className="pt-6">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
@@ -211,10 +227,18 @@ export default function AppointmentsDesktop() {
       {/* Appointment Modal */}
       <AppointmentModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setEditingAppointment(undefined);
+          }
+        }}
         onAppointmentCreated={() => {
           // Refresh appointments
+          setEditingAppointment(undefined);
         }}
+        appointment={editingAppointment}
+        mode={editingAppointment ? 'edit' : 'create'}
       />
     </div>
   );

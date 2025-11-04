@@ -16,20 +16,48 @@ import { CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+interface Appointment {
+  id: number;
+  type: string;
+  date: string;
+  time: string;
+  duration: number;
+  status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
+  teamMember: {
+    id?: number;
+    name: string;
+    role: string;
+    avatar: string;
+  };
+  location: string;
+  isVirtual: boolean;
+  notes?: string;
+}
+
 interface AppointmentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAppointmentCreated?: () => void;
+  appointment?: Appointment;
+  mode?: 'create' | 'edit';
 }
 
-export default function AppointmentModal({ open, onOpenChange, onAppointmentCreated }: AppointmentModalProps) {
+export default function AppointmentModal({ 
+  open, 
+  onOpenChange, 
+  onAppointmentCreated,
+  appointment,
+  mode = 'create'
+}: AppointmentModalProps) {
   const { currentProject } = useProject();
-  const [appointmentType, setAppointmentType] = useState<string>('');
-  const [teamMemberId, setTeamMemberId] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [notes, setNotes] = useState('');
-  const [isVirtual, setIsVirtual] = useState(false);
+  const [appointmentType, setAppointmentType] = useState<string>(appointment?.type || '');
+  const [teamMemberId, setTeamMemberId] = useState<string>(appointment?.teamMember.id?.toString() || '');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    appointment?.date ? new Date(appointment.date) : undefined
+  );
+  const [selectedTime, setSelectedTime] = useState<string>(appointment?.time || '');
+  const [notes, setNotes] = useState(appointment?.notes || '');
+  const [isVirtual, setIsVirtual] = useState(appointment?.isVirtual || false);
 
   const handleSubmit = () => {
     // Validation
@@ -38,10 +66,16 @@ export default function AppointmentModal({ open, onOpenChange, onAppointmentCrea
       return;
     }
 
-    // Mock creation
-    toast.success('Cita agendada exitosamente', {
-      description: `Tu cita para ${appointmentType} ha sido registrada. Recibirás una confirmación pronto.`
-    });
+    // Mock creation/update
+    if (mode === 'edit') {
+      toast.success('Cita actualizada exitosamente', {
+        description: `Los cambios en tu cita de ${appointmentType} han sido guardados.`
+      });
+    } else {
+      toast.success('Cita agendada exitosamente', {
+        description: `Tu cita para ${appointmentType} ha sido registrada. Recibirás una confirmación pronto.`
+      });
+    }
 
     // Reset form
     setAppointmentType('');
@@ -59,7 +93,7 @@ export default function AppointmentModal({ open, onOpenChange, onAppointmentCrea
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Agendar Nueva Cita</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? 'Editar Cita' : 'Agendar Nueva Cita'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -170,7 +204,7 @@ export default function AppointmentModal({ open, onOpenChange, onAppointmentCrea
             Cancelar
           </Button>
           <Button onClick={handleSubmit} className="bg-secondary hover:bg-secondary/90 text-primary">
-            Agendar Cita
+            {mode === 'edit' ? 'Guardar Cambios' : 'Agendar Cita'}
           </Button>
         </DialogFooter>
       </DialogContent>

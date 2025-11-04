@@ -17,6 +17,7 @@ export default function Appointments() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<typeof mockAppointments[0] | undefined>();
 
   // Filter appointments by current project
   const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
@@ -138,10 +139,18 @@ export default function Appointments() {
       {/* Appointment Modal */}
       <AppointmentModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setEditingAppointment(undefined);
+          }
+        }}
         onAppointmentCreated={() => {
           // Refresh appointments
+          setEditingAppointment(undefined);
         }}
+        appointment={editingAppointment}
+        mode={editingAppointment ? 'edit' : 'create'}
       />
 
       {/* Upcoming Appointments Dialog */}
@@ -154,7 +163,15 @@ export default function Appointments() {
           <div className="space-y-3 mt-4">
             {upcomingAppointments.length > 0 ? (
               upcomingAppointments.map((appointment) => (
-                <Card key={appointment.id} className="border-l-4 border-l-primary">
+                <Card 
+                  key={appointment.id} 
+                  className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => {
+                    setEditingAppointment(appointment);
+                    setIsModalOpen(true);
+                    setUpcomingDialogOpen(false);
+                  }}
+                >
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
