@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { useProject } from '@/contexts/ProjectContext';
 import logo from '@/assets/logo-dovita.png';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
@@ -11,6 +12,7 @@ import GlobalSearch from './GlobalSearch';
 export default function DovitaHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { currentProject } = useProject();
 
   return (
     <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)]">
@@ -55,7 +57,7 @@ export default function DovitaHeader() {
           
           <div className="mt-6 space-y-6">
             <div>
-              <p className="text-sm font-medium mb-2 text-muted-foreground">Proyecto Actual</p>
+              <p className="text-sm font-medium mb-2 text-muted-foreground">{currentProject?.name || 'Proyecto Actual'}</p>
               <ProjectSelector variant="mobile" />
             </div>
 

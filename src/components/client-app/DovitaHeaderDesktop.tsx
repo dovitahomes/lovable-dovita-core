@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { useLocation } from 'react-router-dom';
+import { useProject } from '@/contexts/ProjectContext';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
 
@@ -25,6 +26,7 @@ export default function DovitaHeaderDesktop() {
   const currentLabel = routeLabels[location.pathname] || 'Inicio';
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { currentProject } = useProject();
 
   return (
     <header className="bg-primary text-white px-4 py-2 flex items-center justify-between sticky top-0 z-30 border-b border-primary/20">
@@ -88,7 +90,7 @@ export default function DovitaHeaderDesktop() {
           
           <div className="mt-6 space-y-6">
             <div>
-              <p className="text-sm font-medium mb-2 text-muted-foreground">Proyecto Actual</p>
+              <p className="text-sm font-medium mb-2 text-muted-foreground">{currentProject?.name || 'Proyecto Actual'}</p>
               <ProjectSelector variant="mobile" />
             </div>
 
