@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useLocation } from 'react-router-dom';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
+import { useProject } from '@/contexts/ProjectContext';
 
 const routeLabels: Record<string, string> = {
   '/app': 'Inicio',
@@ -21,6 +22,7 @@ const routeLabels: Record<string, string> = {
 };
 
 export default function DovitaHeaderDesktop() {
+  const { currentProject } = useProject();
   const location = useLocation();
   const currentLabel = routeLabels[location.pathname] || 'Inicio';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -89,6 +91,7 @@ export default function DovitaHeaderDesktop() {
           <div className="mt-6 space-y-6">
             <div>
               <p className="text-sm font-medium mb-2 text-muted-foreground">Proyecto Actual</p>
+              <p className="text-base font-semibold">{currentProject?.name}</p>
               <ProjectSelector variant="mobile" />
             </div>
 
