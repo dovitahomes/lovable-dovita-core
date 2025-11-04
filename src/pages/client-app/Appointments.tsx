@@ -1,21 +1,37 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
 import AppointmentCard from '@/components/client-app/AppointmentCard';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { mockAppointments } from '@/lib/client-data';
 import { useProject } from '@/contexts/ProjectContext';
-import { Plus } from 'lucide-react';
-import { format, isSameDay } from 'date-fns';
+import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from 'lucide-react';
+import { format, isSameDay, isFuture, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Appointments() {
   const { currentProject } = useProject();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
 
   // Filter appointments by current project
   const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
+
+  // Get upcoming appointments (future or today)
+  const upcomingAppointments = projectAppointments
+    .filter(apt => {
+      const aptDate = new Date(apt.date);
+      return isToday(aptDate) || isFuture(aptDate);
+    })
+    .sort((a, b) => {
+      const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (dateCompare !== 0) return dateCompare;
+      return a.time.localeCompare(b.time);
+    });
 
   // Get all dates that have appointments
   const appointmentDates = projectAppointments.map(apt => new Date(apt.date));
@@ -45,6 +61,24 @@ export default function Appointments() {
         onDateSelect={setSelectedDate}
         appointmentDates={appointmentDates}
       />
+
+      {/* Upcoming Appointments Card */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium">Próximas citas</p>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-7 text-xs"
+              onClick={() => setUpcomingDialogOpen(true)}
+            >
+              Ver todas
+            </Button>
+          </div>
+          <p className="text-2xl font-bold">{upcomingAppointments.length}</p>
+        </CardContent>
+      </Card>
 
       {/* Appointments List */}
       <div className="space-y-4">
@@ -109,6 +143,64 @@ export default function Appointments() {
           // Refresh appointments
         }}
       />
+
+      {/* Upcoming Appointments Dialog */}
+      <Dialog open={upcomingDialogOpen} onOpenChange={setUpcomingDialogOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Próximas Citas</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-3 mt-4">
+            {upcomingAppointments.length > 0 ? (
+              upcomingAppointments.map((appointment) => (
+                <Card key={appointment.id} className="border-l-4 border-l-primary">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{appointment.type}</h3>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <Badge className="text-xs">
+                              {appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(appointment.date), "d 'de' MMMM, yyyy", { locale: es })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Clock className="h-4 w-4 flex-shrink-0" />
+                          <span>{appointment.time} - {appointment.duration} min</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                          <span className="break-words">{appointment.location}</span>
+                        </div>
+                        <div className="flex items-start gap-2 text-muted-foreground">
+                          <User className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="mb-1">Con: {appointment.teamMember.name}</p>
+                            <p className="text-xs">{appointment.notes}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No hay citas próximas programadas</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
