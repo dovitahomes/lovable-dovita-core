@@ -117,7 +117,7 @@ export default function DashboardDesktop() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
           onClick={() => navigate('/app/schedule')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -134,7 +134,7 @@ export default function DashboardDesktop() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
           onClick={() => navigate('/app/financial')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -158,7 +158,7 @@ export default function DashboardDesktop() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
           onClick={() => navigate('/app/appointments')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -175,7 +175,7 @@ export default function DashboardDesktop() {
         </Card>
 
         <Card 
-          className="col-span-1 lg:col-span-2 cursor-pointer hover:bg-accent/50 transition-colors"
+          className="col-span-1 lg:col-span-2 cursor-pointer hover:scale-[1.02] transition-transform duration-200"
           onClick={() => navigate('/app/schedule')}
         >
           <CardHeader>
