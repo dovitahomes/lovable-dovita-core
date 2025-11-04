@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockProjectData, mockMinistraciones } from "@/lib/client-data";
+import { mockMinistraciones } from "@/lib/client-data";
+import { useProject } from "@/contexts/ProjectContext";
 import { DollarSign, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
 import {
   Table,
@@ -13,8 +14,16 @@ import {
 } from "@/components/ui/table";
 
 export default function FinancialDesktop() {
-  const project = mockProjectData;
-  const payments = mockMinistraciones;
+  const { currentProject } = useProject();
+  const project = currentProject;
+  
+  // Filter payments by current project
+  const payments = mockMinistraciones.filter(m => m.projectId === project?.id);
+  
+  if (!project) {
+    return <div className="h-full flex items-center justify-center">Cargando datos financieros...</div>;
+  }
+  
   const remaining = project.totalAmount - project.totalPaid;
   const percentSpent = (project.totalPaid / project.totalAmount) * 100;
 

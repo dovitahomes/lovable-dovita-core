@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useLocation } from 'react-router-dom';
+import ProjectSelector from './ProjectSelector';
 
 const routeLabels: Record<string, string> = {
   '/app': 'Inicio',
@@ -24,7 +25,7 @@ export default function DovitaHeaderDesktop() {
       <div className="flex items-center gap-6">
         <Logo size="small" className="brightness-0 invert" />
         <div className="flex items-center gap-2 text-xs text-white/70">
-          <span>Mi Proyecto</span>
+          <ProjectSelector variant="desktop" />
           <span>/</span>
           <span className="text-white font-medium">{currentLabel}</span>
         </div>

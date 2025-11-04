@@ -4,27 +4,32 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockPhotos } from '@/lib/client-data';
+import { useProject } from '@/contexts/ProjectContext';
 import { MapPin, Calendar, Image as ImageIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import PhotoViewer from '@/components/client-app/PhotoViewer';
 
 export default function Photos() {
+  const { currentProject } = useProject();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
 
+  // Filter photos by current project
+  const projectPhotos = mockPhotos.filter(photo => photo.projectId === currentProject?.id);
+
   // Get unique phases
-  const phases = ['all', ...Array.from(new Set(mockPhotos.map(photo => photo.phase)))];
+  const phases = ['all', ...Array.from(new Set(projectPhotos.map(photo => photo.phase)))];
 
   // Filter photos by phase
   const filteredPhotos = selectedPhase === 'all' 
-    ? mockPhotos 
-    : mockPhotos.filter(photo => photo.phase === selectedPhase);
+    ? projectPhotos 
+    : projectPhotos.filter(photo => photo.phase === selectedPhase);
 
   const handlePhotoClick = (index: number) => {
-    // Find the original index in the full array
+    // Find the original index in the full project photos array
     const photo = filteredPhotos[index];
-    const originalIndex = mockPhotos.findIndex(p => p.id === photo.id);
+    const originalIndex = projectPhotos.findIndex(p => p.id === photo.id);
     setSelectedPhotoIndex(originalIndex);
   };
 
@@ -75,19 +80,19 @@ export default function Photos() {
         <div className="grid grid-cols-3 gap-3">
           <Card className="p-3 text-center">
             <p className="text-2xl font-bold text-primary">
-              {mockPhotos.filter(p => p.phase === 'Cimentación').length}
+              {projectPhotos.filter(p => p.phase === 'Cimentación').length}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Cimentación</p>
           </Card>
           <Card className="p-3 text-center">
             <p className="text-2xl font-bold text-primary">
-              {mockPhotos.filter(p => p.phase === 'Estructura').length}
+              {projectPhotos.filter(p => p.phase === 'Estructura').length}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Estructura</p>
           </Card>
           <Card className="p-3 text-center">
             <p className="text-2xl font-bold text-secondary">
-              {mockPhotos.length}
+              {projectPhotos.length}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Total</p>
           </Card>
@@ -146,7 +151,7 @@ export default function Photos() {
       {/* Photo Viewer Modal */}
       {selectedPhotoIndex !== null && (
         <PhotoViewer
-          photos={mockPhotos}
+          photos={projectPhotos}
           currentIndex={selectedPhotoIndex}
           open={selectedPhotoIndex !== null}
           onOpenChange={(open) => !open && setSelectedPhotoIndex(null)}

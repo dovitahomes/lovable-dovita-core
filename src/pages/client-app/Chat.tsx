@@ -5,13 +5,17 @@ import ChatHeader from '@/components/client-app/ChatHeader';
 import ChatMessage from '@/components/client-app/ChatMessage';
 import ChatInput from '@/components/client-app/ChatInput';
 import AvatarCustomizationDialog from '@/components/client-app/AvatarCustomizationDialog';
-import { mockChatMessages, mockProjectData } from '@/lib/client-data';
+import { mockChatMessages } from '@/lib/client-data';
+import { useProject } from '@/contexts/ProjectContext';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 
 export default function Chat() {
-  const [messages, setMessages] = useState(mockChatMessages);
+  const { currentProject } = useProject();
+  const [messages, setMessages] = useState(() => 
+    mockChatMessages.filter(msg => msg.projectId === currentProject?.id)
+  );
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
@@ -26,6 +30,11 @@ export default function Chat() {
   };
 
 
+  // Update messages when project changes
+  useEffect(() => {
+    setMessages(mockChatMessages.filter(msg => msg.projectId === currentProject?.id));
+  }, [currentProject?.id]);
+
   // Auto scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -34,6 +43,7 @@ export default function Chat() {
   const handleSendMessage = (content: string) => {
     const newMessage = {
       id: messages.length + 1,
+      projectId: currentProject?.id || '',
       content,
       timestamp: new Date().toISOString(),
       isClient: true,
@@ -115,10 +125,10 @@ export default function Chat() {
               <span>Chat grupal del equipo</span>
             </div>
             <div className="flex flex-wrap justify-center gap-2 text-xs">
-              {mockProjectData.team.map((member, index) => (
+              {currentProject?.team.map((member, index) => (
                 <span key={member.id} className="text-muted-foreground">
                   {member.name}
-                  {index < mockProjectData.team.length - 1 && ', '}
+                  {index < (currentProject.team.length - 1) && ', '}
                 </span>
               ))}
             </div>

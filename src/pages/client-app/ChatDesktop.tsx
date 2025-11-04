@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Send, Phone, Video, MoreVertical } from "lucide-react";
-import { mockChatMessages, mockProjectData } from "@/lib/client-data";
+import { mockChatMessages } from "@/lib/client-data";
+import { useProject } from "@/contexts/ProjectContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import AvatarCustomizationDialog from "@/components/client-app/AvatarCustomizati
 
 interface Message {
   id: number;
+  projectId: string;
   content: string;
   timestamp: string;
   isClient: boolean;
@@ -28,23 +30,18 @@ interface Message {
 }
 
 export default function ChatDesktop() {
-  const [messages, setMessages] = useState<Message[]>(
-    mockChatMessages.map(msg => ({
-      id: msg.id,
-      content: msg.content,
-      timestamp: new Date(msg.timestamp).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
-      isClient: msg.isClient,
-      sender: msg.sender,
-      status: msg.status
-    }))
+  const { currentProject } = useProject();
+  const [messages, setMessages] = useState<Message[]>(() =>
+    mockChatMessages.filter(msg => msg.projectId === currentProject?.id)
   );
-  const [inputValue, setInputValue] = useState("");
+  const [input, setInput] = useState("");
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
     return saved ? JSON.parse(saved) : null;
   });
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
     setClientAvatar(avatar);

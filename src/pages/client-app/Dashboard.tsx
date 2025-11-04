@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockProjectData, mockAppointments } from '@/lib/client-data';
+import { mockAppointments } from '@/lib/client-data';
+import { useProject } from '@/contexts/ProjectContext';
 import { Calendar, MapPin, Video, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -10,7 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 export default function Dashboard() {
-  const project = mockProjectData;
+  const { currentProject } = useProject();
+  const project = currentProject;
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
   
@@ -19,12 +21,12 @@ export default function Dashboard() {
     ? project.renders[currentRenderIndex].url 
     : project.heroImage;
   
-  // Get next upcoming appointment
+  // Get next upcoming appointment for current project
   const now = new Date();
   const upcomingAppointments = mockAppointments
     .filter(apt => {
       const aptDate = new Date(apt.date + 'T' + apt.time);
-      return aptDate > now && (apt.status === 'confirmed' || apt.status === 'pending');
+      return apt.projectId === project?.id && aptDate > now && (apt.status === 'confirmed' || apt.status === 'pending');
     })
     .sort((a, b) => {
       const dateA = new Date(a.date + 'T' + a.time);
@@ -40,6 +42,10 @@ export default function Dashboard() {
     }
   };
   
+  if (!project) {
+    return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
+  }
+
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
       {/* Welcome Card with Hero Image */}

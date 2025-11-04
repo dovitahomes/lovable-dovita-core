@@ -3,48 +3,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
+import { mockAppointments } from "@/lib/client-data";
+import { useProject } from "@/contexts/ProjectContext";
 import { Plus, Clock, MapPin, User } from "lucide-react";
 import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 
-const mockAppointments = [
-  {
-    id: 1,
-    title: "Inspección de Obra",
-    date: new Date(2024, 10, 15, 10, 0),
-    duration: "1 hora",
-    location: "Sitio de construcción",
-    attendees: ["Ing. Carlos Méndez", "Arq. María López"],
-    type: "Inspección",
-  },
-  {
-    id: 2,
-    title: "Revisión de Acabados",
-    date: new Date(2024, 10, 20, 14, 0),
-    duration: "2 horas",
-    location: "Oficina Dovita",
-    attendees: ["Diseñadora Ana Torres"],
-    type: "Diseño",
-  },
-  {
-    id: 3,
-    title: "Reunión de Avance",
-    date: new Date(2024, 10, 25, 11, 0),
-    duration: "45 minutos",
-    location: "Videollamada",
-    attendees: ["Ing. Carlos Méndez"],
-    type: "Seguimiento",
-  },
-];
-
 export default function AppointmentsDesktop() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2024, 10, 15));
+  const { currentProject } = useProject();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  const appointmentsOnSelectedDate = mockAppointments
-    .filter((apt) => isSameDay(apt.date, selectedDate))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  // Filter appointments by current project
+  const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
 
-  const datesWithAppointments = mockAppointments.map((apt) => apt.date);
+  // Get dates with appointments
+  const appointmentDates = projectAppointments.map(apt => new Date(apt.date));
+
+  // Filter and sort appointments for selected date
+  const appointmentsOnSelectedDate = selectedAppointments;
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
@@ -72,7 +48,7 @@ export default function AppointmentsDesktop() {
               locale={es}
               className="rounded-md border"
               modifiers={{
-                booked: datesWithAppointments,
+                booked: appointmentDates,
               }}
               modifiersClassNames={{
                 booked: "bg-primary/20 font-bold",
@@ -80,7 +56,7 @@ export default function AppointmentsDesktop() {
             />
             <div className="mt-4 p-3 bg-muted rounded-lg">
               <p className="text-sm font-medium mb-2">Próximas citas</p>
-              <p className="text-2xl font-bold">{mockAppointments.length}</p>
+              <p className="text-2xl font-bold">{projectAppointments.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -100,8 +76,8 @@ export default function AppointmentsDesktop() {
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-semibold text-lg">{appointment.title}</h3>
-                            <Badge className="mt-1">{appointment.type}</Badge>
+                            <h3 className="font-semibold text-lg">{appointment.type}</h3>
+                            <Badge className="mt-1">{appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}</Badge>
                           </div>
                           <Button variant="outline" size="sm">
                             Ver Detalles
@@ -111,9 +87,7 @@ export default function AppointmentsDesktop() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="h-4 w-4" />
-                            <span>
-                              {format(appointment.date, "HH:mm", { locale: es })} - {appointment.duration}
-                            </span>
+                            <span>{appointment.time} - {appointment.duration} min</span>
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <MapPin className="h-4 w-4" />
@@ -124,14 +98,8 @@ export default function AppointmentsDesktop() {
                         <div className="flex items-start gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground mt-0.5" />
                           <div>
-                            <p className="text-muted-foreground mb-1">Participantes:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {appointment.attendees.map((attendee, i) => (
-                                <Badge key={i} variant="secondary">
-                                  {attendee}
-                                </Badge>
-                              ))}
-                            </div>
+                            <p className="text-muted-foreground mb-1">Con: {appointment.teamMember.name}</p>
+                            <p className="text-xs text-muted-foreground">{appointment.notes}</p>
                           </div>
                         </div>
                       </div>

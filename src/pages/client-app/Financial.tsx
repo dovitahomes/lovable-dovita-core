@@ -1,13 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { mockProjectData, mockMinistraciones, budgetCategories } from '@/lib/client-data';
+import { mockMinistraciones, budgetCategories } from '@/lib/client-data';
+import { useProject } from '@/contexts/ProjectContext';
 import { CheckCircle2, Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Financial() {
-  const project = mockProjectData;
+  const { currentProject } = useProject();
+  const project = currentProject;
+
+  // Filter financial data by current project
+  const projectMinistraciones = mockMinistraciones.filter(m => m.projectId === project?.id);
+  const projectBudgetCategories = budgetCategories.filter(b => b.projectId === project?.id);
+
+  if (!project) {
+    return <div className="h-full flex items-center justify-center">Cargando datos financieros...</div>;
+  }
 
   return (
     <div className="h-full overflow-y-auto px-4 pt-4 space-y-6">
@@ -57,7 +67,7 @@ export default function Financial() {
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Ministraciones</h2>
         
-        {mockMinistraciones.map((ministracion) => (
+        {projectMinistraciones.map((ministracion) => (
           <Card key={ministracion.id} className="border-l-4 border-l-primary">
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-2">
@@ -101,7 +111,7 @@ export default function Financial() {
           Gastos por categoría principal
         </p>
         
-        {budgetCategories.map((category, index) => {
+        {projectBudgetCategories.map((category, index) => {
           const percentage = (category.spent / category.budgeted) * 100;
           return (
             <Card key={index}>

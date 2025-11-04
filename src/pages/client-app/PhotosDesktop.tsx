@@ -3,12 +3,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockPhotos } from "@/lib/client-data";
+import { useProject } from "@/contexts/ProjectContext";
 import { Download, Maximize2 } from "lucide-react";
 import PhotoViewer from "@/components/client-app/PhotoViewer";
 
 export default function PhotosDesktop() {
+  const { currentProject } = useProject();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
-  const photos = mockPhotos;
+  
+  // Filter photos by current project
+  const photos = mockPhotos.filter(photo => photo.projectId === currentProject?.id);
 
   const handleDownloadAll = async () => {
     for (const photo of photos) {

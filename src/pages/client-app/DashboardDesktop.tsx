@@ -1,11 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockProjectData, mockPhotos } from "@/lib/client-data";
+import { mockPhotos } from "@/lib/client-data";
+import { useProject } from "@/contexts/ProjectContext";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 
 export default function DashboardDesktop() {
-  const project = mockProjectData;
+  const { currentProject } = useProject();
+  const project = currentProject;
+
+  // Filter photos by current project
+  const projectPhotos = mockPhotos.filter(photo => photo.projectId === project?.id);
+
+  if (!project) {
+    return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
+  }
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
@@ -131,12 +140,12 @@ export default function DashboardDesktop() {
             <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold mb-2">{mockPhotos.length}</div>
+            <div className="text-2xl font-bold mb-2">{projectPhotos.length}</div>
             <p className="text-xs text-muted-foreground mb-4">
               Total de fotos subidas
             </p>
             <div className="grid grid-cols-3 gap-2">
-              {mockPhotos.slice(0, 6).map((photo) => (
+              {projectPhotos.slice(0, 6).map((photo) => (
                 <img 
                   key={photo.id}
                   src={photo.url} 

@@ -4,20 +4,25 @@ import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
 import AppointmentCard from '@/components/client-app/AppointmentCard';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { mockAppointments } from '@/lib/client-data';
+import { useProject } from '@/contexts/ProjectContext';
 import { Plus } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Appointments() {
+  const { currentProject } = useProject();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Filter appointments by current project
+  const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
+
   // Get all dates that have appointments
-  const appointmentDates = mockAppointments.map(apt => new Date(apt.date));
+  const appointmentDates = projectAppointments.map(apt => new Date(apt.date));
 
   // Filter appointments for selected date
   const appointmentsForSelectedDate = selectedDate
-    ? mockAppointments.filter(apt => isSameDay(new Date(apt.date), selectedDate))
+    ? projectAppointments.filter(apt => isSameDay(new Date(apt.date), selectedDate))
     : [];
 
   // Sort appointments by time
