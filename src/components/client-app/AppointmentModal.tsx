@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -58,6 +58,26 @@ export default function AppointmentModal({
   const [selectedTime, setSelectedTime] = useState<string>(appointment?.time || '');
   const [notes, setNotes] = useState(appointment?.notes || '');
   const [isVirtual, setIsVirtual] = useState(appointment?.isVirtual || false);
+
+  // Update form when appointment changes (for edit mode)
+  useEffect(() => {
+    if (appointment && mode === 'edit') {
+      setAppointmentType(appointment.type);
+      setTeamMemberId(appointment.teamMember.id?.toString() || '');
+      setSelectedDate(new Date(appointment.date));
+      setSelectedTime(appointment.time);
+      setNotes(appointment.notes || '');
+      setIsVirtual(appointment.isVirtual);
+    } else if (mode === 'create') {
+      // Reset form for new appointment
+      setAppointmentType('');
+      setTeamMemberId('');
+      setSelectedDate(undefined);
+      setSelectedTime('');
+      setNotes('');
+      setIsVirtual(false);
+    }
+  }, [appointment, mode]);
 
   const handleSubmit = () => {
     // Validation
