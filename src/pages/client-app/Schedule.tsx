@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
+import { getScheduleTitle } from '@/lib/project-utils';
 
 export default function Schedule() {
   const { currentProject } = useProject();
@@ -9,7 +10,7 @@ export default function Schedule() {
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Cronograma de Obra</h1>
+        <h1 className="text-2xl font-bold">{getScheduleTitle(currentProject)}</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Seguimiento de las fases del proyecto
         </p>

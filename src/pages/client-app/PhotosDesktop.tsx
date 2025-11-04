@@ -4,12 +4,41 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockPhotos } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
-import { Download, Maximize2 } from "lucide-react";
+import { shouldShowConstructionPhotos } from "@/lib/project-utils";
+import { Download, Maximize2, Image as ImageIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import PhotoViewer from "@/components/client-app/PhotoViewer";
 
 export default function PhotosDesktop() {
   const { currentProject } = useProject();
+  const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  
+  // Check if should show construction photos
+  if (!shouldShowConstructionPhotos(currentProject)) {
+    return (
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2 flex items-center justify-center">
+        <Card className="max-w-2xl p-12">
+          <div className="text-center space-y-6">
+            <ImageIcon className="h-20 w-20 mx-auto text-muted-foreground" />
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Fase de Diseño en Curso</h1>
+              <p className="text-muted-foreground text-lg">
+                Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción
+              </p>
+            </div>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos. 
+              Una vez que el proyecto pase a la fase de construcción, aquí podrás ver el progreso fotográfico de tu obra.
+            </p>
+            <Button size="lg" onClick={() => navigate('/app/documents')}>
+              Ver Documentos de Diseño
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
   
   // Filter photos by current project
   const photos = mockPhotos.filter(photo => photo.projectId === currentProject?.id);

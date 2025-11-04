@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { mockPhotos } from "@/lib/client-data";
 import { useProject } from "@/contexts/ProjectContext";
+import { getProjectHeroImage } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 
 export default function DashboardDesktop() {
@@ -27,7 +28,7 @@ export default function DashboardDesktop() {
         <Card className="col-span-1 lg:col-span-2 xl:col-span-3 relative overflow-hidden h-[220px]">
           <div 
             className="absolute inset-0 bg-cover bg-center" 
-            style={{ backgroundImage: `url(${project.heroImage})` }}
+            style={{ backgroundImage: `url(${getProjectHeroImage(project)})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/80" />
           </div>
@@ -112,19 +113,14 @@ export default function DashboardDesktop() {
             <CardTitle>Fases del Proyecto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {[
-              { name: "Cimentación", progress: 100, status: "Completado" },
-              { name: "Estructura", progress: 85, status: "En progreso" },
-              { name: "Instalaciones", progress: 60, status: "En progreso" },
-              { name: "Acabados", progress: 0, status: "Pendiente" },
-            ].map((phase) => (
-              <div key={phase.name} className="space-y-2">
+            {project.phases.map((phase) => (
+              <div key={phase.id} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{phase.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{phase.progress}%</span>
                     <Badge variant={phase.progress === 100 ? "default" : phase.progress > 0 ? "secondary" : "outline"}>
-                      {phase.status}
+                      {phase.status === 'completed' ? 'Completado' : phase.status === 'in-progress' ? 'En progreso' : 'Pendiente'}
                     </Badge>
                   </div>
                 </div>

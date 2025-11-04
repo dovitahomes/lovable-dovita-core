@@ -5,15 +5,45 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockPhotos } from '@/lib/client-data';
 import { useProject } from '@/contexts/ProjectContext';
+import { shouldShowConstructionPhotos } from '@/lib/project-utils';
 import { MapPin, Calendar, Image as ImageIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import PhotoViewer from '@/components/client-app/PhotoViewer';
 
 export default function Photos() {
   const { currentProject } = useProject();
+  const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
+
+  // Check if should show construction photos
+  if (!shouldShowConstructionPhotos(currentProject)) {
+    return (
+      <div className="h-full overflow-y-auto p-4">
+        <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4 rounded-lg">
+          <h1 className="text-2xl font-bold mb-1">Fotos de Avance</h1>
+          <p className="text-sm text-white/90">
+            Las fotos de construcción estarán disponibles próximamente
+          </p>
+        </div>
+        <Card className="p-8">
+          <div className="text-center space-y-4">
+            <ImageIcon className="h-16 w-16 mx-auto text-muted-foreground" />
+            <h3 className="text-lg font-semibold">Fase de Diseño en Curso</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción. 
+              Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos.
+            </p>
+            <Button onClick={() => navigate('/app/documents')}>
+              Ver Documentos de Diseño
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   // Filter photos by current project
   const projectPhotos = mockPhotos.filter(photo => photo.projectId === currentProject?.id);

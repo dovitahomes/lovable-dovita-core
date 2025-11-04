@@ -8,6 +8,7 @@ export interface Project {
   location: string;
   progress: number;
   currentPhase: string;
+  projectStage: 'design' | 'construction';
   totalAmount: number;
   totalPaid: number;
   totalPending: number;

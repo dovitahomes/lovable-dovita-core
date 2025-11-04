@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { useProject } from "@/contexts/ProjectContext";
+import { getScheduleTitle, getScheduleSubtitle } from "@/lib/project-utils";
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -38,8 +39,8 @@ export default function ScheduleDesktop() {
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Cronograma del Proyecto</h1>
-        <p className="text-muted-foreground">Seguimiento de fases y avance temporal</p>
+        <h1 className="text-3xl font-bold mb-2">{getScheduleTitle(currentProject)}</h1>
+        <p className="text-muted-foreground">{getScheduleSubtitle(currentProject)}</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -92,20 +93,20 @@ export default function ScheduleDesktop() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Fases Completadas</span>
-                  <span className="font-bold">3/8</span>
+                  <span className="font-bold">{completedPhases}/{phases.length}</span>
                 </div>
-                <Progress value={37.5} />
+                <Progress value={completionPercentage} />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Fases en Progreso</span>
-                  <span className="font-bold">2</span>
+                  <span className="font-bold">{inProgressPhases}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Fases Pendientes</span>
-                  <span className="font-bold">3</span>
+                  <span className="font-bold">{pendingPhases}</span>
                 </div>
               </div>
             </CardContent>
