@@ -198,7 +198,7 @@ export const mockPhotos = [
   {
     id: 2,
     projectId: "project_juriquilla",
-    url: "/src/assets/construction-progress.jpg",
+    url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80",
     phase: "Estructura",
     date: "2024-05-05",
     description: "Columnas de planta baja terminadas",
@@ -207,7 +207,7 @@ export const mockPhotos = [
   {
     id: 3,
     projectId: "project_juriquilla",
-    url: "/src/assets/process-construction.jpg",
+    url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80",
     phase: "Estructura",
     date: "2024-05-12",
     description: "Losa de entrepiso en proceso",
