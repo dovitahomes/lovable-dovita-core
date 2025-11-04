@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockAppointments, mockMinistraciones } from '@/lib/client-data';
+import { mockAppointments, mockMinistraciones, mockPhotos } from '@/lib/client-data';
 import { useProject } from '@/contexts/ProjectContext';
 import { calculateProjectProgress, getCurrentPhase, isInDesignPhase } from '@/lib/project-utils';
 import { Calendar, MapPin, Video, ArrowRight, Image as ImageIcon } from 'lucide-react';
@@ -73,6 +73,21 @@ export default function Dashboard() {
     
     displayTotal = displayPaid + displayPending;
   }
+
+  // Obtener imágenes correctas según la fase
+  const projectPhotos = mockPhotos.filter(photo => photo.projectId === project.id);
+  
+  const recentImages = inDesignPhase
+    ? project.renders?.slice(0, 3) || []
+    : projectPhotos.slice(0, 3);
+
+  const handleImageClick = () => {
+    if (inDesignPhase) {
+      navigate('/app/documents');
+    } else {
+      navigate('/app/photos');
+    }
+  };
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
@@ -262,15 +277,17 @@ export default function Dashboard() {
       </Card>
 
       {/* Renders Gallery Preview */}
-      {project.renders && project.renders.length > 0 && (
+      {recentImages.length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Renders del Proyecto</CardTitle>
+              <CardTitle className="text-sm">
+                {inDesignPhase ? 'Diseños Recientes' : 'Fotos Recientes'}
+              </CardTitle>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => navigate('/app/documents')}
+                onClick={handleImageClick}
                 className="text-xs"
               >
                 Ver todos
@@ -279,15 +296,15 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-2">
-              {project.renders.slice(0, 3).map((render) => (
+              {recentImages.map((item) => (
                 <div 
-                  key={render.id} 
+                  key={item.id} 
                   className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setCurrentRenderIndex(project.renders.findIndex(r => r.id === render.id))}
+                  onClick={handleImageClick}
                 >
                   <img
-                    src={render.url}
-                    alt={render.title}
+                    src={inDesignPhase ? item.url : item.url}
+                    alt={inDesignPhase ? item.title : item.description}
                     className="w-full h-full object-cover"
                   />
                 </div>
