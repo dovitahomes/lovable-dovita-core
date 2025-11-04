@@ -91,12 +91,7 @@ export default function DovitaHeaderDesktop() {
           <div className="mt-6 space-y-6">
             <div>
               <p className="text-sm font-medium mb-2 text-muted-foreground">Proyecto Actual</p>
-              <p className="text-base text-foreground">{currentProject?.name}</p>
-              {hasMultipleProjects && (
-                <div className="mt-3">
-                  <ProjectSelector variant="mobile" />
-                </div>
-              )}
+              <ProjectSelector variant="mobile" />
             </div>
 
             <Separator />
