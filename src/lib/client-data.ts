@@ -119,8 +119,8 @@ export const mockClientData = {
       currentPhase: "Diseño de Interiores",
       projectStage: "design" as const,
       totalAmount: 6200000,
-      totalPaid: 930000,
-      totalPending: 5270000,
+      totalPaid: 50000,
+      totalPending: 70000,
       startDate: "2024-02-01",
       estimatedEndDate: "2025-12-01",
       heroImage: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80",
@@ -269,18 +269,26 @@ export const mockMinistraciones = [
   {
     id: 5,
     projectId: "project_playa",
-    amount: 930000,
-    date: "2024-09-01",
+    amount: 50000,
+    date: "2024-02-15",
     status: "paid" as const,
-    concept: "Anticipo - Diseño y Permisos"
+    concept: "Anticipo - Proyecto de Diseño"
   },
   {
     id: 6,
     projectId: "project_playa",
-    amount: 1240000,
-    date: "2024-11-15",
+    amount: 40000,
+    date: "2024-03-20",
     status: "pending" as const,
-    concept: "Primera Ministración - Cimentación"
+    concept: "Segunda Ministración - Diseño Arquitectónico"
+  },
+  {
+    id: 7,
+    projectId: "project_playa",
+    amount: 30000,
+    date: "2024-04-15",
+    status: "future" as const,
+    concept: "Tercera Ministración - Diseño Final"
   }
 ];
 
