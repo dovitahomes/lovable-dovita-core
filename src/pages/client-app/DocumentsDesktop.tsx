@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Download, Search, Upload } from "lucide-react";
+import { FileText, Download, Search, Upload, Eye } from "lucide-react";
+import DocumentViewer from '@/components/client-app/DocumentViewer';
 import {
   Table,
   TableBody,
@@ -15,33 +17,47 @@ import {
 
 const documents = {
   cliente: [
-    { id: 1, name: "Contrato de Obra", size: "890 KB", date: "1 Oct 2024", type: "PDF" },
-    { id: 2, name: "Factura #001", size: "245 KB", date: "5 Oct 2024", type: "PDF" },
-    { id: 3, name: "Factura #002", size: "238 KB", date: "20 Oct 2024", type: "PDF" },
+    { id: 1, name: "Contrato de Obra.pdf", size: "890 KB", date: "1 Oct 2024", type: "pdf" },
+    { id: 2, name: "Factura #001.pdf", size: "245 KB", date: "5 Oct 2024", type: "pdf" },
+    { id: 3, name: "Factura #002.pdf", size: "238 KB", date: "20 Oct 2024", type: "pdf" },
   ],
   proyecto: [
-    { id: 4, name: "Planos Arquitectónicos", size: "2.4 MB", date: "15 Oct 2024", type: "PDF" },
-    { id: 5, name: "Especificaciones Técnicas", size: "1.8 MB", date: "10 Oct 2024", type: "PDF" },
+    { id: 4, name: "Planos Arquitectónicos.pdf", size: "2.4 MB", date: "15 Oct 2024", type: "pdf" },
+    { id: 5, name: "Especificaciones Técnicas.pdf", size: "1.8 MB", date: "10 Oct 2024", type: "pdf" },
   ],
   legal: [
-    { id: 6, name: "Permiso de Construcción", size: "1.2 MB", date: "25 Sep 2024", type: "PDF" },
-    { id: 7, name: "Licencias", size: "650 KB", date: "20 Sep 2024", type: "PDF" },
-    { id: 8, name: "Póliza de Seguro", size: "420 KB", date: "15 Sep 2024", type: "PDF" },
+    { id: 6, name: "Permiso de Construcción.pdf", size: "1.2 MB", date: "25 Sep 2024", type: "pdf" },
+    { id: 7, name: "Licencias.pdf", size: "650 KB", date: "20 Sep 2024", type: "pdf" },
+    { id: 8, name: "Póliza de Seguro.pdf", size: "420 KB", date: "15 Sep 2024", type: "pdf" },
   ],
   diseno: [
-    { id: 9, name: "Diseño Interior", size: "4.2 MB", date: "12 Oct 2024", type: "PDF" },
-    { id: 10, name: "Renders 3D", size: "5.2 MB", date: "10 Oct 2024", type: "ZIP" },
-    { id: 11, name: "Paleta de Colores", size: "650 KB", date: "8 Oct 2024", type: "PDF" },
+    { id: 9, name: "Diseño Interior.pdf", size: "4.2 MB", date: "12 Oct 2024", type: "pdf" },
+    { id: 10, name: "Renders 3D.jpg", size: "5.2 MB", date: "10 Oct 2024", type: "image" },
+    { id: 11, name: "Paleta de Colores.pdf", size: "650 KB", date: "8 Oct 2024", type: "pdf" },
   ],
   construccion: [
-    { id: 12, name: "Avance Semana 1", size: "1.8 MB", date: "22 Oct 2024", type: "PDF" },
-    { id: 13, name: "Fotos de Obra", size: "3.5 MB", date: "21 Oct 2024", type: "ZIP" },
-    { id: 14, name: "Bitácora Construcción", size: "920 KB", date: "20 Oct 2024", type: "PDF" },
+    { id: 12, name: "Avance Semana 1.pdf", size: "1.8 MB", date: "22 Oct 2024", type: "pdf" },
+    { id: 13, name: "Fotos de Obra.jpg", size: "3.5 MB", date: "21 Oct 2024", type: "image" },
+    { id: 14, name: "Bitácora Construcción.pdf", size: "920 KB", date: "20 Oct 2024", type: "pdf" },
   ],
 };
 
 export default function DocumentsDesktop() {
-  const renderDocumentTable = (docs: typeof documents.proyecto) => (
+  const [selectedDocument, setSelectedDocument] = useState<{
+    name: string;
+    type: string;
+  } | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+
+  const handleViewDocument = (doc: typeof documents.cliente[0]) => {
+    setSelectedDocument({
+      name: doc.name,
+      type: doc.type,
+    });
+    setViewerOpen(true);
+  };
+
+  const renderDocumentTable = (docs: typeof documents.cliente) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -69,9 +85,14 @@ export default function DocumentsDesktop() {
             <TableCell className="text-muted-foreground">{doc.size}</TableCell>
             <TableCell className="text-muted-foreground">{doc.date}</TableCell>
             <TableCell className="text-right">
-              <Button variant="ghost" size="icon">
-                <Download className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center justify-end gap-1">
+                <Button variant="ghost" size="icon" onClick={() => handleViewDocument(doc)}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}
@@ -128,6 +149,12 @@ export default function DocumentsDesktop() {
           </Tabs>
         </CardContent>
       </Card>
+
+      <DocumentViewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        document={selectedDocument}
+      />
     </div>
   );
 }
