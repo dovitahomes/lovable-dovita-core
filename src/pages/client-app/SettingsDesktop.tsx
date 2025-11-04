@@ -235,7 +235,6 @@ export default function SettingsDesktop() {
               </div>
             </div>
           )}
-        </div>
       </div>
     </div>
   );
