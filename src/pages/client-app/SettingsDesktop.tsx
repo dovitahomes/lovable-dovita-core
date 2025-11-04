@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import DovitaHeaderDesktop from '@/components/client-app/DovitaHeaderDesktop';
 import { useNavigate } from 'react-router-dom';
 
 export default function SettingsDesktop() {
@@ -86,26 +85,23 @@ export default function SettingsDesktop() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <DovitaHeaderDesktop />
-      
-      <div className="pt-24 px-8 pb-8">
-        <div className="max-w-4xl mx-auto">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/app')}
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+      <div className="max-w-4xl">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/app')}
+          className="mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
 
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold">Configuración</h1>
-            <p className="text-muted-foreground mt-2 text-lg">
-              Gestiona tus preferencias de notificaciones
-            </p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">Configuración</h1>
+          <p className="text-muted-foreground mt-2 text-lg">
+            Gestiona tus preferencias de notificaciones
+          </p>
+        </div>
 
           <Card>
             <CardHeader>
