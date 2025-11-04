@@ -60,23 +60,30 @@ export default function ChatDesktop() {
     return <AvatarImage src={clientAvatar.value} />;
   };
 
+  // Update messages when project changes
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    setMessages(mockChatMessages.filter(msg => msg.projectId === currentProject?.id));
+  }, [currentProject?.id]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    scrollAreaRef.current?.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   const handleSend = () => {
-    if (!inputValue.trim()) return;
+    if (!input.trim()) return;
 
     const newMessage: Message = {
       id: messages.length + 1,
-      content: inputValue,
+      projectId: currentProject?.id || '',
+      content: input,
       timestamp: new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
       isClient: true,
       status: "sent",
     };
 
     setMessages([...messages, newMessage]);
-    setInputValue("");
+    setInput("");
   };
 
   return (
@@ -85,12 +92,12 @@ export default function ChatDesktop() {
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src={mockProjectData.team[0].avatar} />
-              <AvatarFallback>{mockProjectData.team[0].name[0]}</AvatarFallback>
+              <AvatarImage src={currentProject?.team[0]?.avatar} />
+              <AvatarFallback>{currentProject?.team[0]?.name[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold">{mockProjectData.team[0].name}</h3>
-              <p className="text-xs text-muted-foreground">{mockProjectData.team[0].role}</p>
+              <h3 className="font-semibold">{currentProject?.team[0]?.name}</h3>
+              <p className="text-xs text-muted-foreground">{currentProject?.team[0]?.role}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -115,7 +122,7 @@ export default function ChatDesktop() {
           </div>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => {
             const isClient = message.isClient;
             return (
@@ -163,8 +170,8 @@ export default function ChatDesktop() {
           <div className="flex items-center gap-2">
             <Input
               placeholder="Escribe un mensaje..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               className="flex-1"
             />
@@ -181,7 +188,7 @@ export default function ChatDesktop() {
           <div>
             <h4 className="text-sm font-medium mb-2">Equipo</h4>
             <div className="space-y-3">
-              {mockProjectData.team.map((member) => (
+              {currentProject?.team.map((member) => (
                 <div key={member.id} className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage src={member.avatar} />
@@ -204,9 +211,9 @@ export default function ChatDesktop() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>Avance general</span>
-                <span className="font-bold">{mockProjectData.progress}%</span>
+                <span className="font-bold">{currentProject?.progress}%</span>
               </div>
-              <Badge className="w-full justify-center">{mockProjectData.currentPhase}</Badge>
+              <Badge className="w-full justify-center">{currentProject?.currentPhase}</Badge>
             </div>
           </div>
         </div>

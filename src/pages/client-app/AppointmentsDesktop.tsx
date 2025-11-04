@@ -20,7 +20,9 @@ export default function AppointmentsDesktop() {
   const appointmentDates = projectAppointments.map(apt => new Date(apt.date));
 
   // Filter and sort appointments for selected date
-  const appointmentsOnSelectedDate = selectedAppointments;
+  const appointmentsOnSelectedDate = projectAppointments
+    .filter(apt => isSameDay(new Date(apt.date), selectedDate))
+    .sort((a, b) => a.time.localeCompare(b.time));
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
