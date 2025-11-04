@@ -162,7 +162,10 @@ export default function Dashboard() {
 
       {/* Financial Summary */}
       <div className="grid grid-cols-2 gap-3">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+          onClick={() => navigate('/app/financial')}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground">
               {inDesignPhase ? 'Pagado Diseño' : 'Pagado'}
@@ -178,7 +181,10 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card 
+          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+          onClick={() => navigate('/app/financial')}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground">
               {inDesignPhase ? 'Por Pagar Diseño' : 'Por Pagar'}
