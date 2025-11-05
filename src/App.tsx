@@ -48,7 +48,7 @@ const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
 const Usuarios = lazy(() => import("./pages/Usuarios"));
-const ClientPreviewHost = lazy(() => import("./pages/ClientPreviewHost"));
+const VerComoCliente = lazy(() => import("./pages/VerComoCliente"));
 
 // Admin tools (lazy loaded)
 const ContenidoCorporativo = lazy(() => import("./pages/herramientas/ContenidoCorporativo"));
@@ -179,7 +179,7 @@ const InternalLayout = () => {
                 <Route path="/finance/payments" element={<Navigate to="/lotes-pago" replace />} />
                 <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
-                <Route path="/ver-como-cliente" element={<Suspense fallback={<TableSkeleton />}><ClientPreviewHost /></Suspense>} />
+                <Route path="/ver-como-cliente" element={<Suspense fallback={<TableSkeleton />}><VerComoCliente /></Suspense>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
