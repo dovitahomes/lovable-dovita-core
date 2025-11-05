@@ -9,6 +9,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Proxy /client to apps/client dev server
+      '^/client': {
+        target: 'http://localhost:5174',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react(),
