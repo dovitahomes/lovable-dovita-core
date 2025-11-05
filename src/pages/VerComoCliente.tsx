@@ -1,39 +1,24 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 
 export default function VerComoCliente() {
-  const navigate = useNavigate();
-
   useEffect(() => {
     // Set preview mode in localStorage
     localStorage.setItem("clientapp.previewMode", "true");
     localStorage.setItem("clientapp.backofficeUrl", window.location.origin);
 
-    // Navigate to client app with preview param
-    // Try to navigate to /client first (if built and deployed)
-    // Fallback: show a message that clientapp needs to be compiled
+    // Redirect to client app (apps/client build should be served at /client)
+    // In dev, you can run apps/client separately on another port
+    // In production, build apps/client and serve it at /client path
     const clientAppUrl = "/client?preview=1";
-    
-    // Check if /client exists by attempting navigation
-    // For now, we'll just try to navigate - if it fails, user will see 404
     window.location.href = clientAppUrl;
-  }, [navigate]);
+  }, []);
 
   return (
-    <div className="container mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Redirigiendo al Portal Cliente</CardTitle>
-          <CardDescription>
-            Preparando vista previa...
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="text-muted-foreground">Redirigiendo al Portal Cliente...</p>
+      </div>
     </div>
   );
 }
