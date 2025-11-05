@@ -543,3 +543,355 @@ export const mockChatMessages = [
     status: "delivered" as const
   }
 ];
+
+// ==========================================
+// SUPABASE INTEGRATION (READ-ONLY)
+// ==========================================
+
+import { supabase } from './supabase';
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+// Helper to get signed URL for private files
+async function getSignedUrl(path: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from('project_docs')
+    .createSignedUrl(path, 3600);
+  
+  if (error) {
+    console.error('Error getting signed URL:', error);
+    return '';
+  }
+  
+  return data?.signedUrl || '';
+}
+
+// ==========================================
+// API FUNCTIONS
+// ==========================================
+
+export async function getClientProjects(userId: string) {
+  if (USE_MOCK) {
+    return mockClientData.projects;
+  }
+
+  try {
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select(`
+        id,
+        client_id,
+        status,
+        created_at,
+        updated_at,
+        notas,
+        ubicacion_json,
+        terreno_m2,
+        clients!inner(
+          id,
+          name,
+          email,
+          phone
+        )
+      `)
+      .eq('clients.id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching projects:', error);
+      return [];
+    }
+
+    return projects || [];
+  } catch (error) {
+    console.error('Error in getClientProjects:', error);
+    return [];
+  }
+}
+
+export async function getProjectSummary(projectId: string) {
+  if (USE_MOCK) {
+    const project = mockClientData.projects.find(p => p.id === projectId);
+    return project || null;
+  }
+
+  try {
+    // Get basic project info
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select(`
+        id,
+        status,
+        created_at,
+        updated_at,
+        notas,
+        ubicacion_json,
+        terreno_m2,
+        clients!inner(
+          id,
+          name
+        )
+      `)
+      .eq('id', projectId)
+      .single();
+
+    if (projectError) {
+      console.error('Error fetching project:', projectError);
+      return null;
+    }
+
+    // TODO: Calculate progress from gantt_plans or construction progress
+    // For now, return basic data structure
+    return {
+      id: project.id,
+      clientName: project.clients?.name || 'Cliente',
+      name: project.clients?.name || 'Proyecto', // TODO: projects table needs name field
+      location: project.ubicacion_json?.formatted || 'Sin ubicación',
+      progress: 0, // TODO: calculate from gantt or construction data
+      currentPhase: 'En proceso',
+      projectStage: 'construction' as const,
+      totalAmount: 0, // TODO: sum from budgets
+      totalPaid: 0, // TODO: sum from transactions
+      totalPending: 0,
+      startDate: project.created_at,
+      estimatedEndDate: project.updated_at, // TODO: get from gantt plan
+      status: project.status,
+      notes: project.notas
+    };
+  } catch (error) {
+    console.error('Error in getProjectSummary:', error);
+    return null;
+  }
+}
+
+export async function getProjectPhotos(projectId: string) {
+  if (USE_MOCK) {
+    return mockPhotos.filter(p => p.projectId === projectId);
+  }
+
+  try {
+    const { data: photos, error } = await supabase
+      .from('construction_photos')
+      .select('*')
+      .eq('project_id', projectId)
+      .eq('visibilidad', 'cliente')
+      .order('fecha_foto', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching photos:', error);
+      return [];
+    }
+
+    // Get signed URLs for photos
+    const photosWithUrls = await Promise.all(
+      (photos || []).map(async (photo) => {
+        const signedUrl = await getSignedUrl(photo.file_url);
+        return {
+          id: photo.id,
+          projectId: photo.project_id,
+          url: signedUrl || photo.file_url,
+          phase: 'Construcción', // TODO: link to design_phases
+          date: photo.fecha_foto,
+          description: photo.descripcion || '',
+          location: photo.latitude && photo.longitude 
+            ? { lat: Number(photo.latitude), lng: Number(photo.longitude) }
+            : undefined
+        };
+      })
+    );
+
+    return photosWithUrls;
+  } catch (error) {
+    console.error('Error in getProjectPhotos:', error);
+    return [];
+  }
+}
+
+export async function getProjectDocuments(projectId: string) {
+  if (USE_MOCK) {
+    const project = mockClientData.projects.find(p => p.id === projectId);
+    return project?.documents || [];
+  }
+
+  try {
+    const { data: documents, error } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('project_id', projectId)
+      .eq('visibilidad', 'cliente')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching documents:', error);
+      return [];
+    }
+
+    // Get signed URLs for documents
+    const docsWithUrls = await Promise.all(
+      (documents || []).map(async (doc) => {
+        const signedUrl = await getSignedUrl(doc.file_url);
+        return {
+          id: doc.id,
+          name: doc.nombre,
+          size: doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'N/A',
+          date: new Date(doc.created_at).toLocaleDateString('es-MX'),
+          type: doc.file_type?.includes('image') ? 'image' as const : 'pdf' as const,
+          category: doc.tipo_carpeta as Document['category'],
+          url: signedUrl || doc.file_url
+        };
+      })
+    );
+
+    return docsWithUrls;
+  } catch (error) {
+    console.error('Error in getProjectDocuments:', error);
+    return [];
+  }
+}
+
+export async function getProjectAppointments(projectId: string) {
+  if (USE_MOCK) {
+    return mockAppointments.filter(a => a.projectId === projectId);
+  }
+
+  try {
+    const { data: events, error } = await supabase
+      .from('calendar_events')
+      .select(`
+        id,
+        title,
+        start_at,
+        end_at,
+        notes,
+        attendees,
+        project_id
+      `)
+      .eq('project_id', projectId)
+      .order('start_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching appointments:', error);
+      return [];
+    }
+
+    // Transform to appointment format
+    const appointments = (events || []).map((event) => {
+      const startDate = new Date(event.start_at);
+      const endDate = new Date(event.end_at);
+      const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
+      
+      return {
+        id: event.id,
+        projectId: event.project_id,
+        type: event.title,
+        date: startDate.toISOString().split('T')[0],
+        time: startDate.toTimeString().slice(0, 5),
+        duration,
+        status: (startDate < new Date() ? 'completed' : 'confirmed') as const,
+        teamMember: {
+          id: 1,
+          name: 'Equipo Dovita',
+          role: 'Coordinador',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Team'
+        },
+        location: 'Por definir',
+        notes: event.notes || '',
+        isVirtual: false
+      };
+    });
+
+    return appointments;
+  } catch (error) {
+    console.error('Error in getProjectAppointments:', error);
+    return [];
+  }
+}
+
+export async function getProjectFinancial(projectId: string) {
+  if (USE_MOCK) {
+    const ministrations = mockMinistraciones.filter(m => m.projectId === projectId);
+    const categories = budgetCategories.filter(c => c.projectId === projectId);
+    
+    return {
+      ministrations,
+      categories,
+      summary: {
+        totalAmount: ministrations.reduce((sum, m) => sum + m.amount, 0),
+        totalPaid: ministrations
+          .filter(m => m.status === 'paid')
+          .reduce((sum, m) => sum + m.amount, 0),
+        totalPending: ministrations
+          .filter(m => m.status === 'pending')
+          .reduce((sum, m) => sum + m.amount, 0)
+      }
+    };
+  }
+
+  try {
+    // Get ministrations from gantt
+    const { data: ganttData, error: ganttError } = await supabase
+      .from('gantt_plans')
+      .select(`
+        id,
+        gantt_ministrations (
+          id,
+          date,
+          label,
+          percent,
+          accumulated_percent,
+          alcance
+        )
+      `)
+      .eq('project_id', projectId)
+      .eq('type', 'ejecutivo')
+      .eq('shared_with_construction', true)
+      .single();
+
+    if (ganttError) {
+      console.error('Error fetching gantt ministrations:', ganttError);
+    }
+
+    const ministrations = (ganttData?.gantt_ministrations || []).map((m: any) => ({
+      id: m.id,
+      projectId,
+      amount: 0, // TODO: calculate from budget total * percent
+      date: m.date,
+      status: new Date(m.date) < new Date() ? 'paid' as const : 'future' as const,
+      concept: m.label || m.alcance || 'Ministración'
+    }));
+
+    // Get financial summary from view
+    const { data: summary, error: summaryError } = await supabase
+      .from('vw_client_financial_summary')
+      .select('*')
+      .eq('project_id', projectId);
+
+    if (summaryError) {
+      console.error('Error fetching financial summary:', summaryError);
+    }
+
+    const categories = (summary || []).map((item: any) => ({
+      projectId,
+      name: item.mayor_name || 'Categoría',
+      budgeted: item.mayor_expense || 0,
+      spent: 0 // TODO: calculate from transactions
+    }));
+
+    return {
+      ministrations,
+      categories,
+      summary: {
+        totalAmount: summary?.[0]?.total_deposits || 0,
+        totalPaid: summary?.[0]?.total_deposits || 0,
+        totalPending: summary?.[0]?.balance || 0
+      }
+    };
+  } catch (error) {
+    console.error('Error in getProjectFinancial:', error);
+    return {
+      ministrations: [],
+      categories: [],
+      summary: { totalAmount: 0, totalPaid: 0, totalPending: 0 }
+    };
+  }
+}
