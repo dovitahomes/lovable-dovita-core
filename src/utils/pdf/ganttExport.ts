@@ -6,6 +6,8 @@ import type { BudgetMajor } from "@/hooks/useBudgetMajors";
 import type { WeekCell } from "@/utils/ganttTime";
 import type { CorporateContent } from "@/hooks/useCorporateContent";
 import { calculateBarPosition, groupWeeksByMonth } from "@/utils/ganttTime";
+import { drawHeader, drawFooter } from "./membrete";
+import { hexToRgb } from "./brand";
 
 export async function exportGanttToPDF(params: {
   projectName: string;
@@ -30,38 +32,19 @@ export async function exportGanttToPDF(params: {
   const redRgb: [number, number, number] = [211, 47, 47]; // Red for ministrations
   const barBlueRgb = primaryRgb; // Use primary color for bars
 
-  let currentY = 10;
+  // ============= HEADER SECTION (institutional letterhead) =============
+  const brand = {
+    logoUrl: params.corporateData?.logo_url || null,
+    colorPrimario: primaryColor,
+    colorSecundario: secondaryColor,
+    razonSocial: params.corporateData?.nombre_empresa || "DOVITA",
+    domicilio: params.corporateData?.direccion || "",
+    telefono: params.corporateData?.telefono_principal || "",
+    sitioWeb: params.corporateData?.sitio_web || "",
+    emailPrincipal: params.corporateData?.email_principal || "",
+  };
 
-  // ============= HEADER SECTION =============
-  // Logo (left side)
-  if (params.corporateData?.logo_url) {
-    try {
-      doc.addImage(params.corporateData.logo_url, "PNG", 10, currentY, 35, 18);
-    } catch (e) {
-      console.error("Error loading logo for PDF");
-    }
-  }
-
-  // Corporate info (right side)
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-  const rightX = pageWidth - 10;
-  
-  if (params.corporateData?.nombre_empresa) {
-    doc.text(params.corporateData.nombre_empresa, rightX, currentY + 3, { align: "right" });
-  }
-  if (params.corporateData?.direccion) {
-    doc.setFontSize(8);
-    doc.text(params.corporateData.direccion, rightX, currentY + 8, { align: "right" });
-  }
-  if (params.corporateData?.telefono_principal) {
-    doc.text(`Tel: ${params.corporateData.telefono_principal}`, rightX, currentY + 12, { align: "right" });
-  }
-  if (params.corporateData?.email_principal) {
-    doc.text(params.corporateData.email_principal, rightX, currentY + 16, { align: "right" });
-  }
-
-  currentY += 22;
+  let currentY = await drawHeader(doc, brand, { orientation: "landscape" });
 
   // Title
   doc.setFontSize(14);
@@ -287,18 +270,8 @@ export async function exportGanttToPDF(params: {
     currentY = (doc as any).lastAutoTable.finalY + 5;
   }
 
-  // ============= FOOTER =============
-  const footerY = pageHeight - 8;
-  doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
-  doc.text(
-    `${params.corporateData?.nombre_empresa || "Sistema Dovita"} | Cronograma de Gantt`,
-    10,
-    footerY
-  );
-  doc.text(`Generado: ${format(new Date(), "dd/MM/yyyy HH:mm")}`, pageWidth - 10, footerY, {
-    align: "right",
-  });
+  // ============= FOOTER (institutional) =============
+  drawFooter(doc, brand, { pageNumber: 1, totalPages: 1 });
 
   // Save
   const fileName = `Gantt_${params.projectName.replace(/\s+/g, "_")}_${format(new Date(), "yyyyMMdd")}.pdf`;
@@ -307,9 +280,4 @@ export async function exportGanttToPDF(params: {
   return fileName;
 }
 
-function hexToRgb(hex: string): [number, number, number] {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
-    : [30, 64, 175]; // Default blue
-}
+// hexToRgb now imported from ./brand
