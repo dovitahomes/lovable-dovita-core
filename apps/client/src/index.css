@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Layout heights */
+    --header-height: 68px;
+    --footer-height: 65px;
+    
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 212 100% 26%;
+    --primary-foreground: 0 0% 100%;
+    
+    --primary-dark: 212 100% 18%;
+    --primary-light: 212 100% 40%;
+    --primary-accent: 212 100% 26%;
+
+    --secondary: 45 100% 60%;
+    --secondary-foreground: 0 0% 20%;
+
+    --muted: 210 20% 98%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 212 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 212 100% 50%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Tech startup gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(212 100% 26%) 0%, hsl(212 100% 40%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(45 100% 60%) 0%, hsl(45 100% 70%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(212 100% 18%) 0%, hsl(212 100% 26%) 50%, hsl(212 100% 40%) 100%);
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 212 100% 26%;
+    --primary-foreground: 0 0% 100%;
+    
+    --primary-dark: 212 100% 18%;
+    --primary-light: 212 100% 40%;
+    --primary-accent: 212 100% 26%;
+
+    --secondary: 45 100% 60%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 45 100% 60%;
+    --accent-foreground: 0 0% 10%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 215 100% 50%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+/* Mobile Frame Styles */
+.mobile-frame {
+  border-radius: 24px;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+/* Fixed size elements that don't scale with zoom */
+.no-zoom {
+  zoom: reset;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+@supports not (zoom: reset) {
+  .no-zoom {
+    transform: scale(1);
+    transform-origin: top left;
+  }
+}
+
+/* Menu Styles */
+.menu {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5rem;
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  width: 100%;
+  flex-shrink: 0;
+  zoom: reset;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+@supports not (zoom: reset) {
+  .menu {
+    transform: scale(1);
+  }
+}
+
+.menu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  color: hsl(var(--muted-foreground));
+  flex: 1;
+  max-width: 60px;
+}
+
+.menu__item.active {
+  color: hsl(var(--primary));
+}
+
+.menu__icon {
+  position: relative;
+}
+
+.menu__item.active .menu__icon .icon {
+  animation: iconBounce 0.6s ease-in-out;
+}
+
+.menu__icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.menu__text {
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  position: relative;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.menu__text.active {
+  opacity: 1;
+  max-height: 2rem;
+}
+
+.menu__text.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  width: var(--lineWidth, 0);
+  height: 2px;
+  background: hsl(var(--primary));
+  transition: width 0.3s ease;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-0.3em);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-0.1em);
+  }
+  80% {
+    transform: translateY(0);
+  }
+}
+
+/* Appointment Calendar Styles */
+.appointment-calendar .has-appointment {
+  position: relative;
+}
+
+.appointment-calendar .has-appointment::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: hsl(var(--secondary));
+}
