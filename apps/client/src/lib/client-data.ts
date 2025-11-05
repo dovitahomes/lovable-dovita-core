@@ -550,7 +550,13 @@ export const mockChatMessages = [
 
 import { supabase } from './supabase';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+// Helper to determine runtime mock mode
+const useMockRuntime = () => {
+  const override = localStorage.getItem('clientapp.useMock');
+  if (override === 'true') return true;
+  if (override === 'false') return false;
+  return import.meta.env.VITE_USE_MOCK === 'true';
+};
 
 // Helper to get signed URL for private files
 async function getSignedUrl(path: string): Promise<string> {
@@ -571,7 +577,7 @@ async function getSignedUrl(path: string): Promise<string> {
 // ==========================================
 
 export async function getClientProjects(userId: string) {
-  if (USE_MOCK) {
+  if (useMockRuntime()) {
     return mockClientData.projects;
   }
 
@@ -604,7 +610,7 @@ export async function getClientProjects(userId: string) {
 }
 
 export async function getProjectSummary(projectId: string) {
-  if (USE_MOCK) {
+  if (useMockRuntime()) {
     const project = mockClientData.projects.find(p => p.id === projectId);
     return project || null;
   }
@@ -643,7 +649,7 @@ export async function getProjectSummary(projectId: string) {
 }
 
 export async function getProjectPhotos(projectId: string) {
-  if (USE_MOCK) {
+  if (useMockRuntime()) {
     return mockPhotos.filter(p => p.projectId === projectId);
   }
 
@@ -685,7 +691,7 @@ export async function getProjectPhotos(projectId: string) {
 }
 
 export async function getProjectDocuments(projectId: string) {
-  if (USE_MOCK) {
+  if (useMockRuntime()) {
     const project = mockClientData.projects.find(p => p.id === projectId);
     return project?.documents || [];
   }
@@ -726,7 +732,7 @@ export async function getProjectDocuments(projectId: string) {
 }
 
 export async function getProjectAppointments(projectId: string) {
-  if (USE_MOCK) {
+  if (useMockRuntime()) {
     return mockAppointments.filter(a => a.projectId === projectId);
   }
 
@@ -773,7 +779,7 @@ export async function getProjectAppointments(projectId: string) {
 }
 
 export async function getProjectFinancial(projectId: string) {
-  if (USE_MOCK) {
+  if (useMockRuntime()) {
     const ministrations = mockMinistraciones.filter(m => m.projectId === projectId);
     const categories = budgetCategories.filter(c => c.projectId === projectId);
     

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, Check } from 'lucide-react';
+import { Bell, Database, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 export default function Settings() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+  const [useMock, setUseMock] = useState(true);
   const [preferences, setPreferences] = useState({
     chat: true,
     calendar: true,
@@ -32,6 +33,12 @@ export default function Settings() {
     const savedPushEnabled = localStorage.getItem('pushNotificationsEnabled');
     if (savedPushEnabled) {
       setPushEnabled(savedPushEnabled === 'true');
+    }
+
+    // Load data source preference
+    const savedUseMock = localStorage.getItem('clientapp.useMock');
+    if (savedUseMock !== null) {
+      setUseMock(savedUseMock === 'true');
     }
   }, []);
 
@@ -83,6 +90,12 @@ export default function Settings() {
     setPreferences(newPreferences);
     localStorage.setItem('notificationPreferences', JSON.stringify(newPreferences));
     toast.success('Preferencias actualizadas');
+  };
+
+  const handleDataSourceToggle = (checked: boolean) => {
+    setUseMock(checked);
+    localStorage.setItem('clientapp.useMock', checked.toString());
+    toast.info('La fuente de datos se actualizará al cambiar de pantalla');
   };
 
   return (
@@ -227,6 +240,35 @@ export default function Settings() {
             </div>
           </div>
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Fuente de Datos
+            </CardTitle>
+            <CardDescription>
+              Alternar entre datos de ejemplo y datos reales de Supabase
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="mock-toggle" className="text-base">
+                  Usar datos de ejemplo (Mock)
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  {useMock ? 'Mostrando datos de ejemplo' : 'Conectado a Supabase'}
+                </p>
+              </div>
+              <Switch
+                id="mock-toggle"
+                checked={useMock}
+                onCheckedChange={handleDataSourceToggle}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
