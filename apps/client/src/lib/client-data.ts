@@ -577,24 +577,9 @@ export async function getClientProjects(userId: string) {
 
   try {
     const { data: projects, error } = await supabase
-      .from('projects')
-      .select(`
-        id,
-        client_id,
-        status,
-        created_at,
-        updated_at,
-        notas,
-        ubicacion_json,
-        terreno_m2,
-        clients!inner(
-          id,
-          name,
-          email,
-          phone
-        )
-      `)
-      .eq('clients.id', userId)
+      .from('v_client_projects')
+      .select('*')
+      .eq('client_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -602,7 +587,16 @@ export async function getClientProjects(userId: string) {
       return [];
     }
 
-    return projects || [];
+    return (projects || []).map(p => ({
+      id: p.project_id,
+      clientId: p.client_id,
+      name: p.project_name,
+      code: p.project_code,
+      status: p.status,
+      location: p.ubicacion_json?.formatted || 'Sin ubicación',
+      terrainM2: p.terreno_m2,
+      createdAt: p.created_at
+    }));
   } catch (error) {
     console.error('Error in getClientProjects:', error);
     return [];
@@ -616,47 +610,31 @@ export async function getProjectSummary(projectId: string) {
   }
 
   try {
-    // Get basic project info
-    const { data: project, error: projectError } = await supabase
-      .from('projects')
-      .select(`
-        id,
-        status,
-        created_at,
-        updated_at,
-        notas,
-        ubicacion_json,
-        terreno_m2,
-        clients!inner(
-          id,
-          name
-        )
-      `)
-      .eq('id', projectId)
+    const { data: summary, error } = await supabase
+      .from('v_client_project_summary')
+      .select('*')
+      .eq('project_id', projectId)
       .single();
 
-    if (projectError) {
-      console.error('Error fetching project:', projectError);
+    if (error) {
+      console.error('Error fetching project summary:', error);
       return null;
     }
 
-    // TODO: Calculate progress from gantt_plans or construction progress
-    // For now, return basic data structure
     return {
-      id: project.id,
-      clientName: project.clients?.name || 'Cliente',
-      name: project.clients?.name || 'Proyecto', // TODO: projects table needs name field
-      location: project.ubicacion_json?.formatted || 'Sin ubicación',
-      progress: 0, // TODO: calculate from gantt or construction data
+      id: summary.project_id,
+      clientName: 'Cliente', // TODO: add to view if needed
+      name: summary.project_name,
+      location: 'Sin ubicación', // TODO: add from projects.ubicacion_json
+      progress: Number(summary.progress_percent) || 0,
       currentPhase: 'En proceso',
       projectStage: 'construction' as const,
-      totalAmount: 0, // TODO: sum from budgets
-      totalPaid: 0, // TODO: sum from transactions
-      totalPending: 0,
-      startDate: project.created_at,
-      estimatedEndDate: project.updated_at, // TODO: get from gantt plan
-      status: project.status,
-      notes: project.notas
+      totalAmount: Number(summary.total_amount) || 0,
+      totalPaid: Number(summary.total_paid) || 0,
+      totalPending: Number(summary.total_pending) || 0,
+      startDate: summary.start_date,
+      estimatedEndDate: summary.estimated_end_date,
+      status: summary.status
     };
   } catch (error) {
     console.error('Error in getProjectSummary:', error);
@@ -671,11 +649,10 @@ export async function getProjectPhotos(projectId: string) {
 
   try {
     const { data: photos, error } = await supabase
-      .from('construction_photos')
+      .from('v_client_photos')
       .select('*')
       .eq('project_id', projectId)
-      .eq('visibilidad', 'cliente')
-      .order('fecha_foto', { ascending: false });
+      .order('taken_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching photos:', error);
@@ -685,14 +662,14 @@ export async function getProjectPhotos(projectId: string) {
     // Get signed URLs for photos
     const photosWithUrls = await Promise.all(
       (photos || []).map(async (photo) => {
-        const signedUrl = await getSignedUrl(photo.file_url);
+        const signedUrl = await getSignedUrl(photo.storage_path);
         return {
-          id: photo.id,
+          id: photo.photo_id,
           projectId: photo.project_id,
-          url: signedUrl || photo.file_url,
-          phase: 'Construcción', // TODO: link to design_phases
-          date: photo.fecha_foto,
-          description: photo.descripcion || '',
+          url: signedUrl || photo.storage_path,
+          phase: photo.phase_name || 'Construcción',
+          date: photo.taken_at,
+          description: photo.caption || '',
           location: photo.latitude && photo.longitude 
             ? { lat: Number(photo.latitude), lng: Number(photo.longitude) }
             : undefined
@@ -715,11 +692,10 @@ export async function getProjectDocuments(projectId: string) {
 
   try {
     const { data: documents, error } = await supabase
-      .from('documents')
+      .from('v_client_documents')
       .select('*')
       .eq('project_id', projectId)
-      .eq('visibilidad', 'cliente')
-      .order('created_at', { ascending: false });
+      .order('uploaded_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching documents:', error);
@@ -729,15 +705,15 @@ export async function getProjectDocuments(projectId: string) {
     // Get signed URLs for documents
     const docsWithUrls = await Promise.all(
       (documents || []).map(async (doc) => {
-        const signedUrl = await getSignedUrl(doc.file_url);
+        const signedUrl = await getSignedUrl(doc.storage_path);
         return {
-          id: doc.id,
-          name: doc.nombre,
+          id: doc.doc_id,
+          name: doc.name,
           size: doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'N/A',
-          date: new Date(doc.created_at).toLocaleDateString('es-MX'),
-          type: doc.file_type?.includes('image') ? 'image' as const : 'pdf' as const,
-          category: doc.tipo_carpeta as Document['category'],
-          url: signedUrl || doc.file_url
+          date: new Date(doc.uploaded_at).toLocaleDateString('es-MX'),
+          type: doc.mime_type?.includes('image') ? 'image' as const : 'pdf' as const,
+          category: doc.category as Document['category'],
+          url: signedUrl || doc.storage_path
         };
       })
     );
@@ -755,33 +731,24 @@ export async function getProjectAppointments(projectId: string) {
   }
 
   try {
-    const { data: events, error } = await supabase
-      .from('calendar_events')
-      .select(`
-        id,
-        title,
-        start_at,
-        end_at,
-        notes,
-        attendees,
-        project_id
-      `)
+    const { data: appointments, error } = await supabase
+      .from('v_client_appointments')
+      .select('*')
       .eq('project_id', projectId)
-      .order('start_at', { ascending: true });
+      .order('starts_at', { ascending: true });
 
     if (error) {
       console.error('Error fetching appointments:', error);
       return [];
     }
 
-    // Transform to appointment format
-    const appointments = (events || []).map((event) => {
-      const startDate = new Date(event.start_at);
-      const endDate = new Date(event.end_at);
+    return (appointments || []).map((event) => {
+      const startDate = new Date(event.starts_at);
+      const endDate = new Date(event.ends_at);
       const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
       
       return {
-        id: event.id,
+        id: event.appointment_id,
         projectId: event.project_id,
         type: event.title,
         date: startDate.toISOString().split('T')[0],
@@ -794,13 +761,11 @@ export async function getProjectAppointments(projectId: string) {
           role: 'Coordinador',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Team'
         },
-        location: 'Por definir',
+        location: event.location || 'Por definir',
         notes: event.notes || '',
         isVirtual: false
       };
     });
-
-    return appointments;
   } catch (error) {
     console.error('Error in getProjectAppointments:', error);
     return [];
@@ -828,62 +793,61 @@ export async function getProjectFinancial(projectId: string) {
   }
 
   try {
-    // Get ministrations from gantt
-    const { data: ganttData, error: ganttError } = await supabase
-      .from('gantt_plans')
-      .select(`
-        id,
-        gantt_ministrations (
-          id,
-          date,
-          label,
-          percent,
-          accumulated_percent,
-          alcance
-        )
-      `)
+    // Get ministrations from view
+    const { data: ministrations, error: minError } = await supabase
+      .from('v_client_ministrations')
+      .select('*')
       .eq('project_id', projectId)
-      .eq('type', 'ejecutivo')
-      .eq('shared_with_construction', true)
-      .single();
+      .order('seq', { ascending: true });
 
-    if (ganttError) {
-      console.error('Error fetching gantt ministrations:', ganttError);
+    if (minError) {
+      console.error('Error fetching ministrations:', minError);
     }
 
-    const ministrations = (ganttData?.gantt_ministrations || []).map((m: any) => ({
-      id: m.id,
-      projectId,
-      amount: 0, // TODO: calculate from budget total * percent
-      date: m.date,
-      status: new Date(m.date) < new Date() ? 'paid' as const : 'future' as const,
-      concept: m.label || m.alcance || 'Ministración'
-    }));
-
-    // Get financial summary from view
-    const { data: summary, error: summaryError } = await supabase
-      .from('vw_client_financial_summary')
+    // Get budget categories
+    const { data: categories, error: catError } = await supabase
+      .from('v_client_budget_categories')
       .select('*')
       .eq('project_id', projectId);
+
+    if (catError) {
+      console.error('Error fetching budget categories:', catError);
+    }
+
+    // Get financial summary
+    const { data: summary, error: summaryError } = await supabase
+      .from('v_client_financial_summary')
+      .select('*')
+      .eq('project_id', projectId)
+      .single();
 
     if (summaryError) {
       console.error('Error fetching financial summary:', summaryError);
     }
 
-    const categories = (summary || []).map((item: any) => ({
+    const formattedMinistrations = (ministrations || []).map(m => ({
+      id: m.seq,
       projectId,
-      name: item.mayor_name || 'Categoría',
-      budgeted: item.mayor_expense || 0,
-      spent: 0 // TODO: calculate from transactions
+      amount: summary ? (Number(summary.total_amount) * Number(m.percent)) / 100 : 0,
+      date: m.date,
+      status: new Date(m.date) < new Date() ? 'paid' as const : 'future' as const,
+      concept: m.label
+    }));
+
+    const formattedCategories = (categories || []).map(c => ({
+      projectId,
+      name: c.name,
+      budgeted: Number(c.budgeted) || 0,
+      spent: Number(c.spent) || 0
     }));
 
     return {
-      ministrations,
-      categories,
+      ministrations: formattedMinistrations,
+      categories: formattedCategories,
       summary: {
-        totalAmount: summary?.[0]?.total_deposits || 0,
-        totalPaid: summary?.[0]?.total_deposits || 0,
-        totalPending: summary?.[0]?.balance || 0
+        totalAmount: Number(summary?.total_amount) || 0,
+        totalPaid: Number(summary?.paid_amount) || 0,
+        totalPending: Number(summary?.pending_amount) || 0
       }
     };
   } catch (error) {
