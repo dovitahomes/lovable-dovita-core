@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProjectProvider } from "@/contexts/ProjectContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { mockClientData } from "@/lib/client-data";
+import PreviewBar from "@/components/client-app/PreviewBar";
 import NotFound from "./pages/NotFound";
 import ResponsiveClientApp from "./pages/client-app/ResponsiveClientApp";
 import ResponsiveDashboard from "./pages/client-app/ResponsiveDashboard";
@@ -26,6 +27,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <PreviewBar />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Navigate to="/app" replace />} />

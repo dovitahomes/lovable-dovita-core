@@ -558,6 +558,10 @@ const useMockRuntime = () => {
   return import.meta.env.VITE_USE_MOCK === 'true';
 };
 
+const getForceClientId = (): string | null => {
+  return localStorage.getItem('clientapp.forceClientId');
+};
+
 // Helper to get signed URL for private files
 async function getSignedUrl(path: string): Promise<string> {
   const { data, error } = await supabase.storage
@@ -582,11 +586,20 @@ export async function getClientProjects(userId: string) {
   }
 
   try {
-    const { data: projects, error } = await supabase
+    const forceClientId = getForceClientId();
+    let query = supabase
       .from('v_client_projects')
       .select('*')
-      .eq('client_id', userId)
       .order('created_at', { ascending: false });
+
+    // Filter by forceClientId if in preview mode, otherwise by userId
+    if (forceClientId) {
+      query = query.eq('client_id', forceClientId);
+    } else {
+      query = query.eq('client_id', userId);
+    }
+
+    const { data: projects, error } = await query;
 
     if (error) {
       console.error('Error fetching projects:', error);

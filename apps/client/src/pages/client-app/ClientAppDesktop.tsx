@@ -3,8 +3,13 @@ import DovitaHeaderDesktop from "@/components/client-app/DovitaHeaderDesktop";
 import FloatingIslandSidebar from "@/components/client-app/FloatingIslandSidebar";
 
 export default function ClientAppDesktop() {
+  // Check if preview mode is active for layout adjustment
+  const isPreviewMode = localStorage.getItem("clientapp.previewMode") === "true" || 
+                        new URLSearchParams(window.location.search).has("preview");
+  const previewBarHeight = isPreviewMode ? 48 : 0;
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background" style={{ paddingTop: `${previewBarHeight}px` }}>
       <DovitaHeaderDesktop />
       <FloatingIslandSidebar />
       

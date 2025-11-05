@@ -60,6 +60,8 @@ export function ProjectProvider({ children, projects: initialProjects }: { child
   const loadProjects = async (userId: string) => {
     setIsLoading(true);
     try {
+      // In preview mode, userId might be the forceClientId
+      // getClientProjects will handle the filtering internally
       const projectsData = await getClientProjects(userId);
       const mappedProjects: Project[] = projectsData.map((p: any) => ({
         id: p.project_id,

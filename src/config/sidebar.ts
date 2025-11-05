@@ -19,6 +19,7 @@ import {
   Users,
   ShieldCheck,
   ListTree,
+  Eye,
 } from "lucide-react";
 
 export type SidebarItem = {
@@ -198,6 +199,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: "/herramientas/reglas", 
         icon: FileText, 
         moduleName: "centro_reglas" 
+      },
+      { 
+        title: "Ver como cliente", 
+        url: "/ver-como-cliente", 
+        icon: Eye, 
+        moduleName: "herramientas" 
       },
     ],
   },
