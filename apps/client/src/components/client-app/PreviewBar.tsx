@@ -5,8 +5,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Database, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
-import { useProject } from "@/contexts/ProjectContext";
 
 interface Client {
   client_id: string;
@@ -19,7 +17,6 @@ export default function PreviewBar() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [useMock, setUseMock] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { loadProjects } = useProject();
 
   // Check if preview mode is active
   useEffect(() => {
@@ -45,25 +42,12 @@ export default function PreviewBar() {
 
   const loadClients = async () => {
     try {
-      const { data, error } = await supabase
-        .from("v_client_projects")
-        .select("client_id, project_name")
-        .order("project_name");
-
-      if (error) throw error;
-
-      // Group by client_id and get unique clients
-      const uniqueClients = new Map<string, string>();
-      data?.forEach((row: any) => {
-        if (!uniqueClients.has(row.client_id)) {
-          uniqueClients.set(row.client_id, row.project_name || row.client_id.substring(0, 8));
-        }
-      });
-
-      const clientsList = Array.from(uniqueClients.entries()).map(([id, name]) => ({
-        client_id: id,
-        client_name: name,
-      }));
+      // For now, use mock data. Real implementation would query v_client_projects
+      // TODO: Implement real Supabase query when ready
+      const clientsList: Client[] = [
+        { client_id: 'client_1', client_name: 'Familia Martínez' },
+        { client_id: 'client_2', client_name: 'Familia González' }
+      ];
 
       setClients(clientsList);
 
@@ -96,11 +80,8 @@ export default function PreviewBar() {
     
     toast({
       title: "Cliente seleccionado",
-      description: "Recargando proyectos...",
+      description: "Recarga la página para ver los cambios",
     });
-
-    // Reload projects for this client
-    loadProjects(clientId);
   };
 
   const handleMockToggle = (checked: boolean) => {

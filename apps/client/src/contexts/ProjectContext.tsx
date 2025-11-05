@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getClientProjects } from '@/lib/client-data';
 import type { Document, Phase } from '@/lib/client-data';
 
 export interface Project {
@@ -40,62 +39,18 @@ interface ProjectContextType {
   availableProjects: Project[];
   setCurrentProject: (projectId: string) => void;
   hasMultipleProjects: boolean;
-  loadProjects: (userId: string) => Promise<void>;
-  isLoading: boolean;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
-export function ProjectProvider({ children, projects: initialProjects }: { children: ReactNode; projects: Project[] }) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [isLoading, setIsLoading] = useState(false);
+export function ProjectProvider({ children, projects }: { children: ReactNode; projects: Project[] }) {
   const [currentProjectId, setCurrentProjectId] = useState<string>(() => {
     const saved = localStorage.getItem('currentProjectId');
-    return saved && initialProjects.some(p => p.id === saved) ? saved : initialProjects[0]?.id || '';
+    return saved && projects.some(p => p.id === saved) ? saved : projects[0]?.id || '';
   });
 
   const currentProject = projects.find(p => p.id === currentProjectId) || projects[0] || null;
   const hasMultipleProjects = projects.length > 1;
-
-  const loadProjects = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      // In preview mode, userId might be the forceClientId
-      // getClientProjects will handle the filtering internally
-      const projectsData = await getClientProjects(userId);
-      const mappedProjects: Project[] = projectsData.map((p: any) => ({
-        id: p.project_id,
-        clientName: 'Cliente',
-        name: p.project_name,
-        location: 'Ubicación',
-        progress: 0,
-        currentPhase: 'En progreso',
-        projectStage: 'construction' as const,
-        totalAmount: 0,
-        totalPaid: 0,
-        totalPending: 0,
-        startDate: p.created_at,
-        estimatedEndDate: '',
-        heroImage: '',
-        renders: [],
-        team: [],
-        documents: [],
-        phases: [],
-      }));
-      setProjects(mappedProjects);
-      
-      // Auto-select first project if none selected
-      if (!currentProjectId && mappedProjects.length > 0) {
-        const firstId = mappedProjects[0].id;
-        setCurrentProjectId(firstId);
-        localStorage.setItem('currentProjectId', firstId);
-      }
-    } catch (error) {
-      console.error('Error loading projects:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (currentProjectId) {
@@ -115,9 +70,7 @@ export function ProjectProvider({ children, projects: initialProjects }: { child
         currentProject,
         availableProjects: projects,
         setCurrentProject,
-        hasMultipleProjects,
-        loadProjects,
-        isLoading,
+        hasMultipleProjects
       }}
     >
       {children}
