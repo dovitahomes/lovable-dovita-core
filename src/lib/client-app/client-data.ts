@@ -6,6 +6,7 @@ export interface Document {
   date: string;
   type: 'pdf' | 'image';
   category: 'cliente' | 'proyecto' | 'legal' | 'diseno' | 'construccion';
+  url?: string; // URL opcional para documentos con storage (especialmente imágenes)
 }
 
 // Phase interface
@@ -94,7 +95,7 @@ export const mockClientData = {
         { id: 5, name: 'Contrato de Construcción.pdf', size: '2.8 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
         { id: 6, name: 'Permiso de Construcción.pdf', size: '1.5 MB', date: '20 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
         { id: 7, name: 'Diseño Interior.pdf', size: '4.2 MB', date: '12 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 8, name: 'Renders 3D.jpg', size: '2.1 MB', date: '10 Mar 2024', type: 'image' as const, category: 'diseno' as const },
+        { id: 8, name: 'Renders 3D.jpg', size: '2.1 MB', date: '10 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80' },
         { id: 9, name: 'Paleta de Colores.pdf', size: '650 KB', date: '8 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
         { id: 10, name: 'Avance Semana 1.pdf', size: '1.8 MB', date: '22 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
         { id: 11, name: 'Fotos Obra.jpg', size: '3.5 MB', date: '21 Mar 2024', type: 'image' as const, category: 'construccion' as const },
@@ -164,11 +165,11 @@ export const mockClientData = {
         { id: 15, name: 'Planos Casa Playa.pdf', size: '3.2 MB', date: '20 Feb 2024', type: 'pdf' as const, category: 'proyecto' as const },
         { id: 16, name: 'Especificaciones Técnicas Playa.pdf', size: '1.1 MB', date: '18 Feb 2024', type: 'pdf' as const, category: 'proyecto' as const },
         { id: 17, name: 'Contrato Construcción Playa.pdf', size: '3.0 MB', date: '25 Feb 2024', type: 'pdf' as const, category: 'legal' as const },
-        { id: 18, name: 'Propuesta Conceptual.jpg', size: '3.5 MB', date: '5 Mar 2024', type: 'image' as const, category: 'diseno' as const },
+        { id: 18, name: 'Propuesta Conceptual.jpg', size: '3.5 MB', date: '5 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80' },
         { id: 19, name: 'Diseño Interior Playa.pdf', size: '5.1 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 20, name: 'Renders Vista al Mar.jpg', size: '2.8 MB', date: '18 Mar 2024', type: 'image' as const, category: 'diseno' as const },
+        { id: 20, name: 'Renders Vista al Mar.jpg', size: '2.8 MB', date: '18 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80' },
         { id: 21, name: 'Paleta Tropical.pdf', size: '720 KB', date: '20 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 22, name: 'Render Fachada Principal.jpg', size: '3.2 MB', date: '25 Mar 2024', type: 'image' as const, category: 'diseno' as const },
+        { id: 22, name: 'Render Fachada Principal.jpg', size: '3.2 MB', date: '25 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80' },
         { id: 23, name: 'Planos Ejecutivos.pdf', size: '4.5 MB', date: '1 Abr 2024', type: 'pdf' as const, category: 'diseno' as const },
       ] as Document[],
       phases: [

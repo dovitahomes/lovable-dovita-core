@@ -6,6 +6,7 @@ import { mockAppointments, mockMinistraciones, mockPhotos } from '@/lib/client-a
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { calculateProjectProgress, getCurrentPhase, isInDesignPhase } from '@/lib/project-utils';
+import { getProjectHeroImage } from '@/lib/client-app/dataAdapters';
 import { Calendar, MapPin, Video, Clock, User, FileText, MessageCircle, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -38,10 +39,10 @@ export default function Dashboard() {
     );
   }
   
-  // Get current hero image (rotate through renders if available)
+  // Get current hero image (prioriza diseños recientes > renders > heroImage)
   const heroImage = project.renders && project.renders.length > 0 
     ? project.renders[currentRenderIndex].url 
-    : project.heroImage;
+    : getProjectHeroImage(project);
   
   // Get next upcoming appointment for current project
   const now = new Date();
@@ -110,23 +111,52 @@ export default function Dashboard() {
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Welcome Card with Hero Image */}
-        <Card className="overflow-hidden">
-          <div className="relative h-40">
-            <img
-              src={heroImage}
-              alt="Proyecto"
-              className="w-full h-full object-cover cursor-pointer"
-              onClick={() => handleImageClick()}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <h1 className="text-xl font-bold text-white">
-                ¡Hola, {project.clientName}!
-              </h1>
-              <p className="text-sm text-white/90 mt-1">
-                {currentProject.name}
+        <Card className="border-0 overflow-hidden relative min-h-[200px]">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url('${heroImage}')`,
+            }}
+          >
+            {/* Dark overlay gradient for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/85" />
+          </div>
+          
+          {/* Content */}
+          <div className="relative z-10">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg text-white drop-shadow-md">
+                  Bienvenido, {project.clientName}
+                </CardTitle>
+                {project.renders && project.renders.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleNextRender}
+                    className="text-white hover:bg-white/20 backdrop-blur-sm -mt-2 border border-white/20"
+                  >
+                    <ImageIcon className="h-4 w-4 mr-1" />
+                    {currentRenderIndex + 1}/{project.renders.length}
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-semibold mb-1 text-white drop-shadow-md">{project.name}</p>
+              <p className="text-sm text-white/95 flex items-center gap-1 drop-shadow">
+                <MapPin className="h-3 w-3" />
+                {project.location}
               </p>
-            </div>
+              {project.renders && project.renders.length > 0 && (
+                <div className="mt-3 inline-block">
+                  <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                    {project.renders[currentRenderIndex].title} • {project.renders[currentRenderIndex].phase}
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
           </div>
         </Card>
 

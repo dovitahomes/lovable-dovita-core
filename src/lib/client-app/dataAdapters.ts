@@ -197,3 +197,34 @@ export function calculatePercentage(part: number, total: number): number {
   if (total === 0) return 0;
   return Math.round((part / total) * 100);
 }
+
+/**
+ * Obtiene la imagen hero del proyecto
+ * Prioriza: última imagen JPG de diseño > renders > heroImage default
+ */
+export function getProjectHeroImage(project: Project | null): string {
+  if (!project) return '';
+  
+  // 1. Buscar documentos de diseño tipo imagen (JPG, PNG, etc.)
+  const designImages = project.documents
+    .filter(doc => doc.category === 'diseno' && doc.type === 'image' && doc.url)
+    .sort((a, b) => {
+      // Ordenar por fecha descendente (más reciente primero)
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+  
+  // Si hay imágenes de diseño con URL, usar la más reciente
+  if (designImages.length > 0 && designImages[0].url) {
+    return designImages[0].url;
+  }
+  
+  // 2. Si no hay imágenes de diseño, usar renders
+  if (project.renders && project.renders.length > 0) {
+    return project.renders[0].url;
+  }
+  
+  // 3. Fallback a la imagen hero por defecto
+  return project.heroImage;
+}
