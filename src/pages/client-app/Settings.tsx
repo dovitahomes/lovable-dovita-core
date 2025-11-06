@@ -102,9 +102,9 @@ export default function Settings() {
   };
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <PreviewBar />
-      <div className="min-h-screen bg-background pb-safe">
+      <div className="flex-1 overflow-y-auto pb-[130px]">
         <div className="max-w-2xl mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Configuración</h1>
