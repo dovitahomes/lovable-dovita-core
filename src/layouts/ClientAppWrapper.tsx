@@ -1,11 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { DataSourceProvider } from '@/contexts/client-app/DataSourceContext';
 import { ProjectProvider } from '@/contexts/client-app/ProjectContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useAppMode } from '@/hooks/client-app/useAppMode';
 import { useProjectsData } from '@/hooks/client-app/useProjectsData';
 import { AuthStateListener } from '@/components/client-app/AuthStateListener';
-import PreviewBar from '@/components/client-app/PreviewBar';
 import ResponsiveClientApp from '@/pages/client-app/ResponsiveClientApp';
 import ResponsiveDashboard from '@/pages/client-app/ResponsiveDashboard';
 import ResponsivePhotos from '@/pages/client-app/ResponsivePhotos';
@@ -34,10 +33,10 @@ function ClientAppContent() {
   return (
     <ProjectProvider projects={projects}>
       <AuthStateListener />
-      {isPreviewMode && <PreviewBar />}
       <Routes>
         <Route element={<ResponsiveClientApp />}>
           <Route index element={<ResponsiveDashboard />} />
+          <Route path="dashboard" element={<ResponsiveDashboard />} />
           <Route path="photos" element={<ResponsivePhotos />} />
           <Route path="financial" element={<ResponsiveFinancial />} />
           <Route path="chat" element={<ResponsiveChat />} />
