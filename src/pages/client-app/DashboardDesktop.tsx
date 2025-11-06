@@ -3,12 +3,15 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { mockPhotos, mockMinistraciones } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
+import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase, isInDesignPhase } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PreviewBar from "@/components/client-app/PreviewBar";
 
 export default function DashboardDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const project = currentProject;
   const navigate = useNavigate();
 
@@ -70,11 +73,13 @@ export default function DashboardDesktop() {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
-      <div>
-        <h1 className="text-2xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
-        <p className="text-muted-foreground">Resumen general de tu construcción</p>
-      </div>
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
+          <p className="text-muted-foreground">Resumen general de tu construcción</p>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         <Card className="col-span-1 lg:col-span-2 xl:col-span-3 relative overflow-hidden h-[220px]">
@@ -236,6 +241,7 @@ export default function DashboardDesktop() {
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   );
 }

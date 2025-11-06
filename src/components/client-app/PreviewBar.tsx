@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -15,7 +16,11 @@ interface Client {
 }
 
 export default function PreviewBar() {
+  const location = useLocation();
   const { source, setSource, forceClientId, setForceClientId, isPreviewMode } = useDataSource();
+  
+  // Solo renderizar en rutas /client/*
+  const isClientRoute = location.pathname.startsWith('/client');
   
   // Query para obtener clientes reales de Supabase
   const { data: realClients = [], isLoading: loadingClients } = useQuery({
@@ -32,7 +37,7 @@ export default function PreviewBar() {
         client_name: c.name,
       }));
     },
-    enabled: isPreviewMode,
+    enabled: isPreviewMode && isClientRoute,
   });
 
   // Combinar con mock clients si está en modo mock
@@ -46,11 +51,11 @@ export default function PreviewBar() {
 
   // Auto-select first client if none selected
   useEffect(() => {
-    if (isPreviewMode && !forceClientId && displayClients.length > 0) {
+    if (isPreviewMode && isClientRoute && !forceClientId && displayClients.length > 0) {
       const firstClientId = displayClients[0].client_id;
       setForceClientId(firstClientId);
     }
-  }, [isPreviewMode, forceClientId, displayClients, setForceClientId]);
+  }, [isPreviewMode, isClientRoute, forceClientId, displayClients, setForceClientId]);
 
 
   const handleClientChange = (clientId: string) => {
@@ -86,7 +91,8 @@ export default function PreviewBar() {
     window.location.href = backofficeUrl;
   };
 
-  if (!isPreviewMode) {
+  // No renderizar si no está en modo preview o no está en ruta de cliente
+  if (!isPreviewMode || !isClientRoute) {
     return null;
   }
 

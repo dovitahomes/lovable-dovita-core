@@ -4,15 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { mockAppointments, mockMinistraciones, mockPhotos } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { calculateProjectProgress, getCurrentPhase, isInDesignPhase } from '@/lib/project-utils';
 import { Calendar, MapPin, Video, ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Dashboard() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const project = currentProject;
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
@@ -90,7 +93,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-full overflow-y-auto p-4 space-y-4">
       {/* Welcome Card with Hero Image */}
       <Card className="border-0 overflow-hidden relative min-h-[180px]">
         {/* Background Image */}
@@ -327,7 +332,8 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      )}
+        )}
+      </div>
     </div>
   );
 }
