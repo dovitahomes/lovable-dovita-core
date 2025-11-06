@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Database, Eye, AlertCircle, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -195,7 +196,12 @@ export default function PreviewBar() {
     >
       {/* Barra colapsada - Tab visible */}
       <div 
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-[hsl(var(--dovita-yellow))] text-primary px-4 py-2 rounded-b-lg shadow-lg cursor-pointer flex items-center gap-2 active:scale-95 transition-transform touch-manipulation"
+        className={cn(
+          "absolute bottom-0 translate-y-full bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-transform touch-manipulation",
+          isMobile 
+            ? "right-4 px-2 py-1" 
+            : "left-1/2 -translate-x-1/2 px-4 py-2"
+        )}
         onClick={handleToggleExpand}
         style={{
           opacity: isExpanded ? 0 : 1,
@@ -203,9 +209,13 @@ export default function PreviewBar() {
           pointerEvents: isExpanded ? 'none' : 'auto',
         }}
       >
-        <Eye className="h-3 w-3" />
-        <span className="text-xs font-medium whitespace-nowrap">Modo Preview</span>
-        <ChevronDown className="h-3 w-3" />
+        <Eye className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+        {!isMobile && (
+          <>
+            <span className="text-xs font-medium whitespace-nowrap">Modo Preview</span>
+            <ChevronDown className="h-3 w-3" />
+          </>
+        )}
       </div>
 
       {/* Overlay para cerrar en móvil al hacer tap fuera */}
@@ -224,7 +234,10 @@ export default function PreviewBar() {
 
       {/* Barra expandida - Contenido completo */}
       <div className="bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/20 shadow-lg">
-        <div className="container mx-auto px-4 py-2 flex items-center gap-4 flex-wrap">
+        <div className={cn(
+          "container mx-auto px-4 flex items-center flex-wrap",
+          isMobile ? "py-1.5 gap-2" : "py-2 gap-4"
+        )}>
           {/* Botón de cierre para móvil */}
           {isMobile && (
             <button
