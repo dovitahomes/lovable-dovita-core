@@ -27,6 +27,80 @@ Portal web progresivo (PWA) para que clientes visualicen en tiempo real el progr
 
 ---
 
+## 🔄 Client App - Arquitectura de Datos
+
+El Client App funciona con un **sistema dual-source** que permite consumir datos de dos fuentes:
+- **Mock Data**: Datos simulados para desarrollo, demos y testing
+- **Real Data**: Datos reales desde Supabase via vistas SQL especializadas
+
+### Sistema de Fuentes de Datos
+
+El `DataSourceContext` administra la conmutación automática entre fuentes:
+- En **modo preview** (`/client?preview=true`): permite al equipo interno "ver como cliente" seleccionando cualquier cliente real del sistema
+- En **modo producción**: los clientes autenticados consumen automáticamente sus datos reales
+- La selección se persiste en `localStorage` para mantener el estado entre recargas
+
+### Datos Reales (Supabase Views)
+
+El sistema cuenta con **8 vistas SQL optimizadas** que exponen datos del ERP al Client App:
+
+| Vista | Propósito | Estado |
+|-------|-----------|--------|
+| `v_client_projects` | Listado de proyectos del cliente | ✅ Funcional |
+| `v_client_project_summary` | Dashboard con KPIs y fechas | ✅ Funcional |
+| `v_client_documents` | Documentos visibles al cliente | ✅ Funcional |
+| `v_client_photos` | Fotos de construcción | ✅ Funcional |
+| `v_client_appointments` | Citas y reuniones | ⚠️ Falta ubicación |
+| `v_client_ministrations` | Cronograma de pagos | ⚠️ Falta estado de pago |
+| `v_client_financial_summary` | Resumen financiero | ✅ Funcional |
+| `v_client_budget_categories` | Desglose presupuestal | ✅ Funcional |
+
+### Datos Faltantes Críticos
+
+Para hacer el Client App **100% funcional con datos reales**, se requieren:
+
+**🔴 Críticos**:
+- [ ] `calendar_events.location` / `meeting_link` / `visibility`
+- [ ] Tabla `project_members` para mostrar equipo del proyecto
+- [ ] `projects.progress_override` o función de cálculo automático
+- [ ] `gantt_ministrations.invoice_id` para estado de pago
+
+**🟡 Deseables**:
+- [ ] `construction_photos.phase_id` para vincular fotos a fases
+- [ ] Tabla `chat_messages` para mensajería en tiempo real
+- [ ] Función `calculate_project_progress()` basada en gantt
+
+### Hooks Unificados
+
+El sistema usa hooks que automáticamente conmutan entre mock y real:
+
+```typescript
+// Ejemplo: documentos del proyecto
+const { data, isLoading, source } = useUnifiedDocuments(projectId);
+// source = 'mock' | 'real' (automático según contexto)
+```
+
+Hooks disponibles:
+- `useUnifiedDocuments` - Documentos del proyecto
+- `useUnifiedPhotos` - Fotos de construcción
+- `useUnifiedMinistrations` - Cronograma de pagos
+- `useUnifiedFinancialSummary` - Resumen financiero
+- `useUnifiedBudgetCategories` - Categorías presupuestales
+- `useUnifiedAppointments` - Citas y reuniones
+
+### Documentación Completa
+
+📘 **[CLIENT_APP_DATA.md](./docs/CLIENT_APP_DATA.md)** - Análisis exhaustivo de:
+- Estructura completa de datos mock
+- Especificaciones de las 8 vistas SQL
+- Mapeo detallado Mock → Real (20+ campos)
+- Plan de implementación por fases
+- Checklist de datos faltantes
+- Ejemplos de código y uso
+- Políticas de seguridad (RLS)
+
+---
+
 ## Datos Mock (Desarrollo)
 
 Para facilitar pruebas end-to-end, el proyecto incluye scripts para sembrar y limpiar datos de prueba.
