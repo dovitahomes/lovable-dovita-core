@@ -4,8 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Download, Image as ImageIcon, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DocumentViewer from '@/components/client-app/DocumentViewer';
-import { useProject } from '@/contexts/ProjectContext';
-import type { Document } from '@/lib/client-data';
+import { useProject } from '@/contexts/client-app/ProjectContext';
+import type { Document } from '@/lib/client-app/client-data';
 
 export default function Documents() {
   const { currentProject } = useProject();

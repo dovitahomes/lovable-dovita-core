@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
-import { useProject } from "@/contexts/ProjectContext";
+import { useProject } from "@/contexts/client-app/ProjectContext";
 import { getScheduleTitle, getScheduleSubtitle } from "@/lib/project-utils";
 
 const getStatusIcon = (status: string) => {

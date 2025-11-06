@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockMinistraciones } from "@/lib/client-data";
-import { useProject } from "@/contexts/ProjectContext";
+import { mockMinistraciones } from "@/lib/client-app/client-data";
+import { useProject } from "@/contexts/client-app/ProjectContext";
 import { isInDesignPhase } from "@/lib/project-utils";
 import { DollarSign, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
 import {

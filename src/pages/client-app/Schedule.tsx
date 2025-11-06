@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import { getScheduleTitle } from '@/lib/project-utils';
 
 export default function Schedule() {

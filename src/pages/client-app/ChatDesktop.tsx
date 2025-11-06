@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Send, Phone, Video, MoreVertical } from "lucide-react";
-import { mockChatMessages } from "@/lib/client-data";
-import { useProject } from "@/contexts/ProjectContext";
+import { mockChatMessages } from "@/lib/client-app/client-data";
+import { useProject } from "@/contexts/client-app/ProjectContext";
 import {
   DropdownMenu,
   DropdownMenuContent,

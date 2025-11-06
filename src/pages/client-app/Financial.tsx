@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { mockMinistraciones, budgetCategories } from '@/lib/client-data';
-import { useProject } from '@/contexts/ProjectContext';
+import { mockMinistraciones, budgetCategories } from '@/lib/client-app/client-data';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import { CheckCircle2, Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';

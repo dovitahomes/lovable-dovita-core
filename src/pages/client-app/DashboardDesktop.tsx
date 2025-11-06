@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockPhotos, mockMinistraciones } from "@/lib/client-data";
-import { useProject } from "@/contexts/ProjectContext";
+import { mockPhotos, mockMinistraciones } from "@/lib/client-app/client-data";
+import { useProject } from "@/contexts/client-app/ProjectContext";
 import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase, isInDesignPhase } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";

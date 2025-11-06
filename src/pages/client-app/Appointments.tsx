@@ -6,8 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
 import AppointmentCard from '@/components/client-app/AppointmentCard';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
-import { mockAppointments } from '@/lib/client-data';
-import { useProject } from '@/contexts/ProjectContext';
+import { mockAppointments } from '@/lib/client-app/client-data';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from 'lucide-react';
 import { format, isSameDay, isFuture, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';

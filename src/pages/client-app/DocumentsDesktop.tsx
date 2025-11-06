@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Download, Search, Upload, Eye } from "lucide-react";
 import DocumentViewer from '@/components/client-app/DocumentViewer';
-import { useProject } from '@/contexts/ProjectContext';
-import type { Document } from '@/lib/client-data';
+import { useProject } from '@/contexts/client-app/ProjectContext';
+import type { Document } from '@/lib/client-app/client-data';
 import {
   Table,
   TableBody,
