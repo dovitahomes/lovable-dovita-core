@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-// Temporary type definitions until they're added to supabase/types
-type ClientDocument = any;
-type ClientPhoto = any;
-type ClientMinistration = any;
-type ClientFinancialSummary = any;
-type ClientBudgetCategory = any;
-type ClientAppointment = any;
+// Type aliases from Supabase generated types
+type ClientDocument = Database['public']['Views']['v_client_documents']['Row'];
+type ClientPhoto = Database['public']['Views']['v_client_photos']['Row'];
+type ClientMinistration = Database['public']['Views']['v_client_ministrations']['Row'];
+type ClientFinancialSummary = Database['public']['Views']['v_client_financial_summary']['Row'];
+type ClientBudgetCategory = Database['public']['Views']['v_client_budget_categories']['Row'];
+type ClientAppointment = Database['public']['Views']['v_client_appointments']['Row'];
 
 export function useClientDocuments(projectId: string | null) {
   return useQuery({
