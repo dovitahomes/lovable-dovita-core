@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
@@ -30,7 +31,7 @@ export default function Schedule() {
             {/* Timeline dot */}
             <div className="absolute -left-10 top-6 w-10 flex items-center justify-start">
               {phase.status === 'completed' ? (
-                <CheckCircle2 className="h-10 w-10 text-green-600 bg-background" />
+                <CheckCircle2 className="h-10 w-10 text-primary bg-background" />
               ) : phase.status === 'in-progress' ? (
                 <Clock className="h-10 w-10 text-primary bg-background" />
               ) : (
@@ -48,10 +49,10 @@ export default function Schedule() {
                 </div>
                 
                 {phase.status === 'completed' && (
-                  <Badge className="bg-green-100 text-green-700">Completada</Badge>
+                  <Badge className="bg-primary/10 text-primary">Completada</Badge>
                 )}
                 {phase.status === 'in-progress' && (
-                  <Badge className="bg-blue-100 text-blue-700">En Proceso</Badge>
+                  <Badge className="bg-primary/10 text-primary">En Proceso</Badge>
                 )}
                 {phase.status === 'pending' && (
                   <Badge variant="secondary">Pendiente</Badge>
@@ -64,12 +65,7 @@ export default function Schedule() {
                     <span className="text-muted-foreground">Avance</span>
                     <span className="font-semibold text-primary">{phase.progress}%</span>
                   </div>
-                  <div className="h-2 bg-secondary/20 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${phase.progress}%` }}
-                    />
-                  </div>
+                  <Progress value={phase.progress} variant="yellow" className="h-2" />
                 </div>
               )}
             </CardContent>

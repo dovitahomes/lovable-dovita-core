@@ -176,7 +176,8 @@ export default function DashboardDesktop() {
               } total
             </p>
             <Progress 
-              value={(displayPaid / displayTotal) * 100} 
+              value={(displayPaid / displayTotal) * 100}
+              variant="yellow"
               className="mt-2"
             />
           </CardContent>
@@ -218,7 +219,7 @@ export default function DashboardDesktop() {
                     </Badge>
                   </div>
                 </div>
-                <Progress value={phase.progress} />
+                <Progress value={phase.progress} variant="yellow" />
               </div>
             ))}
           </CardContent>

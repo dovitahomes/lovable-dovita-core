@@ -79,7 +79,7 @@ export default function ScheduleDesktop() {
                           <span className="text-muted-foreground">Progreso</span>
                           <span className="font-medium">{phase.progress}%</span>
                         </div>
-                        <Progress value={phase.progress} />
+                        <Progress value={phase.progress} variant="yellow" />
                       </div>
                     )}
                   </div>
@@ -100,7 +100,7 @@ export default function ScheduleDesktop() {
                   <span className="text-muted-foreground">Fases Completadas</span>
                   <span className="font-bold">{completedPhases}/{phases.length}</span>
                 </div>
-                <Progress value={completionPercentage} />
+                <Progress value={completionPercentage} variant="yellow" />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">

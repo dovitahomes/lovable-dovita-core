@@ -194,7 +194,7 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-bold text-green-600">
+            <p className="text-lg font-bold text-primary">
               {inDesignPhase 
                 ? `$${(displayPaid / 1000).toFixed(0)}k`
                 : `$${(displayPaid / 1000000).toFixed(1)}M`
