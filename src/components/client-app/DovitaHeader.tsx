@@ -8,7 +8,7 @@ import logo from '@/assets/logo-dovita.png';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
 import NotificationPanel from './NotificationPanel';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 

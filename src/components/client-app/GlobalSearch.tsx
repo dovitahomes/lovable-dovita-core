@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import { mockAppointments, mockChatMessages } from '@/lib/client-data';
 import { Search, Calendar, FileText, MessageSquare, Users, Image, Clock, X } from 'lucide-react';
 import { format, parse } from 'date-fns';

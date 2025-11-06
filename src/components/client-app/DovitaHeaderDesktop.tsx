@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ProjectSelector from './ProjectSelector';
 import GlobalSearch from './GlobalSearch';
 import NotificationPanel from './NotificationPanel';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 const routeLabels: Record<string, string> = {
