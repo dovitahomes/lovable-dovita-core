@@ -80,9 +80,9 @@ export default function DashboardDesktop() {
 
   const handleImageClick = () => {
     if (inDesignPhase) {
-      navigate('/documents');
+      navigate('/client/documents');
     } else {
-      navigate('/photos');
+      navigate('/client/photos');
     }
   };
 
@@ -185,7 +185,7 @@ export default function DashboardDesktop() {
 
         <Card 
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-          onClick={() => navigate('/appointments')}
+          onClick={() => navigate('/client/appointments')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Próxima Cita</CardTitle>
@@ -202,7 +202,7 @@ export default function DashboardDesktop() {
 
         <Card 
           className="col-span-1 lg:col-span-2 cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-          onClick={() => navigate('/schedule')}
+          onClick={() => navigate('/client/schedule')}
         >
           <CardHeader>
             <CardTitle>Fases del Proyecto</CardTitle>

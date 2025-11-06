@@ -100,9 +100,9 @@ export default function Dashboard() {
 
   const handleImageClick = () => {
     if (inDesignPhase) {
-      navigate('/documents');
+      navigate('/client/documents');
     } else {
-      navigate('/photos');
+      navigate('/client/photos');
     }
   };
 
@@ -231,7 +231,7 @@ export default function Dashboard() {
 
       {/* Next Appointment */}
       {nextAppointment && (
-        <Card className="border-l-4 border-l-primary">
+        <Card className="border-l-4 border-l-primary cursor-pointer hover:scale-[1.02] transition-transform duration-200" onClick={() => navigate('/client/appointments')}>
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ export default function Dashboard() {
             <Button 
               className="w-full" 
               variant="outline"
-              onClick={() => navigate('/appointments')}
+              onClick={() => navigate('/client/appointments')}
             >
               Ver Detalles
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -295,16 +295,16 @@ export default function Dashboard() {
           <CardTitle className="text-sm">Acciones Rápidas</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/photos')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/client/photos')}>
             Ver Fotos
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/appointments')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/client/appointments')}>
             Agendar Cita
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/chat')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/client/chat')}>
             Mensaje
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/documents')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/client/documents')}>
             Documentos
           </Button>
         </CardContent>
