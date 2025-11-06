@@ -112,56 +112,57 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex flex-col flex-1">
-        <div className="flex-shrink-0 bg-background border-b">
-          <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
-        </div>
+    <div className="flex flex-col h-full">
+      {/* Header - Fixed top */}
+      <div className="flex-shrink-0 bg-background border-b">
+        <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
+      </div>
 
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4">
-          <div className="py-4">
-            {/* Team Members Info */}
-            <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
-                <Users className="h-4 w-4" />
-                <span>Chat grupal del equipo</span>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2 text-xs">
-                {currentProject?.team.map((member, index) => (
-                  <span key={member.id} className="text-muted-foreground">
-                    {member.name}
-                    {index < (currentProject.team.length - 1) && ', '}
-                  </span>
-                ))}
-              </div>
+      {/* Messages Area - Scrollable */}
+      <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4">
+        <div className="py-4">
+          {/* Team Members Info */}
+          <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
+              <Users className="h-4 w-4" />
+              <span>Chat grupal del equipo</span>
             </div>
-
-            {/* Messages grouped by date */}
-            {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
-              <div key={dateKey}>
-                {/* Date Separator */}
-                <div className="flex items-center justify-center my-4">
-                  <div className="bg-muted px-3 py-1 rounded-full">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {getDateLabel(dateKey)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Messages for this date */}
-                {dateMessages.map((message) => (
-                  <ChatMessage key={message.id} message={message} clientAvatar={clientAvatar} />
-                ))}
-              </div>
-            ))}
-
-            <div ref={messagesEndRef} />
+            <div className="flex flex-wrap justify-center gap-2 text-xs">
+              {currentProject?.team.map((member, index) => (
+                <span key={member.id} className="text-muted-foreground">
+                  {member.name}
+                  {index < (currentProject.team.length - 1) && ', '}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="flex-shrink-0 bg-background border-t">
-          <ChatInput onSendMessage={handleSendMessage} />
+          {/* Messages grouped by date */}
+          {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
+            <div key={dateKey}>
+              {/* Date Separator */}
+              <div className="flex items-center justify-center my-4">
+                <div className="bg-muted px-3 py-1 rounded-full">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {getDateLabel(dateKey)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Messages for this date */}
+              {dateMessages.map((message) => (
+                <ChatMessage key={message.id} message={message} clientAvatar={clientAvatar} />
+              ))}
+            </div>
+          ))}
+
+          <div ref={messagesEndRef} />
         </div>
+      </div>
+
+      {/* Input Area - Fixed bottom */}
+      <div className="flex-shrink-0 bg-background border-t">
+        <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
       <AvatarCustomizationDialog
