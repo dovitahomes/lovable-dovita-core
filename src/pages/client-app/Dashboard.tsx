@@ -169,7 +169,7 @@ export default function Dashboard() {
           <CardTitle className="text-sm text-muted-foreground">Fase Actual</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Progress value={currentPhase?.progress || 0} className="h-3" />
+          <Progress value={currentPhase?.progress || 0} variant="yellow" className="h-3" />
           <div className="flex items-center justify-between">
             <div>
               <p className="text-3xl font-bold text-primary">{currentPhase?.progress || 0}%</p>

@@ -104,7 +104,7 @@ export default function FinancialDesktop() {
               <span>Gastado: {formatAmount(project.totalPaid)}</span>
               <span className="text-muted-foreground">{percentSpent.toFixed(1)}%</span>
             </div>
-            <Progress value={percentSpent} className="h-3" />
+            <Progress value={percentSpent} variant="yellow" className="h-3" />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>$0</span>
               <span>{formatAmount(project.totalAmount)}</span>

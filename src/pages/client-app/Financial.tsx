@@ -62,7 +62,8 @@ export default function Financial() {
           </div>
 
           <Progress 
-            value={(project.totalPaid / project.totalAmount) * 100} 
+            value={(project.totalPaid / project.totalAmount) * 100}
+            variant="yellow"
             className="h-2 bg-white/20"
           />
         </CardContent>
@@ -127,7 +128,7 @@ export default function Financial() {
                     {percentage.toFixed(0)}%
                   </p>
                 </div>
-                <Progress value={percentage} className="h-2" />
+                <Progress value={percentage} variant="yellow" className="h-2" />
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
                     Gastado: ${(category.spent / 1000).toFixed(0)}k

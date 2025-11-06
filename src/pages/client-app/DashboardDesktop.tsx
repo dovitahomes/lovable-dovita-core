@@ -145,7 +145,7 @@ export default function DashboardDesktop() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold mb-2">{currentPhase?.progress || 0}%</div>
-            <Progress value={currentPhase?.progress || 0} className="mb-2" />
+            <Progress value={currentPhase?.progress || 0} variant="yellow" className="mb-2" />
             <p className="text-xs text-muted-foreground">
               {currentPhase?.name || project.currentPhase}
             </p>
