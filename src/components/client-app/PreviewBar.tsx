@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Database, Eye } from "lucide-react";
+import { ArrowLeft, Database, Eye, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ interface Client {
 export default function PreviewBar() {
   const location = useLocation();
   const { source, setSource, forceClientId, setForceClientId, isPreviewMode } = useDataSource();
+  const [isSwitching, setIsSwitching] = useState(false);
   
   // Solo renderizar en rutas /client/*
   const isClientRoute = location.pathname.startsWith('/client');
@@ -53,9 +54,17 @@ export default function PreviewBar() {
   useEffect(() => {
     if (isPreviewMode && isClientRoute && !forceClientId && displayClients.length > 0) {
       const firstClientId = displayClients[0].client_id;
-      setForceClientId(firstClientId);
+      
+      // VALIDACIÓN: Solo auto-seleccionar si el ID es válido para el source actual
+      const isValidId = source === 'mock' 
+        ? firstClientId.startsWith('mock_') 
+        : !firstClientId.startsWith('mock_');
+      
+      if (isValidId) {
+        setForceClientId(firstClientId);
+      }
     }
-  }, [isPreviewMode, isClientRoute, forceClientId, displayClients, setForceClientId]);
+  }, [isPreviewMode, isClientRoute, forceClientId, displayClients, setForceClientId, source]);
 
 
   const handleClientChange = (clientId: string) => {
@@ -71,19 +80,34 @@ export default function PreviewBar() {
   };
 
   const handleMockToggle = (checked: boolean) => {
-    setSource(checked ? 'mock' : 'real');
+    setIsSwitching(true);
+    
+    const newSource = checked ? 'mock' : 'real';
+    setSource(newSource);
     
     // Clear current selections when switching
     localStorage.removeItem("currentProjectId");
-    if (!checked && displayClients.length > 0) {
-      // When switching to real, select first real client
-      setForceClientId(displayClients[0].client_id);
+    
+    // CORRECCIÓN: Usar la lista correcta según el nuevo source
+    const clientsToUse = newSource === 'mock' ? mockClients : realClients;
+    
+    if (clientsToUse.length > 0) {
+      // Seleccionar el primer cliente del source correcto
+      setForceClientId(clientsToUse[0].client_id);
+    } else {
+      // Si no hay clientes en el nuevo source, limpiar selección
+      setForceClientId(null);
     }
     
     toast({
       title: checked ? "Modo Mock Data" : "Modo Datos Reales",
-      description: "Los datos se actualizarán automáticamente",
+      description: clientsToUse.length > 0 
+        ? "Los datos se actualizarán automáticamente" 
+        : "No hay clientes disponibles. Cambia a Mock Data para continuar.",
     });
+    
+    // Dar tiempo para que React re-renderice con los nuevos datos
+    setTimeout(() => setIsSwitching(false), 300);
   };
 
   const handleBackoffice = () => {
@@ -108,8 +132,15 @@ export default function PreviewBar() {
           <div className="flex items-center gap-2">
             <Label className="text-sm text-primary-foreground">Cliente:</Label>
             <Select value={forceClientId || undefined} onValueChange={handleClientChange}>
-              <SelectTrigger className="h-8 w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30">
-                <SelectValue placeholder={loadingClients ? "Cargando..." : "Seleccionar cliente"} />
+              <SelectTrigger 
+                className="h-8 w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30"
+                disabled={isSwitching}
+              >
+                <SelectValue placeholder={
+                  isSwitching ? "Cambiando..." : 
+                  loadingClients ? "Cargando..." : 
+                  "Seleccionar cliente"
+                } />
               </SelectTrigger>
               <SelectContent>
                 {displayClients.map((client) => (
@@ -123,8 +154,9 @@ export default function PreviewBar() {
         )}
 
         {source === 'real' && realClients.length === 0 && !loadingClients && (
-          <div className="text-xs text-primary-foreground/80 bg-primary-foreground/10 px-2 py-1 rounded">
-            Sin clientes reales. Activa Mock Data →
+          <div className="text-xs text-primary-foreground/80 bg-primary-foreground/10 px-2 py-1 rounded flex items-center gap-2">
+            <AlertCircle className="h-3 w-3" />
+            <span>Sin clientes reales. Activa Mock Data para continuar →</span>
           </div>
         )}
 

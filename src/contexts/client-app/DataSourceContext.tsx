@@ -39,14 +39,17 @@ export function DataSourceProvider({ children }: { children: ReactNode }) {
   
   const setSource = (newSource: DataSource) => {
     setSourceState(newSource);
+    // Persistir en localStorage para mantener estado entre sesiones
     localStorage.setItem('clientapp.useMock', newSource === 'mock' ? 'true' : 'false');
   };
-  
+
   const setForceClientId = (id: string | null) => {
     setForceClientIdState(id);
     if (id) {
+      // Guardar cliente seleccionado
       localStorage.setItem('clientapp.forceClientId', id);
     } else {
+      // Limpiar si no hay cliente
       localStorage.removeItem('clientapp.forceClientId');
     }
   };
