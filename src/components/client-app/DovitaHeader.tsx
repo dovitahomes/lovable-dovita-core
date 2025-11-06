@@ -21,7 +21,7 @@ export default function DovitaHeader() {
   const { unreadCount } = useNotifications();
 
   return (
-    <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[env(safe-area-inset-top)] before:bg-primary before:-translate-y-full before:z-[-1]">
+    <header className="bg-primary text-white fixed top-0 left-0 right-0 z-50 flex-shrink-0 border-b border-primary/20 pt-[env(safe-area-inset-top)]">
       <div className="h-[68px] px-6 flex items-center justify-between">
         <img 
           src={logo} 
