@@ -165,6 +165,65 @@
 }
 ```
 
+## Separación de Comportamiento de Scroll
+
+### ERP (Backoffice)
+- ✅ Scroll natural en `body` (comportamiento por defecto del navegador)
+- ✅ Páginas largas pueden hacer scroll libremente
+- ✅ Sin restricciones de `overflow` o `position: fixed` en body
+- ✅ Funciona con sidebar colapsable sin conflictos
+
+### Client App (Portal de Clientes)
+- ✅ `body` fijo con `overflow: hidden` (solo dentro de `.client-app-container`)
+- ✅ Scroll SOLO en `<main className="overflow-y-auto">` del layout
+- ✅ Altura fija de viewport (`100vh`) para navegación móvil
+- ✅ Bottom nav (`InteractiveMenu`) siempre visible sin que el scroll lo oculte
+
+### Implementación Técnica
+
+**CSS en `src/index.css`**:
+```css
+/* ERP mantiene scroll normal por defecto */
+body {
+  @apply bg-background text-foreground;
+}
+
+/* Client App: contenedor fijo sin scroll en body */
+.client-app-container {
+  overflow: hidden;
+  height: 100vh;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+```
+
+**Client App Layout**:
+```tsx
+// src/layouts/ClientAppWrapper.tsx
+export default function ClientAppWrapper() {
+  return (
+    <div className="client-app-container">
+      <DataSourceProvider>
+        {/* Contenido */}
+      </DataSourceProvider>
+    </div>
+  );
+}
+
+// src/pages/client-app/ClientApp.tsx (Mobile)
+<main className="flex-1 overflow-y-auto overflow-x-hidden">
+  {/* Aquí va el scroll */}
+</main>
+```
+
+### Regla Crítica de Scroll
+**NUNCA** aplicar estilos de scroll de Client App de forma global. Siempre usar:
+- `.client-app-container` para aislar estilos específicos de Client App
+- Mantener `body` limpio para que el ERP tenga scroll normal
+- Scroll en Client App SOLO dentro del `<main>` del layout
+
 ### Variables CSS
 
 **ERP**:

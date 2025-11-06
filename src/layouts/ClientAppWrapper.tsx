@@ -54,10 +54,12 @@ function ClientAppContent() {
 
 export default function ClientAppWrapper() {
   return (
-    <DataSourceProvider>
-      <NotificationProvider>
-        <ClientAppContent />
-      </NotificationProvider>
-    </DataSourceProvider>
+    <div className="client-app-container">
+      <DataSourceProvider>
+        <NotificationProvider>
+          <ClientAppContent />
+        </NotificationProvider>
+      </DataSourceProvider>
+    </div>
   );
 }
