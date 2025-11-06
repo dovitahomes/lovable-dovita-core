@@ -227,7 +227,7 @@ export default function PreviewBar() {
       {/* Lengüeta colapsada - Siempre visible como overlay fijo */}
       <div 
         className={cn(
-          "fixed z-[60] bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all duration-300 touch-manipulation",
+          "fixed z-[100] bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all duration-300 touch-manipulation",
           isMobile 
             ? "top-[env(safe-area-inset-top,0)] right-4 px-2 py-1" 
             : "top-0 left-1/2 -translate-x-1/2 px-4 py-2",
@@ -248,7 +248,7 @@ export default function PreviewBar() {
       {/* Overlay para cerrar en móvil al hacer tap fuera */}
       {isMobile && isExpanded && (
         <div
-          className="fixed inset-0 bg-black/20 z-[99]"
+          className="fixed inset-0 bg-black/20 z-[98]"
           onClick={() => {
             if (closeTimeoutRef.current) {
               clearTimeout(closeTimeoutRef.current);
@@ -262,7 +262,7 @@ export default function PreviewBar() {
       {/* Barra expandida - Contenido completo */}
       <div 
         className={cn(
-          "fixed left-0 right-0 z-[60] transition-all duration-300 ease-in-out",
+          "fixed left-0 right-0 z-[100] transition-all duration-300 ease-in-out",
           isMobile ? "top-[env(safe-area-inset-top,0)]" : "top-0",
           isExpanded ? "translate-y-0" : "-translate-y-full"
         )}
