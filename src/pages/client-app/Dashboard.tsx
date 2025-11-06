@@ -120,7 +120,10 @@ export default function Dashboard() {
             }}
           >
             {/* Dark overlay gradient for text readability */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/85" />
+            <div 
+              className="absolute inset-0" 
+              style={{ background: 'var(--gradient-hero-card)' }}
+            />
           </div>
           
           {/* Content */}
