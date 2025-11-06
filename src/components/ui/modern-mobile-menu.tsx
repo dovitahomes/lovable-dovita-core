@@ -22,8 +22,8 @@ export const ModernMobileMenu: React.FC<MobileMenuProps> = ({ items, accentColor
   const navigate = useNavigate();
 
   const finalItems = useMemo(() => {
-    if (!items || !Array.isArray(items) || items.length < 2 || items.length > 6) {
-      console.warn('ModernMobileMenu: using fallback items');
+    if (!items || !Array.isArray(items) || items.length < 2 || items.length > 7) {
+      console.warn('ModernMobileMenu: items inválidos (debe tener entre 2-7 items). Usando array vacío.');
       return [];
     }
     return items;
@@ -33,6 +33,16 @@ export const ModernMobileMenu: React.FC<MobileMenuProps> = ({ items, accentColor
     () => Math.max(0, finalItems.findIndex(it => location.pathname.startsWith(it.href))),
     [finalItems, location.pathname]
   );
+
+  useEffect(() => {
+    console.log('🔍 ModernMobileMenu Debug:', {
+      itemsCount: finalItems.length,
+      items: finalItems.map(i => i.label),
+      location: location.pathname,
+      activeIndex,
+      isMobile: window.innerWidth < 768
+    });
+  }, [finalItems, location.pathname, activeIndex]);
 
   const textRefs = useRef<(HTMLElement | null)[]>([]);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -56,7 +66,7 @@ export const ModernMobileMenu: React.FC<MobileMenuProps> = ({ items, accentColor
   return (
     <nav
       className="
-        fixed bottom-0 left-0 right-0 z-40 md:hidden
+        fixed bottom-0 left-0 right-0 z-50 md:hidden
         pb-[max(env(safe-area-inset-bottom),0px)] pt-2
         bg-[color:var(--client-nav-bg,rgba(12,18,40,0.72))] backdrop-blur
         border-t border-[color:var(--client-nav-border,rgba(255,255,255,0.08))]

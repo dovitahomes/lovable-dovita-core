@@ -34,16 +34,14 @@ export default function ClientApp() {
         <Outlet />
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50">
-        <ModernMobileMenu
-          items={menuItems.map((item) => ({ 
-            label: item.label, 
-            icon: item.icon,
-            href: item.path 
-          }))}
-          accentColor="var(--brand-accent)"
-        />
-      </footer>
+      <ModernMobileMenu
+        items={menuItems.map((item) => ({ 
+          label: item.label, 
+          icon: item.icon,
+          href: item.path 
+        }))}
+        accentColor="var(--brand-accent)"
+      />
     </div>
   );
 }
