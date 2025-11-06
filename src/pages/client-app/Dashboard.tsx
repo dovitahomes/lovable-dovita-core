@@ -163,7 +163,7 @@ export default function Dashboard() {
       {/* Current Phase Card */}
       <Card 
         className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-        onClick={() => navigate('/schedule')}
+        onClick={() => navigate('/client/schedule')}
       >
         <CardHeader>
           <CardTitle className="text-sm text-muted-foreground">Fase Actual</CardTitle>
