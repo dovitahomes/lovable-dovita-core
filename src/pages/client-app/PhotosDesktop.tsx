@@ -4,38 +4,44 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockPhotos } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
+import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { shouldShowConstructionPhotos } from "@/lib/project-utils";
 import { Download, Maximize2, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhotoViewer from "@/components/client-app/PhotoViewer";
+import PreviewBar from "@/components/client-app/PreviewBar";
 
 export default function PhotosDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
     return (
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2 flex items-center justify-center">
-        <Card className="max-w-2xl p-12">
-          <div className="text-center space-y-6">
-            <ImageIcon className="h-20 w-20 mx-auto text-muted-foreground" />
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Fase de Diseño en Curso</h1>
-              <p className="text-muted-foreground text-lg">
-                Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción
+      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+        <PreviewBar />
+        <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2 flex items-center justify-center">
+          <Card className="max-w-2xl p-12">
+            <div className="text-center space-y-6">
+              <ImageIcon className="h-20 w-20 mx-auto text-muted-foreground" />
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Fase de Diseño en Curso</h1>
+                <p className="text-muted-foreground text-lg">
+                  Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción
+                </p>
+              </div>
+              <p className="text-muted-foreground max-w-lg mx-auto">
+                Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos. 
+                Una vez que el proyecto pase a la fase de construcción, aquí podrás ver el progreso fotográfico de tu obra.
               </p>
+              <Button size="lg" onClick={() => navigate('/client/documents')}>
+                Ver Documentos de Diseño
+              </Button>
             </div>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos. 
-              Una vez que el proyecto pase a la fase de construcción, aquí podrás ver el progreso fotográfico de tu obra.
-            </p>
-            <Button size="lg" onClick={() => navigate('/documents')}>
-              Ver Documentos de Diseño
-            </Button>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -64,7 +70,9 @@ export default function PhotosDesktop() {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Galería de Fotos</h1>
@@ -113,6 +121,7 @@ export default function PhotosDesktop() {
           onNavigate={setSelectedPhotoIndex}
         />
       )}
+      </div>
     </div>
   );
 }

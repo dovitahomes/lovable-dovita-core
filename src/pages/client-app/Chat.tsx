@@ -7,12 +7,15 @@ import ChatInput from '@/components/client-app/ChatInput';
 import AvatarCustomizationDialog from '@/components/client-app/AvatarCustomizationDialog';
 import { mockChatMessages } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Chat() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const [messages, setMessages] = useState(() => 
     mockChatMessages.filter(msg => msg.projectId === currentProject?.id)
   );
@@ -109,7 +112,9 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="flex flex-col h-full">
       {/* Header - Static at top */}
       <div className="flex-shrink-0 bg-background border-b">
         <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
@@ -168,6 +173,7 @@ export default function Chat() {
         currentAvatar={clientAvatar}
         onSave={handleSaveAvatar}
       />
+      </div>
     </div>
   );
 }

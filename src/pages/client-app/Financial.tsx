@@ -3,12 +3,15 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { mockMinistraciones, budgetCategories } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { CheckCircle2, Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Financial() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const project = currentProject;
 
   // Filter financial data by current project
@@ -20,7 +23,9 @@ export default function Financial() {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 pt-4 space-y-6">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-full overflow-y-auto px-4 pt-4 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Estado Financiero</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -136,6 +141,7 @@ export default function Financial() {
           );
         })}
       </div>
+    </div>
     </div>
   );
 }

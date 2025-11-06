@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { mockMinistraciones } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
+import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { isInDesignPhase } from "@/lib/project-utils";
 import { DollarSign, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
 import {
@@ -13,9 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import PreviewBar from "@/components/client-app/PreviewBar";
 
 export default function FinancialDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const project = currentProject;
   
   // Filter payments by current project
@@ -37,7 +40,9 @@ export default function FinancialDesktop() {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
         <h1 className="text-3xl font-bold mb-2">Información Financiera</h1>
         <p className="text-muted-foreground">Gestión de pagos y presupuesto</p>
@@ -141,6 +146,7 @@ export default function FinancialDesktop() {
           </Table>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Phone, Video, MoreVertical } from "lucide-react";
 import { mockChatMessages } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
+import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AvatarCustomizationDialog from "@/components/client-app/AvatarCustomizationDialog";
+import PreviewBar from "@/components/client-app/PreviewBar";
 
 interface Message {
   id: number;
@@ -31,6 +33,7 @@ interface Message {
 
 export default function ChatDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const [messages, setMessages] = useState<Message[]>(() =>
     mockChatMessages.filter(msg => msg.projectId === currentProject?.id)
   );
@@ -87,7 +90,9 @@ export default function ChatDesktop() {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
       <Card className="col-span-8 flex flex-col overflow-hidden">
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -225,6 +230,7 @@ export default function ChatDesktop() {
         currentAvatar={clientAvatar}
         onSave={handleSaveAvatar}
       />
+      </div>
     </div>
   );
 }
