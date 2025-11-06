@@ -83,7 +83,14 @@ export function RouteHealthCheck() {
   };
 
   if (loading) {
-    return <div>Loading health check...</div>;
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent mb-4"></div>
+          <p className="text-muted-foreground">Cargando permisos...</p>
+        </div>
+      </div>
+    );
   }
 
   const allItems = getAllSidebarItems();
@@ -144,31 +151,52 @@ export function RouteHealthCheck() {
               Module Permissions
             </CardTitle>
             <CardDescription>
-              Permission configuration status
+              Permission configuration status for current user
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {moduleNames.map(moduleName => {
                 const hasPerm = perms?.find(p => p.module_name === moduleName);
+                const canViewModule = hasPerm?.can_view;
                 return (
                   <div key={moduleName} className="flex items-center justify-between text-sm">
-                    <span>{moduleName}</span>
+                    <span className="font-mono text-xs">{moduleName}</span>
                     {hasPerm ? (
-                      <Badge variant="outline" className="bg-green-50">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Configured
+                      <Badge variant="outline" className={canViewModule ? "bg-green-50" : "bg-yellow-50"}>
+                        {canViewModule ? (
+                          <>
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Configured
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            No View Access
+                          </>
+                        )}
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-yellow-50">
+                      <Badge variant="outline" className="bg-red-50">
                         <XCircle className="h-3 w-3 mr-1" />
-                        Missing
+                        Missing in DB
                       </Badge>
                     )}
                   </div>
                 );
               })}
             </div>
+            {missingPerms.length > 0 && (
+              <Alert className="mt-4" variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Missing Permissions</AlertTitle>
+                <AlertDescription>
+                  Go to <a href="/herramientas/accesos" className="underline font-semibold">
+                    /herramientas/accesos
+                  </a> to configure permissions for these modules.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       </div>
