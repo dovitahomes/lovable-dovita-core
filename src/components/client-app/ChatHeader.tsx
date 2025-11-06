@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Phone, Video, MoreVertical } from 'lucide-react';
-import { mockProjectData } from '@/lib/client-data';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +13,8 @@ interface ChatHeaderProps {
 }
 
 export default function ChatHeader({ onAvatarCustomize }: ChatHeaderProps) {
-  const teamMembers = mockProjectData.team;
+  const { currentProject } = useProject();
+  const teamMembers = currentProject?.team || [];
 
   return (
     <div className="bg-card border-b px-4 py-3 flex items-center justify-between">
@@ -40,7 +40,7 @@ export default function ChatHeader({ onAvatarCustomize }: ChatHeaderProps) {
 
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-sm truncate">
-            Equipo - {mockProjectData.name}
+            Equipo - {currentProject?.name}
           </h2>
           <p className="text-xs text-muted-foreground truncate">
             {teamMembers.length} participantes
