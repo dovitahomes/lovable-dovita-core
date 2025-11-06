@@ -101,7 +101,7 @@ export default function SettingsDesktop() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
         <div className="max-w-4xl">

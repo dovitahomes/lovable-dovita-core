@@ -51,7 +51,7 @@ export default function Appointments() {
   });
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-full overflow-y-auto p-4 space-y-6 pb-8">
       <div>

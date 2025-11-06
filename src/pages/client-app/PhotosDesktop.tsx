@@ -20,7 +20,7 @@ export default function PhotosDesktop() {
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
     return (
-      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <div>
         <PreviewBar />
         <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2 flex items-center justify-center">
           <Card className="max-w-2xl p-12">
@@ -70,7 +70,7 @@ export default function PhotosDesktop() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div className="flex items-center justify-between">

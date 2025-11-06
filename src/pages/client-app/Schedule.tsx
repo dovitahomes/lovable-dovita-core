@@ -12,7 +12,7 @@ export default function Schedule() {
   const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-full overflow-y-auto p-4 space-y-4">
       <div>

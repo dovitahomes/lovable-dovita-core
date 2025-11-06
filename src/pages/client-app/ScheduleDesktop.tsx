@@ -40,7 +40,7 @@ export default function ScheduleDesktop() {
   const completionPercentage = phases.length > 0 ? (completedPhases / phases.length) * 100 : 0;
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>

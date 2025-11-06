@@ -102,7 +102,7 @@ export default function Settings() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="min-h-screen bg-background pb-safe">
         <div className="max-w-2xl mx-auto p-6 space-y-6">

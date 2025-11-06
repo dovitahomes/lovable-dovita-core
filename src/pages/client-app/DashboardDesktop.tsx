@@ -21,7 +21,7 @@ export default function DashboardDesktop() {
   // Early return if no project - DESPUÉS de PreviewBar
   if (!project) {
     return (
-      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <div>
         <PreviewBar />
         <div className="h-full flex items-center justify-center">
           <div className="text-center space-y-3">
@@ -87,7 +87,7 @@ export default function DashboardDesktop() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
         <div>

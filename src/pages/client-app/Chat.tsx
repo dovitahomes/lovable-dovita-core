@@ -112,7 +112,7 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="flex flex-col h-full">
       {/* Header - Static at top */}

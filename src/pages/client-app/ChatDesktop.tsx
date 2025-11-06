@@ -90,7 +90,7 @@ export default function ChatDesktop() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
       <Card className="col-span-8 flex flex-col overflow-hidden">

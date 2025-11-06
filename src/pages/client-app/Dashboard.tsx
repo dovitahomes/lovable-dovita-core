@@ -23,7 +23,7 @@ export default function Dashboard() {
   // Early return if no project - DESPUÉS de PreviewBar
   if (!project) {
     return (
-      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <div>
         <PreviewBar />
         <div className="h-full flex items-center justify-center p-4">
           <div className="text-center space-y-3">
@@ -107,7 +107,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-full overflow-y-auto p-4 space-y-4">
       {/* Welcome Card with Hero Image */}

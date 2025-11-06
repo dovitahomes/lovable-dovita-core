@@ -24,7 +24,7 @@ export default function Photos() {
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
     return (
-      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <div>
         <PreviewBar />
         <div className="h-full overflow-y-auto p-4">
           <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4 rounded-lg">
@@ -70,7 +70,7 @@ export default function Photos() {
   };
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-full overflow-y-auto">
       {/* Header */}

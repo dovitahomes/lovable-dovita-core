@@ -26,13 +26,8 @@ export default function ClientApp() {
     navigate(menuItems[index].path);
   };
 
-  // Check if preview mode is active for layout adjustment
-  const isPreviewMode = localStorage.getItem("clientapp.previewMode") === "true" || 
-                        new URLSearchParams(window.location.search).has("preview");
-  const previewBarHeight = isPreviewMode ? 48 : 0;
-
   return (
-    <div className="min-h-screen flex flex-col bg-background" style={{ paddingTop: `${previewBarHeight}px` }}>
+    <div className="min-h-screen flex flex-col bg-background">
       <DovitaHeader />
 
       <main className="h-[calc(100vh-68px-env(safe-area-inset-top)-65px-env(safe-area-inset-bottom))] overflow-hidden mt-[calc(68px+env(safe-area-inset-top))]">

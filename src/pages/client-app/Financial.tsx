@@ -23,7 +23,7 @@ export default function Financial() {
   }
 
   return (
-    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+    <div>
       <PreviewBar />
       <div className="h-full overflow-y-auto px-4 pt-4 space-y-6">
       <div>

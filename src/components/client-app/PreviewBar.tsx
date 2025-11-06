@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Database, Eye, AlertCircle } from "lucide-react";
+import { ArrowLeft, Database, Eye, AlertCircle, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ export default function PreviewBar() {
   const location = useLocation();
   const { source, setSource, forceClientId, setForceClientId, isPreviewMode } = useDataSource();
   const [isSwitching, setIsSwitching] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   // Solo renderizar en rutas /client/*
   const isClientRoute = location.pathname.startsWith('/client');
@@ -121,65 +122,89 @@ export default function PreviewBar() {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/20 shadow-lg">
-      <div className="container mx-auto px-4 py-2 flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Eye className="h-4 w-4 text-primary-foreground" />
-          <span className="text-sm font-medium text-primary-foreground">Modo Previsualización</span>
-        </div>
+    <div 
+      className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out"
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+      style={{
+        transform: isExpanded ? 'translateY(0)' : 'translateY(-100%)',
+      }}
+    >
+      {/* Barra colapsada - Tab visible */}
+      <div 
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-[hsl(var(--dovita-yellow))] text-primary px-4 py-1 rounded-b-lg shadow-lg cursor-pointer flex items-center gap-2"
+        style={{
+          opacity: isExpanded ? 0 : 1,
+          transition: 'opacity 0.2s ease-in-out',
+          pointerEvents: isExpanded ? 'none' : 'auto',
+        }}
+      >
+        <Eye className="h-3 w-3" />
+        <span className="text-xs font-medium">Modo Preview</span>
+        <ChevronDown className="h-3 w-3" />
+      </div>
 
-        {displayClients.length > 0 && (
+      {/* Barra expandida - Contenido completo */}
+      <div className="bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/20 shadow-lg">
+        <div className="container mx-auto px-4 py-2 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
-            <Label className="text-sm text-primary-foreground">Cliente:</Label>
-            <Select value={forceClientId || undefined} onValueChange={handleClientChange}>
-              <SelectTrigger 
-                className="h-8 w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30"
-                disabled={isSwitching}
-              >
-                <SelectValue placeholder={
-                  isSwitching ? "Cambiando..." : 
-                  loadingClients ? "Cargando..." : 
-                  "Seleccionar cliente"
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {displayClients.map((client) => (
-                  <SelectItem key={client.client_id} value={client.client_id}>
-                    {client.client_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Eye className="h-4 w-4 text-primary-foreground" />
+            <span className="text-sm font-medium text-primary-foreground">Modo Previsualización</span>
           </div>
-        )}
 
-        {source === 'real' && realClients.length === 0 && !loadingClients && (
-          <div className="text-xs text-primary-foreground/80 bg-primary-foreground/10 px-2 py-1 rounded flex items-center gap-2">
-            <AlertCircle className="h-3 w-3" />
-            <span>Sin clientes reales. Activa Mock Data para continuar →</span>
+          {displayClients.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Label className="text-sm text-primary-foreground">Cliente:</Label>
+              <Select value={forceClientId || undefined} onValueChange={handleClientChange}>
+                <SelectTrigger 
+                  className="h-8 w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30"
+                  disabled={isSwitching}
+                >
+                  <SelectValue placeholder={
+                    isSwitching ? "Cambiando..." : 
+                    loadingClients ? "Cargando..." : 
+                    "Seleccionar cliente"
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  {displayClients.map((client) => (
+                    <SelectItem key={client.client_id} value={client.client_id}>
+                      {client.client_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {source === 'real' && realClients.length === 0 && !loadingClients && (
+            <div className="text-xs text-primary-foreground/80 bg-primary-foreground/10 px-2 py-1 rounded flex items-center gap-2">
+              <AlertCircle className="h-3 w-3" />
+              <span>Sin clientes reales. Activa Mock Data para continuar →</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <Database className="h-4 w-4 text-primary-foreground" />
+            <Label className="text-sm text-primary-foreground">Mock Data:</Label>
+            <Switch
+              checked={source === 'mock'}
+              onCheckedChange={handleMockToggle}
+              className="data-[state=checked]:bg-primary-foreground"
+            />
           </div>
-        )}
 
-        <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-primary-foreground" />
-          <Label className="text-sm text-primary-foreground">Mock Data:</Label>
-          <Switch
-            checked={source === 'mock'}
-            onCheckedChange={handleMockToggle}
-            className="data-[state=checked]:bg-primary-foreground"
-          />
-        </div>
-
-        <div className="ml-auto">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleBackoffice}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Backoffice
-          </Button>
+          <div className="ml-auto">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleBackoffice}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Backoffice
+            </Button>
+          </div>
         </div>
       </div>
     </div>

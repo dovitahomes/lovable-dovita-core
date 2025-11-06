@@ -1,14 +1,10 @@
 import { Outlet } from "react-router-dom";
 import DovitaHeaderDesktop from "@/components/client-app/DovitaHeaderDesktop";
 import FloatingIslandSidebar from "@/components/client-app/FloatingIslandSidebar";
-import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 
 export default function ClientAppDesktop() {
-  const { isPreviewMode } = useDataSource();
-  const previewBarHeight = isPreviewMode ? 48 : 0;
-
   return (
-    <div className="min-h-screen flex flex-col bg-background" style={{ paddingTop: `${previewBarHeight}px` }}>
+    <div className="min-h-screen flex flex-col bg-background">
       <DovitaHeaderDesktop />
       <FloatingIslandSidebar />
       
