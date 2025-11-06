@@ -257,8 +257,8 @@ All colors MUST be HSL.
     right: 0;
     height: env(safe-area-inset-bottom);
     background: linear-gradient(to top, hsl(var(--primary)), hsl(var(--card)));
-    transform: translateY(100%);
     pointer-events: none;
+    z-index: -1;
   }
 
   @media (min-width: 768px) {
