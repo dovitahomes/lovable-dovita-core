@@ -20,6 +20,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
   
+  // Early return if no project
+  if (!project) {
+    return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
+  }
+  
   // Get current hero image (rotate through renders if available)
   const heroImage = project.renders && project.renders.length > 0 
     ? project.renders[currentRenderIndex].url 
@@ -45,10 +50,6 @@ export default function Dashboard() {
       setCurrentRenderIndex((prev) => (prev + 1) % project.renders.length);
     }
   };
-  
-  if (!project) {
-    return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
-  }
 
   // Calcular progreso dinámicamente basado en fases
   const projectProgress = calculateProjectProgress(project);
