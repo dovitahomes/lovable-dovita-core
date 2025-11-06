@@ -36,7 +36,7 @@ export default function Photos() {
               Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción. 
               Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos.
             </p>
-            <Button onClick={() => navigate('/app/documents')}>
+            <Button onClick={() => navigate('/documents')}>
               Ver Documentos de Diseño
             </Button>
           </div>

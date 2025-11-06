@@ -83,9 +83,9 @@ export default function Dashboard() {
 
   const handleImageClick = () => {
     if (inDesignPhase) {
-      navigate('/app/documents');
+      navigate('/documents');
     } else {
-      navigate('/app/photos');
+      navigate('/photos');
     }
   };
 
@@ -144,7 +144,7 @@ export default function Dashboard() {
       {/* Current Phase Card */}
       <Card 
         className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-        onClick={() => navigate('/app/schedule')}
+        onClick={() => navigate('/schedule')}
       >
         <CardHeader>
           <CardTitle className="text-sm text-muted-foreground">Fase Actual</CardTitle>
@@ -167,7 +167,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Card 
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-          onClick={() => navigate('/app/financial')}
+          onClick={() => navigate('/financial')}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground">
@@ -189,7 +189,7 @@ export default function Dashboard() {
         
         <Card 
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-          onClick={() => navigate('/app/financial')}
+          onClick={() => navigate('/financial')}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground">
@@ -261,7 +261,7 @@ export default function Dashboard() {
             <Button 
               className="w-full" 
               variant="outline"
-              onClick={() => navigate('/app/appointments')}
+              onClick={() => navigate('/appointments')}
             >
               Ver Detalles
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -276,16 +276,16 @@ export default function Dashboard() {
           <CardTitle className="text-sm">Acciones Rápidas</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/app/photos')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/photos')}>
             Ver Fotos
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/app/appointments')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/appointments')}>
             Agendar Cita
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/app/chat')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/chat')}>
             Mensaje
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/app/documents')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/documents')}>
             Documentos
           </Button>
         </CardContent>

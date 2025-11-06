@@ -31,7 +31,7 @@ export default function PhotosDesktop() {
               Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos. 
               Una vez que el proyecto pase a la fase de construcción, aquí podrás ver el progreso fotográfico de tu obra.
             </p>
-            <Button size="lg" onClick={() => navigate('/app/documents')}>
+            <Button size="lg" onClick={() => navigate('/documents')}>
               Ver Documentos de Diseño
             </Button>
           </div>

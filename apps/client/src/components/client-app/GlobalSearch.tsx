@@ -138,7 +138,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={apt.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleNavigate('/app/appointments')}
+                          onClick={() => handleNavigate('/appointments')}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -171,7 +171,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={doc.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleNavigate('/app/documents')}
+                          onClick={() => handleNavigate('/documents')}
                         >
                           <div className="flex items-center gap-3">
                             {doc.type === 'pdf' ? (
@@ -206,7 +206,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={msg.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleNavigate('/app/chat')}
+                          onClick={() => handleNavigate('/chat')}
                         >
                           <div className="flex items-start gap-3">
                             <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -242,7 +242,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={member.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleNavigate('/app/chat')}
+                          onClick={() => handleNavigate('/chat')}
                         >
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -274,7 +274,7 @@ export default function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) 
                         <div
                           key={phase.id}
                           className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleNavigate('/app/schedule')}
+                          onClick={() => handleNavigate('/schedule')}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">

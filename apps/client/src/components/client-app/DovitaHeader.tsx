@@ -86,7 +86,7 @@ export default function DovitaHeader() {
                 className="w-full justify-start gap-3"
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate('/app/settings');
+                  navigate('/settings');
                 }}
               >
                 <Settings className="h-4 w-4" />
