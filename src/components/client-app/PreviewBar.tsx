@@ -24,6 +24,7 @@ export default function PreviewBar() {
   const [isSwitching, setIsSwitching] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isInUse, setIsInUse] = useState(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Detectar si es móvil
@@ -44,6 +45,22 @@ export default function PreviewBar() {
       }
     };
   }, []);
+
+  // Re-programar cierre automático cuando el estado "en uso" cambie
+  useEffect(() => {
+    if (isExpanded && !isInUse) {
+      // Si está expandido pero ya NO está en uso, programar cierre
+      closeTimeoutRef.current = setTimeout(() => {
+        setIsExpanded(false);
+      }, 2000);
+    }
+    
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, [isInUse, isExpanded]);
   
   // Solo renderizar en rutas /client/*
   const isClientRoute = location.pathname.startsWith('/client');
@@ -156,14 +173,18 @@ export default function PreviewBar() {
       // Si se está expandiendo, iniciar timeout para cerrar automáticamente
       if (newExpandedState) {
         closeTimeoutRef.current = setTimeout(() => {
-          setIsExpanded(false);
-        }, 1000);
+          // Solo cerrar si NO está en uso
+          if (!isInUse) {
+            setIsExpanded(false);
+          }
+        }, 2000);
       } else {
-        // Si se está cerrando manualmente, cancelar cualquier timeout pendiente
+        // Si se está cerrando manualmente, cancelar timeout y resetear estado
         if (closeTimeoutRef.current) {
           clearTimeout(closeTimeoutRef.current);
           closeTimeoutRef.current = null;
         }
+        setIsInUse(false);
       }
     }
   };
@@ -171,7 +192,8 @@ export default function PreviewBar() {
   // Manejar eventos de mouse (para desktop con delay)
   const handleMouseEnter = () => {
     if (!isMobile) {
-      // Cancelar cualquier timeout pendiente
+      // Marcar como "en uso" y cancelar cualquier timeout pendiente
+      setIsInUse(true);
       if (closeTimeoutRef.current) {
         clearTimeout(closeTimeoutRef.current);
         closeTimeoutRef.current = null;
@@ -182,10 +204,13 @@ export default function PreviewBar() {
 
   const handleMouseLeave = () => {
     if (!isMobile) {
-      // Agregar delay de 1 segundo antes de cerrar
+      // Marcar como NO en uso al salir
+      setIsInUse(false);
+      
+      // Programar cierre automático con 2 segundos de delay
       closeTimeoutRef.current = setTimeout(() => {
         setIsExpanded(false);
-      }, 1000);
+      }, 2000);
     }
   };
 
@@ -274,7 +299,19 @@ export default function PreviewBar() {
           {displayClients.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               <Label className="text-xs sm:text-sm text-primary-foreground whitespace-nowrap">Cliente:</Label>
-              <Select value={forceClientId || undefined} onValueChange={handleClientChange}>
+              <Select 
+                value={forceClientId || undefined} 
+                onValueChange={handleClientChange}
+                onOpenChange={(open) => {
+                  if (isMobile) {
+                    setIsInUse(open);
+                    if (open && closeTimeoutRef.current) {
+                      clearTimeout(closeTimeoutRef.current);
+                      closeTimeoutRef.current = null;
+                    }
+                  }
+                }}
+              >
                 <SelectTrigger 
                   className="h-8 w-[160px] sm:w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30 text-xs sm:text-sm"
                   disabled={isSwitching}
@@ -312,6 +349,20 @@ export default function PreviewBar() {
               checked={source === 'mock'}
               onCheckedChange={handleMockToggle}
               className="data-[state=checked]:bg-primary-foreground scale-90 sm:scale-100"
+              onFocus={() => {
+                if (isMobile) {
+                  setIsInUse(true);
+                  if (closeTimeoutRef.current) {
+                    clearTimeout(closeTimeoutRef.current);
+                    closeTimeoutRef.current = null;
+                  }
+                }
+              }}
+              onBlur={() => {
+                if (isMobile) {
+                  setIsInUse(false);
+                }
+              }}
             />
           </div>
 
@@ -321,6 +372,20 @@ export default function PreviewBar() {
               size="sm"
               onClick={handleBackoffice}
               className="gap-2 h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+              onFocus={() => {
+                if (isMobile) {
+                  setIsInUse(true);
+                  if (closeTimeoutRef.current) {
+                    clearTimeout(closeTimeoutRef.current);
+                    closeTimeoutRef.current = null;
+                  }
+                }
+              }}
+              onBlur={() => {
+                if (isMobile) {
+                  setIsInUse(false);
+                }
+              }}
             >
               <ArrowLeft className="h-3 sm:h-4 w-3 sm:w-4" />
               <span className="hidden sm:inline">Backoffice</span>
