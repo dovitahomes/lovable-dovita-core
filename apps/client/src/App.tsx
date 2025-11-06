@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProjectProvider } from "@/contexts/ProjectContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { DataSourceProvider } from "@/contexts/DataSourceContext";
 import { mockClientData } from "@/lib/client-data";
 import PreviewBar from "@/components/client-app/PreviewBar";
 import NotFound from "./pages/NotFound";
@@ -22,13 +23,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ProjectProvider projects={mockClientData.projects}>
-      <NotificationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <PreviewBar />
-          <BrowserRouter basename="/client">
+    <DataSourceProvider>
+      <ProjectProvider projects={mockClientData.projects}>
+        <NotificationProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <PreviewBar />
+            <BrowserRouter basename="/client">
             <Routes>
               <Route path="/" element={<ResponsiveClientApp />}>
                 <Route index element={<ResponsiveDashboard />} />
@@ -47,6 +49,7 @@ const App = () => (
         </TooltipProvider>
       </NotificationProvider>
     </ProjectProvider>
+    </DataSourceProvider>
   </QueryClientProvider>
 );
 
