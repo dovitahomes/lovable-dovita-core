@@ -164,106 +164,109 @@ export default function Dashboard() {
         </Card>
 
         {/* Current Phase Card */}
-        <Card>
+        <Card 
+          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+          onClick={() => navigate('/client/schedule')}
+        >
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Fase Actual del Proyecto</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Fase Actual</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <Progress value={projectProgress} variant="yellow" className="h-3" />
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold text-lg">{currentPhase.name}</p>
+                <p className="text-3xl font-bold text-primary">{projectProgress}%</p>
+                <p className="text-sm text-muted-foreground">{currentPhase.name}</p>
               </div>
-              <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">
-                En Proceso
-              </Badge>
+              <Button variant="outline" size="sm">
+                Ver Detalles
+              </Button>
             </div>
-            
-            <Progress value={projectProgress} variant="yellow" className="h-2" />
-            <p className="text-sm text-muted-foreground text-right">
-              {projectProgress}% completado
-            </p>
           </CardContent>
         </Card>
 
-        {/* Financial Summary Card */}
-        <Card className="bg-gradient-to-br from-primary to-primary/80 text-white border-0">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Resumen Financiero</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {inDesignPhase ? (
-              // Diseño phase - solo mostrar total y mensaje especial
-              <div>
-                <p className="text-xs opacity-75">Total Proyecto</p>
-                <p className="text-3xl font-bold">
-                  ${displayTotal.toLocaleString('es-MX')}
-                </p>
-                <p className="text-sm opacity-90 mt-1">MXN</p>
-                <p className="text-xs opacity-90 mt-3 bg-white/10 rounded-lg p-2">
-                  Los pagos iniciarán una vez aprobada la fase de diseño
-                </p>
-              </div>
-            ) : (
-              // Construcción phase - mostrar pagado/pendiente normal
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs opacity-75">Pagado</p>
-                    <p className="text-2xl font-bold">
-                      ${(displayPaid / 1000000).toFixed(1)}M
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs opacity-75">Por Pagar</p>
-                    <p className="text-2xl font-bold">
-                      ${(displayPending / 1000000).toFixed(1)}M
-                    </p>
-                  </div>
-                </div>
-                <Progress 
-                  value={(displayPaid / displayTotal) * 100}
-                  variant="yellow"
-                  className="h-2 bg-white/20"
-                />
-                <div className="flex items-center justify-between text-xs opacity-75">
-                  <span>Total: ${displayTotal.toLocaleString('es-MX')}</span>
-                  <span>{((displayPaid / displayTotal) * 100).toFixed(0)}%</span>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        {/* Financial Summary - Grid 2 Columns */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Tarjeta Pagado */}
+          <Card 
+            className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+            onClick={() => navigate('/client/financial')}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs text-muted-foreground">
+                {inDesignPhase ? 'Pagado Diseño' : 'Pagado'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg font-bold text-green-600">
+                {inDesignPhase 
+                  ? `$${(displayPaid / 1000).toFixed(0)}k`
+                  : `$${(displayPaid / 1000000).toFixed(1)}M`
+                }
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {Math.round((displayPaid / displayTotal) * 100)}% del total
+              </p>
+            </CardContent>
+          </Card>
+          
+          {/* Tarjeta Pendiente */}
+          <Card 
+            className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+            onClick={() => navigate('/client/financial')}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs text-muted-foreground">
+                {inDesignPhase ? 'Por Pagar Diseño' : 'Por Pagar'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg font-bold text-orange-600">
+                {inDesignPhase 
+                  ? `$${(displayPending / 1000).toFixed(0)}k`
+                  : `$${(displayPending / 1000000).toFixed(1)}M`
+                }
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {Math.round((displayPending / displayTotal) * 100)}% restante
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Next Appointment */}
         {nextAppointment && (
           <Card className="border-l-4 border-l-primary">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Próxima Cita</CardTitle>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-sm">Próxima Cita</CardTitle>
+                </div>
+                <Badge 
+                  variant={nextAppointment.status === 'confirmed' ? 'default' : 'secondary'}
+                  className={nextAppointment.status === 'confirmed' ? '' : 'bg-secondary text-secondary-foreground'}
+                >
+                  {nextAppointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="font-semibold">{nextAppointment.type}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Calendar className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {format(new Date(nextAppointment.date), "d 'de' MMMM", { locale: es })}
-                  </span>
-                  <span className="text-muted-foreground">•</span>
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {nextAppointment.time}
-                  </span>
-                </div>
+                <p className="font-semibold text-base">{nextAppointment.type}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {format(new Date(nextAppointment.date), "EEEE d 'de' MMMM", { locale: es })} a las {nextAppointment.time}
+                </p>
               </div>
               
-              <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
-                  </div>
-                </div>
+              <div className="flex items-center gap-3">
+                <img 
+                  src={nextAppointment.teamMember.avatar} 
+                  alt={nextAppointment.teamMember.name}
+                  className="h-10 w-10 rounded-full"
+                />
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{nextAppointment.teamMember.name}</p>
+                  <p className="text-sm font-medium">{nextAppointment.teamMember.name}</p>
                   <p className="text-xs text-muted-foreground">{nextAppointment.teamMember.role}</p>
                 </div>
               </div>
@@ -272,7 +275,7 @@ export default function Dashboard() {
                 {nextAppointment.isVirtual ? (
                   <>
                     <Video className="h-4 w-4" />
-                    <span>Virtual</span>
+                    <span>Reunión Virtual</span>
                   </>
                 ) : (
                   <>
@@ -281,6 +284,14 @@ export default function Dashboard() {
                   </>
                 )}
               </div>
+
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate('/client/appointments')}
+              >
+                Ver Detalles
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -288,41 +299,41 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Acciones Rápidas</CardTitle>
+            <CardTitle className="text-sm">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-                <Button 
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
                 variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
+                size="sm"
                 onClick={() => navigate('/client/photos')}
               >
-                <ImageIcon className="h-5 w-5" />
-                <span className="text-xs">Ver Fotos</span>
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Ver Fotos
               </Button>
               <Button 
                 variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
+                size="sm"
                 onClick={() => navigate('/client/appointments')}
               >
-                <Calendar className="h-5 w-5" />
-                <span className="text-xs">Citas</span>
+                <Calendar className="h-4 w-4 mr-2" />
+                Agendar Cita
               </Button>
               <Button 
                 variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
+                size="sm"
                 onClick={() => navigate('/client/chat')}
               >
-                <MessageCircle className="h-5 w-5" />
-                <span className="text-xs">Chat</span>
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Mensaje
               </Button>
               <Button 
                 variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
+                size="sm"
                 onClick={() => navigate('/client/documents')}
               >
-                <FileText className="h-5 w-5" />
-                <span className="text-xs">Documentos</span>
+                <FileText className="h-4 w-4 mr-2" />
+                Documentos
               </Button>
             </div>
           </CardContent>
@@ -333,16 +344,16 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">
+                <CardTitle className="text-sm">
                   {inDesignPhase ? 'Diseños Recientes' : 'Fotos Recientes'}
                 </CardTitle>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   className="h-7 text-xs"
-                  onClick={() => navigate('/client/photos')}
+                  onClick={handleImageClick}
                 >
-                  Ver todas
+                  Ver todos
                 </Button>
               </div>
             </CardHeader>
@@ -351,13 +362,13 @@ export default function Dashboard() {
                 {recentImages.map((item, idx) => (
                   <div 
                     key={idx} 
-                    className="aspect-square rounded-lg overflow-hidden cursor-pointer"
-                    onClick={() => handleImageClick()}
+                    className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={handleImageClick}
                   >
                     <img
                       src={item.url}
-                      alt={item.description}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform"
+                      alt={inDesignPhase ? item.title : item.description}
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 ))}
