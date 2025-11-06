@@ -164,13 +164,15 @@ export default function Photos() {
       </div>
 
       {/* Photo Viewer */}
-      {selectedPhotoIndex !== null && (
-        <PhotoViewer
-          photos={projectPhotos}
-          currentIndex={selectedPhotoIndex}
-          onNavigate={setSelectedPhotoIndex}
-        />
-      )}
+      <PhotoViewer
+        open={selectedPhotoIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedPhotoIndex(null);
+        }}
+        photos={projectPhotos}
+        currentIndex={selectedPhotoIndex ?? 0}
+        onNavigate={setSelectedPhotoIndex}
+      />
     </div>
   );
 }
