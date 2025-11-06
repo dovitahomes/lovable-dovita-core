@@ -3493,6 +3493,7 @@ export type Database = {
           subtotal: number
         }[]
       }
+      get_client_id_from_auth: { Args: never; Returns: string }
       get_effective_rule: {
         Args: { p_key: string; p_proyecto_id?: string; p_sucursal_id?: string }
         Returns: Json
@@ -3517,6 +3518,7 @@ export type Database = {
           qty_requested: number
         }[]
       }
+      is_collaborator: { Args: never; Returns: boolean }
       save_price_history: {
         Args: {
           precio_param: number
