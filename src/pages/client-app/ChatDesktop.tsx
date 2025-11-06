@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AvatarCustomizationDialog from "@/components/client-app/AvatarCustomizationDialog";
-import PreviewBar from "@/components/client-app/PreviewBar";
 
 interface Message {
   id: number;
@@ -90,9 +89,7 @@ export default function ChatDesktop() {
   };
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
+    <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
       <Card className="col-span-8 flex flex-col overflow-hidden">
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -230,7 +227,6 @@ export default function ChatDesktop() {
         currentAvatar={clientAvatar}
         onSave={handleSaveAvatar}
       />
-      </div>
     </div>
   );
 }

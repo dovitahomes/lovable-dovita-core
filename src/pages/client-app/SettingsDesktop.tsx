@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function SettingsDesktop() {
   const navigate = useNavigate();
@@ -101,10 +100,8 @@ export default function SettingsDesktop() {
   };
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
-        <div className="max-w-4xl">
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+      <div className="max-w-4xl">
         <Button
           variant="ghost"
           onClick={() => navigate('/app')}
@@ -282,7 +279,6 @@ export default function SettingsDesktop() {
             </div>
           </CardContent>
         </Card>
-        </div>
       </div>
     </div>
   );

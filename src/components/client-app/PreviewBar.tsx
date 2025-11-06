@@ -9,6 +9,7 @@ import { ArrowLeft, Database, Eye, AlertCircle, ChevronDown } from "lucide-react
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useDataSource } from "@/contexts/client-app/DataSourceContext";
+import { useAppMode } from "@/hooks/client-app/useAppMode";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Client {
@@ -18,7 +19,8 @@ interface Client {
 
 export default function PreviewBar() {
   const location = useLocation();
-  const { source, setSource, forceClientId, setForceClientId, isPreviewMode } = useDataSource();
+  const { source, setSource, forceClientId, setForceClientId } = useDataSource();
+  const { isPreviewMode, userRole } = useAppMode();
   const [isSwitching, setIsSwitching] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -134,24 +136,15 @@ export default function PreviewBar() {
   };
 
   const handleBackoffice = () => {
-    // 1. Obtener URL de backoffice guardada
-    let backofficeUrl = localStorage.getItem("clientapp.backofficeUrl") || "/";
-    
-    // 2. Validar que la URL sea del backoffice (no /client/*)
-    // Si es una ruta de cliente, usar dashboard como fallback
-    if (backofficeUrl.startsWith('/client')) {
-      backofficeUrl = '/';
-    }
-    
-    // 3. Limpiar preview mode y storage
+    // 1. Limpiar preview mode y storage
     localStorage.removeItem("clientapp.previewMode");
     localStorage.removeItem("clientapp.useMock");
     localStorage.removeItem("clientapp.forceClientId");
     localStorage.removeItem("clientapp.backofficeUrl");
     localStorage.removeItem("currentProjectId");
     
-    // 4. Navegar al backoffice
-    window.location.href = backofficeUrl;
+    // 2. SIEMPRE redirigir al dashboard del ERP
+    window.location.href = '/';
   };
 
   // Manejar toggle de expansión (para móvil con tap y delay)
@@ -196,8 +189,11 @@ export default function PreviewBar() {
     }
   };
 
-  // No renderizar si no está en modo preview o no está en ruta de cliente
-  if (!isPreviewMode || !isClientRoute) {
+  // No renderizar si:
+  // - No es colaborador
+  // - No está en modo preview
+  // - No está en ruta de cliente
+  if (userRole !== 'collaborator' || !isPreviewMode || !isClientRoute) {
     return null;
   }
 
@@ -206,10 +202,10 @@ export default function PreviewBar() {
       {/* Lengüeta colapsada - Siempre visible como overlay fijo */}
       <div 
         className={cn(
-          "fixed top-0 z-[100] bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all duration-300 touch-manipulation",
+          "fixed z-[60] bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all duration-300 touch-manipulation",
           isMobile 
-            ? "right-4 px-2 py-1" 
-            : "left-1/2 -translate-x-1/2 px-4 py-2",
+            ? "top-[env(safe-area-inset-top,0)] right-4 px-2 py-1" 
+            : "top-0 left-1/2 -translate-x-1/2 px-4 py-2",
           isExpanded && "opacity-0 pointer-events-none"
         )}
         onClick={handleToggleExpand}
@@ -241,7 +237,8 @@ export default function PreviewBar() {
       {/* Barra expandida - Contenido completo */}
       <div 
         className={cn(
-          "fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out",
+          "fixed left-0 right-0 z-[60] transition-all duration-300 ease-in-out",
+          isMobile ? "top-[env(safe-area-inset-top,0)]" : "top-0",
           isExpanded ? "translate-y-0" : "-translate-y-full"
         )}
         onMouseLeave={handleMouseLeave}

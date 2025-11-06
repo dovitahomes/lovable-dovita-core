@@ -7,7 +7,6 @@ import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase, isInDesignPhase } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import PreviewBar from "@/components/client-app/PreviewBar";
 
 export default function DashboardDesktop() {
   const { currentProject } = useProject();
@@ -18,19 +17,16 @@ export default function DashboardDesktop() {
   // Filter photos by current project
   const projectPhotos = mockPhotos.filter(photo => photo.projectId === project?.id);
 
-  // Early return if no project - DESPUÉS de PreviewBar
+  // Early return if no project
   if (!project) {
     return (
-      <div>
-        <PreviewBar />
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center space-y-3">
-            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
-            <p className="text-sm text-muted-foreground">
-              Activa Mock Data en la barra superior si no hay proyectos reales.
-            </p>
-          </div>
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
+          <p className="text-sm text-muted-foreground">
+            Activa Mock Data en la barra superior si no hay proyectos reales.
+          </p>
         </div>
       </div>
     );
@@ -87,13 +83,11 @@ export default function DashboardDesktop() {
   };
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
-          <p className="text-muted-foreground">Resumen general de tu construcción</p>
-        </div>
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-4 pr-2">
+      <div>
+        <h1 className="text-2xl font-bold mb-2">Bienvenido a tu Proyecto</h1>
+        <p className="text-muted-foreground">Resumen general de tu construcción</p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         <Card className="col-span-1 lg:col-span-2 xl:col-span-3 relative overflow-hidden h-[220px]">
@@ -256,7 +250,6 @@ export default function DashboardDesktop() {
           </CardContent>
         </Card>
       </div>
-    </div>
     </div>
   );
 }

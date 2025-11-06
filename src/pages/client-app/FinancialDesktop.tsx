@@ -14,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import PreviewBar from "@/components/client-app/PreviewBar";
 
 export default function FinancialDesktop() {
   const { currentProject } = useProject();
@@ -40,9 +39,7 @@ export default function FinancialDesktop() {
   };
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
         <h1 className="text-3xl font-bold mb-2">Información Financiera</h1>
         <p className="text-muted-foreground">Gestión de pagos y presupuesto</p>
@@ -146,7 +143,6 @@ export default function FinancialDesktop() {
           </Table>
         </CardContent>
       </Card>
-      </div>
     </div>
   );
 }

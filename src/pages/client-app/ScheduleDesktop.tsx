@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { useProject } from "@/contexts/client-app/ProjectContext";
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import PreviewBar from '@/components/client-app/PreviewBar';
 import { getScheduleTitle, getScheduleSubtitle } from "@/lib/project-utils";
 
 const getStatusIcon = (status: string) => {
@@ -48,9 +47,7 @@ export default function ScheduleDesktop() {
   };
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
         <h1 className="text-3xl font-bold mb-2">{getScheduleTitle(currentProject)}</h1>
         <p className="text-muted-foreground">{getScheduleSubtitle(currentProject)}</p>
@@ -152,7 +149,6 @@ export default function ScheduleDesktop() {
             </CardContent>
           </Card>
         </div>
-      </div>
       </div>
     </div>
   );

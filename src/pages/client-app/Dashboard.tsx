@@ -12,7 +12,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Dashboard() {
   const { currentProject } = useProject();
@@ -21,19 +20,16 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
   
-  // Early return if no project - DESPUÉS de PreviewBar
+  // Early return if no project
   if (!project) {
     return (
-      <div>
-        <PreviewBar />
-        <div className="h-full flex items-center justify-center p-4">
-          <div className="text-center space-y-3">
-            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
-            <p className="text-sm text-muted-foreground">
-              Si no hay datos, activa Mock Data en la barra superior.
-            </p>
-          </div>
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
+          <p className="text-sm text-muted-foreground">
+            Si no hay datos, activa Mock Data en la barra superior.
+          </p>
         </div>
       </div>
     );

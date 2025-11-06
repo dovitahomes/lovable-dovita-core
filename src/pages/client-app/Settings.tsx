@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Settings() {
   const { isPreviewMode } = useDataSource();
@@ -103,7 +102,6 @@ export default function Settings() {
 
   return (
     <div className="h-full flex flex-col">
-      <PreviewBar />
       <div className="flex-1 overflow-y-auto pb-[130px]">
         <div className="max-w-2xl mx-auto p-6 space-y-6">
         <div>

@@ -5,6 +5,7 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useAppMode } from '@/hooks/client-app/useAppMode';
 import { useProjectsData } from '@/hooks/client-app/useProjectsData';
 import { AuthStateListener } from '@/components/client-app/AuthStateListener';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import { CLIENT_APP_RELATIVE_ROUTES } from '@/config/routes';
 import ResponsiveClientApp from '@/pages/client-app/ResponsiveClientApp';
 import ResponsiveDashboard from '@/pages/client-app/ResponsiveDashboard';
@@ -33,6 +34,7 @@ function ClientAppContent() {
 
   return (
     <ProjectProvider projects={projects}>
+      <PreviewBar />
       <AuthStateListener />
       <Routes>
         {/* Sub-rutas relativas de /client/* */}

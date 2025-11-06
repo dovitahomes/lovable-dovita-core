@@ -9,7 +9,6 @@ import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { mockAppointments } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import PreviewBar from '@/components/client-app/PreviewBar';
 import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from 'lucide-react';
 import { format, isSameDay, isFuture, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';

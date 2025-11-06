@@ -11,7 +11,6 @@ import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
-import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Chat() {
   const { currentProject } = useProject();

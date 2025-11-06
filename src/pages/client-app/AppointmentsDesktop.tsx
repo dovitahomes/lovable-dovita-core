@@ -8,7 +8,6 @@ import AppointmentModal from "@/components/client-app/AppointmentModal";
 import { mockAppointments } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import PreviewBar from '@/components/client-app/PreviewBar';
 import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
 import { format, isSameDay, isFuture, isToday } from "date-fns";
 import { es } from "date-fns/locale";
@@ -45,9 +44,7 @@ export default function AppointmentsDesktop() {
     .sort((a, b) => a.time.localeCompare(b.time));
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Citas y Reuniones</h1>
@@ -247,7 +244,6 @@ export default function AppointmentsDesktop() {
         appointment={editingAppointment}
         mode={editingAppointment ? 'edit' : 'create'}
       />
-      </div>
     </div>
   );
 }

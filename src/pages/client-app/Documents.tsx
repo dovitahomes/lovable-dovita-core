@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import PreviewBar from '@/components/client-app/PreviewBar';
 import type { Document } from '@/lib/client-app/client-data';
 
 export default function Documents() {
