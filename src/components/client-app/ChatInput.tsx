@@ -1,7 +1,7 @@
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Paperclip, Smile } from 'lucide-react';
+import { Send, Paperclip } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -53,16 +53,9 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="min-h-[40px] max-h-[100px] resize-none pr-10 overflow-y-auto text-base"
+            className="min-h-[40px] max-h-[100px] resize-none overflow-y-auto text-base"
             rows={1}
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-1 bottom-1 text-muted-foreground"
-          >
-            <Smile className="h-5 w-5" />
-          </Button>
         </div>
 
         <Button
