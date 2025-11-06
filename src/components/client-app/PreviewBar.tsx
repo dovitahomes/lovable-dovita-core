@@ -20,6 +20,17 @@ export default function PreviewBar() {
   const { source, setSource, forceClientId, setForceClientId, isPreviewMode } = useDataSource();
   const [isSwitching, setIsSwitching] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Solo renderizar en rutas /client/*
   const isClientRoute = location.pathname.startsWith('/client');
@@ -116,6 +127,26 @@ export default function PreviewBar() {
     window.location.href = backofficeUrl;
   };
 
+  // Manejar toggle de expansión (para móvil con tap)
+  const handleToggleExpand = () => {
+    if (isMobile) {
+      setIsExpanded(!isExpanded);
+    }
+  };
+
+  // Manejar eventos de mouse (para desktop)
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setIsExpanded(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setIsExpanded(false);
+    }
+  };
+
   // No renderizar si no está en modo preview o no está en ruta de cliente
   if (!isPreviewMode || !isClientRoute) {
     return null;
@@ -124,15 +155,16 @@ export default function PreviewBar() {
   return (
     <div 
       className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out"
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
         transform: isExpanded ? 'translateY(0)' : 'translateY(-100%)',
       }}
     >
       {/* Barra colapsada - Tab visible */}
       <div 
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-[hsl(var(--dovita-yellow))] text-primary px-4 py-1 rounded-b-lg shadow-lg cursor-pointer flex items-center gap-2"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-[hsl(var(--dovita-yellow))] text-primary px-4 py-2 rounded-b-lg shadow-lg cursor-pointer flex items-center gap-2 active:scale-95 transition-transform touch-manipulation"
+        onClick={handleToggleExpand}
         style={{
           opacity: isExpanded ? 0 : 1,
           transition: 'opacity 0.2s ease-in-out',
@@ -140,30 +172,50 @@ export default function PreviewBar() {
         }}
       >
         <Eye className="h-3 w-3" />
-        <span className="text-xs font-medium">Modo Preview</span>
+        <span className="text-xs font-medium whitespace-nowrap">Modo Preview</span>
         <ChevronDown className="h-3 w-3" />
       </div>
+
+      {/* Overlay para cerrar en móvil al hacer tap fuera */}
+      {isMobile && isExpanded && (
+        <div
+          className="fixed inset-0 bg-transparent -z-10"
+          onClick={() => setIsExpanded(false)}
+        />
+      )}
 
       {/* Barra expandida - Contenido completo */}
       <div className="bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/20 shadow-lg">
         <div className="container mx-auto px-4 py-2 flex items-center gap-4 flex-wrap">
+          {/* Botón de cierre para móvil */}
+          {isMobile && (
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="text-primary-foreground hover:text-primary-foreground/80 active:scale-95 transition-transform"
+              aria-label="Cerrar"
+            >
+              <ChevronDown className="h-5 w-5 rotate-180" />
+            </button>
+          )}
+
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4 text-primary-foreground" />
-            <span className="text-sm font-medium text-primary-foreground">Modo Previsualización</span>
+            <span className="text-sm font-medium text-primary-foreground hidden sm:inline">Modo Previsualización</span>
+            <span className="text-xs font-medium text-primary-foreground sm:hidden">Preview</span>
           </div>
 
           {displayClients.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Label className="text-sm text-primary-foreground">Cliente:</Label>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Label className="text-xs sm:text-sm text-primary-foreground whitespace-nowrap">Cliente:</Label>
               <Select value={forceClientId || undefined} onValueChange={handleClientChange}>
                 <SelectTrigger 
-                  className="h-8 w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30"
+                  className="h-8 w-[160px] sm:w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30 text-xs sm:text-sm"
                   disabled={isSwitching}
                 >
                   <SelectValue placeholder={
                     isSwitching ? "Cambiando..." : 
                     loadingClients ? "Cargando..." : 
-                    "Seleccionar cliente"
+                    "Seleccionar"
                   } />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,18 +231,20 @@ export default function PreviewBar() {
 
           {source === 'real' && realClients.length === 0 && !loadingClients && (
             <div className="text-xs text-primary-foreground/80 bg-primary-foreground/10 px-2 py-1 rounded flex items-center gap-2">
-              <AlertCircle className="h-3 w-3" />
-              <span>Sin clientes reales. Activa Mock Data para continuar →</span>
+              <AlertCircle className="h-3 w-3 flex-shrink-0" />
+              <span className="hidden sm:inline">Sin clientes reales. Activa Mock Data para continuar →</span>
+              <span className="sm:hidden">Sin clientes →</span>
             </div>
           )}
 
           <div className="flex items-center gap-2">
-            <Database className="h-4 w-4 text-primary-foreground" />
-            <Label className="text-sm text-primary-foreground">Mock Data:</Label>
+            <Database className="h-3 sm:h-4 w-3 sm:w-4 text-primary-foreground" />
+            <Label className="text-xs sm:text-sm text-primary-foreground whitespace-nowrap hidden sm:inline">Mock Data:</Label>
+            <Label className="text-xs text-primary-foreground whitespace-nowrap sm:hidden">Mock:</Label>
             <Switch
               checked={source === 'mock'}
               onCheckedChange={handleMockToggle}
-              className="data-[state=checked]:bg-primary-foreground"
+              className="data-[state=checked]:bg-primary-foreground scale-90 sm:scale-100"
             />
           </div>
 
@@ -199,10 +253,11 @@ export default function PreviewBar() {
               variant="secondary"
               size="sm"
               onClick={handleBackoffice}
-              className="gap-2"
+              className="gap-2 h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Backoffice
+              <ArrowLeft className="h-3 sm:h-4 w-3 sm:w-4" />
+              <span className="hidden sm:inline">Backoffice</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </div>
         </div>
