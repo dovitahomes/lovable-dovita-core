@@ -34,6 +34,14 @@ export function useAppMode() {
     const fromStorage = localStorage.getItem('clientapp.previewMode') === 'true';
     const isCollaborator = userRole === 'collaborator';
     
+    console.log('[useAppMode] Preview Mode Check:', {
+      fromUrl,
+      fromStorage,
+      userRole,
+      isCollaborator,
+      willBePreviewMode: (fromUrl || fromStorage) && isCollaborator
+    });
+    
     // Preview mode solo si es colaborador Y tiene el flag de preview
     return (fromUrl || fromStorage) && isCollaborator;
   }, [userRole]);
