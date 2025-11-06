@@ -33,7 +33,7 @@ export default function DovitaHeader() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-white hover:text-[hsl(var(--dovita-yellow))] hover:bg-transparent"
+            className="text-white hover:bg-[hsl(var(--dovita-yellow))]/20"
             onClick={() => setSearchOpen(true)}
           >
             <Search className="h-5 w-5" />
@@ -41,7 +41,7 @@ export default function DovitaHeader() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-white hover:text-[hsl(var(--dovita-yellow))] hover:bg-transparent relative"
+            className="text-white hover:bg-[hsl(var(--dovita-yellow))]/20 relative"
             onClick={() => setNotificationsOpen(true)}
           >
             <Bell className="h-5 w-5" />
@@ -54,7 +54,7 @@ export default function DovitaHeader() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-white hover:text-[hsl(var(--dovita-yellow))] hover:bg-transparent"
+            className="text-white hover:bg-[hsl(var(--dovita-yellow))]/20"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="h-5 w-5" />
