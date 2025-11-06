@@ -1,6 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
@@ -14,12 +13,12 @@ export default function Schedule() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-[130px]">
-      <div>
-        <h1 className="text-2xl font-bold">{getScheduleTitle(currentProject)}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Seguimiento de las fases del proyecto
-        </p>
-      </div>
+        <div>
+          <h1 className="text-2xl font-bold">{getScheduleTitle(currentProject)}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Seguimiento de las fases del proyecto
+          </p>
+        </div>
 
       <div className="relative space-y-4">
         {/* Timeline line */}
@@ -30,7 +29,7 @@ export default function Schedule() {
             {/* Timeline dot */}
             <div className="absolute -left-10 top-6 w-10 flex items-center justify-start">
               {phase.status === 'completed' ? (
-                <CheckCircle2 className="h-10 w-10 text-primary bg-background" />
+                <CheckCircle2 className="h-10 w-10 text-green-600 bg-background" />
               ) : phase.status === 'in-progress' ? (
                 <Clock className="h-10 w-10 text-primary bg-background" />
               ) : (
@@ -48,13 +47,13 @@ export default function Schedule() {
                 </div>
                 
                 {phase.status === 'completed' && (
-                  <Badge className="bg-primary/10 text-primary">Completada</Badge>
+                  <Badge className="bg-green-100 text-green-700">Completada</Badge>
                 )}
                 {phase.status === 'in-progress' && (
-                  <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">En Proceso</Badge>
+                  <Badge className="bg-blue-100 text-blue-700">En Proceso</Badge>
                 )}
                 {phase.status === 'pending' && (
-                  <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">Pendiente</Badge>
+                  <Badge variant="secondary">Pendiente</Badge>
                 )}
               </div>
 
@@ -64,7 +63,12 @@ export default function Schedule() {
                     <span className="text-muted-foreground">Avance</span>
                     <span className="font-semibold text-primary">{phase.progress}%</span>
                   </div>
-                  <Progress value={phase.progress} variant="yellow" className="h-2" />
+                  <div className="h-2 bg-secondary/20 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${phase.progress}%` }}
+                    />
+                  </div>
                 </div>
               )}
             </CardContent>

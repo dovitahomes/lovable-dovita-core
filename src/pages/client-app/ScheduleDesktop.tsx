@@ -21,11 +21,11 @@ const getStatusIcon = (status: string) => {
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "completed":
-      return <Badge className="bg-primary/10 text-primary">Completado</Badge>;
+      return <Badge>Completado</Badge>;
     case "in-progress":
-      return <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">En Progreso</Badge>;
+      return <Badge variant="secondary">En Progreso</Badge>;
     default:
-      return <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">Pendiente</Badge>;
+      return <Badge variant="outline">Pendiente</Badge>;
   }
 };
 
@@ -79,7 +79,7 @@ export default function ScheduleDesktop() {
                           <span className="text-muted-foreground">Progreso</span>
                           <span className="font-medium">{phase.progress}%</span>
                         </div>
-                        <Progress value={phase.progress} variant="yellow" />
+                        <Progress value={phase.progress} />
                       </div>
                     )}
                   </div>
@@ -100,7 +100,7 @@ export default function ScheduleDesktop() {
                   <span className="text-muted-foreground">Fases Completadas</span>
                   <span className="font-bold">{completedPhases}/{phases.length}</span>
                 </div>
-                <Progress value={completionPercentage} variant="yellow" />
+                <Progress value={completionPercentage} />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">

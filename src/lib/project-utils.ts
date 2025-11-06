@@ -71,10 +71,10 @@ export const getScheduleSubtitle = (project: Project | null): string => {
   if (!project) return 'Seguimiento de fases';
   
   if (isInDesignPhase(project)) {
-    return 'Seguimiento de fases de diseño';
+    return 'Seguimiento detallado del proceso de diseño';
   }
   
-  return 'Seguimiento de fases y avance temporal';
+  return 'Seguimiento detallado del proceso de construcción';
 };
 
 /**
