@@ -112,14 +112,18 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header - Fixed top */}
-      <div className="flex-shrink-0 bg-background border-b">
+    <div className="flex flex-col h-full max-h-[100dvh]">
+      {/* Header - Sticky top */}
+      <div className="sticky top-0 z-10 flex-shrink-0 bg-background border-b">
         <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
       </div>
 
-      {/* Messages Area - Scrollable */}
-      <div ref={scrollAreaRef} className="flex-1 overflow-y-auto px-4">
+      {/* Messages Area - Scrollable with controlled height */}
+      <div 
+        ref={scrollAreaRef} 
+        className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-20"
+        style={{ maxHeight: 'calc(100dvh - 120px)' }}
+      >
         <div className="py-4">
           {/* Team Members Info */}
           <div className="bg-muted/50 rounded-lg p-3 mb-4 text-center">
@@ -160,8 +164,8 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Input Area - Fixed bottom */}
-      <div className="flex-shrink-0 bg-background border-t">
+      {/* Input Area - Sticky bottom */}
+      <div className="sticky bottom-0 z-10 flex-shrink-0 bg-background border-t">
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
