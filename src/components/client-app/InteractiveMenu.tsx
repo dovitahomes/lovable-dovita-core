@@ -77,7 +77,7 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
 
   return (
     <nav
-      className="menu"
+      className="client-menu"
       role="navigation"
       style={navStyle}
     >
@@ -90,16 +90,16 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
         return (
           <button
             key={item.label}
-            className={`menu__item ${isActive ? 'active' : ''}`}
+            className={`client-menu__item ${isActive ? 'active' : ''}`}
             onClick={() => handleItemClick(index)}
             ref={(el) => (itemRefs.current[index] = el)}
             style={{ '--lineWidth': '0px' } as React.CSSProperties}
           >
-            <div className="menu__icon">
+            <div className="client-menu__icon">
               <IconComponent className="icon" />
             </div>
             <strong
-              className={`menu__text ${isTextActive ? 'active' : ''}`}
+              className={`client-menu__text ${isTextActive ? 'active' : ''}`}
               ref={(el) => (textRefs.current[index] = el)}
             >
               {item.label}

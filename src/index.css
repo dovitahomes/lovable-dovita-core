@@ -166,8 +166,8 @@ All colors MUST be HSL.
     @apply sticky top-0 z-40 w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800;
   }
 
-  /* Client App Interactive Menu Styles */
-  .menu {
+  /* Client App Interactive Menu Styles - Prefixed to avoid ERP conflicts */
+  .client-menu {
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -178,7 +178,7 @@ All colors MUST be HSL.
     border-top: 1px solid var(--client-nav-border);
   }
 
-  .menu__item {
+  .client-menu__item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -192,17 +192,22 @@ All colors MUST be HSL.
     position: relative;
   }
 
-  .menu__item.active {
+  .client-menu__item.active {
     color: var(--component-active-color, hsl(var(--primary)));
   }
 
-  .menu__text {
+  .client-menu__text {
     font-size: 0.75rem;
     font-weight: 500;
     transition: all 0.3s ease;
   }
 
-  .menu__icon {
+  .client-menu__icon {
     font-size: 1.5rem;
+  }
+
+  /* Client App Container - Scope for client-specific styles */
+  .client-app-container {
+    /* Isolation for Client App if needed */
   }
 }
