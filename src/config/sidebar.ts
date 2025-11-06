@@ -21,6 +21,7 @@ import {
   ListTree,
   Eye,
 } from "lucide-react";
+import { BACKOFFICE_ROUTES } from "./routes";
 
 export type SidebarItem = {
   title: string;
@@ -38,6 +39,8 @@ export type SidebarSection = {
 /**
  * Canonical sidebar structure - single source of truth for navigation
  * Each item maps to a route and a permission module
+ * 
+ * IMPORTANTE: Todas las URLs usan constantes de @/config/routes
  */
 export const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
@@ -45,7 +48,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { 
         title: "Dashboard", 
-        url: "/", 
+        url: BACKOFFICE_ROUTES.DASHBOARD, 
         icon: LayoutDashboard, 
         moduleName: "dashboard" 
       },
@@ -56,13 +59,13 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { 
         title: "Leads", 
-        url: "/leads", 
+        url: BACKOFFICE_ROUTES.LEADS, 
         icon: TrendingUp, 
         moduleName: "leads" 
       },
       { 
         title: "Clientes", 
-        url: "/clientes", 
+        url: BACKOFFICE_ROUTES.CLIENTES, 
         icon: Briefcase, 
         moduleName: "clientes" 
       },
@@ -73,19 +76,19 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { 
         title: "Transacciones Unificadas", 
-        url: "/erp/transactions", 
+        url: BACKOFFICE_ROUTES.ERP_TRANSACTIONS, 
         icon: ListTree, 
         moduleName: "herramientas" 
       },
       { 
         title: "Presupuestos", 
-        url: "/presupuestos", 
+        url: BACKOFFICE_ROUTES.PRESUPUESTOS, 
         icon: Calculator, 
         moduleName: "presupuestos" 
       },
       { 
         title: "Proveedores", 
-        url: "/proveedores", 
+        url: BACKOFFICE_ROUTES.PROVEEDORES, 
         icon: Truck, 
         moduleName: "proveedores" 
       },
@@ -96,31 +99,31 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { 
         title: "Proyectos", 
-        url: "/proyectos", 
+        url: BACKOFFICE_ROUTES.PROYECTOS, 
         icon: FolderKanban, 
         moduleName: "proyectos" 
       },
       { 
         title: "Diseño", 
-        url: "/diseno", 
+        url: BACKOFFICE_ROUTES.DISENO, 
         icon: PenTool, 
         moduleName: "diseno" 
       },
       { 
         title: "Cronograma de Gantt", 
-        url: "/gantt", 
+        url: BACKOFFICE_ROUTES.GANTT, 
         icon: Calendar, 
         moduleName: "cronograma" 
       },
       { 
         title: "Construcción", 
-        url: "/construccion", 
+        url: BACKOFFICE_ROUTES.CONSTRUCCION, 
         icon: Truck, 
         moduleName: "construccion" 
       },
       { 
         title: "Órdenes de Compra", 
-        url: "/ordenes-compra", 
+        url: BACKOFFICE_ROUTES.ORDENES_COMPRA, 
         icon: ShoppingCart, 
         moduleName: "ordenes_compra" 
       },
@@ -131,19 +134,19 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { 
         title: "Pagos a Proveedores", 
-        url: "/lotes-pago", 
+        url: BACKOFFICE_ROUTES.LOTES_PAGO, 
         icon: DollarSign, 
         moduleName: "lotes_pago" 
       },
       { 
         title: "Contabilidad", 
-        url: "/contabilidad", 
+        url: BACKOFFICE_ROUTES.CONTABILIDAD, 
         icon: Receipt, 
         moduleName: "contabilidad" 
       },
       { 
         title: "Comisiones", 
-        url: "/comisiones", 
+        url: BACKOFFICE_ROUTES.COMISIONES, 
         icon: Percent, 
         moduleName: "comisiones" 
       },
@@ -154,55 +157,55 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { 
         title: "Usuarios", 
-        url: "/usuarios", 
+        url: BACKOFFICE_ROUTES.USUARIOS, 
         icon: UserCog, 
         moduleName: "usuarios" 
       },
       { 
         title: "Métricas", 
-        url: "/metrics", 
+        url: BACKOFFICE_ROUTES.METRICS, 
         icon: TrendingUp, 
         moduleName: "herramientas" 
       },
       { 
         title: "Contenido Corporativo", 
-        url: "/herramientas/contenido-corporativo", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO, 
         icon: Building2, 
         moduleName: "contenido_corporativo" 
       },
       { 
         title: "Sucursales", 
-        url: "/herramientas/sucursales", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES, 
         icon: MapPin, 
         moduleName: "sucursales" 
       },
       { 
         title: "Alianzas", 
-        url: "/herramientas/alianzas", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_ALIANZAS, 
         icon: Handshake, 
         moduleName: "herramientas" 
       },
       { 
         title: "Identidades", 
-        url: "/herramientas/identidades", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES, 
         icon: Users, 
         moduleName: "herramientas" 
       },
       { 
         title: "Accesos", 
-        url: "/herramientas/accesos", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS, 
         icon: ShieldCheck, 
         moduleName: "accesos" 
       },
       { 
         title: "Centro de Reglas", 
-        url: "/herramientas/reglas", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS, 
         icon: FileText, 
         moduleName: "centro_reglas" 
       },
       { 
         title: "Ver como cliente", 
-        url: "/ver-como-cliente", 
+        url: BACKOFFICE_ROUTES.VER_COMO_CLIENTE, 
         icon: Eye, 
         moduleName: "herramientas" 
       },
