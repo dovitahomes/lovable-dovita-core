@@ -137,10 +137,24 @@ export default function PreviewBar() {
     window.location.href = backofficeUrl;
   };
 
-  // Manejar toggle de expansión (para móvil con tap)
+  // Manejar toggle de expansión (para móvil con tap y delay)
   const handleToggleExpand = () => {
     if (isMobile) {
-      setIsExpanded(!isExpanded);
+      const newExpandedState = !isExpanded;
+      setIsExpanded(newExpandedState);
+      
+      // Si se está expandiendo, iniciar timeout para cerrar automáticamente
+      if (newExpandedState) {
+        closeTimeoutRef.current = setTimeout(() => {
+          setIsExpanded(false);
+        }, 1000);
+      } else {
+        // Si se está cerrando manualmente, cancelar cualquier timeout pendiente
+        if (closeTimeoutRef.current) {
+          clearTimeout(closeTimeoutRef.current);
+          closeTimeoutRef.current = null;
+        }
+      }
     }
   };
 
@@ -198,7 +212,13 @@ export default function PreviewBar() {
       {isMobile && isExpanded && (
         <div
           className="fixed inset-0 bg-transparent -z-10"
-          onClick={() => setIsExpanded(false)}
+          onClick={() => {
+            if (closeTimeoutRef.current) {
+              clearTimeout(closeTimeoutRef.current);
+              closeTimeoutRef.current = null;
+            }
+            setIsExpanded(false);
+          }}
         />
       )}
 
@@ -208,7 +228,13 @@ export default function PreviewBar() {
           {/* Botón de cierre para móvil */}
           {isMobile && (
             <button
-              onClick={() => setIsExpanded(false)}
+              onClick={() => {
+                if (closeTimeoutRef.current) {
+                  clearTimeout(closeTimeoutRef.current);
+                  closeTimeoutRef.current = null;
+                }
+                setIsExpanded(false);
+              }}
               className="text-primary-foreground hover:text-primary-foreground/80 active:scale-95 transition-transform"
               aria-label="Cerrar"
             >
