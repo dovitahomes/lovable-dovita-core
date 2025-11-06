@@ -186,28 +186,18 @@ export default function PreviewBar() {
   }
 
   return (
-    <div 
-      className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transform: isExpanded ? 'translateY(0)' : 'translateY(-100%)',
-      }}
-    >
-      {/* Barra colapsada - Tab visible */}
+    <>
+      {/* Lengüeta colapsada - Siempre visible como overlay fijo */}
       <div 
         className={cn(
-          "absolute bottom-0 translate-y-full bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-transform touch-manipulation",
+          "fixed top-0 z-[100] bg-[hsl(var(--dovita-yellow))]/90 text-primary rounded-b-lg shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all duration-300 touch-manipulation",
           isMobile 
             ? "right-4 px-2 py-1" 
-            : "left-1/2 -translate-x-1/2 px-4 py-2"
+            : "left-1/2 -translate-x-1/2 px-4 py-2",
+          isExpanded && "opacity-0 pointer-events-none"
         )}
         onClick={handleToggleExpand}
-        style={{
-          opacity: isExpanded ? 0 : 1,
-          transition: 'opacity 0.2s ease-in-out',
-          pointerEvents: isExpanded ? 'none' : 'auto',
-        }}
+        onMouseEnter={handleMouseEnter}
       >
         <Eye className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
         {!isMobile && (
@@ -221,7 +211,7 @@ export default function PreviewBar() {
       {/* Overlay para cerrar en móvil al hacer tap fuera */}
       {isMobile && isExpanded && (
         <div
-          className="fixed inset-0 bg-transparent -z-10"
+          className="fixed inset-0 bg-black/20 z-[99]"
           onClick={() => {
             if (closeTimeoutRef.current) {
               clearTimeout(closeTimeoutRef.current);
@@ -233,11 +223,18 @@ export default function PreviewBar() {
       )}
 
       {/* Barra expandida - Contenido completo */}
-      <div className="bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/20 shadow-lg">
-        <div className={cn(
-          "container mx-auto px-4 flex items-center flex-wrap",
-          isMobile ? "py-1.5 gap-2" : "py-2 gap-4"
-        )}>
+      <div 
+        className={cn(
+          "fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out",
+          isExpanded ? "translate-y-0" : "-translate-y-full"
+        )}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="bg-primary/95 backdrop-blur-sm border-b border-primary-foreground/20 shadow-lg">
+          <div className={cn(
+            "container mx-auto px-4 flex items-center flex-wrap",
+            isMobile ? "py-1.5 gap-2" : "py-2 gap-4"
+          )}>
           {/* Botón de cierre para móvil */}
           {isMobile && (
             <button
@@ -320,5 +317,6 @@ export default function PreviewBar() {
         </div>
       </div>
     </div>
+    </>
   );
 }
