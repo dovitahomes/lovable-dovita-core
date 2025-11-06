@@ -28,10 +28,9 @@ const App = () => (
           <Toaster />
           <Sonner />
           <PreviewBar />
-          <BrowserRouter>
+          <BrowserRouter basename="/client">
             <Routes>
-              <Route path="/" element={<Navigate to="/app" replace />} />
-              <Route path="/app" element={<ResponsiveClientApp />}>
+              <Route path="/" element={<ResponsiveClientApp />}>
                 <Route index element={<ResponsiveDashboard />} />
                 <Route path="photos" element={<ResponsivePhotos />} />
                 <Route path="financial" element={<ResponsiveFinancial />} />
