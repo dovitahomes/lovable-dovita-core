@@ -75,7 +75,7 @@ export default function Documents() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-8">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-[65px]">
       <div>
         <h1 className="text-2xl font-bold">Documentos</h1>
         <p className="text-sm text-muted-foreground mt-1">

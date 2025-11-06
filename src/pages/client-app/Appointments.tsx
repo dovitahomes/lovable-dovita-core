@@ -52,7 +52,7 @@ export default function Appointments() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-8">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-[65px]">
       <div>
         <h1 className="text-2xl font-bold">Citas con el Equipo</h1>
         <p className="text-sm text-muted-foreground mt-1">
