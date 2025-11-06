@@ -18,8 +18,22 @@ export default function DashboardDesktop() {
   // Filter photos by current project
   const projectPhotos = mockPhotos.filter(photo => photo.projectId === project?.id);
 
+  // Early return if no project - DESPUÉS de PreviewBar
   if (!project) {
-    return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
+    return (
+      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+        <PreviewBar />
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
+            <p className="text-sm text-muted-foreground">
+              Activa Mock Data en la barra superior si no hay proyectos reales.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Calcular progreso dinámicamente basado en fases

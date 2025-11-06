@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { useAuthClientId } from './useAuthClientId';
 import { useClientProjects, useClientProjectSummary } from './useClientProjects';
@@ -8,7 +8,7 @@ import { transformProjectToUI } from '@/lib/client-app/dataAdapters';
 import type { Project } from '@/contexts/client-app/ProjectContext';
 
 export function useProjectsData() {
-  const { source, forceClientId, isPreviewMode } = useDataSource();
+  const { source, forceClientId, isPreviewMode, setSource } = useDataSource();
   const { data: authClient } = useAuthClientId();
   
   // Determinar qué client_id usar
@@ -21,6 +21,15 @@ export function useProjectsData() {
   
   // Datos reales de Supabase
   const { data: realProjects = [], isLoading: loadingProjects } = useClientProjects(effectiveClientId);
+  
+  // AUTO-CORREGIR: Si está en preview mode, source es 'real' pero no hay proyectos,
+  // cambiar automáticamente a mock para evitar quedarse en loading infinito
+  useEffect(() => {
+    if (isPreviewMode && source === 'real' && !loadingProjects && realProjects.length === 0) {
+      console.log('[useProjectsData] No hay clientes reales en preview mode, cambiando a mock');
+      setSource('mock');
+    }
+  }, [isPreviewMode, source, loadingProjects, realProjects.length, setSource]);
   
   // Para cada proyecto, obtener su summary, documentos y fotos
   const transformedRealProjects = useMemo(() => {

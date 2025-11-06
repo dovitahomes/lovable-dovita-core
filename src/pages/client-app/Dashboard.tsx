@@ -20,9 +20,22 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
   
-  // Early return if no project
+  // Early return if no project - DESPUÉS de PreviewBar
   if (!project) {
-    return <div className="h-full flex items-center justify-center">Cargando proyecto...</div>;
+    return (
+      <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+        <PreviewBar />
+        <div className="h-full flex items-center justify-center p-4">
+          <div className="text-center space-y-3">
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
+            <p className="text-sm text-muted-foreground">
+              Si no hay datos, activa Mock Data en la barra superior.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
   
   // Get current hero image (rotate through renders if available)

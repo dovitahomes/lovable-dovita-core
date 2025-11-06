@@ -8,6 +8,11 @@ export default function VerComoCliente() {
     // Activar modo preview en localStorage
     localStorage.setItem("clientapp.previewMode", "true");
     
+    // LIMPIAR estado previo para forzar re-inicialización
+    localStorage.removeItem("clientapp.useMock");
+    localStorage.removeItem("clientapp.forceClientId");
+    localStorage.removeItem("currentProjectId");
+    
     // Guardar URL del backoffice para el botón de regreso
     const currentPath = window.location.pathname;
     localStorage.setItem("clientapp.backofficeUrl", currentPath === "/ver-como-cliente" ? "/" : currentPath);
