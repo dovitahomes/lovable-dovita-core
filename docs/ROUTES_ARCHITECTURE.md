@@ -313,6 +313,35 @@ navigate(generateRoute.clientWithPreview());
 
 ## Troubleshooting
 
+### Problema: "Rutas Fantasma en Autocompletado del Navegador"
+
+**Síntomas**: 
+- Aparecen rutas como `/cronograma`, `/finanzas`, `/client/:clientId` en el autocompletado
+- Estas rutas NO existen en `routes.ts` ni en el código actual
+- Navegando a ellas produce redirect o 404
+
+**Causa**: Caché del navegador, historial de URLs visitadas, React Router inference
+
+**Solución**:
+1. **Limpieza rápida**: `Ctrl + Shift + Delete` → Limpiar "Todo el tiempo" → Historial + Caché + Cookies
+2. **Limpieza por consola**:
+   ```javascript
+   localStorage.clear();
+   sessionStorage.clear();
+   ```
+3. **Hard refresh**: `Ctrl + Shift + R`
+4. **Modo incógnito**: Verificar sin afectar sesión actual
+
+**Ver guía completa**: [CLEARING_ROUTE_CACHE.md](./CLEARING_ROUTE_CACHE.md)
+
+**Rutas fantasma comunes** (YA NO EXISTEN):
+- `/cronograma` ❌ → Ahora es `/gantt`
+- `/cronograma-parametrico` ❌ → Ahora es `/gantt`
+- `/finanzas` ❌ → Ahora es `/contabilidad`
+- `/client/:clientId` ❌ → Fue reemplazado por selector de proyecto
+
+---
+
 ### Problema: "Página en Blanco al Navegar"
 
 **Causa**: Ruta no está definida o layout incorrecto

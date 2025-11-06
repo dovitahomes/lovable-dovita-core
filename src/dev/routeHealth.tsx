@@ -10,7 +10,9 @@ import { useModuleAccess } from '@/hooks/useModuleAccess';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, AlertTriangle, Info } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Info, ExternalLink } from 'lucide-react';
+import { ALL_ROUTES } from '@/lib/routing/getAccessibleRoutes';
+import { BACKOFFICE_ROUTES, PUBLIC_ROUTES, CLIENT_APP_ROUTES } from '@/config/routes';
 
 export function RouteHealthCheck() {
   const { perms, loading } = useModuleAccess();
@@ -32,6 +34,31 @@ export function RouteHealthCheck() {
       console.log(`  ✓ ${item.title} → ${item.url} (module: ${item.moduleName})`);
     });
     
+    // Validate routes consistency
+    console.log('\n🔗 Route Consistency Check:');
+    const routesFromConstants = Object.values(BACKOFFICE_ROUTES) as string[];
+    const routesFromSidebar = allItems.map(item => item.url);
+    
+    routesFromSidebar.forEach(url => {
+      if (routesFromConstants.includes(url as any)) {
+        console.log(`  ✓ ${url} - defined in BACKOFFICE_ROUTES`);
+      } else {
+        console.warn(`  ⚠️ ${url} - NOT found in BACKOFFICE_ROUTES (hardcoded?)`);
+      }
+    });
+    
+    // Check for phantom routes (legacy)
+    console.log('\n👻 Phantom Routes (should NOT exist):');
+    const phantomRoutes = [
+      '/cronograma',
+      '/cronograma-parametrico', 
+      '/finanzas',
+      '/client/:clientId'
+    ];
+    phantomRoutes.forEach(route => {
+      console.log(`  ❌ ${route} - legacy route (redirect or removed)`);
+    });
+    
     // Check module permissions
     const moduleNames = getAllModuleNames();
     console.log('\n🔐 Module permission check:');
@@ -45,20 +72,12 @@ export function RouteHealthCheck() {
       }
     });
     
-    // Map UI fields to DB fields
-    console.log('\n🗺️ Field mapping (UI → DB):');
-    console.log('  purchase_orders:');
-    console.log('    - qty_solicitada → qty requested');
-    console.log('    - qty_ordenada → qty ordered');
-    console.log('    - qty_recibida → qty received');
-    console.log('    - estado → status (enum: solicitado, ordenado, recibido)');
-    console.log('  gantt_plans:');
-    console.log('    - type → gantt type (enum: parametrico, ejecutivo)');
-    console.log('    - shared_with_construction → boolean flag');
-    console.log('  tu_nodes:');
-    console.log('    - type → node type (enum: departamento, mayor, partida, subpartida)');
-    console.log('    - parent_id → hierarchical relationship');
-    console.log('    - project_scope → scope (enum: global, departamento, proyecto)');
+    // Count total registered routes
+    console.log('\n📊 Route Statistics:');
+    console.log(`  Public routes: ${Object.keys(PUBLIC_ROUTES).length}`);
+    console.log(`  Client app routes: ${Object.keys(CLIENT_APP_ROUTES).length}`);
+    console.log(`  Backoffice routes: ${Object.keys(BACKOFFICE_ROUTES).length}`);
+    console.log(`  Total: ${Object.keys(PUBLIC_ROUTES).length + Object.keys(CLIENT_APP_ROUTES).length + Object.keys(BACKOFFICE_ROUTES).length}`);
     
     console.groupEnd();
   };
@@ -219,6 +238,104 @@ export function RouteHealthCheck() {
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            Phantom Routes (Legacy)
+          </CardTitle>
+          <CardDescription>
+            Routes that NO LONGER exist but may appear in browser autocomplete
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="text-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <code className="text-muted-foreground">/cronograma</code>
+                <Badge variant="outline" className="bg-red-50">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Removed → /gantt
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <code className="text-muted-foreground">/cronograma-parametrico</code>
+                <Badge variant="outline" className="bg-red-50">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Removed → /gantt
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <code className="text-muted-foreground">/finanzas</code>
+                <Badge variant="outline" className="bg-red-50">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Removed → /contabilidad
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <code className="text-muted-foreground">/client/:clientId</code>
+                <Badge variant="outline" className="bg-red-50">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Removed
+                </Badge>
+              </div>
+            </div>
+            <Alert className="mt-4">
+              <Info className="h-4 w-4" />
+              <AlertTitle>How to Clear Cache</AlertTitle>
+              <AlertDescription>
+                See <a href="/docs/CLEARING_ROUTE_CACHE.md" className="underline inline-flex items-center gap-1">
+                  CLEARING_ROUTE_CACHE.md <ExternalLink className="h-3 w-3" />
+                </a> for instructions
+              </AlertDescription>
+            </Alert>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-blue-500" />
+            Route Statistics
+          </CardTitle>
+          <CardDescription>
+            Total registered routes across all contexts
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-3xl font-bold text-primary">
+                {Object.keys(PUBLIC_ROUTES).length}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">Public Routes</div>
+              <div className="text-xs text-muted-foreground mt-1">/auth/*</div>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-3xl font-bold text-primary">
+                {Object.keys(CLIENT_APP_ROUTES).length}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">Client App Routes</div>
+              <div className="text-xs text-muted-foreground mt-1">/client/*</div>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-3xl font-bold text-primary">
+                {Object.keys(BACKOFFICE_ROUTES).length}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">Backoffice Routes</div>
+              <div className="text-xs text-muted-foreground mt-1">/*</div>
+            </div>
+          </div>
+          <div className="mt-4 text-center p-4 bg-muted rounded-lg">
+            <div className="text-2xl font-bold">
+              {Object.keys(PUBLIC_ROUTES).length + Object.keys(CLIENT_APP_ROUTES).length + Object.keys(BACKOFFICE_ROUTES).length}
+            </div>
+            <div className="text-sm text-muted-foreground">Total Routes Registered</div>
           </div>
         </CardContent>
       </Card>
