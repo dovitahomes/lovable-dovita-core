@@ -143,7 +143,7 @@ export function AppSidebar() {
                         }}
                       >
                         <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-                        {state !== "collapsed" && <span>{item.title}</span>}
+                        {(isMobile || state !== "collapsed") && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -173,7 +173,7 @@ export function AppSidebar() {
                     ) : (
                       <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
                     )}
-                    {state !== "collapsed" && <span>Sidebar {sidebarTheme === "dark" ? "Claro" : "Oscuro"}</span>}
+                    {(isMobile || state !== "collapsed") && <span>Sidebar {sidebarTheme === "dark" ? "Claro" : "Oscuro"}</span>}
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -185,7 +185,7 @@ export function AppSidebar() {
                       : "cursor-pointer hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                   }>
                     <LogOut className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-                    {state !== "collapsed" && <span>Cerrar Sesión</span>}
+                    {(isMobile || state !== "collapsed") && <span>Cerrar Sesión</span>}
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
