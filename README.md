@@ -1,6 +1,31 @@
-# Dovita Core
+# Dovita CRM - Sistema Integral de Gestión de Construcción
 
-Sistema integral de gestión para proyectos de construcción y arquitectura.
+Sistema completo de gestión empresarial (ERP) especializado en construcción, con portal de clientes integrado.
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+### Backoffice (ERP)
+Sistema interno para colaboradores de Dovita con gestión completa del negocio.
+
+- **Rutas**: `/`, `/clientes`, `/proyectos`, `/presupuestos`, `/construccion`, `/finanzas`, etc.
+- **Layout**: `InternalLayout` con `AppSidebar` colapsable
+- **Estilo**: Corporativo, tema claro/oscuro, sidebar navegable
+- **Usuarios**: Colaboradores internos con roles y permisos
+
+### Client App (Portal de Clientes)
+Portal web progresivo (PWA) para que clientes visualicen en tiempo real el progreso de sus proyectos.
+
+- **Rutas**: `/client/*` (dashboard, photos, financial, chat, documents, schedule, appointments, settings)
+- **Layout Mobile**: `ClientApp` con `InteractiveMenu` en footer
+- **Layout Desktop**: `ClientAppDesktop` con `FloatingIslandSidebar` flotante
+- **Estilo**: Moderno, mobile-first, navegación intuitiva
+- **Usuarios**: Clientes finales con acceso a sus proyectos
+
+**📘 [Guía completa de separación de diseño](./docs/DESIGN_SEPARATION.md)**
+
+---
 
 ## Datos Mock (Desarrollo)
 
