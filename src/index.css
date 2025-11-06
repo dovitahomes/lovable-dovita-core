@@ -11,11 +11,12 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Dovita Brand Colors */
-    --dovita-blue: 222 71% 40%;      /* #1e40af - Primary blue */
-    --dovita-blue-1: #1e3a8a;        /* base */
-    --dovita-blue-2: #0a3080;        /* más oscuro */
-    --dovita-blue-grad: linear-gradient(180deg, rgba(30,58,138,0.92), rgba(10,48,128,0.85));
-    --dovita-yellow: 48 100% 65%;    /* #FFD84D */
+    --dovita-blue: 221 71% 34%;      /* #1d4e89 - Azul corporativo oscuro */
+    --dovita-blue-1: #1e3a8a;        /* Base (más oscuro) */
+    --dovita-blue-2: #1d4e89;        /* Medio oscuro */
+    --dovita-blue-3: #2563eb;        /* Medio */
+    --dovita-blue-grad: linear-gradient(180deg, rgba(30,58,138,0.92), rgba(29,78,137,0.88), rgba(10,48,128,0.85));
+    --dovita-yellow: 45 100% 51%;    /* #FFC107 - Amarillo dorado */
     --dovita-dark: 222 47% 8%;       /* Darker slate for text */
     
     /* Client Portal Mobile Nav */
@@ -24,7 +25,50 @@ All colors MUST be HSL.
     --client-nav-fg: #c8cbe0;
     
     /* Acento activo */
-    --brand-accent: #6d6cff;
+    --brand-accent: #1e3a8a;         /* Azul corporativo (NO morado) */
+    
+    /* Badge Status Colors */
+    --badge-pendiente-bg: 254 243 199;   /* #fef3c7 - Amarillo claro */
+    --badge-pendiente-text: 245 158 11;  /* #f59e0b - Amarillo oscuro */
+    --badge-pendiente-border: 252 211 77; /* #fcd34d - Amarillo medio */
+    
+    --badge-proceso-bg: 219 234 254;     /* #dbeafe - Azul claro */
+    --badge-proceso-text: 29 78 216;     /* #1d4ed8 - Azul oscuro */
+    --badge-proceso-border: 147 197 253; /* #93c5fd - Azul medio */
+    
+    --badge-completada-bg: 209 250 229;  /* #d1fae5 - Verde claro */
+    --badge-completada-text: 22 163 74;  /* #16a34a - Verde oscuro */
+    --badge-completada-border: 134 239 172; /* #86efac - Verde medio */
+    
+    --badge-confirmada-bg: 219 234 254;  /* #dbeafe - Azul claro */
+    --badge-confirmada-text: 29 78 216;  /* #1d4ed8 - Azul oscuro */
+    
+    /* Financial Status Colors */
+    --financial-paid: 16 185 129;        /* #10b981 - Verde "Pagado" */
+    --financial-paid-light: 167 243 208; /* #a7f3d0 - Fondo card pagado */
+    
+    --financial-pending: 249 115 22;     /* #f97316 - Naranja "Por Pagar" */
+    --financial-pending-light: 254 215 170; /* #fed7aa - Fondo card por pagar */
+    
+    /* Progress Bar Colors */
+    --progress-completed: 221 71% 34%;   /* #1d4e89 - Azul oscuro (primary) */
+    --progress-pending: 45 100% 51%;     /* #FFC107 - Amarillo dorado */
+    --progress-pending-light: 254 240 138; /* #fef08a - Amarillo muy claro */
+    
+    /* Chat Bubble Colors */
+    --chat-bubble-self: 221 71% 34%;     /* #1d4e89 - Azul oscuro (mensajes propios) */
+    --chat-bubble-other: 243 244 246;    /* #f3f4f6 - Gris claro (mensajes otros) */
+    --chat-bubble-other-text: 17 24 39;  /* #111827 - Gris muy oscuro */
+    
+    /* Icon States (Bottom Nav & Active Elements) */
+    --icon-active: 221 71% 34%;          /* #1d4e89 - Azul oscuro */
+    --icon-inactive: 156 163 175;        /* #9ca3af - Gris medio */
+    --icon-hover: 221 71% 40%;           /* #1e40af - Azul hover */
+    
+    /* Card & Border Colors */
+    --card-border-accent: 221 71% 34%;   /* #1d4e89 - Borde azul para ministraciones/citas */
+    --card-border-light: 229 231 235;    /* #e5e7eb - Borde gris claro */
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     
     /* Corporate Blue & Emerald Green Design System */
     --background: 220 17% 97%;
@@ -37,9 +81,9 @@ All colors MUST be HSL.
     --popover-foreground: 222 47% 11%;
 
     /* Primary: Corporate Blue */
-    --primary: 221 83% 53%;
+    --primary: 221 71% 34%;          /* #1d4e89 - Azul oscuro corporativo */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 221 83% 45%;
+    --primary-hover: 221 71% 40%;    /* #1e40af - Hover más claro */
     
     /* Secondary: Emerald Green */
     --secondary: 160 84% 39%;
@@ -57,34 +101,47 @@ All colors MUST be HSL.
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 221 83% 53%;
+    --ring: 221 71% 34%;
 
     --radius: 0.75rem;
 
     /* Sidebar (dark by default) */
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 220 17% 97%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary: 221 71% 34%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 47% 16%;
     --sidebar-accent-foreground: 220 17% 97%;
     --sidebar-border: 222 47% 16%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-ring: 221 71% 34%;
 
     /* Light sidebar (when data-sidebar-theme="light") */
     --sidebar-background-light: 0 0% 100%;
     --sidebar-foreground-light: 222 47% 11%;
-    --sidebar-primary-light: 221 83% 53%;
+    --sidebar-primary-light: 221 71% 34%;
     --sidebar-primary-foreground-light: 0 0% 100%;
     --sidebar-accent-light: 220 14% 96%;
     --sidebar-accent-foreground-light: 222 47% 11%;
     --sidebar-border-light: 220 13% 91%;
-    --sidebar-ring-light: 221 83% 53%;
+    --sidebar-ring-light: 221 71% 34%;
 
     /* Custom gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%), hsl(221 83% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(221 71% 34%), hsl(221 71% 40%));
     --gradient-secondary: linear-gradient(135deg, hsl(160 84% 39%), hsl(160 84% 32%));
-    --gradient-header: linear-gradient(90deg, hsl(222 47% 11%), hsl(221 83% 53%));
+    --gradient-header: linear-gradient(90deg, hsl(222 47% 11%), hsl(221 71% 34%));
+    
+    /* Hero Card Gradient */
+    --gradient-hero-card: linear-gradient(135deg, 
+      rgba(29, 58, 138, 0.95) 0%, 
+      rgba(30, 64, 175, 0.88) 50%,
+      rgba(37, 99, 235, 0.80) 100%
+    );
+    
+    /* Photos Header Gradient (más claro que hero) */
+    --gradient-photos-header: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.95) 0%, 
+      rgba(59, 130, 246, 0.90) 100%
+    );
     
     /* Shadows */
     --shadow-sm: 0 2px 4px hsl(222 47% 11% / 0.05);
@@ -107,9 +164,9 @@ All colors MUST be HSL.
     --popover: 222 47% 14%;
     --popover-foreground: 220 17% 97%;
 
-    --primary: 221 83% 53%;
+    --primary: 221 71% 40%;          /* Un poco más claro en dark mode */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 221 83% 60%;
+    --primary-hover: 221 71% 48%;
 
     --secondary: 160 84% 39%;
     --secondary-foreground: 0 0% 100%;
@@ -126,16 +183,16 @@ All colors MUST be HSL.
 
     --border: 222 47% 20%;
     --input: 222 47% 20%;
-    --ring: 221 83% 53%;
+    --ring: 221 71% 40%;
 
     --sidebar-background: 222 47% 8%;
     --sidebar-foreground: 220 17% 97%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary: 221 71% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 47% 12%;
     --sidebar-accent-foreground: 220 17% 97%;
     --sidebar-border: 222 47% 16%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-ring: 221 71% 40%;
   }
 }
 
@@ -193,7 +250,7 @@ All colors MUST be HSL.
   }
 
   .client-menu__item.active {
-    color: var(--component-active-color, hsl(var(--primary)));
+    color: hsl(var(--icon-active));
   }
 
   .client-menu__text {
