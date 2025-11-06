@@ -186,7 +186,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Card 
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-          onClick={() => navigate('/financial')}
+          onClick={() => navigate('/client/financial')}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground">
@@ -208,7 +208,7 @@ export default function Dashboard() {
         
         <Card 
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-          onClick={() => navigate('/financial')}
+          onClick={() => navigate('/client/financial')}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-xs text-muted-foreground">
