@@ -91,7 +91,7 @@ export default function Financial() {
                   </Badge>
                 )}
                 {ministracion.status === 'pending' && (
-                  <Badge className="bg-amber-100 text-amber-700">
+                  <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">
                     <Clock className="h-3 w-3 mr-1" />
                     Pendiente
                   </Badge>

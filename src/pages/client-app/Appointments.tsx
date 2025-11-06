@@ -183,7 +183,7 @@ export default function Appointments() {
                         <div className="flex-1">
                           <h3 className="font-semibold">{appointment.type}</h3>
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <Badge className="text-xs">
+                            <Badge className={appointment.status === 'confirmed' ? "text-xs" : "text-xs bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]"}>
                               {appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                             </Badge>
                             <span className="text-xs text-muted-foreground">

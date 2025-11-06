@@ -21,11 +21,11 @@ const getStatusIcon = (status: string) => {
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "completed":
-      return <Badge>Completado</Badge>;
+      return <Badge className="bg-primary/10 text-primary">Completado</Badge>;
     case "in-progress":
-      return <Badge variant="secondary">En Progreso</Badge>;
+      return <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">En Progreso</Badge>;
     default:
-      return <Badge variant="outline">Pendiente</Badge>;
+      return <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">Pendiente</Badge>;
   }
 };
 

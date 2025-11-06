@@ -135,7 +135,7 @@ export default function FinancialDesktop() {
                   <TableCell>{payment.concept}</TableCell>
                   <TableCell className="font-bold">{formatAmount(payment.amount)}</TableCell>
                   <TableCell>
-                    <Badge variant={payment.status === "paid" ? "default" : payment.status === "pending" ? "secondary" : "outline"}>
+                    <Badge variant={payment.status === "paid" ? "default" : "outline"} className={payment.status === "pending" ? "bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]" : ""}>
                       {payment.status === "paid" ? "Pagado" : payment.status === "pending" ? "Pendiente" : "Futuro"}
                     </Badge>
                   </TableCell>

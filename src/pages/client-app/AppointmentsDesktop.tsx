@@ -118,7 +118,7 @@ export default function AppointmentsDesktop() {
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="font-semibold text-lg">{appointment.type}</h3>
-                            <Badge className="mt-1">{appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}</Badge>
+                            <Badge className={appointment.status === 'confirmed' ? "mt-1" : "mt-1 bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]"}>{appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}</Badge>
                           </div>
                           <Button variant="outline" size="sm">
                             Ver Detalles
@@ -187,7 +187,7 @@ export default function AppointmentsDesktop() {
                         <div>
                           <h3 className="font-semibold text-lg">{appointment.type}</h3>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge className="text-xs">
+                            <Badge className={appointment.status === 'confirmed' ? "text-xs" : "text-xs bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]"}>
                               {appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                             </Badge>
                             <span className="text-sm text-muted-foreground">

@@ -214,7 +214,7 @@ export default function DashboardDesktop() {
                   <span className="text-sm font-medium">{phase.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{phase.progress}%</span>
-                    <Badge variant={phase.progress === 100 ? "default" : phase.progress > 0 ? "secondary" : "outline"}>
+                    <Badge variant={phase.progress === 100 ? "default" : "outline"} className={phase.progress > 0 && phase.progress < 100 ? "bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]" : ""}>
                       {phase.status === 'completed' ? 'Completado' : phase.status === 'in-progress' ? 'En progreso' : 'Pendiente'}
                     </Badge>
                   </div>

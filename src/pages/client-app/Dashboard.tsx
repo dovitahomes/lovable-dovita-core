@@ -238,7 +238,7 @@ export default function Dashboard() {
                 <Calendar className="h-4 w-4 text-primary" />
                 <CardTitle className="text-sm">Próxima Cita</CardTitle>
               </div>
-              <Badge variant={nextAppointment.status === 'confirmed' ? 'default' : 'secondary'}>
+              <Badge variant={nextAppointment.status === 'confirmed' ? 'default' : 'outline'} className={nextAppointment.status !== 'confirmed' ? "bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]" : ""}>
                 {nextAppointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
               </Badge>
             </div>

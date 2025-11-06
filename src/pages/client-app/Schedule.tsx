@@ -52,10 +52,10 @@ export default function Schedule() {
                   <Badge className="bg-primary/10 text-primary">Completada</Badge>
                 )}
                 {phase.status === 'in-progress' && (
-                  <Badge className="bg-primary/10 text-primary">En Proceso</Badge>
+                  <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">En Proceso</Badge>
                 )}
                 {phase.status === 'pending' && (
-                  <Badge variant="secondary">Pendiente</Badge>
+                  <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">Pendiente</Badge>
                 )}
               </div>
 
