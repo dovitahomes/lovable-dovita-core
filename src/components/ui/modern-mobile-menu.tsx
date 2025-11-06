@@ -1,114 +1,114 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { ElementType } from 'react';
 
-export type IconComponentType = ElementType<{ className?: string }>;
+type IconComponentType = React.ElementType<{ className?: string }>;
 
-export interface MobileMenuItem {
+export interface InteractiveMenuItem {
   label: string;
   icon: IconComponentType;
-  href: string;
 }
 
-export interface MobileMenuProps {
-  items?: MobileMenuItem[];
+export interface InteractiveMenuProps {
+  items?: InteractiveMenuItem[];
   accentColor?: string;
+  activeIndex?: number;
+  onItemClick?: (index: number) => void;
 }
 
-const defaultAccentColor = 'var(--brand-accent, var(--accent-foreground))';
+const defaultAccentColor = 'hsl(var(--primary))';
 
-export const ModernMobileMenu: React.FC<MobileMenuProps> = ({ items, accentColor }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
+const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ 
+  items, 
+  accentColor,
+  activeIndex: controlledActiveIndex,
+  onItemClick 
+}) => {
+  const [internalActiveIndex, setInternalActiveIndex] = useState(0);
+  const activeIndex = controlledActiveIndex ?? internalActiveIndex;
 
   const finalItems = useMemo(() => {
-    if (!items || !Array.isArray(items) || items.length < 2 || items.length > 7) {
-      console.warn('ModernMobileMenu: items inválidos (debe tener entre 2-7 items). Usando array vacío.');
+    const isValid = items && Array.isArray(items) && items.length >= 2 && items.length <= 7;
+    if (!isValid) {
+      console.warn("InteractiveMenu: 'items' prop is invalid or missing.");
       return [];
     }
     return items;
   }, [items]);
 
-  const activeIndex = useMemo(
-    () => Math.max(0, finalItems.findIndex(it => location.pathname.startsWith(it.href))),
-    [finalItems, location.pathname]
-  );
-
   useEffect(() => {
-    console.log('🔍 ModernMobileMenu Debug:', {
-      itemsCount: finalItems.length,
-      items: finalItems.map(i => i.label),
-      location: location.pathname,
-      activeIndex,
-      isMobile: window.innerWidth < 768
-    });
-  }, [finalItems, location.pathname, activeIndex]);
+    if (activeIndex >= finalItems.length) {
+      setInternalActiveIndex(0);
+    }
+  }, [finalItems, activeIndex]);
 
   const textRefs = useRef<(HTMLElement | null)[]>([]);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     const setLineWidth = () => {
-      const el = itemRefs.current[activeIndex];
-      const tx = textRefs.current[activeIndex];
-      if (el && tx) el.style.setProperty('--lineWidth', `${tx.offsetWidth}px`);
+      const activeItemElement = itemRefs.current[activeIndex];
+      const activeTextElement = textRefs.current[activeIndex];
+
+      if (activeItemElement && activeTextElement) {
+        const textWidth = activeTextElement.offsetWidth;
+        activeItemElement.style.setProperty('--lineWidth', `${textWidth}px`);
+      }
     };
+
     setLineWidth();
+
     window.addEventListener('resize', setLineWidth);
-    return () => window.removeEventListener('resize', setLineWidth);
+    return () => {
+      window.removeEventListener('resize', setLineWidth);
+    };
   }, [activeIndex, finalItems]);
 
-  const navStyle = useMemo(
-    () => ({ '--component-active-color': accentColor || defaultAccentColor } as React.CSSProperties),
-    [accentColor]
-  );
+  const handleItemClick = (index: number) => {
+    if (onItemClick) {
+      onItemClick(index);
+    } else {
+      setInternalActiveIndex(index);
+    }
+  };
+
+  const navStyle = useMemo(() => {
+    const activeColor = accentColor || defaultAccentColor;
+    return { '--component-active-color': activeColor } as React.CSSProperties;
+  }, [accentColor]);
 
   return (
     <nav
-      className="
-        fixed bottom-0 left-0 right-0 z-50 md:hidden
-        pb-[max(env(safe-area-inset-bottom),0px)] pt-3
-        bg-white dark:bg-zinc-900
-        border-t border-zinc-200 dark:border-zinc-800
-        shadow-[0_-2px_10px_rgba(0,0,0,0.05)]
-        flex items-center justify-around
-      "
+      className="menu"
       role="navigation"
       style={navStyle}
     >
       {finalItems.map((item, index) => {
         const isActive = index === activeIndex;
-        const Icon = item.icon;
+        const isTextActive = isActive;
+
+        const IconComponent = item.icon;
+
         return (
           <button
             key={item.label}
-            ref={el => (itemRefs.current[index] = el)}
-            onClick={() => navigate(item.href)}
+            className={`menu__item ${isActive ? 'active' : ''}`}
+            onClick={() => handleItemClick(index)}
+            ref={(el) => (itemRefs.current[index] = el)}
             style={{ '--lineWidth': '0px' } as React.CSSProperties}
-            className={`
-              group relative flex flex-col items-center justify-center gap-1 px-3 py-2
-              text-xs font-medium transition-all duration-300
-              ${isActive ? 'text-[#1d4e89]' : 'text-slate-400 hover:text-slate-600'}
-            `}
           >
-            <div className={`transition-all duration-300 ${isActive ? 'animate-iconBounce scale-110' : 'scale-100'}`}>
-              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
+            <div className="menu__icon">
+              <IconComponent className="icon" />
             </div>
             <strong
-              ref={el => (textRefs.current[index] = el)}
-              className="leading-none"
+              className={`menu__text ${isTextActive ? 'active' : ''}`}
+              ref={(el) => (textRefs.current[index] = el)}
             >
               {item.label}
             </strong>
-            <span
-              aria-hidden
-              className={`absolute -top-0 h-[2px] rounded-full transition-all duration-300
-                ${isActive ? 'bg-[#1d4e89] w-[var(--lineWidth)] opacity-100' : 'w-0 bg-transparent opacity-0'}
-              `}
-            />
           </button>
         );
       })}
     </nav>
   );
 };
+
+export { InteractiveMenu };

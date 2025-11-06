@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Home, FileText, PenTool, Image, Calendar, MessageSquare, X } from "lucide-react";
+import { User, Home, FileText, PenTool, Calendar, MessageSquare, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
-import { ModernMobileMenu } from "@/components/ui/modern-mobile-menu";
-import { Outlet, useNavigate } from "react-router-dom";
+import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ClientLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   // Temporarily disabled - will be restored in Prompt 2
   const hasAccess = true;
   const accessLoading = false;
@@ -94,6 +95,12 @@ export default function ClientLayout() {
     { label: "Chat", icon: MessageSquare, href: "/client/chat" },
   ];
 
+  const activeIndex = menuItems.findIndex((item) => location.pathname.startsWith(item.href));
+
+  const handleMenuClick = (index: number) => {
+    navigate(menuItems[index].href);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Impersonate banner */}
@@ -158,7 +165,12 @@ export default function ClientLayout() {
       </main>
 
       {/* Modern Mobile Bottom Navigation */}
-      <ModernMobileMenu items={menuItems} accentColor="var(--brand-accent)" />
+      <InteractiveMenu 
+        items={menuItems.map((item) => ({ label: item.label, icon: item.icon }))} 
+        accentColor="hsl(var(--primary))"
+        activeIndex={activeIndex >= 0 ? activeIndex : 0}
+        onItemClick={handleMenuClick}
+      />
     </div>
   );
 }

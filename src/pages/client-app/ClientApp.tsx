@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ModernMobileMenu } from "@/components/ui/modern-mobile-menu";
+import { InteractiveMenu } from "@/components/ui/modern-mobile-menu";
 import DovitaHeader from "@/components/client-app/DovitaHeader";
 import { Home, Image, DollarSign, MessageCircle, FolderOpen, CalendarDays, Calendar } from "lucide-react";
 
@@ -34,13 +34,14 @@ export default function ClientApp() {
         <Outlet />
       </main>
 
-      <ModernMobileMenu
+      <InteractiveMenu
         items={menuItems.map((item) => ({ 
           label: item.label, 
-          icon: item.icon,
-          href: item.path 
+          icon: item.icon
         }))}
-        accentColor="var(--brand-accent)"
+        accentColor="hsl(var(--primary))"
+        activeIndex={activeIndex >= 0 ? activeIndex : 0}
+        onItemClick={handleMenuClick}
       />
     </div>
   );

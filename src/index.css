@@ -223,67 +223,107 @@ All colors MUST be HSL.
     @apply sticky top-0 z-40 w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800;
   }
 
-  /* Client App Interactive Menu Styles - Prefixed to avoid ERP conflicts */
-  .client-menu {
+  /* Menu Styles */
+  .menu {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background: var(--client-nav-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 0.75rem 1rem;
-    border-top: 1px solid var(--client-nav-border);
+    padding: 0.5rem;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    background: hsl(var(--card));
+    border-top: 1px solid hsl(var(--border));
+    width: 100%;
+    flex-shrink: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
   }
 
-  .client-menu__item {
+  @media (min-width: 768px) {
+    .menu {
+      display: none;
+    }
+  }
+
+  .menu__item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    background: transparent;
+    padding: 0.25rem;
     border: none;
-    color: var(--client-nav-fg);
+    background: transparent;
     cursor: pointer;
-    padding: 0.5rem;
     transition: all 0.3s ease;
+    position: relative;
+    color: hsl(var(--muted-foreground));
+    flex: 1;
+    max-width: 60px;
+  }
+
+  .menu__item.active {
+    color: var(--component-active-color, hsl(var(--primary)));
+  }
+
+  .menu__icon {
     position: relative;
   }
 
-  .client-menu__item.active {
-    color: hsl(var(--icon-active));
+  .menu__item.active .menu__icon .icon {
+    animation: iconBounce 0.6s ease-in-out;
   }
 
-  .client-menu__text {
-    font-size: 0.75rem;
+  .menu__icon .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .menu__text {
+    font-size: 0.625rem;
     font-weight: 500;
-    transition: all 0.3s ease;
+    text-transform: capitalize;
+    position: relative;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
   }
 
-  .client-menu__icon {
-    font-size: 1.5rem;
+  .menu__text.active {
+    opacity: 1;
+    max-height: 2rem;
+  }
+
+  .menu__text.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.25rem;
+    left: 0;
+    width: var(--lineWidth, 0);
+    height: 2px;
+    background: var(--component-active-color, hsl(var(--primary)));
+    transition: width 0.3s ease;
   }
 
   /* Icon Bounce Animation for Client Menu */
   @keyframes iconBounce {
     0%, 100% {
-      transform: translateY(0) scale(1.1);
+      transform: translateY(0);
     }
     20% {
-      transform: translateY(-0.3em) scale(1.15);
+      transform: translateY(-0.3em);
     }
     40% {
-      transform: translateY(0) scale(1.1);
+      transform: translateY(0);
     }
     60% {
-      transform: translateY(-0.1em) scale(1.12);
+      transform: translateY(-0.1em);
     }
     80% {
-      transform: translateY(0) scale(1.1);
+      transform: translateY(0);
     }
-  }
-
-  .animate-iconBounce {
-    animation: iconBounce 0.6s ease-in-out;
   }
 
   /* Client App Container - Scope for client-specific styles */
