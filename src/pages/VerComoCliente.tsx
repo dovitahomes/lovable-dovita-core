@@ -1,24 +1,27 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function VerComoCliente() {
-  useEffect(() => {
-    // Set preview mode in localStorage
-    localStorage.setItem("clientapp.previewMode", "true");
-    localStorage.setItem("clientapp.backofficeUrl", window.location.origin);
+  const navigate = useNavigate();
 
-    // Redirect to client app
-    // In development: proxy to apps/client dev server
-    // In production: served from apps/client/dist
-    const clientUrl = `${window.location.origin}/client?preview=1`;
-    window.location.href = clientUrl;
-  }, []);
+  useEffect(() => {
+    // Activar modo preview en localStorage
+    localStorage.setItem("clientapp.previewMode", "true");
+    
+    // Guardar URL del backoffice para el botón de regreso
+    const currentPath = window.location.pathname;
+    localStorage.setItem("clientapp.backofficeUrl", currentPath === "/ver-como-cliente" ? "/" : currentPath);
+    
+    // Redirigir a Client App con parámetro preview usando React Router
+    navigate("/client?preview=1", { replace: true });
+  }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
       <div className="text-center space-y-4">
         <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
         <p className="text-lg font-medium text-muted-foreground">Cargando vista de cliente...</p>
-        <p className="text-sm text-muted-foreground">Redirigiendo a /client...</p>
+        <p className="text-sm text-muted-foreground">Activando modo preview...</p>
       </div>
     </div>
   );
