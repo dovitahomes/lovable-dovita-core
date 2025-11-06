@@ -42,7 +42,7 @@ export default function NotificationPanel({ open, onOpenChange }: NotificationPa
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[400px] sm:w-[500px] p-0">
+      <SheetContent side="right" className="w-[85vw] sm:w-[400px] md:w-[500px] p-0">
         <SheetHeader className="p-6 pb-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2">
