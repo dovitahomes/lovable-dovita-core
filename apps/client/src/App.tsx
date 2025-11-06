@@ -7,7 +7,7 @@ import { ProjectProvider } from "@/contexts/ProjectContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { DataSourceProvider } from "@/contexts/DataSourceContext";
 import { useAppMode } from "@/hooks/useAppMode";
-import { mockClientData } from "@/lib/client-data";
+import { useProjectsData } from "@/hooks/useProjectsData";
 import PreviewBar from "@/components/client-app/PreviewBar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ClientLogin from "@/pages/Login";
@@ -33,9 +33,22 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const { isPreviewMode } = useAppMode();
+  const { projects, isLoading, clientName } = useProjectsData();
+
+  // Loading state mientras se cargan los proyectos
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+        <div className="text-center space-y-4">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="text-lg font-medium text-muted-foreground">Cargando tus proyectos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <ProjectProvider projects={projects}>
       <Toaster />
       <Sonner />
       {isPreviewMode && <PreviewBar />}
@@ -56,7 +69,7 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </>
+    </ProjectProvider>
   );
 }
 
@@ -64,13 +77,11 @@ function AppContent() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <DataSourceProvider>
-      <ProjectProvider projects={mockClientData.projects}>
-        <NotificationProvider>
-          <TooltipProvider>
-            <AppContent />
-          </TooltipProvider>
-        </NotificationProvider>
-      </ProjectProvider>
+      <NotificationProvider>
+        <TooltipProvider>
+          <AppContent />
+        </TooltipProvider>
+      </NotificationProvider>
     </DataSourceProvider>
   </QueryClientProvider>
 );
