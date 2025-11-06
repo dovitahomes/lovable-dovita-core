@@ -63,7 +63,7 @@ export default function DovitaHeaderDesktop() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="md:hidden text-white hover:bg-white/10"
+          className="md:hidden text-white hover:bg-[hsl(var(--dovita-yellow))]/20"
           onClick={() => setSearchOpen(true)}
         >
           <Search className="h-5 w-5" />
@@ -71,7 +71,7 @@ export default function DovitaHeaderDesktop() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative text-white hover:bg-white/10"
+          className="relative text-white hover:bg-[hsl(var(--dovita-yellow))]/20"
           onClick={() => setNotificationsOpen(true)}
         >
           <Bell className="h-5 w-5" />
@@ -81,13 +81,13 @@ export default function DovitaHeaderDesktop() {
             </Badge>
           )}
         </Button>
-        <Button variant="ghost" size="icon" className="hidden lg:flex text-white hover:bg-white/10">
+        <Button variant="ghost" size="icon" className="hidden lg:flex text-white hover:bg-[hsl(var(--dovita-yellow))]/20">
           <User className="h-5 w-5" />
         </Button>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="hidden lg:flex text-white hover:bg-white/10"
+          className="hidden lg:flex text-white hover:bg-[hsl(var(--dovita-yellow))]/20"
           onClick={() => navigate('/settings')}
         >
           <Settings className="h-5 w-5" />
@@ -95,7 +95,7 @@ export default function DovitaHeaderDesktop() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="lg:hidden text-white hover:bg-white/10"
+          className="lg:hidden text-white hover:bg-[hsl(var(--dovita-yellow))]/20"
           onClick={() => setMenuOpen(true)}
         >
           <Menu className="h-5 w-5" />
