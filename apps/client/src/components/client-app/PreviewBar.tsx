@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Database, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useDataSource } from "@/contexts/DataSourceContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Client {
   client_id: string;
@@ -12,85 +15,69 @@ interface Client {
 }
 
 export default function PreviewBar() {
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [useMock, setUseMock] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const { source, setSource, forceClientId, setForceClientId, isPreviewMode } = useDataSource();
+  
+  // Query para obtener clientes reales de Supabase
+  const { data: realClients = [], isLoading: loadingClients } = useQuery({
+    queryKey: ['preview-clients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, email')
+        .order('name');
+      
+      if (error) throw error;
+      return data.map(c => ({
+        client_id: c.id,
+        client_name: c.name,
+      }));
+    },
+    enabled: isPreviewMode,
+  });
 
-  // Check if preview mode is active
+  // Combinar con mock clients si está en modo mock
+  const mockClients: Client[] = [
+    { client_id: 'mock_1', client_name: 'Familia Martínez (Mock)' },
+    { client_id: 'mock_2', client_name: 'Familia González (Mock)' },
+    { client_id: 'mock_3', client_name: 'Familia Rodríguez (Mock)' }
+  ];
+
+  const displayClients = source === 'mock' ? mockClients : realClients;
+
+  // Auto-select first client if none selected
   useEffect(() => {
-    const previewFromStorage = localStorage.getItem("clientapp.previewMode") === "true";
-    const previewFromUrl = new URLSearchParams(window.location.search).has("preview");
-    const isPreview = previewFromStorage || previewFromUrl;
-    setIsPreviewMode(isPreview);
-
-    if (isPreview) {
-      // Load current settings
-      const forceClientId = localStorage.getItem("clientapp.forceClientId");
-      const mockSetting = localStorage.getItem("clientapp.useMock");
-      
-      setSelectedClientId(forceClientId);
-      setUseMock(mockSetting !== "false");
-      
-      // Load clients from v_client_projects
-      loadClients();
-    } else {
-      setLoading(false);
+    if (isPreviewMode && !forceClientId && displayClients.length > 0) {
+      const firstClientId = displayClients[0].client_id;
+      setForceClientId(firstClientId);
     }
-  }, []);
+  }, [isPreviewMode, forceClientId, displayClients, setForceClientId]);
 
-  const loadClients = async () => {
-    try {
-      // For now, use mock data. Real implementation would query v_client_projects
-      // TODO: Implement real Supabase query when ready
-      const clientsList: Client[] = [
-        { client_id: 'client_1', client_name: 'Familia Martínez' },
-        { client_id: 'client_2', client_name: 'Familia González' }
-      ];
-
-      setClients(clientsList);
-
-      // Auto-select first client if none selected
-      if (!selectedClientId && clientsList.length > 0) {
-        const firstClientId = clientsList[0].client_id;
-        setSelectedClientId(firstClientId);
-        localStorage.setItem("clientapp.forceClientId", firstClientId);
-      }
-    } catch (error) {
-      console.error("Error loading clients:", error);
-      // If no clients, suggest using mock data
-      if (clients.length === 0) {
-        toast({
-          title: "Sin clientes reales",
-          description: "Activa Mock Data para previsualizar",
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleClientChange = (clientId: string) => {
-    setSelectedClientId(clientId);
-    localStorage.setItem("clientapp.forceClientId", clientId);
+    setForceClientId(clientId);
     
     // Clear current project to force reload
     localStorage.removeItem("currentProjectId");
     
     toast({
       title: "Cliente seleccionado",
-      description: "Recarga la página para ver los cambios",
+      description: "Los datos se actualizarán automáticamente",
     });
   };
 
   const handleMockToggle = (checked: boolean) => {
-    setUseMock(checked);
-    localStorage.setItem("clientapp.useMock", checked ? "true" : "false");
+    setSource(checked ? 'mock' : 'real');
+    
+    // Clear current selections when switching
+    localStorage.removeItem("currentProjectId");
+    if (!checked && displayClients.length > 0) {
+      // When switching to real, select first real client
+      setForceClientId(displayClients[0].client_id);
+    }
     
     toast({
-      title: "Fuente de datos actualizada",
-      description: "Navega para refrescar los datos",
+      title: checked ? "Modo Mock Data" : "Modo Datos Reales",
+      description: "Los datos se actualizarán automáticamente",
     });
   };
 
@@ -111,15 +98,15 @@ export default function PreviewBar() {
           <span className="text-sm font-medium text-primary-foreground">Modo Previsualización</span>
         </div>
 
-        {!loading && clients.length > 0 && (
+        {displayClients.length > 0 && (
           <div className="flex items-center gap-2">
             <Label className="text-sm text-primary-foreground">Cliente:</Label>
-            <Select value={selectedClientId || undefined} onValueChange={handleClientChange}>
+            <Select value={forceClientId || undefined} onValueChange={handleClientChange}>
               <SelectTrigger className="h-8 w-[200px] bg-background/10 text-primary-foreground border-primary-foreground/30">
-                <SelectValue placeholder="Seleccionar cliente" />
+                <SelectValue placeholder={loadingClients ? "Cargando..." : "Seleccionar cliente"} />
               </SelectTrigger>
               <SelectContent>
-                {clients.map((client) => (
+                {displayClients.map((client) => (
                   <SelectItem key={client.client_id} value={client.client_id}>
                     {client.client_name}
                   </SelectItem>
@@ -129,11 +116,17 @@ export default function PreviewBar() {
           </div>
         )}
 
+        {source === 'real' && realClients.length === 0 && !loadingClients && (
+          <div className="text-xs text-primary-foreground/80 bg-primary-foreground/10 px-2 py-1 rounded">
+            Sin clientes reales. Activa Mock Data →
+          </div>
+        )}
+
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-primary-foreground" />
           <Label className="text-sm text-primary-foreground">Mock Data:</Label>
           <Switch
-            checked={useMock}
+            checked={source === 'mock'}
             onCheckedChange={handleMockToggle}
             className="data-[state=checked]:bg-primary-foreground"
           />
