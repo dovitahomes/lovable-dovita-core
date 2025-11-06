@@ -67,9 +67,10 @@ export const ModernMobileMenu: React.FC<MobileMenuProps> = ({ items, accentColor
     <nav
       className="
         fixed bottom-0 left-0 right-0 z-50 md:hidden
-        pb-[max(env(safe-area-inset-bottom),0px)] pt-2
-        bg-[color:var(--client-nav-bg,rgba(12,18,40,0.72))] backdrop-blur
-        border-t border-[color:var(--client-nav-border,rgba(255,255,255,0.08))]
+        pb-[max(env(safe-area-inset-bottom),0px)] pt-3
+        bg-white dark:bg-zinc-900
+        border-t border-zinc-200 dark:border-zinc-800
+        shadow-[0_-2px_10px_rgba(0,0,0,0.05)]
         flex items-center justify-around
       "
       role="navigation"
@@ -84,26 +85,25 @@ export const ModernMobileMenu: React.FC<MobileMenuProps> = ({ items, accentColor
             ref={el => (itemRefs.current[index] = el)}
             onClick={() => navigate(item.href)}
             style={{ '--lineWidth': '0px' } as React.CSSProperties}
-            className="
+            className={`
               group relative flex flex-col items-center justify-center gap-1 px-3 py-2
-              text-xs font-medium
-              text-[color:var(--client-nav-fg,#c8cbe0)]
-              hover:text-white transition-colors
-            "
+              text-xs font-medium transition-all duration-300
+              ${isActive ? 'text-[#1d4e89]' : 'text-slate-400 hover:text-slate-600'}
+            `}
           >
-            <div className={`transition-transform ${isActive ? 'scale-110' : 'scale-100'}`}>
-              <Icon className={`h-5 w-5 ${isActive ? 'text-[color:var(--component-active-color)]' : ''}`} />
+            <div className={`transition-all duration-300 ${isActive ? 'animate-iconBounce scale-110' : 'scale-100'}`}>
+              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
             </div>
             <strong
               ref={el => (textRefs.current[index] = el)}
-              className={`leading-none ${isActive ? 'text-[color:var(--component-active-color)]' : ''}`}
+              className="leading-none"
             >
               {item.label}
             </strong>
             <span
               aria-hidden
-              className={`absolute -top-0.5 h-0.5 rounded-full transition-all duration-300
-                ${isActive ? 'bg-[color:var(--component-active-color)] w-[var(--lineWidth)]' : 'w-0 bg-transparent'}
+              className={`absolute -top-0 h-[2px] rounded-full transition-all duration-300
+                ${isActive ? 'bg-[#1d4e89] w-[var(--lineWidth)] opacity-100' : 'w-0 bg-transparent opacity-0'}
               `}
             />
           </button>
