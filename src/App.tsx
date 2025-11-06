@@ -18,6 +18,9 @@ import { AuthProvider } from "@/app/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 
+// Client App imports
+import ClientAppWrapper from "@/layouts/ClientAppWrapper";
+
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
@@ -207,7 +210,14 @@ const App = () => {
                   <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
                   <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
                   
-                  {/* All internal routes - wrapped with ProtectedRoute */}
+                  {/* Client App Routes - COMPLETAMENTE SEPARADAS del ERP */}
+                  <Route path="/client/*" element={
+                    <ProtectedRoute>
+                      <ClientAppWrapper />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* All internal ERP routes - wrapped with ProtectedRoute */}
                   <Route path="/*" element={
                     <ProtectedRoute>
                       <InternalLayout />

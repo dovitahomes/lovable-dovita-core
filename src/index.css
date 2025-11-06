@@ -1,8 +1,8 @@
+@import './components/ui/sidebar-styles.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './components/ui/sidebar-styles.css';
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -164,5 +164,45 @@ All colors MUST be HSL.
   
   .header {
     @apply sticky top-0 z-40 w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800;
+  }
+
+  /* Client App Interactive Menu Styles */
+  .menu {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--client-nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--client-nav-border);
+  }
+
+  .menu__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--client-nav-fg);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .menu__item.active {
+    color: var(--component-active-color, hsl(var(--primary)));
+  }
+
+  .menu__text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .menu__icon {
+    font-size: 1.5rem;
   }
 }
