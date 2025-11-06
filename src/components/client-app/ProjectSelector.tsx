@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/client-app/ProjectContext';
 
 interface ProjectSelectorProps {
   variant?: 'mobile' | 'desktop';
