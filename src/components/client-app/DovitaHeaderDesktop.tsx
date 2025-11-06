@@ -76,7 +76,7 @@ export default function DovitaHeaderDesktop() {
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-secondary text-primary text-[10px]">
+            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-[hsl(var(--dovita-yellow))] text-primary text-[10px]">
               {unreadCount}
             </Badge>
           )}

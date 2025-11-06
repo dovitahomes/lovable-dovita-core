@@ -29,7 +29,7 @@ export default function AppointmentCard({ appointment, onViewDetails, onCancel }
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Confirmada</Badge>;
+        return <Badge className="bg-primary/10 text-primary hover:bg-primary/10">Confirmada</Badge>;
       case 'pending':
         return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Pendiente</Badge>;
       case 'completed':
