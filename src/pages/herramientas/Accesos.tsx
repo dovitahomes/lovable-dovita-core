@@ -10,20 +10,38 @@ import { useToast } from '@/hooks/use-toast';
 import { LoadingError } from '@/components/common/LoadingError';
 
 const AVAILABLE_MODULES = [
+  // Principal
   { id: 'dashboard', name: 'Dashboard' },
+  
+  // CRM
   { id: 'leads', name: 'Leads' },
   { id: 'clientes', name: 'Clientes' },
+  
+  // Proyectos
   { id: 'proyectos', name: 'Proyectos' },
   { id: 'diseno', name: 'Diseño' },
   { id: 'presupuestos', name: 'Presupuestos' },
-  { id: 'cronograma', name: 'Cronograma' },
+  { id: 'cronograma', name: 'Cronograma de Gantt' },
   { id: 'construccion', name: 'Construcción' },
+  
+  // Abastecimiento
   { id: 'proveedores', name: 'Proveedores' },
+  { id: 'ordenes_compra', name: 'Órdenes de Compra' },
+  { id: 'lotes_pago', name: 'Lotes de Pago' },
+  
+  // Finanzas
   { id: 'finanzas', name: 'Finanzas' },
   { id: 'contabilidad', name: 'Contabilidad' },
   { id: 'comisiones', name: 'Comisiones' },
+  
+  // Gestión / Herramientas
   { id: 'usuarios', name: 'Usuarios' },
-  { id: 'herramientas', name: 'Herramientas' },
+  { id: 'accesos', name: 'Accesos' },
+  { id: 'identidades', name: 'Identidades' },
+  { id: 'contenido_corporativo', name: 'Contenido Corporativo' },
+  { id: 'sucursales', name: 'Sucursales' },
+  { id: 'centro_reglas', name: 'Centro de Reglas' },
+  { id: 'herramientas', name: 'Herramientas (General)' },
 ];
 
 type UserBasic = {
