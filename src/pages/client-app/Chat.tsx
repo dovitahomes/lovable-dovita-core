@@ -112,7 +112,7 @@ export default function Chat() {
   const groupedMessages = groupMessagesByDate();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full pb-[65px]">
       {/* Header - Fixed top */}
       <div className="flex-shrink-0 bg-background border-b">
         <ChatHeader onAvatarCustomize={() => setAvatarDialogOpen(true)} />
@@ -121,7 +121,7 @@ export default function Chat() {
       {/* Messages Area - Scrollable */}
       <div 
         ref={scrollAreaRef} 
-        className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 mb-[65px]"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4"
       >
         <div className="py-4">
           {/* Team Members Info */}
