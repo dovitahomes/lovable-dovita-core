@@ -62,7 +62,6 @@ export default function Financial() {
 
           <Progress 
             value={(project.totalPaid / project.totalAmount) * 100}
-            variant="yellow"
             className="h-2 bg-white/20"
           />
         </CardContent>
@@ -84,13 +83,13 @@ export default function Financial() {
                   </p>
                 </div>
                 {ministracion.status === 'paid' && (
-                  <Badge className="bg-primary/10 text-primary">
+                  <Badge className="bg-green-100 text-green-700">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
                     Pagado
                   </Badge>
                 )}
                 {ministracion.status === 'pending' && (
-                  <Badge className="bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]">
+                  <Badge className="bg-amber-100 text-amber-700">
                     <Clock className="h-3 w-3 mr-1" />
                     Pendiente
                   </Badge>
@@ -127,7 +126,7 @@ export default function Financial() {
                     {percentage.toFixed(0)}%
                   </p>
                 </div>
-                <Progress value={percentage} variant="yellow" className="h-2" />
+                <Progress value={percentage} className="h-2" />
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
                     Gastado: ${(category.spent / 1000).toFixed(0)}k
