@@ -38,7 +38,7 @@ export default function Documents() {
   const renderDocumentList = (docs: Document[]) => (
     <div className="space-y-2">
       {docs.map((doc) => (
-        <Card key={doc.id}>
+        <Card key={doc.id} className="hover:shadow-lg transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -76,12 +76,12 @@ export default function Documents() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-[130px]">
-      <div>
-        <h1 className="text-2xl font-bold">Documentos</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Accede a todos los documentos de tu proyecto
-        </p>
-      </div>
+        <div>
+          <h1 className="text-2xl font-bold">Documentos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Accede a todos los documentos de tu proyecto
+          </p>
+        </div>
 
       <Tabs defaultValue="cliente" className="w-full">
         <TabsList className="h-auto flex flex-wrap gap-1 p-1">
@@ -113,11 +113,11 @@ export default function Documents() {
         </TabsContent>
       </Tabs>
 
-      <DocumentViewer
-        open={viewerOpen}
-        onOpenChange={setViewerOpen}
-        document={selectedDocument}
-      />
+        <DocumentViewer
+          open={viewerOpen}
+          onOpenChange={setViewerOpen}
+          document={selectedDocument}
+        />
       </div>
     </div>
   );
