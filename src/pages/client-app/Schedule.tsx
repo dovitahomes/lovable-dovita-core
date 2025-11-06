@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
@@ -10,6 +11,14 @@ export default function Schedule() {
   const { currentProject } = useProject();
   const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
+  const [expandedPhaseId, setExpandedPhaseId] = useState<number | null>(
+    phases.find(p => p.status === 'in-progress')?.id || phases[0]?.id || null
+  );
+
+  const handlePhaseClick = (phaseId: number) => {
+    setExpandedPhaseId(expandedPhaseId === phaseId ? null : phaseId);
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-[130px]">
@@ -24,8 +33,15 @@ export default function Schedule() {
         {/* Timeline line */}
         <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-border" />
 
-        {phases.map((phase, index) => (
-          <Card key={phase.id} className="relative ml-10">
+        {phases.map((phase, index) => {
+          const isExpanded = expandedPhaseId === phase.id;
+          
+          return (
+          <Card 
+            key={phase.id} 
+            className="relative ml-10 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handlePhaseClick(phase.id)}
+          >
             {/* Timeline dot */}
             <div className="absolute -left-10 top-6 w-10 flex items-center justify-start">
               {phase.status === 'completed' ? (
@@ -41,9 +57,11 @@ export default function Schedule() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <h3 className="font-semibold">{phase.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {phase.startDate} - {phase.endDate}
-                  </p>
+                  {isExpanded && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {phase.startDate} - {phase.endDate}
+                    </p>
+                  )}
                 </div>
                 
                 {phase.status === 'completed' && (
@@ -57,7 +75,7 @@ export default function Schedule() {
                 )}
               </div>
 
-              {phase.status === 'in-progress' && (
+              {isExpanded && phase.status === 'in-progress' && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Avance</span>
@@ -73,7 +91,8 @@ export default function Schedule() {
               )}
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
       </div>
     </div>

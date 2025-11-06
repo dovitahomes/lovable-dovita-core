@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -33,11 +34,18 @@ export default function ScheduleDesktop() {
   const { currentProject } = useProject();
   const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
+  const [expandedPhaseId, setExpandedPhaseId] = useState<number | null>(
+    phases.find(p => p.status === 'in-progress')?.id || phases[0]?.id || null
+  );
   
   const completedPhases = phases.filter(p => p.status === 'completed').length;
   const inProgressPhases = phases.filter(p => p.status === 'in-progress').length;
   const pendingPhases = phases.filter(p => p.status === 'pending').length;
   const completionPercentage = phases.length > 0 ? (completedPhases / phases.length) * 100 : 0;
+
+  const handlePhaseClick = (phaseId: number) => {
+    setExpandedPhaseId(expandedPhaseId === phaseId ? null : phaseId);
+  };
 
   return (
     <div>
@@ -54,8 +62,15 @@ export default function ScheduleDesktop() {
             <CardTitle>Fases del Proyecto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {phases.map((phase, index) => (
-              <div key={phase.id} className="relative">
+            {phases.map((phase, index) => {
+              const isExpanded = expandedPhaseId === phase.id;
+              
+              return (
+              <div 
+                key={phase.id} 
+                className="relative cursor-pointer hover:bg-accent/5 p-2 -m-2 rounded-lg transition-colors"
+                onClick={() => handlePhaseClick(phase.id)}
+              >
                 {index < phases.length - 1 && (
                   <div className="absolute left-[10px] top-[40px] bottom-[-24px] w-0.5 bg-border" />
                 )}
@@ -67,13 +82,15 @@ export default function ScheduleDesktop() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-lg">{phase.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {phase.startDate} - {phase.endDate}
-                        </p>
+                        {isExpanded && (
+                          <p className="text-sm text-muted-foreground">
+                            {phase.startDate} - {phase.endDate}
+                          </p>
+                        )}
                       </div>
                       {getStatusBadge(phase.status)}
                     </div>
-                    {phase.status === "in-progress" && (
+                    {isExpanded && phase.status === "in-progress" && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Progreso</span>
@@ -85,7 +102,8 @@ export default function ScheduleDesktop() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
 
