@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Download, Search, Upload, Eye } from "lucide-react";
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import type { Document } from '@/lib/client-app/client-data';
 import {
   Table,
@@ -19,6 +21,7 @@ import {
 
 export default function DocumentsDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const [selectedDocument, setSelectedDocument] = useState<{
     name: string;
     type: string;
@@ -86,7 +89,9 @@ export default function DocumentsDesktop() {
   );
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Documentos</h1>
@@ -140,6 +145,7 @@ export default function DocumentsDesktop() {
         onOpenChange={setViewerOpen}
         document={selectedDocument}
       />
+      </div>
     </div>
   );
 }

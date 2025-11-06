@@ -2,13 +2,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import { getScheduleTitle } from '@/lib/project-utils';
 
 export default function Schedule() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-full overflow-y-auto p-4 space-y-4">
       <div>
         <h1 className="text-2xl font-bold">{getScheduleTitle(currentProject)}</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -70,6 +75,7 @@ export default function Schedule() {
             </CardContent>
           </Card>
         ))}
+      </div>
       </div>
     </div>
   );

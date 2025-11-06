@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { useProject } from "@/contexts/client-app/ProjectContext";
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import { getScheduleTitle, getScheduleSubtitle } from "@/lib/project-utils";
 
 const getStatusIcon = (status: string) => {
@@ -29,6 +31,7 @@ const getStatusBadge = (status: string) => {
 
 export default function ScheduleDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
   
   const completedPhases = phases.filter(p => p.status === 'completed').length;
@@ -37,7 +40,9 @@ export default function ScheduleDesktop() {
   const completionPercentage = phases.length > 0 ? (completedPhases / phases.length) * 100 : 0;
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
         <h1 className="text-3xl font-bold mb-2">{getScheduleTitle(currentProject)}</h1>
         <p className="text-muted-foreground">{getScheduleSubtitle(currentProject)}</p>
@@ -131,6 +136,7 @@ export default function ScheduleDesktop() {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

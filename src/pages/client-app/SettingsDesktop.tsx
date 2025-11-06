@@ -7,9 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function SettingsDesktop() {
   const navigate = useNavigate();
+  const { isPreviewMode } = useDataSource();
   const [pushEnabled, setPushEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [useMock, setUseMock] = useState(true);
@@ -98,8 +101,10 @@ export default function SettingsDesktop() {
   };
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
-      <div className="max-w-4xl">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+        <div className="max-w-4xl">
         <Button
           variant="ghost"
           onClick={() => navigate('/app')}
@@ -273,10 +278,11 @@ export default function SettingsDesktop() {
                   id="mock-toggle-desktop"
                   checked={useMock}
                   onCheckedChange={handleDataSourceToggle}
-                />
-              </div>
-            </CardContent>
-          </Card>
+              />
+            </div>
+          </CardContent>
+        </Card>
+        </div>
       </div>
     </div>
   );

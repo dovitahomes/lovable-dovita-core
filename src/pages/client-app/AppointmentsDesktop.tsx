@@ -7,12 +7,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import AppointmentModal from "@/components/client-app/AppointmentModal";
 import { mockAppointments } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
 import { format, isSameDay, isFuture, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function AppointmentsDesktop() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,7 +45,9 @@ export default function AppointmentsDesktop() {
     .sort((a, b) => a.time.localeCompare(b.time));
 
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Citas y Reuniones</h1>
@@ -240,6 +245,7 @@ export default function AppointmentsDesktop() {
         appointment={editingAppointment}
         mode={editingAppointment ? 'edit' : 'create'}
       />
+      </div>
     </div>
   );
 }

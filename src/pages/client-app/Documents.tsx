@@ -5,10 +5,13 @@ import { FileText, Download, Image as ImageIcon, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import type { Document } from '@/lib/client-app/client-data';
 
 export default function Documents() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const [selectedDocument, setSelectedDocument] = useState<{
     name: string;
     type: string;
@@ -71,7 +74,9 @@ export default function Documents() {
   );
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-full overflow-y-auto p-4 space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Documentos</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -114,6 +119,7 @@ export default function Documents() {
         onOpenChange={setViewerOpen}
         document={selectedDocument}
       />
+      </div>
     </div>
   );
 }

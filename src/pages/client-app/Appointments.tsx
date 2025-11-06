@@ -8,12 +8,15 @@ import AppointmentCard from '@/components/client-app/AppointmentCard';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { mockAppointments } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from 'lucide-react';
 import { format, isSameDay, isFuture, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Appointments() {
   const { currentProject } = useProject();
+  const { isPreviewMode } = useDataSource();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
@@ -48,7 +51,9 @@ export default function Appointments() {
   });
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-6 pb-8">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="h-full overflow-y-auto p-4 space-y-6 pb-8">
       <div>
         <h1 className="text-2xl font-bold">Citas con el Equipo</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -218,6 +223,7 @@ export default function Appointments() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

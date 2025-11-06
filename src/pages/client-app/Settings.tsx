@@ -6,8 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import PreviewBar from '@/components/client-app/PreviewBar';
 
 export default function Settings() {
+  const { isPreviewMode } = useDataSource();
   const [pushEnabled, setPushEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [useMock, setUseMock] = useState(true);
@@ -99,8 +102,10 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-safe">
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div style={{ paddingTop: isPreviewMode ? '48px' : '0' }}>
+      <PreviewBar />
+      <div className="min-h-screen bg-background pb-safe">
+        <div className="max-w-2xl mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Configuración</h1>
           <p className="text-muted-foreground mt-2">
@@ -269,6 +274,7 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
