@@ -4,13 +4,13 @@ import DovitaHeader from "@/components/client-app/DovitaHeader";
 import { Home, Image, DollarSign, MessageCircle, FolderOpen, CalendarDays, Calendar } from "lucide-react";
 
 const menuItems = [
-  { label: "Inicio", icon: Home, path: "/app" },
-  { label: "Fotos", icon: Image, path: "/app/photos" },
-  { label: "Financiero", icon: DollarSign, path: "/app/financial" },
-  { label: "Chat", icon: MessageCircle, path: "/app/chat" },
-  { label: "Documentos", icon: FolderOpen, path: "/app/documents" },
-  { label: "Cronograma", icon: CalendarDays, path: "/app/schedule" },
-  { label: "Citas", icon: Calendar, path: "/app/appointments" },
+  { label: "Inicio", icon: Home, path: "/" },
+  { label: "Fotos", icon: Image, path: "/photos" },
+  { label: "Financiero", icon: DollarSign, path: "/financial" },
+  { label: "Chat", icon: MessageCircle, path: "/chat" },
+  { label: "Documentos", icon: FolderOpen, path: "/documents" },
+  { label: "Cronograma", icon: CalendarDays, path: "/schedule" },
+  { label: "Citas", icon: Calendar, path: "/appointments" },
 ];
 
 export default function ClientApp() {
@@ -18,7 +18,7 @@ export default function ClientApp() {
   const navigate = useNavigate();
 
   const activeIndex = menuItems.findIndex(
-    (item) => location.pathname === item.path || (item.path === "/app" && location.pathname === "/app/"),
+    (item) => location.pathname === item.path || (item.path === "/" && (location.pathname === "/" || location.pathname === "")),
   );
 
   const handleMenuClick = (index: number) => {

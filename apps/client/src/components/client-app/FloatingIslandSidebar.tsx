@@ -3,13 +3,13 @@ import { Home, Image, DollarSign, MessageCircle, FolderOpen, CalendarDays, Calen
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 const menuItems = [
-  { label: "Inicio", icon: Home, path: "/client" },
-  { label: "Fotos", icon: Image, path: "/client/photos" },
-  { label: "Financiero", icon: DollarSign, path: "/client/financial" },
-  { label: "Chat", icon: MessageCircle, path: "/client/chat" },
-  { label: "Documentos", icon: FolderOpen, path: "/client/documents" },
-  { label: "Cronograma", icon: CalendarDays, path: "/client/schedule" },
-  { label: "Citas", icon: Calendar, path: "/client/appointments" },
+  { label: "Inicio", icon: Home, path: "/" },
+  { label: "Fotos", icon: Image, path: "/photos" },
+  { label: "Financiero", icon: DollarSign, path: "/financial" },
+  { label: "Chat", icon: MessageCircle, path: "/chat" },
+  { label: "Documentos", icon: FolderOpen, path: "/documents" },
+  { label: "Cronograma", icon: CalendarDays, path: "/schedule" },
+  { label: "Citas", icon: Calendar, path: "/appointments" },
 ];
 
 export default function FloatingIslandSidebar() {
@@ -17,8 +17,8 @@ export default function FloatingIslandSidebar() {
   const location = useLocation();
 
   const isActive = (path: string) => {
-    if (path === "/client") {
-      return location.pathname === "/client" || location.pathname === "/client/";
+    if (path === "/") {
+      return location.pathname === "/" || location.pathname === "";
     }
     return location.pathname === path;
   };

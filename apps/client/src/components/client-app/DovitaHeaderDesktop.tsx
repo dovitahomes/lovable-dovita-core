@@ -14,14 +14,14 @@ import { useProject } from '@/contexts/ProjectContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 const routeLabels: Record<string, string> = {
-  '/client': 'Inicio',
-  '/client/photos': 'Fotos',
-  '/client/financial': 'Financiero',
-  '/client/chat': 'Chat',
-  '/client/documents': 'Documentos',
-  '/client/schedule': 'Cronograma',
-  '/client/appointments': 'Citas',
-  '/client/settings': 'Configuración',
+  '/': 'Inicio',
+  '/photos': 'Fotos',
+  '/financial': 'Financiero',
+  '/chat': 'Chat',
+  '/documents': 'Documentos',
+  '/schedule': 'Cronograma',
+  '/appointments': 'Citas',
+  '/settings': 'Configuración',
 };
 
 export default function DovitaHeaderDesktop() {
@@ -88,7 +88,7 @@ export default function DovitaHeaderDesktop() {
           variant="ghost" 
           size="icon" 
           className="hidden lg:flex text-white hover:bg-white/10"
-          onClick={() => navigate('/client/settings')}
+          onClick={() => navigate('/settings')}
         >
           <Settings className="h-5 w-5" />
         </Button>
@@ -127,7 +127,7 @@ export default function DovitaHeaderDesktop() {
                 className="w-full justify-start gap-3"
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate('/client/settings');
+                  navigate('/settings');
                 }}
               >
                 <Settings className="h-4 w-4" />

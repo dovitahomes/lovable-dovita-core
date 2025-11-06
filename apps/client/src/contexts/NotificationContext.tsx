@@ -31,7 +31,7 @@ const mockNotifications: Notification[] = [
     timestamp: '2025-11-04T10:30:00',
     read: false,
     projectId: 'project_juriquilla',
-    actionUrl: '/client/chat'
+    actionUrl: '/chat'
   },
   {
     id: '2',
@@ -41,7 +41,7 @@ const mockNotifications: Notification[] = [
     timestamp: '2025-11-03T15:20:00',
     read: false,
     projectId: 'project_juriquilla',
-    actionUrl: '/client/appointments'
+    actionUrl: '/appointments'
   },
   {
     id: '3',
@@ -51,7 +51,7 @@ const mockNotifications: Notification[] = [
     timestamp: '2025-11-02T09:15:00',
     read: false,
     projectId: 'project_playa',
-    actionUrl: '/client/documents'
+    actionUrl: '/documents'
   },
   {
     id: '4',
@@ -61,7 +61,7 @@ const mockNotifications: Notification[] = [
     timestamp: '2025-11-01T14:45:00',
     read: true,
     projectId: 'project_juriquilla',
-    actionUrl: '/client/photos'
+    actionUrl: '/photos'
   },
   {
     id: '5',
@@ -71,7 +71,7 @@ const mockNotifications: Notification[] = [
     timestamp: '2025-10-31T11:20:00',
     read: true,
     projectId: 'project_juriquilla',
-    actionUrl: '/client/chat'
+    actionUrl: '/chat'
   }
 ];
 
