@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { generateRoute, BACKOFFICE_ROUTES } from "@/config/routes";
 
 export default function VerComoCliente() {
   const navigate = useNavigate();
@@ -15,14 +16,13 @@ export default function VerComoCliente() {
     
     // Guardar URL del backoffice para el botón de regreso
     const currentPath = window.location.pathname;
-    const backofficeUrl = currentPath === "/ver-como-cliente" ? "/" : currentPath;
+    const backofficeUrl = currentPath === BACKOFFICE_ROUTES.VER_COMO_CLIENTE 
+      ? BACKOFFICE_ROUTES.DASHBOARD 
+      : currentPath;
     localStorage.setItem("clientapp.backofficeUrl", backofficeUrl);
     
     // Redirigir a Client App con parámetro preview usando React Router v6
-    navigate({
-      pathname: "/client",
-      search: "?preview=true"
-    }, { replace: true });
+    navigate(generateRoute.clientWithPreview(), { replace: true });
   }, [navigate]);
 
   return (

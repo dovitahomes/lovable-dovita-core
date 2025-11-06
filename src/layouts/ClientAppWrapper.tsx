@@ -1,10 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { DataSourceProvider } from '@/contexts/client-app/DataSourceContext';
 import { ProjectProvider } from '@/contexts/client-app/ProjectContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useAppMode } from '@/hooks/client-app/useAppMode';
 import { useProjectsData } from '@/hooks/client-app/useProjectsData';
 import { AuthStateListener } from '@/components/client-app/AuthStateListener';
+import { CLIENT_APP_RELATIVE_ROUTES } from '@/config/routes';
 import ResponsiveClientApp from '@/pages/client-app/ResponsiveClientApp';
 import ResponsiveDashboard from '@/pages/client-app/ResponsiveDashboard';
 import ResponsivePhotos from '@/pages/client-app/ResponsivePhotos';
@@ -34,16 +35,17 @@ function ClientAppContent() {
     <ProjectProvider projects={projects}>
       <AuthStateListener />
       <Routes>
+        {/* Sub-rutas relativas de /client/* */}
         <Route element={<ResponsiveClientApp />}>
           <Route index element={<ResponsiveDashboard />} />
-          <Route path="dashboard" element={<ResponsiveDashboard />} />
-          <Route path="photos" element={<ResponsivePhotos />} />
-          <Route path="financial" element={<ResponsiveFinancial />} />
-          <Route path="chat" element={<ResponsiveChat />} />
-          <Route path="documents" element={<ResponsiveDocuments />} />
-          <Route path="schedule" element={<ResponsiveSchedule />} />
-          <Route path="appointments" element={<ResponsiveAppointments />} />
-          <Route path="settings" element={<ResponsiveSettings />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.DASHBOARD} element={<ResponsiveDashboard />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.PHOTOS} element={<ResponsivePhotos />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.FINANCIAL} element={<ResponsiveFinancial />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.CHAT} element={<ResponsiveChat />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.DOCUMENTS} element={<ResponsiveDocuments />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.SCHEDULE} element={<ResponsiveSchedule />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.APPOINTMENTS} element={<ResponsiveAppointments />} />
+          <Route path={CLIENT_APP_RELATIVE_ROUTES.SETTINGS} element={<ResponsiveSettings />} />
         </Route>
       </Routes>
     </ProjectProvider>

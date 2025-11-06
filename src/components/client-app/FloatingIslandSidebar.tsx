@@ -1,15 +1,16 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Image, DollarSign, MessageCircle, FolderOpen, CalendarDays, Calendar } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { CLIENT_APP_ROUTES } from "@/config/routes";
 
 const menuItems = [
-  { label: "Inicio", icon: Home, path: "/client" },
-  { label: "Fotos", icon: Image, path: "/client/photos" },
-  { label: "Financiero", icon: DollarSign, path: "/client/financial" },
-  { label: "Chat", icon: MessageCircle, path: "/client/chat" },
-  { label: "Documentos", icon: FolderOpen, path: "/client/documents" },
-  { label: "Cronograma", icon: CalendarDays, path: "/client/schedule" },
-  { label: "Citas", icon: Calendar, path: "/client/appointments" },
+  { label: "Inicio", icon: Home, path: CLIENT_APP_ROUTES.BASE },
+  { label: "Fotos", icon: Image, path: CLIENT_APP_ROUTES.PHOTOS },
+  { label: "Financiero", icon: DollarSign, path: CLIENT_APP_ROUTES.FINANCIAL },
+  { label: "Chat", icon: MessageCircle, path: CLIENT_APP_ROUTES.CHAT },
+  { label: "Documentos", icon: FolderOpen, path: CLIENT_APP_ROUTES.DOCUMENTS },
+  { label: "Cronograma", icon: CalendarDays, path: CLIENT_APP_ROUTES.SCHEDULE },
+  { label: "Citas", icon: Calendar, path: CLIENT_APP_ROUTES.APPOINTMENTS },
 ];
 
 export default function FloatingIslandSidebar() {
@@ -17,8 +18,8 @@ export default function FloatingIslandSidebar() {
   const location = useLocation();
 
   const isActive = (path: string) => {
-    if (path === "/client") {
-      return location.pathname === "/client" || location.pathname === "/client/dashboard";
+    if (path === CLIENT_APP_ROUTES.BASE) {
+      return location.pathname === CLIENT_APP_ROUTES.BASE || location.pathname === CLIENT_APP_ROUTES.DASHBOARD;
     }
     return location.pathname === path;
   };

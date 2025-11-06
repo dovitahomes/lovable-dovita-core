@@ -17,6 +17,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/app/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
+import { PUBLIC_ROUTES, BACKOFFICE_ROUTES, LEGACY_ROUTES } from "@/config/routes";
 
 // Client App imports
 import ClientAppWrapper from "@/layouts/ClientAppWrapper";
@@ -94,95 +95,142 @@ const InternalLayout = () => {
           <div className="flex flex-1 flex-col gap-4 p-4">
             <Suspense fallback={<PageHeaderSkeleton />}>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                {/* ============================================ */}
+                {/* DASHBOARD                                    */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.DASHBOARD} element={<Dashboard />} />
                 
-                <Route path="/herramientas/contenido-corporativo" element={<Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>} />
-                <Route path="/herramientas/sucursales" element={<Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>} />
-                <Route path="/herramientas/alianzas" element={<Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>} />
-                <Route path="/herramientas/identidades" element={<Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>} />
-                <Route path="/herramientas/accesos" element={<Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>} />
-                <Route path="/herramientas/reglas" element={<Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>} />
-                <Route path="/herramientas/catalogo-tu" element={<Navigate to="/erp/transactions" replace />} />
-                <Route path="/erp/transactions" element={<Suspense fallback={<TableSkeleton />}><CatalogoTU /></Suspense>} />
-                <Route path="/erp/budgets" element={<Suspense fallback={<TableSkeleton />}><Budgets /></Suspense>} />
-                <Route path="/erp/budgets/new" element={<Suspense fallback={<TableSkeleton />}><BudgetWizard /></Suspense>} />
-                <Route path="/erp/budgets/:id" element={<Suspense fallback={<TableSkeleton />}><BudgetEditor /></Suspense>} />
-                <Route path="/herramientas/usuarios" element={<Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>} />
-                <Route path="/metrics" element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
-                <Route path="/usuarios" element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
-                <Route path="/clientes" element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
-                <Route path="/clientes/:id" element={<Suspense fallback={<TabsSkeleton />}><ClienteDetalle /></Suspense>} />
-                <Route path="/proyectos" element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
-                <Route path="/proyectos/:id" element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
-                <Route path="/leads" element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
-                <Route path="/diseno" element={<Suspense fallback={<TableSkeleton />}><Diseno /></Suspense>} />
-                <Route path="/presupuestos" element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
-                <Route path="/presupuestos/nuevo-ejecutivo" element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
-                <Route path="/presupuestos/:id" element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
+                {/* ============================================ */}
+                {/* HERRAMIENTAS ADMINISTRATIVAS                */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} element={<Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES} element={<Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ALIANZAS} element={<Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES} element={<Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS} element={<Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS} element={<Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS} element={<Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>} />
                 
-                {/* Unified Gantt route - single route with internal tabs */}
-                <Route path="/gantt" element={
+                {/* ============================================ */}
+                {/* ERP MODULES                                  */}
+                {/* ============================================ */}
+                <Route path={LEGACY_ROUTES.HERRAMIENTAS_CATALOGO_TU} element={<Navigate to={BACKOFFICE_ROUTES.ERP_TRANSACTIONS} replace />} />
+                <Route path={BACKOFFICE_ROUTES.ERP_TRANSACTIONS} element={<Suspense fallback={<TableSkeleton />}><CatalogoTU /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.ERP_BUDGETS} element={<Suspense fallback={<TableSkeleton />}><Budgets /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.ERP_BUDGETS_NEW} element={<Suspense fallback={<TableSkeleton />}><BudgetWizard /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.ERP_BUDGET_DETAIL} element={<Suspense fallback={<TableSkeleton />}><BudgetEditor /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* USUARIOS Y METRICS                          */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.METRICS} element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.USUARIOS} element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* CRM - LEADS Y CLIENTES                      */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.LEADS} element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.CLIENTES} element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.CLIENTE_DETALLE} element={<Suspense fallback={<TabsSkeleton />}><ClienteDetalle /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* PROYECTOS Y DISEÑO                          */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.PROYECTOS} element={<Suspense fallback={<TableSkeleton />}><Proyectos /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.PROYECTO_DETALLE} element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.DISENO} element={<Suspense fallback={<TableSkeleton />}><Diseno /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* PRESUPUESTOS                                */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.PRESUPUESTOS} element={<Suspense fallback={<TableSkeleton />}><Presupuestos /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.PRESUPUESTO_EJECUTIVO} element={<Suspense fallback={<TableSkeleton />}><PresupuestoEjecutivo /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.PRESUPUESTO_PARAMETRICO} element={<Suspense fallback={<TableSkeleton />}><PresupuestoParametrico /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* CRONOGRAMA - GANTT UNIFICADO                */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.GANTT} element={
                   <ProtectedRoute moduleName="cronograma">
                     <Suspense fallback={<TableSkeleton />}><GanttPlan /></Suspense>
                   </ProtectedRoute>
                 } />
                 
-                {/* Legacy Gantt redirects - not shown in sidebar but still functional */}
-                <Route path="/cronograma" element={<Navigate to="/gantt" replace />} />
-                <Route path="/cronograma-parametrico" element={<Navigate to="/gantt" replace />} />
-                <Route path="/construccion/gantt" element={<Navigate to="/gantt" replace />} />
-                <Route path="/schedule" element={<Navigate to="/gantt" replace />} />
-                <Route path="/legacy-schedule" element={<Navigate to="/gantt" replace />} />
-                <Route path="/gantt-ejecutivo" element={<Navigate to="/gantt" replace />} />
+                {/* Legacy Gantt redirects - mantener por compatibilidad */}
+                <Route path={LEGACY_ROUTES.CRONOGRAMA} element={<Navigate to={BACKOFFICE_ROUTES.GANTT} replace />} />
+                <Route path={LEGACY_ROUTES.CRONOGRAMA_PARAMETRICO} element={<Navigate to={BACKOFFICE_ROUTES.GANTT} replace />} />
+                <Route path={LEGACY_ROUTES.CONSTRUCCION_GANTT} element={<Navigate to={BACKOFFICE_ROUTES.GANTT} replace />} />
+                <Route path={LEGACY_ROUTES.SCHEDULE} element={<Navigate to={BACKOFFICE_ROUTES.GANTT} replace />} />
+                <Route path={LEGACY_ROUTES.LEGACY_SCHEDULE} element={<Navigate to={BACKOFFICE_ROUTES.GANTT} replace />} />
+                <Route path={LEGACY_ROUTES.GANTT_EJECUTIVO} element={<Navigate to={BACKOFFICE_ROUTES.GANTT} replace />} />
                 
-                <Route path="/construccion" element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
-                <Route path="/construccion/:id" element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
-                <Route path="/construccion/proyectos/:projectId/cronograma" element={
+                {/* ============================================ */}
+                {/* CONSTRUCCIÓN                                */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION} element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_DETALLE} element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_CRONOGRAMA} element={
                   <ProtectedRoute moduleName="construccion">
                     <Suspense fallback={<TableSkeleton />}><ProjectSchedule /></Suspense>
                   </ProtectedRoute>
                 } />
                 
-                {/* Proveedores y Órdenes de Compra */}
-                <Route path="/proveedores" element={
+                {/* ============================================ */}
+                {/* PROVEEDORES Y ÓRDENES DE COMPRA            */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.PROVEEDORES} element={
                   <ProtectedRoute moduleName="proveedores">
                     <Suspense fallback={<TableSkeleton />}><Proveedores /></Suspense>
                   </ProtectedRoute>
                 } />
-                <Route path="/ordenes-compra" element={
+                <Route path={BACKOFFICE_ROUTES.ORDENES_COMPRA} element={
                   <ProtectedRoute moduleName="ordenes_compra">
                     <Suspense fallback={<TableSkeleton />}><OrdenesCompra /></Suspense>
                   </ProtectedRoute>
                 } />
                 
-                {/* Legacy redirects for purchase orders */}
-                <Route path="/construccion/ordenes-compra" element={<Navigate to="/ordenes-compra" replace />} />
-                <Route path="/purchase-intake" element={<Navigate to="/ordenes-compra" replace />} />
-                <Route path="/purchase-batch" element={<Navigate to="/ordenes-compra" replace />} />
-                <Route path="/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
-                <Route path="/construction/purchase-orders" element={<Navigate to="/ordenes-compra" replace />} />
-                <Route path="/pagos" element={<Navigate to="/lotes-pago" replace />} />
+                {/* Legacy redirects para órdenes de compra */}
+                <Route path={LEGACY_ROUTES.CONSTRUCCION_ORDENES} element={<Navigate to={BACKOFFICE_ROUTES.ORDENES_COMPRA} replace />} />
+                <Route path={LEGACY_ROUTES.PURCHASE_INTAKE} element={<Navigate to={BACKOFFICE_ROUTES.ORDENES_COMPRA} replace />} />
+                <Route path={LEGACY_ROUTES.PURCHASE_BATCH} element={<Navigate to={BACKOFFICE_ROUTES.ORDENES_COMPRA} replace />} />
+                <Route path={LEGACY_ROUTES.PURCHASE_ORDERS} element={<Navigate to={BACKOFFICE_ROUTES.ORDENES_COMPRA} replace />} />
+                <Route path={LEGACY_ROUTES.CONSTRUCTION_PURCHASE_ORDERS} element={<Navigate to={BACKOFFICE_ROUTES.ORDENES_COMPRA} replace />} />
                 
-                {/* Pagos a Proveedores (Lotes de Pago) */}
-                <Route path="/lotes-pago" element={
+                {/* ============================================ */}
+                {/* PAGOS Y FINANZAS                            */}
+                {/* ============================================ */}
+                <Route path={LEGACY_ROUTES.PAGOS} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
+                <Route path={BACKOFFICE_ROUTES.LOTES_PAGO} element={
                   <ProtectedRoute moduleName="lotes_pago">
                     <Suspense fallback={<TableSkeleton />}><LotesPago /></Suspense>
                   </ProtectedRoute>
                 } />
-                <Route path="/lotes-pago/:id" element={
+                <Route path={BACKOFFICE_ROUTES.LOTE_PAGO_DETALLE} element={
                   <ProtectedRoute moduleName="lotes_pago">
                     <Suspense fallback={<TableSkeleton />}><PaymentBatchDetail /></Suspense>
                   </ProtectedRoute>
                 } />
                 
                 {/* Legacy finance redirects */}
-                <Route path="/finanzas" element={<Navigate to="/contabilidad" replace />} />
-                <Route path="/finanzas/pagos-proveedores" element={<Navigate to="/lotes-pago" replace />} />
-                <Route path="/finanzas/pagos-proveedores/:id" element={<Navigate to="/lotes-pago" replace />} />
-                <Route path="/finance/payments" element={<Navigate to="/lotes-pago" replace />} />
-                <Route path="/contabilidad" element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
-                <Route path="/comisiones" element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
-                <Route path="/ver-como-cliente" element={<Suspense fallback={<TableSkeleton />}><VerComoCliente /></Suspense>} />
+                <Route path={LEGACY_ROUTES.FINANZAS} element={<Navigate to={BACKOFFICE_ROUTES.CONTABILIDAD} replace />} />
+                <Route path={LEGACY_ROUTES.FINANZAS_PAGOS} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
+                <Route path={LEGACY_ROUTES.FINANZAS_PAGO_DETALLE} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
+                <Route path={LEGACY_ROUTES.FINANCE_PAYMENTS} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
+                
+                {/* ============================================ */}
+                {/* CONTABILIDAD Y COMISIONES                   */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.CONTABILIDAD} element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.COMISIONES} element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* VER COMO CLIENTE (Preview Mode)             */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.VER_COMO_CLIENTE} element={<Suspense fallback={<TableSkeleton />}><VerComoCliente /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* 404 - NOT FOUND                             */}
+                {/* ============================================ */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
@@ -202,22 +250,30 @@ const App = () => {
               <BrowserRouter>
               <DemoGuard>
                 <Routes>
-                  {/* Public routes */}
-                  <Route path="/auth/login" element={<Login />} />
-                  <Route path="/debug" element={<Suspense fallback={<PageHeaderSkeleton />}><Debug /></Suspense>} />
-                  <Route path="/auth/callback" element={<Callback />} />
-                  <Route path="/auth/reset" element={<ResetPassword />} />
-                  <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
-                  <Route path="/signup" element={<Navigate to="/auth/login" replace />} />
+                  {/* ============================================ */}
+                  {/* RUTAS PÚBLICAS (sin autenticación)          */}
+                  {/* ============================================ */}
+                  <Route path={PUBLIC_ROUTES.AUTH_LOGIN} element={<Login />} />
+                  <Route path={PUBLIC_ROUTES.DEBUG} element={<Suspense fallback={<PageHeaderSkeleton />}><Debug /></Suspense>} />
+                  <Route path={PUBLIC_ROUTES.AUTH_CALLBACK} element={<Callback />} />
+                  <Route path={PUBLIC_ROUTES.AUTH_RESET} element={<ResetPassword />} />
+                  <Route path={PUBLIC_ROUTES.AUTH} element={<Navigate to={PUBLIC_ROUTES.AUTH_LOGIN} replace />} />
+                  <Route path={PUBLIC_ROUTES.SIGNUP} element={<Navigate to={PUBLIC_ROUTES.AUTH_LOGIN} replace />} />
                   
-                  {/* Client App Routes - COMPLETAMENTE SEPARADAS del ERP */}
+                  {/* ============================================ */}
+                  {/* CLIENT APP (para clientes finales)          */}
+                  {/* Base: /client/* - completamente separado   */}
+                  {/* ============================================ */}
                   <Route path="/client/*" element={
                     <ProtectedRoute>
                       <ClientAppWrapper />
                     </ProtectedRoute>
                   } />
                   
-                  {/* All internal ERP routes - wrapped with ProtectedRoute */}
+                  {/* ============================================ */}
+                  {/* BACKOFFICE (para colaboradores)             */}
+                  {/* Base: /* - todas las demás rutas           */}
+                  {/* ============================================ */}
                   <Route path="/*" element={
                     <ProtectedRoute>
                       <InternalLayout />
