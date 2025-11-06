@@ -57,11 +57,9 @@ export default function Schedule() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <h3 className="font-semibold">{phase.name}</h3>
-                  {isExpanded && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {phase.startDate} - {phase.endDate}
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {phase.startDate} - {phase.endDate}
+                  </p>
                 </div>
                 
                 {phase.status === 'completed' && (
@@ -75,7 +73,7 @@ export default function Schedule() {
                 )}
               </div>
 
-              {isExpanded && phase.status === 'in-progress' && (
+              {isExpanded && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Avance</span>

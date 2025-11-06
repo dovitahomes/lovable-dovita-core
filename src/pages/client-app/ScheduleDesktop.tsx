@@ -82,15 +82,13 @@ export default function ScheduleDesktop() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-lg">{phase.name}</h3>
-                        {isExpanded && (
-                          <p className="text-sm text-muted-foreground">
-                            {phase.startDate} - {phase.endDate}
-                          </p>
-                        )}
+                        <p className="text-sm text-muted-foreground">
+                          {phase.startDate} - {phase.endDate}
+                        </p>
                       </div>
                       {getStatusBadge(phase.status)}
                     </div>
-                    {isExpanded && phase.status === "in-progress" && (
+                    {isExpanded && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Progreso</span>
