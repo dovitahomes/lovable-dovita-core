@@ -23,9 +23,8 @@ export default function Financial() {
   }
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-full overflow-y-auto px-4 pt-4 space-y-6">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Estado Financiero</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -142,7 +141,7 @@ export default function Financial() {
           );
         })}
       </div>
-    </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockPhotos } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import { shouldShowConstructionPhotos } from '@/lib/project-utils';
+import { shouldShowConstructionPhotos, isInDesignPhase } from '@/lib/project-utils';
 import { MapPin, Calendar, Image as ImageIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -53,6 +53,12 @@ export default function Photos() {
 
   // Filter photos by current project
   const projectPhotos = mockPhotos.filter(photo => photo.projectId === currentProject?.id);
+  
+  // Determine if in design phase
+  const inDesignPhase = isInDesignPhase(currentProject);
+  
+  // Get unique phases from project photos
+  const projectPhases = Array.from(new Set(projectPhotos.map(photo => photo.phase)));
 
   // Get unique phases
   const phases = ['all', ...Array.from(new Set(projectPhotos.map(photo => photo.phase)))];
@@ -70,133 +76,101 @@ export default function Photos() {
   };
 
   return (
-    <div>
-      <PreviewBar />
-      <div className="h-full overflow-y-auto">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h1 className="text-2xl font-bold mb-1">Fotos de Avance</h1>
-            <p className="text-sm text-white/90">
-              Visualiza el progreso de tu proyecto
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-background z-10 border-b">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold">Galería del Proyecto</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {inDesignPhase ? 'Renders y visualizaciones del diseño' : 'Avance de construcción'}
             </p>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5" />
-              <span className="font-semibold">{filteredPhotos.length}</span>
+
+          {/* Phase Filter */}
+          <div className="px-4 pb-4">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <Button
+                variant={selectedPhase === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedPhase('all')}
+                className="whitespace-nowrap"
+              >
+                Todas
+              </Button>
+              {projectPhases.map((phase) => (
+                <Button
+                  key={phase}
+                  variant={selectedPhase === phase ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedPhase(phase)}
+                  className="whitespace-nowrap"
+                >
+                  {phase}
+                </Button>
+              ))}
             </div>
-            <p className="text-xs text-white/80">fotos</p>
           </div>
         </div>
-      </div>
-
-      <div className="px-4 space-y-4">
-        {/* Phase Filter */}
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filtrar por Fase</span>
-          </div>
-          <Tabs value={selectedPhase} onValueChange={setSelectedPhase}>
-            <TabsList className="w-full grid grid-cols-4">
-              {phases.map((phase) => (
-                <TabsTrigger 
-                  key={phase} 
-                  value={phase}
-                  className="text-xs"
-                >
-                  {phase === 'all' ? 'Todas' : phase}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </Card>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-primary">
-              {projectPhotos.filter(p => p.phase === 'Cimentación').length}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Cimentación</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-primary">
-              {projectPhotos.filter(p => p.phase === 'Estructura').length}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Estructura</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-secondary">
-              {projectPhotos.length}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Total</p>
-          </Card>
-        </div>
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">Total {inDesignPhase ? 'Renders' : 'Fotos'}</p>
+                <p className="text-2xl font-bold">{filteredPhotos.length}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">Última actualización</p>
+                <p className="text-sm font-semibold mt-1">
+                  {filteredPhotos.length > 0
+                    ? format(new Date(filteredPhotos[0].date), "d MMM", { locale: es })
+                    : '-'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Photo Gallery */}
-        <div className="grid grid-cols-2 gap-3">
-          {filteredPhotos.map((photo, index) => (
-            <Card 
-              key={photo.id} 
-              className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
-              onClick={() => handlePhotoClick(index)}
-            >
-              <div className="relative aspect-square">
+          {/* Photo Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {filteredPhotos.map((photo, index) => (
+              <div
+                key={photo.id}
+                className="aspect-square rounded-lg overflow-hidden cursor-pointer relative group"
+                onClick={() => handlePhotoClick(index)}
+              >
                 <img
                   src={photo.url}
                   alt={photo.description}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                 />
-                <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm">
-                  {photo.phase}
-                </Badge>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-white text-xs font-medium mb-1">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    <p className="text-white text-xs font-medium truncate">
                       {photo.description}
+                    </p>
+                    <p className="text-white/75 text-xs">
+                      {format(new Date(photo.date), "d 'de' MMM", { locale: es })}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="p-3 space-y-2">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {format(new Date(photo.date), "d MMM yyyy", { locale: es })}
-                </p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  Obra - Juriquilla
-                </p>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredPhotos.length === 0 && (
-          <div className="text-center py-12">
-            <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">
-              No hay fotos disponibles para esta fase
-            </p>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Photo Viewer Modal */}
+      {/* Photo Viewer */}
       {selectedPhotoIndex !== null && (
         <PhotoViewer
           photos={projectPhotos}
           currentIndex={selectedPhotoIndex}
-          open={selectedPhotoIndex !== null}
-          onOpenChange={(open) => !open && setSelectedPhotoIndex(null)}
           onNavigate={setSelectedPhotoIndex}
         />
       )}
-      </div>
     </div>
   );
 }
