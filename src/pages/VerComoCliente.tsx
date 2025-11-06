@@ -15,10 +15,14 @@ export default function VerComoCliente() {
     
     // Guardar URL del backoffice para el botón de regreso
     const currentPath = window.location.pathname;
-    localStorage.setItem("clientapp.backofficeUrl", currentPath === "/ver-como-cliente" ? "/" : currentPath);
+    const backofficeUrl = currentPath === "/ver-como-cliente" ? "/" : currentPath;
+    localStorage.setItem("clientapp.backofficeUrl", backofficeUrl);
     
-    // Redirigir a Client App con parámetro preview usando React Router
-    navigate("/client?preview=1", { replace: true });
+    // Redirigir a Client App con parámetro preview usando React Router v6
+    navigate({
+      pathname: "/client",
+      search: "?preview=true"
+    }, { replace: true });
   }, [navigate]);
 
   return (

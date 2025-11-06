@@ -134,7 +134,23 @@ export default function PreviewBar() {
   };
 
   const handleBackoffice = () => {
-    const backofficeUrl = localStorage.getItem("clientapp.backofficeUrl") || "/";
+    // 1. Obtener URL de backoffice guardada
+    let backofficeUrl = localStorage.getItem("clientapp.backofficeUrl") || "/";
+    
+    // 2. Validar que la URL sea del backoffice (no /client/*)
+    // Si es una ruta de cliente, usar dashboard como fallback
+    if (backofficeUrl.startsWith('/client')) {
+      backofficeUrl = '/';
+    }
+    
+    // 3. Limpiar preview mode y storage
+    localStorage.removeItem("clientapp.previewMode");
+    localStorage.removeItem("clientapp.useMock");
+    localStorage.removeItem("clientapp.forceClientId");
+    localStorage.removeItem("clientapp.backofficeUrl");
+    localStorage.removeItem("currentProjectId");
+    
+    // 4. Navegar al backoffice
     window.location.href = backofficeUrl;
   };
 

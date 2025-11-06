@@ -16,14 +16,32 @@ export function useAppMode() {
     queryFn: async () => {
       if (!user) return null;
       
-      // Verificar si es colaborador (tiene roles en user_roles)
-      const { data } = await supabase
+      // 1. Verificar si tiene roles de colaborador
+      const { data: roles } = await supabase
         .from('user_roles')
         .select('role_name')
         .eq('user_id', user.id)
         .limit(1);
       
-      return data && data.length > 0 ? 'collaborator' : 'client';
+      if (roles && roles.length > 0) {
+        console.log('[useAppMode] User is collaborator (has roles)');
+        return 'collaborator';
+      }
+      
+      // 2. Verificar si es cliente (tiene registro en tabla clients)
+      const { data: client } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('email', user.email)
+        .limit(1);
+      
+      if (client && client.length > 0) {
+        console.log('[useAppMode] User is client (in clients table)');
+        return 'client';
+      }
+      
+      console.log('[useAppMode] User role unknown');
+      return null;
     },
     enabled: !!user,
   });
