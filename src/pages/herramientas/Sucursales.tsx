@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+import { ResponsiveTable } from "@/components/common/ResponsiveTable";
 
 interface Sucursal {
   id: string;
@@ -281,61 +281,52 @@ const Sucursales = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Dirección</TableHead>
-                <TableHead>Ciudad</TableHead>
-                <TableHead>Responsable</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sucursales.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    No hay sucursales registradas
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sucursales.map((sucursal) => (
-                  <TableRow key={sucursal.id}>
-                    <TableCell className="font-medium">{sucursal.nombre}</TableCell>
-                    <TableCell>{sucursal.direccion}</TableCell>
-                    <TableCell>{sucursal.ciudad || "-"}</TableCell>
-                    <TableCell>{sucursal.responsable || "-"}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        sucursal.activa
-                          ? "bg-secondary/10 text-secondary"
-                          : "bg-muted text-muted-foreground"
-                      }`}>
-                        {sucursal.activa ? "Activa" : "Inactiva"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(sucursal)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(sucursal.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable
+            data={sucursales}
+            keyExtractor={(s) => s.id}
+            columns={[
+              { 
+                header: "Nombre", 
+                key: "nombre",
+                render: (value) => <span className="font-medium">{value}</span>
+              },
+              { header: "Dirección", key: "direccion" },
+              { header: "Ciudad", key: "ciudad", hideOnMobile: true },
+              { header: "Responsable", key: "responsable", hideOnMobile: true },
+              { 
+                header: "Estado", 
+                key: "activa",
+                render: (activa) => (
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    activa
+                      ? "bg-secondary/10 text-secondary"
+                      : "bg-muted text-muted-foreground"
+                  }`}>
+                    {activa ? "Activa" : "Inactiva"}
+                  </span>
+                )
+              },
+            ]}
+            actions={(sucursal) => (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEdit(sucursal)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(sucursal.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </>
+            )}
+            emptyMessage="No hay sucursales registradas"
+          />
         </CardContent>
       </Card>
     </div>

@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { LoadingError } from "@/components/common/LoadingError";
+import { ResponsiveTable } from "@/components/common/ResponsiveTable";
 
 export default function Usuarios() {
   const [open, setOpen] = useState(false);
@@ -161,35 +161,30 @@ export default function Usuarios() {
             onRetry={() => queryClient.invalidateQueries({ queryKey: ['users'] })}
           />
           {!isLoading && !error && users && users.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.full_name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(user.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ResponsiveTable
+              data={users}
+              keyExtractor={(u) => u.id}
+              columns={[
+                { 
+                  header: "Nombre", 
+                  key: "full_name",
+                  render: (value) => <span className="font-medium">{value || "-"}</span>
+                },
+                { header: "Email", key: "email" },
+                { header: "Teléfono", key: "phone", hideOnMobile: true },
+              ]}
+              actions={(user) => (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(user.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              emptyMessage="Aún no hay usuarios"
+            />
           )}
         </CardContent>
       </Card>

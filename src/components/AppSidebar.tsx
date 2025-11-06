@@ -25,6 +25,7 @@ import { useTheme } from "@/context/ThemeProvider";
 import { useSidebarTheme } from "@/context/SidebarThemeProvider";
 import { SIDEBAR_SECTIONS } from "@/config/sidebar";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AppSidebar() {
   const { state, setOpen } = useSidebar();
@@ -32,10 +33,12 @@ export function AppSidebar() {
   const { theme } = useTheme();
   const { sidebarTheme, toggleSidebarTheme } = useSidebarTheme();
   const { prefetch } = usePrefetchRoute();
+  const isMobile = useIsMobile();
   
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
+    if (isMobile) return; // No hover en móvil
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
@@ -44,6 +47,7 @@ export function AppSidebar() {
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return; // No hover en móvil
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
     }

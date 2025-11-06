@@ -5,13 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClientsList } from "@/hooks/useClients";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Trash2, Eye } from "lucide-react";
 import { ClientDialog } from "@/components/forms/ClientDialog";
 import { LoadingError } from "@/components/common/LoadingError";
+import { ResponsiveTable } from "@/components/common/ResponsiveTable";
 
 export default function Clientes() {
   const navigate = useNavigate();
@@ -63,43 +63,45 @@ export default function Clientes() {
             onRetry={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
           />
           {!isLoading && !error && clients && clients.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clients.map((client) => (
-                  <TableRow key={client.id}>
-                    <TableCell>
-                      <Badge variant={client.person_type === 'fisica' ? 'default' : 'secondary'}>
-                        {client.person_type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{client.name}</TableCell>
-                    <TableCell>{client.email || '-'}</TableCell>
-                    <TableCell>{client.phone || '-'}</TableCell>
-                    <TableCell>{new Date(client.created_at).toLocaleDateString('es-MX')}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/clientes/${client.id}`)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(client.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ResponsiveTable
+              data={clients}
+              keyExtractor={(c) => c.id}
+              columns={[
+                { 
+                  header: "Tipo", 
+                  key: "person_type",
+                  render: (type) => (
+                    <Badge variant={type === 'fisica' ? 'default' : 'secondary'}>
+                      {type}
+                    </Badge>
+                  )
+                },
+                { 
+                  header: "Nombre", 
+                  key: "name",
+                  render: (value) => <span className="font-medium">{value}</span>
+                },
+                { header: "Email", key: "email" },
+                { header: "Teléfono", key: "phone", hideOnMobile: true },
+                { 
+                  header: "Fecha", 
+                  key: "created_at",
+                  hideOnMobile: true,
+                  render: (date) => new Date(date).toLocaleDateString('es-MX')
+                },
+              ]}
+              actions={(client) => (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/clientes/${client.id}`)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(client.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              emptyMessage="Aún no hay clientes"
+            />
           )}
         </CardContent>
       </Card>

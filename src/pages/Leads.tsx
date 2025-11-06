@@ -92,8 +92,8 @@ export default function Leads() {
 
       {/* Kanban Board */}
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex gap-4 h-full pb-4">
+        <div className="flex-1 overflow-x-auto pb-4">
+          <div className="flex gap-4 h-full min-w-max">
             {COLUMNS.map(({ status, title }) => (
               <KanbanColumn
                 key={status}

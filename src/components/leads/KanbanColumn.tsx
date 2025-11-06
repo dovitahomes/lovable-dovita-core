@@ -26,7 +26,7 @@ export function KanbanColumn({ status, title, leads, isLoading, onConvert }: Kan
   const { setNodeRef, isOver } = useDroppable({ id: status });
   
   return (
-    <Card className={`flex flex-col h-full min-w-[280px] ${isOver ? 'ring-2 ring-primary' : ''}`}>
+    <Card className={`flex flex-col h-full min-w-[280px] w-[280px] md:min-w-[300px] md:w-[300px] ${isOver ? 'ring-2 ring-primary' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
