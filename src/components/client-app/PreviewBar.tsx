@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export default function PreviewBar() {
   const [isSwitching, setIsSwitching] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Detectar si es móvil
   useEffect(() => {
@@ -30,6 +31,15 @@ export default function PreviewBar() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Limpiar timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
   }, []);
   
   // Solo renderizar en rutas /client/*
@@ -134,16 +144,24 @@ export default function PreviewBar() {
     }
   };
 
-  // Manejar eventos de mouse (para desktop)
+  // Manejar eventos de mouse (para desktop con delay)
   const handleMouseEnter = () => {
     if (!isMobile) {
+      // Cancelar cualquier timeout pendiente
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
       setIsExpanded(true);
     }
   };
 
   const handleMouseLeave = () => {
     if (!isMobile) {
-      setIsExpanded(false);
+      // Agregar delay de 1 segundo antes de cerrar
+      closeTimeoutRef.current = setTimeout(() => {
+        setIsExpanded(false);
+      }, 1000);
     }
   };
 
