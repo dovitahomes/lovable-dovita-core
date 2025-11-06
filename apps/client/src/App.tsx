@@ -10,6 +10,7 @@ import { useAppMode } from "@/hooks/useAppMode";
 import { useProjectsData } from "@/hooks/useProjectsData";
 import PreviewBar from "@/components/client-app/PreviewBar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AuthStateListener } from "@/components/AuthStateListener";
 import ClientLogin from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 import ResponsiveClientApp from "./pages/client-app/ResponsiveClientApp";
@@ -49,6 +50,7 @@ function AppContent() {
 
   return (
     <ProjectProvider projects={projects}>
+      <AuthStateListener />
       <Toaster />
       <Sonner />
       {isPreviewMode && <PreviewBar />}

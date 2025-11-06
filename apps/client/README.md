@@ -1,52 +1,34 @@
-# Dovita - Plataforma Cliente
+# Dovita Client App - Portal de Clientes
 
-<div align="center">
-  <img src="src/assets/logo-dovita.png" alt="Dovita Logo" width="200"/>
-  
-  **Interfaz front-end para clientes de proyectos de diseño y construcción de casas**
-  
-  [![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://react.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-  [![Vite](https://img.shields.io/badge/Vite-5.4.19-purple.svg)](https://vitejs.dev/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC.svg)](https://tailwindcss.com/)
-</div>
+Portal web progresivo (PWA) para que clientes de Dovita visualicen en tiempo real el progreso de sus proyectos de construcción.
 
 ---
 
-## 📋 Tabla de Contenidos
+## 🎯 Modos de Uso
 
-- [Descripción General](#-descripción-general)
-- [Características Principales](#-características-principales)
-- [Stack Tecnológico](#-stack-tecnológico)
-- [Arquitectura de la Aplicación](#-arquitectura-de-la-aplicación)
-- [Funcionalidades Detalladas](#-funcionalidades-detalladas)
-- [Contextos y Estado Global](#-contextos-y-estado-global)
-- [Funcionalidades PWA](#-funcionalidades-pwa)
-- [Interfaces TypeScript](#-interfaces-typescript)
-- [Requisitos del Backend/CRM/ERP](#-requisitos-del-backendcrmerp)
-- [Variables de Entorno](#-variables-de-entorno)
-- [Instalación y Configuración](#-instalación-y-configuración)
-- [Testing del Backend](#-testing-del-backend)
-- [Deployment](#-deployment)
-- [Seguridad](#-seguridad)
-- [Roadmap](#-roadmap)
-- [Soporte](#-soporte)
-- [Licencia](#-licencia)
+### 1. Modo Cliente (Producción)
+- **URL**: `/client`
+- **Acceso**: Magic link por email
+- **Características**:
+  - Clientes ven solo sus proyectos
+  - Sin PreviewBar
+  - Datos protegidos por RLS
+  - Autenticación requerida
+
+### 2. Modo Preview (Colaboradores)
+- **URL**: `/client?preview=1`
+- **Acceso**: Desde botón "Ver como Cliente" en ERP
+- **Características**:
+  - PreviewBar superior para:
+    - Selector de cliente
+    - Toggle Mock/Real Data
+    - Botón regreso a Backoffice
+  - Requiere rol de colaborador
+  - Puede ver cualquier cliente
 
 ---
 
-## 🎯 Descripción General
-
-**Dovita - Plataforma Cliente** es una aplicación web progresiva (PWA) desarrollada como interfaz front-end para clientes que tienen proyectos de diseño y construcción de casas. Esta aplicación está diseñada para conectarse a un CRM/ERP existente y proporcionar a los clientes una experiencia fluida y profesional para:
-
-- Monitorear el avance de su proyecto en tiempo real
-- Comunicarse con el equipo de construcción
-- Revisar documentos y fotos del proyecto
-- Gestionar citas y reuniones
-- Realizar seguimiento financiero de pagos y presupuesto
-- Revisar el cronograma de construcción/diseño
-
-### ✨ Características Principales
+## ✨ Características Principales
 
 - 📱 **Diseño Responsivo**: Tres versiones optimizadas (móvil, tablet, desktop)
 - 💬 **Chat en Tiempo Real**: Comunicación directa con el equipo
@@ -58,6 +40,8 @@
 - 🎨 **UI/UX Premium**: Interfaz moderna con animaciones fluidas
 - 🌓 **Tema Personalizado**: Sistema de diseño coherente
 - ⚡ **Rendimiento Óptimo**: Carga rápida y experiencia fluida
+- 🔐 **Autenticación Segura**: Magic link sin contraseñas
+- 🛡️ **Seguridad RLS**: Datos protegidos a nivel de base de datos
 
 ---
 
