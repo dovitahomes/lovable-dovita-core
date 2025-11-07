@@ -64,20 +64,19 @@ export function AppSidebar() {
     };
   }, []);
 
-  const { canView, loading: permsLoading, isAdminFallback } = useModuleAccess();
+  const { canView, loading: permsLoading } = useModuleAccess();
   
   // Log sidebar filtering for debugging
-  console.log('[AppSidebar] Filtering routes, total sections:', SIDEBAR_SECTIONS.length, 'permsLoading:', permsLoading, 'isAdminFallback:', isAdminFallback);
+  console.log('[AppSidebar] Filtering routes, total sections:', SIDEBAR_SECTIONS.length, 'permsLoading:', permsLoading);
   
   // Si está cargando, mostrar todas las secciones con skeleton
-  // Si es admin fallback y no hay permisos, mostrar todo
   // Si no, filtrar por permisos
   const routesToShow = permsLoading
     ? SIDEBAR_SECTIONS // Mostrar estructura mientras carga
     : SIDEBAR_SECTIONS.map(section => {
         const filteredItems = section.items.filter(item => {
           const can = canView(item.moduleName);
-          console.log('[AppSidebar] Module:', item.moduleName, 'canView:', can, 'isAdminFallback:', isAdminFallback);
+          console.log('[AppSidebar] Module:', item.moduleName, 'canView:', can);
           return can;
         });
         return {

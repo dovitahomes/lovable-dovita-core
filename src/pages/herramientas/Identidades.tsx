@@ -123,10 +123,10 @@ const Identidades = () => {
 
       // Update role if changed (using RPC for security)
       if (userData.data.role) {
-        const { error: roleError } = await (supabase.rpc("admin_set_user_roles" as any, {
-          target_user_id: userData.id,
-          roles: [userData.data.role],
-        }) as any);
+        const { error: roleError } = await supabase.rpc("admin_set_user_roles", {
+          p_user_id: userData.id,
+          p_roles: [userData.data.role],
+        });
 
         if (roleError) throw roleError;
       }

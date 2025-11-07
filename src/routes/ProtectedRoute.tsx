@@ -26,7 +26,7 @@ export function ProtectedRoute({
   fallback 
 }: ProtectedRouteProps) {
   const { loading: authLoading, user } = useAuth();
-  const { loading: permsLoading, has, isAdminFallback } = useModuleAccess();
+  const { loading: permsLoading, has } = useModuleAccess();
   
   // Mostrar skeleton mientras verifica auth (no bloquear UI)
   if (authLoading) {
@@ -58,13 +58,12 @@ export function ProtectedRoute({
   }
   
   // Verificar permisos del módulo
-  const hasPermission = has(moduleName, action) || isAdminFallback;
+  const hasPermission = has(moduleName, action);
   
   console.log('[ProtectedRoute]', {
     moduleName,
     action,
-    hasPermission,
-    isAdminFallback
+    hasPermission
   });
   
   if (!hasPermission) {

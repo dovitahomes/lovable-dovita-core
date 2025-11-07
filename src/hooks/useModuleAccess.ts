@@ -15,7 +15,6 @@ export function useModuleAccess() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [perms, setPerms] = useState<ModulePerm[]>([]);
-  const [isAdminFallback, setIsAdminFallback] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -24,7 +23,6 @@ export function useModuleAccess() {
       if (!user) {
         console.log('[useModuleAccess] No user, clearing permissions');
         setPerms([]);
-        setIsAdminFallback(false);
         setLoading(false);
         return;
       }
@@ -32,8 +30,6 @@ export function useModuleAccess() {
       console.log('[useModuleAccess] Loading permissions for user:', user.id);
       
       try {
-        // Intentar cargar permisos de user_permissions
-        console.log('[useModuleAccess] Querying user_permissions for user:', user.id);
         const { data, error } = await supabase
           .from('user_permissions')
           .select('module_name, can_view, can_create, can_edit, can_delete')
@@ -41,20 +37,14 @@ export function useModuleAccess() {
 
         if (!active) return;
         
-        console.log('[useModuleAccess] Query result:', { 
-          hasData: !!data, 
-          count: data?.length || 0, 
-          error: error?.message 
-        });
-        
         if (error) {
-          console.warn('[useModuleAccess] Error loading permissions:', error.message);
-          await checkAdminFallback();
+          console.error('[useModuleAccess] Error loading permissions:', error.message);
+          setPerms([]);
         } else if (!data || data.length === 0) {
-          console.warn('[useModuleAccess] No permissions found, checking admin fallback');
-          await checkAdminFallback();
+          console.warn('[useModuleAccess] No permissions found for user', user.id);
+          setPerms([]);
         } else {
-          console.info(`[useModuleAccess] ✓ Loaded ${data.length} permissions for user ${user.id}`);
+          console.info(`[useModuleAccess] ✓ Loaded ${data.length} permissions`);
           setPerms(data.map((d: any) => ({
             module_name: d.module_name,
             can_view: !!d.can_view,
@@ -62,61 +52,14 @@ export function useModuleAccess() {
             can_edit: !!d.can_edit,
             can_delete: !!d.can_delete,
           })));
-          setIsAdminFallback(false);
-          setLoading(false);
         }
-      } catch (err) {
-        console.warn('[useModuleAccess] Exception loading permissions:', err);
-        await checkAdminFallback();
-      }
-    }
-    
-    async function checkAdminFallback() {
-      if (!user || !active) return;
-      
-      try {
-        console.log('[useModuleAccess] Checking admin fallback via RPC for user:', user.id);
-        const { data: isAdmin, error } = await supabase.rpc('current_user_has_role', {
-          p_role_name: 'admin'
-        });
         
-        if (!active) return;
-        
-        if (error) {
-          console.warn('[useModuleAccess] Admin RPC check failed:', error.message);
-          setPerms([]);
-          setIsAdminFallback(false);
-        } else if (isAdmin) {
-          console.warn('[useModuleAccess] ⚠️ ADMIN FALLBACK ACTIVATED - granting full access to all modules');
-          
-          // Crear permisos completos para todos los módulos del sistema
-          const allModules = MODULES
-            .filter(m => m.group !== 'ClientOnly')
-            .map(m => m.key);
-          
-          const virtualPerms: ModulePerm[] = allModules.map(moduleName => ({
-            module_name: moduleName,
-            can_view: true,
-            can_create: true,
-            can_edit: true,
-            can_delete: true,
-          }));
-          
-          console.log('[useModuleAccess] Admin fallback created', virtualPerms.length, 'virtual permissions');
-          setPerms(virtualPerms);
-          setIsAdminFallback(true);
-        } else {
-          console.warn('[useModuleAccess] User is not admin and has no permissions');
-          setPerms([]);
-          setIsAdminFallback(false);
-        }
+        setLoading(false);
       } catch (err) {
-        console.warn('[useModuleAccess] Admin fallback exception:', err);
+        console.error('[useModuleAccess] Exception loading permissions:', err);
         setPerms([]);
-        setIsAdminFallback(false);
+        setLoading(false);
       }
-      
-      setLoading(false);
     }
     
     load();
@@ -148,5 +91,5 @@ export function useModuleAccess() {
     return false;
   };
 
-  return { loading, perms, has, canView, can, isAdminFallback };
+  return { loading, perms, has, canView, can };
 }
