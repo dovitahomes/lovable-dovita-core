@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Upload, AlertTriangle, History } from "lucide-react";
 import { getPricingVarianceThreshold } from "@/utils/businessRules";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
 
 interface BudgetItem {
   id?: string;
@@ -52,6 +53,8 @@ export function BudgetItemDialog({
   const [showVarianceAlert, setShowVarianceAlert] = useState(false);
   const [variancePercent, setVariancePercent] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { can } = useModuleAccess();
+  const canEditSensitiveData = can("presupuestos", "edit"); // Solo colaboradores/admin
 
   const mayores = tuNodes.filter(n => n.type === 'mayor');
   const partidas = tuNodes.filter(n => n.type === 'partida' && n.parent_id === formData.mayor_id);
@@ -285,61 +288,65 @@ export function BudgetItemDialog({
                 />
               </div>
 
-              <div>
-                <Label>Desperdicio %</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={formData.desperdicio_pct}
-                  onChange={(e) => setFormData({ ...formData, desperdicio_pct: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-
-              <div>
-                <Label>Cantidad Necesaria</Label>
-                <Input value={cantNecesaria.toFixed(2)} disabled />
-              </div>
-
-              <div>
-                <Label>Costo Unitario</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.costo_unit}
-                  onChange={(e) => setFormData({ ...formData, costo_unit: parseFloat(e.target.value) || 0 })}
-                />
-                {priceVariance?.has_variance && (
-                  <div className="flex items-center gap-1 text-xs text-orange-600 mt-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    Variación {priceVariance.variance_pct.toFixed(1)}% vs precio anterior
+              {canEditSensitiveData && (
+                <>
+                  <div>
+                    <Label>Desperdicio %</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={formData.desperdicio_pct}
+                      onChange={(e) => setFormData({ ...formData, desperdicio_pct: parseFloat(e.target.value) || 0 })}
+                    />
                   </div>
-                )}
-              </div>
 
-              <div>
-                <Label>Honorarios %</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={formData.honorarios_pct}
-                  onChange={(e) => setFormData({ ...formData, honorarios_pct: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
+                  <div>
+                    <Label>Cantidad Necesaria</Label>
+                    <Input value={cantNecesaria.toFixed(2)} disabled />
+                  </div>
 
-              <div>
-                <Label>Precio Unitario</Label>
-                <Input value={precioUnit.toFixed(2)} disabled />
-              </div>
+                  <div>
+                    <Label>Costo Unitario</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.costo_unit}
+                      onChange={(e) => setFormData({ ...formData, costo_unit: parseFloat(e.target.value) || 0 })}
+                    />
+                    {priceVariance?.has_variance && (
+                      <div className="flex items-center gap-1 text-xs text-orange-600 mt-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Variación {priceVariance.variance_pct.toFixed(1)}% vs precio anterior
+                      </div>
+                    )}
+                  </div>
 
-              <div className="col-span-2">
-                <Label>Proveedor</Label>
-                <Input
-                  value={formData.proveedor_alias}
-                  onChange={(e) => setFormData({ ...formData, proveedor_alias: e.target.value })}
-                />
-              </div>
+                  <div>
+                    <Label>Honorarios %</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={formData.honorarios_pct}
+                      onChange={(e) => setFormData({ ...formData, honorarios_pct: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
 
-              <div>
+                  <div>
+                    <Label>Precio Unitario</Label>
+                    <Input value={precioUnit.toFixed(2)} disabled />
+                  </div>
+
+                  <div className="col-span-2">
+                    <Label>Proveedor</Label>
+                    <Input
+                      value={formData.proveedor_alias}
+                      onChange={(e) => setFormData({ ...formData, proveedor_alias: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className={canEditSensitiveData ? "" : "col-span-2"}>
                 <Label>Total</Label>
                 <Input
                   value={new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(total)}
@@ -350,61 +357,65 @@ export function BudgetItemDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="cotizaciones" className="space-y-4">
-            <div>
-              <Label>Subir Cotización</Label>
-              <div className="mt-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileUpload}
-                  accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls"
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-4 w-4 mr-2" /> Subir Archivo
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Sube cotizaciones para respaldar el costo unitario
-              </p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="historial" className="space-y-4">
-            <div>
-              <Label className="flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Histórico de Precios
-              </Label>
-              {priceHistory && priceHistory.length > 0 ? (
-                <div className="mt-4 space-y-2">
-                  {priceHistory.map((record: any) => (
-                    <div key={record.id} className="flex justify-between items-center p-2 border rounded">
-                      <div>
-                        <div className="font-medium">
-                          {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(record.precio_unit)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(record.observed_at).toLocaleDateString('es-MX')}
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {record.source || 'Sin fuente'}
-                      </div>
-                    </div>
-                  ))}
+          {canEditSensitiveData && (
+            <>
+              <TabsContent value="cotizaciones" className="space-y-4">
+                <div>
+                  <Label>Subir Cotización</Label>
+                  <div className="mt-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileUpload}
+                      accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls"
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 mr-2" /> Subir Archivo
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Sube cotizaciones para respaldar el costo unitario
+                  </p>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground mt-4">
-                  No hay histórico de precios para esta subpartida
-                </p>
-              )}
-            </div>
-          </TabsContent>
+              </TabsContent>
+
+              <TabsContent value="historial" className="space-y-4">
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    Histórico de Precios
+                  </Label>
+                  {priceHistory && priceHistory.length > 0 ? (
+                    <div className="mt-4 space-y-2">
+                      {priceHistory.map((record: any) => (
+                        <div key={record.id} className="flex justify-between items-center p-2 border rounded">
+                          <div>
+                            <div className="font-medium">
+                              {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(record.precio_unit)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(record.observed_at).toLocaleDateString('es-MX')}
+                            </div>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {record.source || 'Sin fuente'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-4">
+                      No hay histórico de precios para esta subpartida
+                    </p>
+                  )}
+                </div>
+              </TabsContent>
+            </>
+          )}
         </Tabs>
 
         <div className="flex gap-2">

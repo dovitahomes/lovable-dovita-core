@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingError } from '@/components/common/LoadingError';
+import { EmergencyRollbackButton } from '@/components/admin/EmergencyRollbackButton';
+import { useModuleAccess } from '@/hooks/useModuleAccess';
 
 const AVAILABLE_MODULES = [
   // Principal
@@ -64,6 +66,8 @@ export default function Accesos() {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { can } = useModuleAccess();
+  const isAdmin = can("accesos", "delete"); // Solo admins pueden hacer rollback
 
   // Fetch users
   const { data: users, isLoading: usersLoading, error: usersError } = useQuery({
@@ -167,11 +171,15 @@ export default function Accesos() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Gestión de Accesos</h1>
-        <p className="text-muted-foreground mt-2">
-          Asigna roles y permisos a los usuarios del sistema
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Gestión de Accesos</h1>
+          <p className="text-muted-foreground mt-2">
+            Asigna roles y permisos a los usuarios del sistema
+          </p>
+        </div>
+        
+        {isAdmin && <EmergencyRollbackButton />}
       </div>
 
       <Card>

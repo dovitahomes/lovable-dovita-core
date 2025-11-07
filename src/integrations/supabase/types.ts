@@ -280,6 +280,13 @@ export type Database = {
             referencedRelation: "budget_items"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "budget_attachments_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_items_client"
+            referencedColumns: ["id"]
+          },
         ]
       }
       budget_audit: {
@@ -1883,6 +1890,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "materials_consumption_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_items_client"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "materials_consumption_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false
@@ -3181,6 +3195,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_role_audit: {
+        Row: {
+          action: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          ip_address: unknown
+          new_roles: string[] | null
+          old_roles: string[] | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          new_roles?: string[] | null
+          old_roles?: string[] | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          new_roles?: string[] | null
+          old_roles?: string[] | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           granted_at: string
@@ -3534,6 +3584,70 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_budget_items_client: {
+        Row: {
+          budget_id: string | null
+          cant_necesaria: number | null
+          cant_real: number | null
+          created_at: string | null
+          descripcion: string | null
+          id: string | null
+          mayor_id: string | null
+          mayor_name: string | null
+          order_index: number | null
+          partida_id: string | null
+          partida_name: string | null
+          precio_unit: number | null
+          subpartida_id: string | null
+          subpartida_name: string | null
+          total: number | null
+          unidad: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_history"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_exec_budget_mayor_totals"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_items_mayor_id_fkey"
+            columns: ["mayor_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_partida_id_fkey"
+            columns: ["partida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_subpartida_id_fkey"
+            columns: ["subpartida_id"]
+            isOneToOne: false
+            referencedRelation: "tu_nodes"
             referencedColumns: ["id"]
           },
         ]
@@ -4252,6 +4366,13 @@ export type Database = {
         }[]
       }
       current_user_has_role: { Args: { p_role_name: string }; Returns: boolean }
+      emergency_disable_all_rls: {
+        Args: never
+        Returns: {
+          rls_disabled: boolean
+          table_name: string
+        }[]
+      }
       ensure_profile: { Args: never; Returns: undefined }
       extract_cfdi_metadata: { Args: { xml_content: string }; Returns: Json }
       get_accounts_payable: {
@@ -4309,6 +4430,7 @@ export type Database = {
           qty_requested: number
         }[]
       }
+      is_client_user: { Args: never; Returns: boolean }
       is_collaborator: { Args: never; Returns: boolean }
       save_price_history: {
         Args: {

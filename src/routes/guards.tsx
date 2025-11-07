@@ -47,11 +47,10 @@ export function RequireModule({
     );
   }
   
-  // Temporarily allow all modules until permissions are seeded
-  // TODO: Enable after Prompt 2 seeds permissions
-  // if (!canView(moduleName)) {
-  //   return <Navigate to="/" replace />;
-  // }
+  // Check module permission
+  if (!canView(moduleName)) {
+    return <Navigate to="/" replace />;
+  }
   
   return <>{children}</>;
 }
