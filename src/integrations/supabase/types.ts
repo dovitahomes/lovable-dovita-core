@@ -862,6 +862,82 @@ export type Database = {
           },
         ]
       }
+      construction_stages: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          name: string
+          progress: number | null
+          project_id: string | null
+          start_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          progress?: number | null
+          project_id?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          progress?: number | null
+          project_id?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       consumption_config: {
         Row: {
           id: string
@@ -1654,6 +1730,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "sucursales"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials_consumption: {
+        Row: {
+          budget_item_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          quantity_used: number | null
+          stage_id: string | null
+          total: number | null
+          unit_cost: number
+        }
+        Insert: {
+          budget_item_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          quantity_used?: number | null
+          stage_id?: string | null
+          total?: number | null
+          unit_cost: number
+        }
+        Update: {
+          budget_item_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          quantity_used?: number | null
+          stage_id?: string | null
+          total?: number | null
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_consumption_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_consumption_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "construction_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_consumption_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_construction_progress"
+            referencedColumns: ["stage_id"]
           },
         ]
       }
@@ -3647,6 +3781,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_construction_progress: {
+        Row: {
+          alert_80: boolean | null
+          consumption_pct: number | null
+          end_date: string | null
+          name: string | null
+          progress: number | null
+          project_id: string | null
+          stage_id: string | null
+          start_date: string | null
+          total_budgeted: number | null
+          total_consumed: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
           },
         ]
       }
