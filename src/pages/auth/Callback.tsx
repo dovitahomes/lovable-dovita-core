@@ -15,31 +15,43 @@ const Callback = () => {
     const processCallback = async () => {
       try {
         await handleMagicLinkExchange();
-        setStatus('success');
         
         // Check user role and redirect accordingly
         const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role_name')
-            .eq('user_id', session.user.id);
-          
-          const role = roleData && roleData.length > 0 ? roleData[0].role_name : null;
-          
-          // Redirect after a short delay
-          setTimeout(() => {
-            if (role === 'cliente') {
-              navigate("/client/home", { replace: true });
-            } else {
-              navigate("/", { replace: true });
-            }
-          }, 1500);
-        } else {
-          setTimeout(() => {
-            navigate("/", { replace: true });
-          }, 1500);
+        if (!session) {
+          throw new Error('No se pudo obtener la sesión');
         }
+
+        // Check if user needs to setup password (invited user)
+        const { data: metadata } = await supabase
+          .from('user_metadata')
+          .select('needs_password_setup')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (metadata?.needs_password_setup) {
+          navigate("/auth/setup-password", { replace: true });
+          return;
+        }
+
+        // Existing user - normal flow
+        setStatus('success');
+        
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role_name')
+          .eq('user_id', session.user.id);
+        
+        const role = roleData && roleData.length > 0 ? roleData[0].role_name : null;
+        
+        // Redirect after a short delay
+        setTimeout(() => {
+          if (role === 'cliente') {
+            navigate("/client/home", { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
+        }, 1500);
       } catch (error: any) {
         setStatus('error');
         setErrorMessage(error.message || 'Error al procesar el enlace de acceso');

@@ -16,6 +16,7 @@ export const PUBLIC_ROUTES = {
   AUTH_LOGIN: '/auth/login',
   AUTH_CALLBACK: '/auth/callback',
   AUTH_RESET: '/auth/reset',
+  AUTH_SETUP_PASSWORD: '/auth/setup-password',
   AUTH: '/auth',
   SIGNUP: '/signup',
   DEBUG: '/debug',

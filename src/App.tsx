@@ -27,6 +27,7 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
 import Callback from "./pages/auth/Callback";
 import ResetPassword from "./pages/auth/ResetPassword";
+import SetupPassword from "./pages/auth/SetupPassword";
 import NotFound from "./pages/NotFound";
 const Debug = lazy(() => import("./pages/Debug"));
 
@@ -295,6 +296,7 @@ const App = () => {
                   <Route path={PUBLIC_ROUTES.DEBUG} element={<Suspense fallback={<PageHeaderSkeleton />}><Debug /></Suspense>} />
                   <Route path={PUBLIC_ROUTES.AUTH_CALLBACK} element={<Callback />} />
                   <Route path={PUBLIC_ROUTES.AUTH_RESET} element={<ResetPassword />} />
+                  <Route path={PUBLIC_ROUTES.AUTH_SETUP_PASSWORD} element={<SetupPassword />} />
                   <Route path={PUBLIC_ROUTES.AUTH} element={<Navigate to={PUBLIC_ROUTES.AUTH_LOGIN} replace />} />
                   <Route path={PUBLIC_ROUTES.SIGNUP} element={<Navigate to={PUBLIC_ROUTES.AUTH_LOGIN} replace />} />
                   

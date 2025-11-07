@@ -104,6 +104,7 @@ Deno.serve(async (req) => {
         data: {
           full_name: full_name || email.split('@')[0],
         },
+        redirectTo: `https://bkthkotzicohjizmcmsa.lovableproject.com/auth/setup-password`,
       });
 
       if (inviteError) throw inviteError;
@@ -122,16 +123,15 @@ Deno.serve(async (req) => {
 
       if (profileError) throw profileError;
 
-      // Upsert user metadata if needed
-      if (sucursal_id || fecha_nacimiento) {
-        await supabaseAdmin.from('user_metadata').upsert({
-          user_id: userId,
-          sucursal_id: sucursal_id || null,
-          fecha_nacimiento: fecha_nacimiento || null,
-        }, {
-          onConflict: 'user_id'
-        });
-      }
+      // Upsert user metadata with needs_password_setup flag
+      await supabaseAdmin.from('user_metadata').upsert({
+        user_id: userId,
+        sucursal_id: sucursal_id || null,
+        fecha_nacimiento: fecha_nacimiento || null,
+        needs_password_setup: true,
+      }, {
+        onConflict: 'user_id'
+      });
 
       // Assign role (use upsert to handle existing role)
       const { error: roleError } = await supabaseAdmin.from('user_roles').upsert({
