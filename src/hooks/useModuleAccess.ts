@@ -17,7 +17,6 @@ export function useModuleAccess() {
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
     
     async function load() {
       if (!user) {
@@ -30,24 +29,39 @@ export function useModuleAccess() {
       console.log('[useModuleAccess] Starting load, user.id:', user.id);
       setLoading(true);
       
-      // Safety timeout - if permissions don't load in 10s, check for admin fallback
-      timeoutId = setTimeout(() => {
-        if (active) {
-          console.warn('[useModuleAccess] Timeout loading permissions after 10s');
-          checkAdminFallback();
-        }
-      }, 10000);
-      
       try {
+        // Verificar sesión activa antes de hacer query
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('[useModuleAccess] Session check:', { 
+          hasSession: !!session, 
+          sessionError: sessionError?.message,
+          userId: session?.user?.id,
+          expiresAt: session?.expires_at 
+        });
+        
+        if (!session) {
+          console.warn('[useModuleAccess] No active session, forcing refresh');
+          const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError || !refreshedSession) {
+            console.error('[useModuleAccess] Session refresh failed, redirecting to login');
+            // Limpiar sesión y redirigir
+            await supabase.auth.signOut();
+            window.location.href = '/auth/login';
+            return;
+          }
+          
+          console.log('[useModuleAccess] ✓ Session refreshed successfully');
+        }
+        
+        // Ahora sí, hacer la query con sesión válida
         console.log('[useModuleAccess] Querying user_permissions for user:', user.id);
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from('user_permissions')
           .select('module_name, can_view, can_create, can_edit, can_delete')
           .eq('user_id', user.id);
 
         if (!active) return;
-        
-        clearTimeout(timeoutId);
         
         console.log('[useModuleAccess] Query result:', { 
           hasData: !!data, 
@@ -57,7 +71,6 @@ export function useModuleAccess() {
         
         if (error) {
           console.warn('[useModuleAccess] Error loading permissions:', error.message);
-          // Check if user is admin to use fallback
           await checkAdminFallback();
         } else if (!data || data.length === 0) {
           console.warn('[useModuleAccess] No permissions found, checking admin fallback');
@@ -74,7 +87,6 @@ export function useModuleAccess() {
           setLoading(false);
         }
       } catch (err) {
-        clearTimeout(timeoutId);
         console.warn('[useModuleAccess] Exception loading permissions:', err);
         await checkAdminFallback();
       }
@@ -129,7 +141,6 @@ export function useModuleAccess() {
     
     return () => { 
       active = false;
-      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [user?.id])
 
