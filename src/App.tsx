@@ -161,11 +161,7 @@ const InternalLayout = () => {
                 {/* CRM - LEADS Y CLIENTES                      */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.LEADS} element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.CLIENTES} element={
-                  <ProtectedRoute moduleName="clientes">
-                    <Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>
-                  </ProtectedRoute>
-                } />
+                <Route path={BACKOFFICE_ROUTES.CLIENTES} element={<Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.CLIENTE_DETALLE} element={<Suspense fallback={<TabsSkeleton />}><ClienteDetalle /></Suspense>} />
                 
                 {/* ============================================ */}

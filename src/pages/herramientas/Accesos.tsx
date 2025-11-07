@@ -115,17 +115,13 @@ export default function Accesos() {
         title: 'Éxito',
         description: 'Roles actualizados correctamente',
       });
-      
-      // Invalidate all permission-related queries
       queryClient.invalidateQueries({ queryKey: ['vw_users_with_roles'] });
       queryClient.invalidateQueries({ queryKey: ['user_permissions', selectedUserId] });
-      queryClient.invalidateQueries({ queryKey: ['user-module-permissions'] });
       
       // Refresh localStorage if current user
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.id === selectedUserId) {
-        // Wait for changes to propagate
-        setTimeout(() => window.location.reload(), 500);
+        window.location.reload();
       }
     },
     onError: (error: Error) => {

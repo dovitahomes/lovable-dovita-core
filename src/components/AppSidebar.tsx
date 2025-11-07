@@ -64,29 +64,13 @@ export function AppSidebar() {
     };
   }, []);
 
-  const { canView, loading: permsLoading, isAdminFallback } = useModuleAccess();
+  const { canView } = useModuleAccess();
   
-  // Log sidebar filtering for debugging
-  console.log('[AppSidebar] Filtering routes, total sections:', SIDEBAR_SECTIONS.length, 'permsLoading:', permsLoading, 'isAdminFallback:', isAdminFallback);
-  
-  // Si está cargando, mostrar todas las secciones con skeleton
-  // Si es admin fallback y no hay permisos, mostrar todo
-  // Si no, filtrar por permisos
-  const routesToShow = permsLoading
-    ? SIDEBAR_SECTIONS // Mostrar estructura mientras carga
-    : SIDEBAR_SECTIONS.map(section => {
-        const filteredItems = section.items.filter(item => {
-          const can = canView(item.moduleName);
-          console.log('[AppSidebar] Module:', item.moduleName, 'canView:', can, 'isAdminFallback:', isAdminFallback);
-          return can;
-        });
-        return {
-          ...section,
-          items: filteredItems
-        };
-      }).filter(section => section.items.length > 0);
-  
-  console.log('[AppSidebar] Routes to show:', routesToShow.length, 'sections');
+  // Filter sidebar items based on user permissions
+  const routesToShow = SIDEBAR_SECTIONS.map(section => ({
+    ...section,
+    items: section.items.filter(item => canView(item.moduleName))
+  })).filter(section => section.items.length > 0);
 
   const handleLogout = async () => {
     const { appSignOut } = await import('@/lib/auth/logout');
@@ -131,56 +115,43 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent>
-        {permsLoading ? (
-          // Skeleton mientras carga
-          <div className="space-y-4 p-4">
-            <div className="space-y-2">
-              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-              <div className="space-y-1">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-8 w-full bg-muted rounded animate-pulse" />
+
+        {routesToShow.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className={sidebarTheme === "light" ? "text-gray-600" : ""}>
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/"}
+                        className={getNavClass}
+                        onMouseEnter={() => {
+                          if (item.url === "/proveedores") {
+                            prefetch({
+                              queryKey: ["providers"],
+                              queryFn: async () => {
+                                const { data } = await supabase.from("providers").select("*").order("name");
+                                return data;
+                              },
+                            });
+                          }
+                        }}
+                      >
+                        <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                        {(isMobile || state !== "collapsed") && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          routesToShow.map((group) => (
-            <SidebarGroup key={group.label}>
-              <SidebarGroupLabel className={sidebarTheme === "light" ? "text-gray-600" : ""}>
-                {group.label}
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {group.items.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <NavLink
-                          to={item.url}
-                          end={item.url === "/"}
-                          className={getNavClass}
-                          onMouseEnter={() => {
-                            if (item.url === "/proveedores") {
-                              prefetch({
-                                queryKey: ["providers"],
-                                queryFn: async () => {
-                                  const { data } = await supabase.from("providers").select("*").order("name");
-                                  return data;
-                                },
-                              });
-                            }
-                          }}
-                        >
-                          <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-                          {(isMobile || state !== "collapsed") && <span>{item.title}</span>}
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ))
-        )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter className={sidebarTheme === "light" ? "border-t border-gray-200" : ""}>

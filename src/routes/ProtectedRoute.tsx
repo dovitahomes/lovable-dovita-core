@@ -4,20 +4,19 @@ import { useAuth } from '@/app/auth/AuthProvider';
 import { useModuleAccess } from '@/hooks/useModuleAccess';
 import { Loader2, ShieldX } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
 
-type PermissionAction = 'view' | 'edit';
+type PermissionAction = 'view' | 'create' | 'edit' | 'delete';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  moduleName?: string; // Opcional para rutas que solo requieren auth
+  moduleName?: string;
   action?: PermissionAction;
   fallback?: ReactNode;
 }
 
 /**
- * Route guard que verifica autenticación y permisos de módulo.
- * Usa user_permissions para control de acceso + fallback admin via RPC.
+ * Route guard that checks user authentication and module permissions
+ * Uses user_permissions table to control access
  */
 export function ProtectedRoute({ 
   children, 
@@ -26,10 +25,10 @@ export function ProtectedRoute({
   fallback 
 }: ProtectedRouteProps) {
   const { loading: authLoading, user } = useAuth();
-  const { loading: permsLoading, has, isAdminFallback } = useModuleAccess();
+  const { loading: permsLoading, canView, can } = useModuleAccess();
   
-  // Mostrar skeleton mientras verifica auth (no bloquear UI)
-  if (authLoading) {
+  // Show loading state while checking auth
+  if (authLoading || permsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -37,35 +36,20 @@ export function ProtectedRoute({
     );
   }
   
-  // Redirigir a login si no está autenticado
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/auth/login" replace />;
   }
   
-  // Mientras carga permisos, mostrar skeleton en lugar de bloquear
-  if (permsLoading) {
-    return (
-      <div className="p-8 space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
-  
-  // Si no se especifica módulo, solo verificar autenticación
+  // If no module specified, just check authentication
   if (!moduleName) {
     return <>{children}</>;
   }
   
-  // Verificar permisos del módulo
-  const hasPermission = has(moduleName, action) || isAdminFallback;
-  
-  console.log('[ProtectedRoute]', {
-    moduleName,
-    action,
-    hasPermission,
-    isAdminFallback
-  });
+  // Check module permission
+  const hasPermission = action === 'view' 
+    ? canView(moduleName)
+    : can(moduleName, action);
   
   if (!hasPermission) {
     return fallback || (
@@ -74,7 +58,7 @@ export function ProtectedRoute({
           <ShieldX className="h-4 w-4" />
           <AlertTitle>Acceso Denegado</AlertTitle>
           <AlertDescription>
-            No tienes permisos para acceder a este módulo ({moduleName}). Contacta al administrador si necesitas acceso.
+            No tienes permisos para acceder a este módulo. Contacta al administrador si necesitas acceso.
           </AlertDescription>
         </Alert>
       </div>

@@ -18,22 +18,7 @@ export default function Presupuestos() {
   const queryClient = useQueryClient();
   const { canView, can } = useModuleAccess();
   
-  // IMPORTANTE: Todos los hooks deben llamarse ANTES de cualquier return condicional
-  const { data: budgets, isLoading, error } = useQuery({
-    queryKey: ['budgets'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_budget_history' as any)
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as any[];
-    },
-    enabled: canView('presupuestos'), // Solo ejecutar query si tiene permisos
-  });
-  
-  // Guard de seguridad DESPUÉS de todos los hooks
+  // Guard de seguridad
   if (!canView('presupuestos')) {
     return (
       <div className="container mx-auto p-6">
@@ -47,6 +32,19 @@ export default function Presupuestos() {
       </div>
     );
   }
+
+  const { data: budgets, isLoading, error } = useQuery({
+    queryKey: ['budgets'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('v_budget_history' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as any[];
+    }
+  });
 
   const getStatusBadge = (status: string) => {
     return status === 'publicado' 
