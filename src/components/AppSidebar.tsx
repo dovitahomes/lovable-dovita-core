@@ -64,13 +64,25 @@ export function AppSidebar() {
     };
   }, []);
 
-  const { canView } = useModuleAccess();
+  const { canView, loading: permsLoading } = useModuleAccess();
+  
+  // Log sidebar filtering for debugging
+  console.log('[AppSidebar] Filtering routes, total sections:', SIDEBAR_SECTIONS.length, 'permsLoading:', permsLoading);
   
   // Filter sidebar items based on user permissions
-  const routesToShow = SIDEBAR_SECTIONS.map(section => ({
-    ...section,
-    items: section.items.filter(item => canView(item.moduleName))
-  })).filter(section => section.items.length > 0);
+  const routesToShow = SIDEBAR_SECTIONS.map(section => {
+    const filteredItems = section.items.filter(item => {
+      const can = canView(item.moduleName);
+      console.log('[AppSidebar] Module:', item.moduleName, 'canView:', can);
+      return can;
+    });
+    return {
+      ...section,
+      items: filteredItems
+    };
+  }).filter(section => section.items.length > 0);
+  
+  console.log('[AppSidebar] Routes to show:', routesToShow.length, 'sections');
 
   const handleLogout = async () => {
     const { appSignOut } = await import('@/lib/auth/logout');

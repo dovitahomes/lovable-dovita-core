@@ -21,23 +21,25 @@ export function useModuleAccess() {
     
     async function load() {
       if (!user) {
+        console.log('[useModuleAccess] No user, clearing permissions');
         setPerms([]);
         setLoading(false);
         return;
       }
       
+      console.log('[useModuleAccess] Starting load, user.id:', user.id);
       setLoading(true);
       
-      // Safety timeout - if permissions don't load in 3s, use empty array
+      // Safety timeout - if permissions don't load in 10s, check for admin fallback
       timeoutId = setTimeout(() => {
         if (active) {
-          console.warn('[useModuleAccess] Timeout loading permissions, using empty array');
-          setPerms([]);
-          setLoading(false);
+          console.warn('[useModuleAccess] Timeout loading permissions after 10s');
+          checkAdminFallback();
         }
-      }, 3000);
+      }, 10000);
       
       try {
+        console.log('[useModuleAccess] Querying user_permissions for user:', user.id);
         const { data, error } = await (supabase as any)
           .from('user_permissions')
           .select('module_name, can_view, can_create, can_edit, can_delete')
@@ -47,22 +49,76 @@ export function useModuleAccess() {
         
         clearTimeout(timeoutId);
         
+        console.log('[useModuleAccess] Query result:', { 
+          hasData: !!data, 
+          count: data?.length || 0, 
+          error: error?.message 
+        });
+        
         if (error) {
           console.warn('[useModuleAccess] Error loading permissions:', error.message);
-          setPerms([]);
+          // Check if user is admin to use fallback
+          await checkAdminFallback();
+        } else if (!data || data.length === 0) {
+          console.warn('[useModuleAccess] No permissions found, checking admin fallback');
+          await checkAdminFallback();
         } else {
-          console.info(`[useModuleAccess] ✓ Loaded ${data?.length || 0} permissions for user ${user.id}`);
-          setPerms((data ?? []).map((d: any) => ({
+          console.info(`[useModuleAccess] ✓ Loaded ${data.length} permissions for user ${user.id}`);
+          setPerms(data.map((d: any) => ({
             module_name: d.module_name,
             can_view: !!d.can_view,
             can_create: !!d.can_create,
             can_edit: !!d.can_edit,
             can_delete: !!d.can_delete,
           })));
+          setLoading(false);
         }
       } catch (err) {
         clearTimeout(timeoutId);
         console.warn('[useModuleAccess] Exception loading permissions:', err);
+        await checkAdminFallback();
+      }
+    }
+    
+    async function checkAdminFallback() {
+      if (!user || !active) return;
+      
+      try {
+        console.log('[useModuleAccess] Checking admin fallback for user:', user.id);
+        const { data: roles, error } = await supabase
+          .from('user_roles')
+          .select('role_name')
+          .eq('user_id', user.id)
+          .eq('role_name', 'admin')
+          .maybeSingle();
+        
+        if (!active) return;
+        
+        if (error) {
+          console.warn('[useModuleAccess] Admin fallback check failed:', error.message);
+          setPerms([]);
+        } else if (roles) {
+          console.warn('[useModuleAccess] ⚠️ User is admin but permissions failed to load. Using admin bypass - ALL modules accessible');
+          // Create full permissions for all modules - admin bypass
+          const allModules = [
+            'dashboard', 'leads', 'clientes', 'tu', 'presupuestos', 'proveedores',
+            'proyectos', 'construccion', 'finanzas', 'ordenes_compra', 'pagos',
+            'lotes_pago', 'contabilidad', 'herramientas', 'usuarios', 'accesos',
+            'alianzas', 'identidades', 'sucursales', 'reglas', 'contenido_corporativo'
+          ];
+          setPerms(allModules.map(module => ({
+            module_name: module,
+            can_view: true,
+            can_create: true,
+            can_edit: true,
+            can_delete: true,
+          })));
+        } else {
+          console.warn('[useModuleAccess] User is not admin and has no permissions');
+          setPerms([]);
+        }
+      } catch (err) {
+        console.warn('[useModuleAccess] Admin fallback exception:', err);
         setPerms([]);
       }
       
