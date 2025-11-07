@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
+import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage/storage-helpers";
 
 export interface DocumentFilters {
   search?: string;
@@ -60,19 +61,13 @@ export function useUploadProjectDocuments(projectId: string) {
       const results = [];
 
       for (const file of files) {
-        const timestamp = Date.now();
-        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filePath = `${projectId}/${sanitizedName}_${timestamp}`;
-
         // Upload to storage
-        const { error: uploadError } = await supabase.storage
-          .from('project_docs')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          throw new Error(`Error al subir ${file.name}: ${uploadError.message}`);
-        }
+        const { path } = await uploadToBucket({
+          bucket: 'project_docs',
+          projectId,
+          file,
+          filename: file.name
+        });
 
         // Insert document record
         const { error: insertError } = await supabase
@@ -83,7 +78,7 @@ export function useUploadProjectDocuments(projectId: string) {
             tipo_carpeta,
             etiqueta: etiqueta || null,
             visibilidad,
-            file_url: filePath, // Store path, not full URL
+            file_url: path, // Store path, not full URL
             file_size: file.size,
             file_type: file.type,
             uploaded_by: user.id,
@@ -95,11 +90,11 @@ export function useUploadProjectDocuments(projectId: string) {
 
         if (insertError) {
           // Clean up uploaded file if DB insert fails
-          await supabase.storage.from('project_docs').remove([filePath]);
+          await deleteFromBucket('project_docs', path);
           throw new Error(`Error al registrar ${file.name}: ${insertError.message}`);
         }
 
-        results.push({ name: file.name, path: filePath });
+        results.push({ name: file.name, path });
       }
 
       return results;
@@ -120,12 +115,13 @@ export function useSignedUrl(filePath: string | null) {
     queryFn: async () => {
       if (!filePath) return null;
       
-      const { data, error } = await supabase.storage
-        .from('project_docs')
-        .createSignedUrl(filePath, 600); // 10 minutes
+      const { url } = await getSignedUrl({
+        bucket: 'project_docs',
+        path: filePath,
+        expiresInSeconds: 600
+      });
       
-      if (error) throw error;
-      return data.signedUrl;
+      return url;
     },
     enabled: !!filePath,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -176,14 +172,7 @@ export function useDeleteDocument() {
       filePath: string 
     }) => {
       // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('project_docs')
-        .remove([filePath]);
-
-      if (storageError) {
-        console.error('Storage delete error:', storageError);
-        // Continue even if storage delete fails
-      }
+      await deleteFromBucket('project_docs', filePath);
 
       // Delete record
       const { error: deleteError } = await supabase

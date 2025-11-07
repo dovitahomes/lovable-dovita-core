@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket } from "@/lib/storage/storage-helpers";
 import { parseCfdiXml } from "@/utils/cfdi/parseCfdi";
 import { toast } from "sonner";
 
@@ -45,17 +46,13 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
         return;
       }
 
-      // Upload XML to storage
-      const fileName = `${cfdi.timbre.uuid}.xml`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('cfdi')
-        .upload(fileName, file, { contentType: 'application/xml', upsert: false });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('cfdi')
-        .getPublicUrl(fileName);
+      // Upload XML to storage - use emisor RFC as projectId for CFDI
+      const { path: xmlPath } = await uploadToBucket({
+        bucket: 'cfdi',
+        projectId: cfdi.emisor.rfc,
+        file,
+        filename: `${cfdi.timbre.uuid}.xml`
+      });
 
       // Find or create emisor/receptor
       let emisorId = null;
@@ -151,7 +148,7 @@ export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDi
           total_amount: cfdi.total,
           emisor_id: emisorId,
           receptor_id: receptorId,
-          xml_url: publicUrl,
+          xml_url: xmlPath,
           meta_json: cfdi as any,
           paid: false
         }]);

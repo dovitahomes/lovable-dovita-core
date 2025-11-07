@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket } from "@/lib/storage/storage-helpers";
 import { toast } from "sonner";
 import SignatureCanvas from "react-signature-canvas";
 import { Trash2, Upload, Save } from "lucide-react";
@@ -106,17 +107,14 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
           const blob = await (await fetch(signatureData)).blob();
           const fileName = `${user.id}/${projectId}-${Date.now()}.png`;
 
-          const { error: uploadError } = await supabase.storage
-            .from('firmas')
-            .upload(fileName, blob);
+          const { path } = await uploadToBucket({
+            bucket: 'firmas',
+            projectId,
+            file: new File([blob], `firma-${Date.now()}.png`, { type: 'image/png' }),
+            filename: `firma-${Date.now()}.png`
+          });
 
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('firmas')
-            .getPublicUrl(fileName);
-
-          firmaUrl = publicUrl;
+          firmaUrl = path;
           firmaTipo = "manuscrita";
         } else if (firmaTab === "pdf") {
           if (!pdfFile) {
@@ -124,18 +122,14 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
             return;
           }
 
-          const fileName = `${user.id}/${projectId}-${Date.now()}.pdf`;
-          const { error: uploadError } = await supabase.storage
-            .from('firmas')
-            .upload(fileName, pdfFile);
+          const { path } = await uploadToBucket({
+            bucket: 'firmas',
+            projectId,
+            file: pdfFile,
+            filename: pdfFile.name
+          });
 
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('firmas')
-            .getPublicUrl(fileName);
-
-          firmaUrl = publicUrl;
+          firmaUrl = path;
           firmaTipo = "pdf";
         }
       }

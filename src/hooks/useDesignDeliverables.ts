@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage/storage-helpers";
 
 interface DesignDeliverable {
   id: string;
@@ -45,14 +46,12 @@ export function useUploadDesignDeliverables(projectId: string) {
       const uploadedFiles = [];
       
       for (const file of files) {
-        const folder = phaseId || 'unassigned';
-        const filePath = `${projectId}/${folder}/${file.name}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('design-deliverables')
-          .upload(filePath, file, { upsert: true });
-        
-        if (uploadError) throw uploadError;
+        const { path } = await uploadToBucket({
+          bucket: 'design-deliverables',
+          projectId,
+          file,
+          filename: file.name
+        });
         
         const { data, error: insertError } = await supabase
           .from('design_deliverables')
@@ -60,7 +59,7 @@ export function useUploadDesignDeliverables(projectId: string) {
             project_id: projectId,
             phase_id: phaseId,
             file_name: file.name,
-            file_url: filePath,
+            file_url: path,
             file_type: file.type,
             file_size: file.size,
             description,
@@ -69,7 +68,11 @@ export function useUploadDesignDeliverables(projectId: string) {
           .select()
           .single();
         
-        if (insertError) throw insertError;
+        if (insertError) {
+          // Cleanup uploaded file if DB insert fails
+          await deleteFromBucket('design-deliverables', path);
+          throw insertError;
+        }
         uploadedFiles.push(data);
       }
       
@@ -95,12 +98,13 @@ export function useSignedUrl(filePath?: string) {
     queryFn: async () => {
       if (!filePath) return null;
       
-      const { data, error } = await supabase.storage
-        .from('design-deliverables')
-        .createSignedUrl(filePath, 600); // 10 minutes
+      const { url } = await getSignedUrl({
+        bucket: 'design-deliverables',
+        path: filePath,
+        expiresInSeconds: 600
+      });
       
-      if (error) throw error;
-      return data.signedUrl;
+      return url;
     },
     enabled: !!filePath,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -149,11 +153,7 @@ export function useDeleteDeliverable() {
       projectId: string;
     }) => {
       // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('design-deliverables')
-        .remove([fileUrl]);
-      
-      if (storageError) throw storageError;
+      await deleteFromBucket('design-deliverables', fileUrl);
       
       // Delete from database
       const { error: dbError } = await supabase

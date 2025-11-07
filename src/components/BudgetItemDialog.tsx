@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket } from "@/lib/storage/storage-helpers";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -117,23 +118,19 @@ export function BudgetItemDialog({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
-      const fileName = `budget-items/${formData.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('documentos')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('documentos')
-        .getPublicUrl(fileName);
+      const { path } = await uploadToBucket({
+        bucket: 'documentos',
+        projectId: formData.id,
+        file,
+        filename: file.name
+      });
 
       const { error: insertError } = await supabase
         .from('budget_attachments')
         .insert({
           budget_item_id: formData.id,
           file_name: file.name,
-          file_url: publicUrl,
+          file_url: path,
           file_type: file.type,
           file_size: file.size,
           uploaded_by: user.id
