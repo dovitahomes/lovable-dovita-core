@@ -46,11 +46,21 @@ const Login = () => {
       if (authError) throw authError;
       
       // 🆕 LLAMAR BOOTSTRAP
+      console.log('[login] Calling bootstrap...');
       const bootstrapOk = await bootstrapUserAfterLogin();
       if (!bootstrapOk) {
         console.warn('[login] Bootstrap falló, pero permitir navegación');
       }
       
+      // Invalidar cache de permisos para forzar refetch
+      const { queryClient } = await import('@/lib/queryConfig');
+      console.log('[login] Invalidating permissions cache...');
+      await queryClient.invalidateQueries({ queryKey: ['user-module-permissions'] });
+      
+      // Esperar 300ms para que las queries se refresquen
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      console.log('[login] ✅ Login complete, navigating to dashboard');
       toast.success('Inicio de sesión exitoso');
       navigate('/', { replace: true });
     } catch (error: any) {
