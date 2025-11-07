@@ -4430,6 +4430,10 @@ export type Database = {
           qty_requested: number
         }[]
       }
+      has_role: {
+        Args: { p_role_name: string; p_user_id: string }
+        Returns: boolean
+      }
       is_client_user: { Args: never; Returns: boolean }
       is_collaborator: { Args: never; Returns: boolean }
       save_price_history: {
@@ -4445,6 +4449,14 @@ export type Database = {
       seed_role_permissions: {
         Args: { p_role_name: string; p_user_id: string }
         Returns: undefined
+      }
+      user_can_access_project: {
+        Args: { p_project_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      user_has_module_permission: {
+        Args: { p_action: string; p_module: string; p_user_id: string }
+        Returns: boolean
       }
       user_has_role: {
         Args: { p_role_name: string; p_user_id: string }
