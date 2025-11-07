@@ -1,0 +1,368 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2025-01-07T00:00:00Z",
+  "description": "Wiring map between UI components, database tables, and storage buckets",
+  "components": [
+    {
+      "file": "src/components/DocumentManager.tsx",
+      "actions": [
+        {
+          "name": "upload",
+          "line_range": "77-90",
+          "table": "documents",
+          "columns": [
+            "project_id",
+            "nombre",
+            "tipo_carpeta",
+            "etiqueta",
+            "visibilidad",
+            "firmado",
+            "file_url",
+            "file_size",
+            "file_type",
+            "uploaded_by"
+          ],
+          "bucket_current": "documentos",
+          "bucket_desired": "project_docs (if visibilidad='cliente') OR documentos (if visibilidad='interno')",
+          "path_pattern_current": "projectId/tipo_carpeta/timestamp-nombre",
+          "path_pattern_desired": "projectId/YYMM-uuid-slugified-nombre.ext",
+          "read_mode": "signed",
+          "issues": [
+            "Stores publicUrl instead of path in file_url",
+            "Uses getPublicUrl() instead of createSignedUrl()",
+            "Path does not follow YYMM-uuid convention",
+            "Bucket should depend on visibilidad field"
+          ]
+        },
+        {
+          "name": "delete",
+          "line_range": "122-148",
+          "table": "documents",
+          "bucket_current": "documentos",
+          "issues": [
+            "Should extract bucket from visibilidad or metadata"
+          ]
+        },
+        {
+          "name": "download",
+          "line_range": "203-211",
+          "bucket_current": "documentos",
+          "read_mode": "signed",
+          "issues": [
+            "Uses getPublicUrl() instead of createSignedUrl()"
+          ]
+        }
+      ],
+      "notes": "Main document management component. Needs bucket routing logic based on visibilidad."
+    },
+    {
+      "file": "src/components/project/DocumentsTab.tsx",
+      "actions": [
+        {
+          "name": "view",
+          "line_range": "N/A",
+          "table": "documents",
+          "columns": [
+            "id",
+            "nombre",
+            "tipo_carpeta",
+            "file_url",
+            "file_type",
+            "file_size",
+            "created_at"
+          ],
+          "bucket_current": "project_docs",
+          "path_pattern_current": "N/A (read only)",
+          "read_mode": "signed",
+          "issues": [
+            "Needs verification of signed URL usage"
+          ]
+        }
+      ],
+      "notes": "Read-only component, may need signed URL for private docs."
+    },
+    {
+      "file": "src/components/construction/ConstructionPhotosTab.tsx",
+      "actions": [
+        {
+          "name": "upload",
+          "line_range": "67-111",
+          "table": "construction_photos",
+          "columns": [
+            "project_id",
+            "file_url",
+            "file_name",
+            "latitude",
+            "longitude",
+            "descripcion",
+            "visibilidad",
+            "uploaded_by",
+            "fecha_foto"
+          ],
+          "bucket_current": "documentos",
+          "bucket_desired": "documentos",
+          "path_pattern_current": "projectId/timestamp.ext",
+          "path_pattern_desired": "projectId/YYMM-uuid-slugified-name.ext",
+          "read_mode": "signed",
+          "issues": [
+            "Stores publicUrl instead of path in file_url",
+            "Path does not follow YYMM-uuid convention",
+            "Uses getPublicUrl() - should use createSignedUrl()"
+          ]
+        },
+        {
+          "name": "view",
+          "line_range": "120-123",
+          "bucket_current": "documentos",
+          "read_mode": "signed",
+          "issues": [
+            "Should use createSignedUrl() for viewing"
+          ]
+        }
+      ],
+      "notes": "Construction photos are stored in documentos bucket (private)."
+    },
+    {
+      "file": "src/components/BudgetItemDialog.tsx",
+      "actions": [
+        {
+          "name": "upload",
+          "line_range": "113-148",
+          "table": "budget_attachments",
+          "columns": [
+            "budget_item_id",
+            "file_name",
+            "file_url",
+            "file_type",
+            "file_size",
+            "uploaded_by"
+          ],
+          "bucket_current": "documentos",
+          "bucket_desired": "documentos",
+          "path_pattern_current": "budget-items/itemId/timestamp-nombre",
+          "path_pattern_desired": "projectId/YYMM-uuid-slugified-nombre.ext",
+          "read_mode": "signed",
+          "issues": [
+            "Stores publicUrl instead of path in file_url",
+            "Path does not include project_id (uses budget-items/itemId)",
+            "Path does not follow YYMM-uuid convention",
+            "Uses getPublicUrl() - should use createSignedUrl()"
+          ]
+        }
+      ],
+      "notes": "Budget attachments need project_id in path for proper organization. Currently uses item-level folders."
+    },
+    {
+      "file": "src/components/accounting/CfdiUploadDialog.tsx",
+      "actions": [
+        {
+          "name": "parse_xml",
+          "line_range": "18-171",
+          "table": "invoices",
+          "columns": [
+            "tipo",
+            "metodo_pago",
+            "issued_at",
+            "uuid",
+            "xml_file_url",
+            "pdf_file_url",
+            "emisor_id",
+            "receptor_id",
+            "subtotal",
+            "total_amount",
+            "metadata"
+          ],
+          "bucket_current": "NONE",
+          "bucket_desired": "cfdi",
+          "path_pattern_current": "NOT IMPLEMENTED",
+          "path_pattern_desired": "emisor_rfc/YYMM-uuid-filename.xml",
+          "read_mode": "signed",
+          "issues": [
+            "Does NOT upload XML file to storage",
+            "xml_file_url column is not populated",
+            "Should upload to cfdi bucket with emisor_rfc folder"
+          ]
+        }
+      ],
+      "notes": "CRITICAL: Currently only parses XML but does not persist the file. Must implement upload to cfdi bucket."
+    },
+    {
+      "file": "src/components/WishlistForm.tsx",
+      "actions": [
+        {
+          "name": "save_signature",
+          "line_range": "85-172",
+          "table": "wishlists",
+          "columns": [
+            "project_id",
+            "payload",
+            "firma_tipo",
+            "firma_url",
+            "firmado",
+            "firmado_at"
+          ],
+          "bucket_current": "firmas",
+          "bucket_desired": "firmas",
+          "path_pattern_current": "NEEDS_REVIEW",
+          "path_pattern_desired": "projectId/YYMM-uuid-signature.png",
+          "read_mode": "signed",
+          "issues": [
+            "Needs full code review to verify signature handling",
+            "May handle both canvas signatures and PDF uploads",
+            "Verify if onConflict is needed (one wishlist per project)"
+          ]
+        }
+      ],
+      "notes": "Wishlist signatures require special handling for canvas and PDF uploads."
+    },
+    {
+      "file": "src/hooks/useProjectDocuments.ts",
+      "actions": [
+        {
+          "name": "upload",
+          "line_range": "42-115",
+          "table": "documents",
+          "columns": [
+            "project_id",
+            "nombre",
+            "tipo_carpeta",
+            "etiqueta",
+            "visibilidad",
+            "file_url",
+            "file_size",
+            "file_type",
+            "uploaded_by",
+            "metadata"
+          ],
+          "bucket_current": "project_docs",
+          "bucket_desired": "project_docs",
+          "path_pattern_current": "projectId/nombre_timestamp",
+          "path_pattern_desired": "projectId/YYMM-uuid-slugified-nombre.ext",
+          "read_mode": "signed",
+          "issues": [
+            "Path pattern close but should include YYMM-uuid",
+            "Verify signed URL usage"
+          ]
+        },
+        {
+          "name": "get_signed_url",
+          "line_range": "117-133",
+          "bucket_current": "project_docs",
+          "read_mode": "signed",
+          "issues": [
+            "Already uses createSignedUrl() correctly ✅"
+          ]
+        },
+        {
+          "name": "delete",
+          "line_range": "165-204",
+          "table": "documents",
+          "bucket_current": "project_docs",
+          "issues": []
+        }
+      ],
+      "notes": "Good implementation, mostly correct. Just needs path standardization."
+    },
+    {
+      "file": "src/hooks/useClientDocumentsUpload.ts",
+      "actions": [
+        {
+          "name": "upload",
+          "line_range": "24-88",
+          "table": "documents",
+          "columns": [
+            "project_id",
+            "nombre",
+            "file_url",
+            "file_type",
+            "file_size",
+            "tipo_carpeta",
+            "etiqueta",
+            "visibilidad",
+            "uploaded_by"
+          ],
+          "bucket_current": "project_docs",
+          "bucket_desired": "project_docs",
+          "path_pattern_current": "projectId/YYMM/uuid-nombre",
+          "path_pattern_desired": "projectId/YYMM-uuid-slugified-nombre.ext",
+          "read_mode": "signed",
+          "issues": [
+            "Stores publicUrl instead of path in file_url",
+            "Path is close but uses YYMM/uuid instead of YYMM-uuid",
+            "Should use createSignedUrl() for reading"
+          ]
+        }
+      ],
+      "notes": "Very close to correct implementation, minor adjustments needed."
+    },
+    {
+      "file": "src/hooks/useDesignDeliverables.ts",
+      "actions": [
+        {
+          "name": "upload",
+          "line_range": "35-90",
+          "table": "design_deliverables",
+          "columns": [
+            "project_id",
+            "phase_id",
+            "file_name",
+            "file_url",
+            "file_type",
+            "file_size",
+            "description",
+            "uploaded_by"
+          ],
+          "bucket_current": "design-deliverables",
+          "bucket_desired": "design-deliverables",
+          "path_pattern_current": "projectId/folder/nombre",
+          "path_pattern_desired": "projectId/YYMM-uuid-slugified-nombre.ext",
+          "read_mode": "signed",
+          "issues": [
+            "Stores path correctly ✅",
+            "Path pattern should include YYMM-uuid",
+            "Already uses createSignedUrl() correctly ✅"
+          ]
+        },
+        {
+          "name": "get_signed_url",
+          "line_range": "92-108",
+          "bucket_current": "design-deliverables",
+          "read_mode": "signed",
+          "issues": [
+            "Already uses createSignedUrl() correctly ✅"
+          ]
+        },
+        {
+          "name": "delete",
+          "line_range": "142-179",
+          "table": "design_deliverables",
+          "bucket_current": "design-deliverables",
+          "issues": []
+        }
+      ],
+      "notes": "Best implementation found. Uses signed URLs correctly, just needs path standardization."
+    }
+  ],
+  "summary": {
+    "total_components": 9,
+    "critical_issues": 7,
+    "components_needing_changes": 7,
+    "components_mostly_correct": 2,
+    "main_issues": [
+      "Storing publicUrl instead of path in file_url (6 components)",
+      "Using getPublicUrl() instead of createSignedUrl() (5 components)",
+      "Path patterns not following YYMM-uuid convention (8 components)",
+      "CfdiUploadDialog not uploading XML files to storage (1 component)",
+      "BudgetItemDialog not including project_id in paths (1 component)"
+    ]
+  },
+  "recommended_fix_order": [
+    "1. Adopt storage-helpers.ts in all components",
+    "2. Fix DocumentManager bucket routing (client vs internal)",
+    "3. Fix ConstructionPhotosTab path and signed URLs",
+    "4. Fix BudgetItemDialog path (include project_id)",
+    "5. Implement XML upload in CfdiUploadDialog",
+    "6. Standardize paths in useProjectDocuments and useClientDocumentsUpload",
+    "7. Review and fix WishlistForm signature handling"
+  ]
+}
