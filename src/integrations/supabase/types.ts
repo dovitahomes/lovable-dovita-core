@@ -153,6 +153,70 @@ export type Database = {
           },
         ]
       }
+      bank_transactions: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          reconciled: boolean | null
+          reconciled_with: string | null
+          reference: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          reconciled?: boolean | null
+          reconciled_with?: string | null
+          reference?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          reconciled?: boolean | null
+          reconciled_with?: string | null
+          reference?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_reconciled_with_fkey"
+            columns: ["reconciled_with"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_reconciled_with_fkey"
+            columns: ["reconciled_with"]
+            isOneToOne: false
+            referencedRelation: "v_bank_reconciliation"
+            referencedColumns: ["invoice_id"]
+          },
+        ]
+      }
       banks: {
         Row: {
           activo: boolean
@@ -1578,6 +1642,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_reconciliation"
+            referencedColumns: ["invoice_id"]
+          },
+          {
             foreignKeyName: "invoice_payments_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
@@ -1832,6 +1903,59 @@ export type Database = {
           },
         ]
       }
+      payment_batch_items: {
+        Row: {
+          amount: number
+          batch_id: string | null
+          created_at: string | null
+          id: string
+          invoice_id: string | null
+        }
+        Insert: {
+          amount: number
+          batch_id?: string | null
+          created_at?: string | null
+          id?: string
+          invoice_id?: string | null
+        }
+        Update: {
+          amount?: number
+          batch_id?: string | null
+          created_at?: string | null
+          id?: string
+          invoice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "pay_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "v_payment_batch_summary"
+            referencedColumns: ["batch_id"]
+          },
+          {
+            foreignKeyName: "payment_batch_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_batch_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_reconciliation"
+            referencedColumns: ["invoice_id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -1885,6 +2009,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pay_batches"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_pay_batch_id_fkey"
+            columns: ["pay_batch_id"]
+            isOneToOne: false
+            referencedRelation: "v_payment_batch_summary"
+            referencedColumns: ["batch_id"]
           },
           {
             foreignKeyName: "payments_po_id_fkey"
@@ -2854,6 +2985,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_cfdi_id_fkey"
+            columns: ["cfdi_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_reconciliation"
+            referencedColumns: ["invoice_id"]
+          },
+          {
             foreignKeyName: "transactions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
@@ -3178,6 +3316,43 @@ export type Database = {
       }
     }
     Views: {
+      v_bank_reconciliation: {
+        Row: {
+          amount: number | null
+          bank_account_id: string | null
+          bank_name: string | null
+          date: string | null
+          description: string | null
+          diff: number | null
+          emisor_id: string | null
+          invoice_id: string | null
+          invoice_total: number | null
+          numero_cuenta: string | null
+          reconciled: boolean | null
+          reconciled_exact: boolean | null
+          reference: string | null
+          supplier_name: string | null
+          transaction_id: string | null
+          type: string | null
+          uuid_cfdi: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_emisor_id_fkey"
+            columns: ["emisor_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_budget_consumption: {
         Row: {
           budget_id: string | null
@@ -3839,6 +4014,29 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      v_payment_batch_summary: {
+        Row: {
+          bank_account_id: string | null
+          bank_name: string | null
+          batch_id: string | null
+          created_at: string | null
+          invoice_count: number | null
+          numero_cuenta: string | null
+          scheduled_date: string | null
+          status: string | null
+          title: string | null
+          total_amount: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_batches_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
           },
         ]
       }

@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign } from "lucide-react";
 import { BankAccountsTab } from "@/components/finance/BankAccountsTab";
-import { PurchaseOrdersTab } from "@/components/finance/PurchaseOrdersTab";
+import { PaymentBatchesTab } from "@/components/finance/PaymentBatchesTab";
+import { BankReconciliationTab } from "@/components/finance/BankReconciliationTab";
 import { TransactionsTab } from "@/components/finance/TransactionsTab";
-import { ReportsTab } from "@/components/finance/ReportsTab";
 import { ProviderBalanceTab } from "@/components/finance/ProviderBalanceTab";
+import { ReportsTab } from "@/components/finance/ReportsTab";
+import { Building2, FileText, DollarSign, ArrowLeftRight, Receipt, TrendingUp, BarChart3 } from "lucide-react";
 
 export default function Finanzas() {
   return (
@@ -16,32 +16,65 @@ export default function Finanzas() {
       </div>
 
       <Tabs defaultValue="accounts" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="accounts">Cuentas Bancarias</TabsTrigger>
-          <TabsTrigger value="purchase-orders">Órdenes de Compra</TabsTrigger>
-          <TabsTrigger value="transactions">Transacciones</TabsTrigger>
-          <TabsTrigger value="reports">Reportes</TabsTrigger>
-          <TabsTrigger value="providers">Proveedores</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="accounts" className="gap-2">
+            <Building2 className="h-4 w-4" />
+            Bancos
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Facturas
+          </TabsTrigger>
+          <TabsTrigger value="batches" className="gap-2">
+            <DollarSign className="h-4 w-4" />
+            Lotes de Pago
+          </TabsTrigger>
+          <TabsTrigger value="reconciliation" className="gap-2">
+            <ArrowLeftRight className="h-4 w-4" />
+            Conciliación
+          </TabsTrigger>
+          <TabsTrigger value="transactions" className="gap-2">
+            <Receipt className="h-4 w-4" />
+            Movimientos
+          </TabsTrigger>
+          <TabsTrigger value="providers" className="gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Saldos
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Reportes
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="accounts">
           <BankAccountsTab />
         </TabsContent>
 
-        <TabsContent value="purchase-orders">
-          <PurchaseOrdersTab />
+        <TabsContent value="invoices">
+          <div className="text-center py-12 text-muted-foreground">
+            Módulo de Facturas en desarrollo
+          </div>
+        </TabsContent>
+
+        <TabsContent value="batches">
+          <PaymentBatchesTab />
+        </TabsContent>
+
+        <TabsContent value="reconciliation">
+          <BankReconciliationTab />
         </TabsContent>
 
         <TabsContent value="transactions">
           <TransactionsTab />
         </TabsContent>
 
-        <TabsContent value="reports">
-          <ReportsTab />
-        </TabsContent>
-
         <TabsContent value="providers">
           <ProviderBalanceTab />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <ReportsTab />
         </TabsContent>
       </Tabs>
     </div>
