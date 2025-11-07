@@ -9,7 +9,8 @@ import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users } from "lucide-react";
+import { generateRoute } from "@/config/routes";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
@@ -59,10 +60,20 @@ export default function ProyectoDetalle() {
           </Button>
           <h1 className="text-3xl font-bold">Expediente del Proyecto</h1>
         </div>
-        <Button onClick={() => navigate(`/construccion/${id}`)} className="gap-2">
-          <HardHat className="h-4 w-4" />
-          Ir a Construcción
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate(generateRoute.proyectoEquipo(id!))} className="gap-2">
+            <Users className="h-4 w-4" />
+            Equipo
+          </Button>
+          <Button variant="outline" onClick={() => navigate(generateRoute.proyectoChat(id!))} className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Chat
+          </Button>
+          <Button onClick={() => navigate(`/construccion/${id}`)} className="gap-2">
+            <HardHat className="h-4 w-4" />
+            Ir a Construcción
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
