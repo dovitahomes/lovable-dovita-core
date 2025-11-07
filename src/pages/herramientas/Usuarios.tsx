@@ -5,14 +5,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Users, Search, UserPlus } from "lucide-react";
+import { Users, Search, UserPlus, Trash2 } from "lucide-react";
 import { UserRoleBadges } from "@/components/admin/UserRoleBadges";
 import { PermissionMatrix } from "@/components/admin/PermissionMatrix";
 import { RoleChangeHistory } from "@/components/admin/RoleChangeHistory";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { inviteUser } from "@/lib/userManagement";
+import { inviteUser, deleteUser } from "@/lib/userManagement";
+import { useAuth } from "@/app/auth/AuthProvider";
 
 type UserRow = {
   id: string;
@@ -22,12 +33,16 @@ type UserRow = {
 };
 
 export default function Usuarios() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -77,6 +92,35 @@ export default function Usuarios() {
       return;
     }
     inviteUserMutation.mutate({ email: inviteEmail, fullName: inviteName });
+  };
+
+  const handleDeleteClick = (userRow: UserRow) => {
+    setUserToDelete(userRow);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    
+    const result = await deleteUser(userToDelete.id);
+
+    if (result.success) {
+      toast.success("Usuario eliminado exitosamente");
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      
+      // If deleted user was selected, clear selection
+      if (selectedUserId === userToDelete.id) {
+        setSelectedUserId(null);
+      }
+    } else {
+      toast.error(result.error || "Error al eliminar usuario");
+    }
+    
+    setIsDeleting(false);
   };
 
   const filteredUsers = users?.filter(
@@ -187,17 +231,17 @@ export default function Usuarios() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((user) => (
+                    filteredUsers.map((userRow) => (
                       <TableRow 
-                        key={user.id}
-                        className={selectedUserId === user.id ? "bg-muted" : ""}
+                        key={userRow.id}
+                        className={selectedUserId === userRow.id ? "bg-muted" : ""}
                       >
-                        <TableCell className="font-medium">{user.email}</TableCell>
-                        <TableCell>{user.full_name || "-"}</TableCell>
+                        <TableCell className="font-medium">{userRow.email}</TableCell>
+                        <TableCell>{userRow.full_name || "-"}</TableCell>
                         <TableCell>
                           <div className="flex gap-1 flex-wrap">
-                            {user.roles.length > 0 ? (
-                              user.roles.map((role) => (
+                            {userRow.roles.length > 0 ? (
+                              userRow.roles.map((role) => (
                                 <span
                                   key={role}
                                   className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary"
@@ -211,13 +255,27 @@ export default function Usuarios() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant={selectedUserId === user.id ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setSelectedUserId(user.id)}
-                          >
-                            {selectedUserId === user.id ? "Seleccionado" : "Seleccionar"}
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant={selectedUserId === userRow.id ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedUserId(userRow.id)}
+                            >
+                              {selectedUserId === userRow.id ? "Seleccionado" : "Seleccionar"}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(userRow);
+                              }}
+                              disabled={userRow.id === user?.id}
+                              title={userRow.id === user?.id ? "No puedes eliminar tu propio usuario" : "Eliminar usuario"}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -262,6 +320,39 @@ export default function Usuarios() {
           <RoleChangeHistory userId={selectedUser.id} />
         </>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar usuario?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Esta acción es <strong>irreversible</strong> y eliminará completamente:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>La cuenta de usuario ({userToDelete?.email})</li>
+                <li>Todos sus roles y permisos</li>
+                <li>Su perfil y datos asociados</li>
+                <li>El acceso a la plataforma será revocado inmediatamente</li>
+              </ul>
+              <p className="font-semibold mt-4">
+                ¿Estás seguro que deseas continuar?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Eliminando..." : "Sí, eliminar usuario"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

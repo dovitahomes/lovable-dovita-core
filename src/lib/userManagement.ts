@@ -92,6 +92,47 @@ export async function sendPasswordReset(email: string): Promise<{ success: boole
 /**
  * Health check for Supabase connection
  */
+/**
+ * Deletes a user completely from the system (auth + profile + roles + permissions)
+ * Only admins can delete users
+ */
+export async function deleteUser(userId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('No authenticated session');
+    }
+
+    const SUPABASE_URL = "https://bkthkotzicohjizmcmsa.supabase.co";
+
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/delete-user`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: userId }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete user');
+    }
+
+    const result = await response.json();
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting user:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Health check for Supabase connection
+ */
 export async function healthCheckSupabase(): Promise<{ 
   connected: boolean; 
   profiles_accessible: boolean;
