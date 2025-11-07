@@ -57,49 +57,92 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Invite user via Admin API
-    const { data: authData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: {
+    // Check if user already exists
+    const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
+    const userExists = existingUser?.users.find(u => u.email === email);
+
+    let userId: string;
+
+    if (userExists) {
+      // User already exists, just update roles/permissions
+      userId = userExists.id;
+      console.log(`User ${email} already exists, updating roles/permissions`);
+
+      // Update or create profile
+      await supabaseAdmin.from('profiles').upsert({
+        id: userId,
+        email,
         full_name: full_name || email.split('@')[0],
-      },
-    });
+        phone: phone || null,
+      });
 
-    if (inviteError) throw inviteError;
+      // Update user metadata if needed
+      if (sucursal_id || fecha_nacimiento) {
+        await supabaseAdmin.from('user_metadata').upsert({
+          user_id: userId,
+          sucursal_id: sucursal_id || null,
+          fecha_nacimiento: fecha_nacimiento || null,
+        });
+      }
 
-    const userId = authData.user.id;
-
-    // Create profile
-    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
-      id: userId,
-      email,
-      full_name: full_name || email.split('@')[0],
-      phone: phone || null,
-    });
-
-    if (profileError) throw profileError;
-
-    // Create user metadata if needed
-    if (sucursal_id || fecha_nacimiento) {
-      await supabaseAdmin.from('user_metadata').insert({
+      // Update role (delete old, insert new)
+      await supabaseAdmin.from('user_roles').delete().eq('user_id', userId);
+      await supabaseAdmin.from('user_roles').insert({
         user_id: userId,
-        sucursal_id: sucursal_id || null,
-        fecha_nacimiento: fecha_nacimiento || null,
+        role_name: role,
+      });
+
+      // Reseed permissions
+      await supabaseAdmin.rpc('seed_role_permissions', {
+        p_user_id: userId,
+        p_role_name: role,
+      });
+
+    } else {
+      // Invite new user
+      const { data: authData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+        data: {
+          full_name: full_name || email.split('@')[0],
+        },
+      });
+
+      if (inviteError) throw inviteError;
+
+      userId = authData.user.id;
+
+      // Create profile
+      const { error: profileError } = await supabaseAdmin.from('profiles').insert({
+        id: userId,
+        email,
+        full_name: full_name || email.split('@')[0],
+        phone: phone || null,
+      });
+
+      if (profileError) throw profileError;
+
+      // Create user metadata if needed
+      if (sucursal_id || fecha_nacimiento) {
+        await supabaseAdmin.from('user_metadata').insert({
+          user_id: userId,
+          sucursal_id: sucursal_id || null,
+          fecha_nacimiento: fecha_nacimiento || null,
+        });
+      }
+
+      // Assign role
+      const { error: roleError } = await supabaseAdmin.from('user_roles').insert({
+        user_id: userId,
+        role_name: role,
+      });
+
+      if (roleError) throw roleError;
+
+      // Seed permissions for the role
+      await supabaseAdmin.rpc('seed_role_permissions', {
+        p_user_id: userId,
+        p_role_name: role,
       });
     }
-
-    // Assign role
-    const { error: roleError } = await supabaseAdmin.from('user_roles').insert({
-      user_id: userId,
-      role_name: role,
-    });
-
-    if (roleError) throw roleError;
-
-    // Seed permissions for the role
-    await supabaseAdmin.rpc('seed_role_permissions', {
-      p_user_id: userId,
-      p_role_name: role,
-    });
 
     return new Response(
       JSON.stringify({ 
