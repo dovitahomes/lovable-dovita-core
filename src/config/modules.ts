@@ -32,8 +32,7 @@ export const MODULES = [
   { key: 'comisiones', path: '/comisiones', label: 'Comisiones', group: 'Administración' },
 
   // Gestión
-  { key: 'usuarios', path: '/herramientas/usuarios', label: 'Usuarios', group: 'Gestión' },
-  { key: 'identidades', path: '/herramientas/identidades', label: 'Identidades', group: 'Gestión' },
+  { key: 'usuarios', path: '/herramientas/gestion-usuarios', label: 'Gestión de Usuarios', group: 'Gestión' },
   { key: 'accesos', path: '/herramientas/accesos', label: 'Accesos', group: 'Gestión' },
   { key: 'sucursales', path: '/herramientas/sucursales', label: 'Sucursales', group: 'Gestión' },
   { key: 'centro_reglas', path: '/herramientas/reglas', label: 'Centro de Reglas', group: 'Gestión' },

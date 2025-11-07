@@ -77,7 +77,7 @@ export function useTypedNavigate() {
     toHerramientasContenido: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO),
     toHerramientasSucursales: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES),
     toHerramientasAlianzas: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_ALIANZAS),
-    toHerramientasIdentidades: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES),
+    toHerramientasGestionUsuarios: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS),
     toHerramientasAccesos: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS),
     toHerramientasReglas: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS),
     toHerramientasUsuarios: () => navigate(BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS),

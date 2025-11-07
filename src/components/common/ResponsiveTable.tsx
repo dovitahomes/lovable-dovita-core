@@ -2,7 +2,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 
-interface Column<T> {
+export interface Column<T> {
   header: string;
   key: keyof T;
   render?: (value: any, item: T) => React.ReactNode;

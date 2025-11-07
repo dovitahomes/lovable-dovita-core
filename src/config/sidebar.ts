@@ -186,10 +186,10 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "herramientas" 
       },
       { 
-        title: "Identidades", 
-        url: BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES, 
+        title: "Gestión de Usuarios", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS, 
         icon: Users, 
-        moduleName: "herramientas" 
+        moduleName: "usuarios" 
       },
       { 
         title: "Accesos", 

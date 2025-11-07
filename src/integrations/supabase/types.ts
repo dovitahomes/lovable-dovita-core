@@ -2150,35 +2150,50 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string
+          emergency_contact: Json | null
+          fecha_ingreso: string | null
           fecha_nacimiento: string | null
           full_name: string | null
           id: string
+          imss_number: string | null
           last_login_at: string | null
           phone: string | null
+          rfc: string | null
           sucursal_id: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email: string
+          emergency_contact?: Json | null
+          fecha_ingreso?: string | null
           fecha_nacimiento?: string | null
           full_name?: string | null
           id: string
+          imss_number?: string | null
           last_login_at?: string | null
           phone?: string | null
+          rfc?: string | null
           sucursal_id?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string
+          emergency_contact?: Json | null
+          fecha_ingreso?: string | null
           fecha_nacimiento?: string | null
           full_name?: string | null
           id?: string
+          imss_number?: string | null
           last_login_at?: string | null
           phone?: string | null
+          rfc?: string | null
           sucursal_id?: string | null
           updated_at?: string
         }
@@ -3086,6 +3101,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_documents: {
+        Row: {
+          category: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          notes: string | null
+          uploaded_by: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          notes?: string | null
+          uploaded_by?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          notes?: string | null
+          uploaded_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_metadata: {
         Row: {
@@ -4237,12 +4291,17 @@ export type Database = {
       }
       vw_users_extended: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
           email: string | null
+          emergency_contact: Json | null
+          fecha_ingreso: string | null
           fecha_nacimiento: string | null
           full_name: string | null
           id: string | null
+          imss_number: string | null
           phone: string | null
+          rfc: string | null
           roles: string[] | null
           sucursal_id: string | null
           sucursal_nombre: string | null

@@ -107,7 +107,7 @@ export const BACKOFFICE_ROUTES = {
   HERRAMIENTAS_CONTENIDO: '/herramientas/contenido-corporativo',
   HERRAMIENTAS_SUCURSALES: '/herramientas/sucursales',
   HERRAMIENTAS_ALIANZAS: '/herramientas/alianzas',
-  HERRAMIENTAS_IDENTIDADES: '/herramientas/identidades',
+  HERRAMIENTAS_GESTION_USUARIOS: '/herramientas/gestion-usuarios',
   HERRAMIENTAS_ACCESOS: '/herramientas/accesos',
   HERRAMIENTAS_REGLAS: '/herramientas/reglas',
   HERRAMIENTAS_USUARIOS: '/herramientas/usuarios',

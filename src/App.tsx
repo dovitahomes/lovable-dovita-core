@@ -121,9 +121,9 @@ const InternalLayout = () => {
                     <Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>
                   </ProtectedRoute>
                 } />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES} element={
-                  <ProtectedRoute moduleName="identidades">
-                    <Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS} element={
+                  <ProtectedRoute moduleName="usuarios">
+                    <Suspense fallback={<TableSkeleton />}><GestionUsuarios /></Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS} element={
