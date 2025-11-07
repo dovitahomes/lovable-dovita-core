@@ -6,24 +6,45 @@ import { Button } from '@/components/ui/button';
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import { useRealClientData } from '@/hooks/client-app/useRealClientData';
 import type { Document } from '@/lib/client-app/client-data';
 
 export default function Documents() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
+  const { source, forceClientId } = useDataSource();
   const [selectedDocument, setSelectedDocument] = useState<{
     name: string;
     type: string;
   } | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
 
+  // Fetch real data if not in mock mode
+  const { data: realData, isLoading: loadingRealData } = useRealClientData(
+    source === 'real' ? forceClientId : null,
+    source === 'real' ? currentProject?.id || null : null
+  );
+
+  // Use mock or real data based on source
+  const useMock = source === 'mock';
+  const allDocuments = useMock
+    ? (currentProject?.documents || [])
+    : (realData.documents || []).map((doc: any) => ({
+        id: doc.id,
+        name: doc.nombre || 'Documento sin nombre',
+        size: doc.file_size ? `${(doc.file_size / 1024).toFixed(0)} KB` : 'N/A',
+        date: doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-MX') : 'N/A',
+        type: (doc.file_type?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
+        category: (doc.tipo_carpeta || 'proyecto') as Document['category'],
+        url: doc.url || '',
+      }));
+
   // Group documents by category
   const documents = {
-    cliente: currentProject?.documents.filter(d => d.category === 'cliente') || [],
-    proyecto: currentProject?.documents.filter(d => d.category === 'proyecto') || [],
-    legal: currentProject?.documents.filter(d => d.category === 'legal') || [],
-    diseno: currentProject?.documents.filter(d => d.category === 'diseno') || [],
-    construccion: currentProject?.documents.filter(d => d.category === 'construccion') || [],
+    cliente: allDocuments.filter(d => d.category === 'cliente'),
+    proyecto: allDocuments.filter(d => d.category === 'proyecto'),
+    legal: allDocuments.filter(d => d.category === 'legal'),
+    diseno: allDocuments.filter(d => d.category === 'diseno'),
+    construccion: allDocuments.filter(d => d.category === 'construccion'),
   };
 
   const handleViewDocument = (doc: Document) => {

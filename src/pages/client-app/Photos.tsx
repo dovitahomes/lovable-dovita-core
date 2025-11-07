@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockPhotos } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import { useRealClientData } from '@/hooks/client-app/useRealClientData';
 import { shouldShowConstructionPhotos, isInDesignPhase } from '@/lib/project-utils';
 import { MapPin, Calendar, Image as ImageIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
@@ -15,10 +16,30 @@ import PhotoViewer from '@/components/client-app/PhotoViewer';
 
 export default function Photos() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
+  const { source, forceClientId } = useDataSource();
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
+
+  // Fetch real data if not in mock mode
+  const { data: realData, isLoading: loadingRealData } = useRealClientData(
+    source === 'real' ? forceClientId : null,
+    source === 'real' ? currentProject?.id || null : null
+  );
+
+  // Use mock or real data based on source
+  const useMock = source === 'mock';
+  const projectPhotos = useMock 
+    ? mockPhotos.filter(photo => photo.projectId === currentProject?.id)
+    : (realData.photos || []).map((photo: any) => ({
+        id: photo.id,
+        projectId: photo.project_id,
+        url: photo.url || '',
+        phase: photo.fase || 'General',
+        date: photo.fecha_foto || new Date().toISOString(),
+        description: photo.descripcion || 'Sin descripción',
+        location: { lat: 0, lng: 0 }, // Not available in view
+      }));
 
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
@@ -47,9 +68,6 @@ export default function Photos() {
     );
   }
 
-  // Filter photos by current project
-  const projectPhotos = mockPhotos.filter(photo => photo.projectId === currentProject?.id);
-  
   // Determine if in design phase
   const inDesignPhase = isInDesignPhase(currentProject);
   

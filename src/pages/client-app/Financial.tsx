@@ -4,18 +4,43 @@ import { Badge } from '@/components/ui/badge';
 import { mockMinistraciones, budgetCategories } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import { useRealClientData } from '@/hooks/client-app/useRealClientData';
 import { CheckCircle2, Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Financial() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
+  const { source, forceClientId } = useDataSource();
   const project = currentProject;
 
-  // Filter financial data by current project
-  const projectMinistraciones = mockMinistraciones.filter(m => m.projectId === project?.id);
-  const projectBudgetCategories = budgetCategories.filter(b => b.projectId === project?.id);
+  // Fetch real data if not in mock mode
+  const { data: realData, isLoading: loadingRealData } = useRealClientData(
+    source === 'real' ? forceClientId : null,
+    source === 'real' ? currentProject?.id || null : null
+  );
+
+  // Use mock or real data based on source
+  const useMock = source === 'mock';
+  const projectMinistraciones = useMock
+    ? mockMinistraciones.filter(m => m.projectId === project?.id)
+    : (realData.ministrations || []).map((m: any) => ({
+        id: m.id || m.seq,
+        projectId: m.project_id,
+        amount: m.monto || 0,
+        date: m.fecha || new Date().toISOString(),
+        status: m.status || 'future',
+        concept: m.label || `Ministración ${m.seq}`,
+      }));
+
+  const projectBudgetCategories = useMock
+    ? budgetCategories.filter(b => b.projectId === project?.id)
+    : (realData.financialSummary ? [{
+        projectId: project?.id,
+        name: realData.financialSummary.mayor_name || 'Presupuesto',
+        budgeted: realData.financialSummary.total_deposits || 0,
+        spent: realData.financialSummary.total_expenses || 0,
+      }] : []);
 
   if (!project) {
     return <div className="h-full flex items-center justify-center">Cargando datos financieros...</div>;

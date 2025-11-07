@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { mockAppointments, mockMinistraciones, mockPhotos } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import { useRealClientData } from '@/hooks/client-app/useRealClientData';
 import { calculateProjectProgress, getCurrentPhase, isInDesignPhase } from '@/lib/project-utils';
 import { getProjectHeroImage } from '@/lib/client-app/dataAdapters';
 import { Calendar, MapPin, Video, Clock, User, FileText, MessageCircle, Image as ImageIcon } from 'lucide-react';
@@ -15,10 +16,16 @@ import { useState } from 'react';
 
 export default function Dashboard() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
+  const { source, forceClientId } = useDataSource();
   const project = currentProject;
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
+
+  // Fetch real data if not in mock mode
+  const { data: realData, isLoading: loadingRealData } = useRealClientData(
+    source === 'real' ? forceClientId : null,
+    source === 'real' ? currentProject?.id || null : null
+  );
   
   // Early return if no project
   if (!project) {
@@ -69,7 +76,17 @@ export default function Dashboard() {
 
   // Calcular pagos según la fase del proyecto
   const inDesignPhase = isInDesignPhase(project);
-  const projectPayments = mockMinistraciones.filter(m => m.projectId === project.id);
+  const useMock = source === 'mock';
+  const projectPayments = useMock
+    ? mockMinistraciones.filter(m => m.projectId === project.id)
+    : (realData.ministrations || []).map((m: any) => ({
+        id: m.id || m.seq,
+        projectId: m.project_id,
+        amount: m.monto || 0,
+        date: m.fecha || new Date().toISOString(),
+        status: m.status || 'future',
+        concept: m.label || `Ministración ${m.seq}`,
+      }));
   
   let displayPaid = project.totalPaid;
   let displayPending = project.totalPending;
@@ -89,7 +106,16 @@ export default function Dashboard() {
   }
 
   // Obtener imágenes correctas según la fase
-  const projectPhotos = mockPhotos.filter(photo => photo.projectId === project.id);
+  const projectPhotos = useMock
+    ? mockPhotos.filter(photo => photo.projectId === project.id)
+    : (realData.photos || []).map((photo: any) => ({
+        id: photo.id,
+        projectId: photo.project_id,
+        url: photo.url || '',
+        phase: photo.fase || 'General',
+        date: photo.fecha_foto || new Date().toISOString(),
+        description: photo.descripcion || 'Sin descripción',
+      }));
   
   const recentImages = inDesignPhase
     ? project.renders?.slice(0, 3) || []
