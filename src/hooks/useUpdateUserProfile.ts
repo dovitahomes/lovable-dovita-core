@@ -39,7 +39,7 @@ export function useUpdateUserProfile() {
           .from('user_metadata')
           .upsert({
             user_id: userId,
-            sucursal_id: sucursal_id,
+            sucursal_id: sucursal_id === '' ? null : sucursal_id,
           }, {
             onConflict: 'user_id'
           });
