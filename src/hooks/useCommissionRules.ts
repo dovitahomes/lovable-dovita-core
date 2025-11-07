@@ -35,11 +35,11 @@ export function useUpsertCommissionRule() {
 
   return useMutation({
     mutationFn: async (rule: Partial<CommissionRule>) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("commission_rules")
-        .upsert(rule)
+        .upsert([rule] as any)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data;
