@@ -26,35 +26,10 @@ export function useModuleAccess() {
         return;
       }
       
-      console.log('[useModuleAccess] Starting load, user.id:', user.id);
+      console.log('[useModuleAccess] Loading permissions for user:', user.id);
       setLoading(true);
       
       try {
-        // Verificar sesión activa antes de hacer query
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('[useModuleAccess] Session check:', { 
-          hasSession: !!session, 
-          sessionError: sessionError?.message,
-          userId: session?.user?.id,
-          expiresAt: session?.expires_at 
-        });
-        
-        if (!session) {
-          console.warn('[useModuleAccess] No active session, forcing refresh');
-          const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (refreshError || !refreshedSession) {
-            console.error('[useModuleAccess] Session refresh failed, redirecting to login');
-            // Limpiar sesión y redirigir
-            await supabase.auth.signOut();
-            window.location.href = '/auth/login';
-            return;
-          }
-          
-          console.log('[useModuleAccess] ✓ Session refreshed successfully');
-        }
-        
-        // Ahora sí, hacer la query con sesión válida
         console.log('[useModuleAccess] Querying user_permissions for user:', user.id);
         const { data, error } = await supabase
           .from('user_permissions')
