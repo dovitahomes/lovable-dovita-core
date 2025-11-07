@@ -15,6 +15,7 @@ interface ResponsiveTableProps<T> {
   keyExtractor: (item: T) => string;
   actions?: (item: T) => React.ReactNode;
   emptyMessage?: string;
+  onRowClick?: (item: T) => void;
 }
 
 export function ResponsiveTable<T>({ 
@@ -22,7 +23,8 @@ export function ResponsiveTable<T>({
   columns, 
   keyExtractor, 
   actions,
-  emptyMessage = "No hay datos"
+  emptyMessage = "No hay datos",
+  onRowClick
 }: ResponsiveTableProps<T>) {
   const isMobile = useIsMobile();
 
@@ -39,7 +41,11 @@ export function ResponsiveTable<T>({
     return (
       <div className="space-y-3">
         {data.map((item) => (
-          <Card key={keyExtractor(item)}>
+          <Card 
+            key={keyExtractor(item)}
+            onClick={() => onRowClick?.(item)}
+            className={onRowClick ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}
+          >
             <CardContent className="p-4 space-y-2">
               {columns
                 .filter(col => !col.hideOnMobile)
@@ -81,7 +87,11 @@ export function ResponsiveTable<T>({
       </TableHeader>
       <TableBody>
         {data.map((item) => (
-          <TableRow key={keyExtractor(item)}>
+          <TableRow 
+            key={keyExtractor(item)}
+            onClick={() => onRowClick?.(item)}
+            className={onRowClick ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}
+          >
             {columns.map((col) => (
               <TableCell key={String(col.key)}>
                 {col.render 

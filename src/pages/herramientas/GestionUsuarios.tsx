@@ -278,6 +278,7 @@ export default function GestionUsuarios() {
             data={filteredUsers}
             columns={columns}
             keyExtractor={(user: any) => user.id}
+            onRowClick={handleRowClick}
             actions={(user: any) => (
               <div className="flex items-center gap-1">
                 <Button
