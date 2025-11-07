@@ -51,7 +51,7 @@ export function useModuleAccess() {
           console.warn('[useModuleAccess] Error loading permissions:', error.message);
           setPerms([]);
         } else {
-          console.info(`[useModuleAccess] ✓ Loaded ${data?.length || 0} permissions`);
+          console.info(`[useModuleAccess] ✓ Loaded ${data?.length || 0} permissions for user ${user.id}`);
           setPerms((data ?? []).map((d: any) => ({
             module_name: d.module_name,
             can_view: !!d.can_view,
@@ -75,7 +75,7 @@ export function useModuleAccess() {
       active = false;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [user])
+  }, [user?.id])
 
   const canView = (moduleName: string) => 
     perms.some(p => p.module_name === moduleName && p.can_view);
