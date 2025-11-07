@@ -106,13 +106,41 @@ const InternalLayout = () => {
                 {/* ============================================ */}
                 {/* HERRAMIENTAS ADMINISTRATIVAS                */}
                 {/* ============================================ */}
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} element={<Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES} element={<Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ALIANZAS} element={<Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES} element={<Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS} element={<Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS} element={<Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS} element={<Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} element={
+                  <ProtectedRoute moduleName="contenido_corporativo">
+                    <Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES} element={
+                  <ProtectedRoute moduleName="sucursales">
+                    <Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ALIANZAS} element={
+                  <ProtectedRoute moduleName="herramientas">
+                    <Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_IDENTIDADES} element={
+                  <ProtectedRoute moduleName="identidades">
+                    <Suspense fallback={<TableSkeleton />}><Identidades /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS} element={
+                  <ProtectedRoute moduleName="accesos">
+                    <Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS} element={
+                  <ProtectedRoute moduleName="centro_reglas">
+                    <Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS} element={
+                  <ProtectedRoute moduleName="usuarios">
+                    <Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
                 {/* ============================================ */}
                 {/* ERP MODULES                                  */}

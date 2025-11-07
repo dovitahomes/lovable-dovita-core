@@ -21,9 +21,20 @@ type ModulePermission = {
 export function PermissionMatrix({ userId }: PermissionMatrixProps) {
   const queryClient = useQueryClient();
 
-  // Temporarily disabled - will be restored in Prompt 2
-  const permissions: ModulePermission[] = [];
-  const isLoading = false;
+  // Fetch user's module permissions
+  const { data: permissions = [], isLoading } = useQuery({
+    queryKey: ["user-module-permissions", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_permissions")
+        .select("module_name, can_view, can_create, can_edit, can_delete")
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return (data || []) as ModulePermission[];
+    },
+    enabled: !!userId,
+  });
 
   const updatePermissionMutation = useMutation({
     mutationFn: async ({
@@ -35,9 +46,21 @@ export function PermissionMatrix({ userId }: PermissionMatrixProps) {
       field: 'can_view' | 'can_create' | 'can_edit' | 'can_delete';
       value: boolean;
     }) => {
-      // Temporarily disabled - will be restored in Prompt 2
-      toast.error("Sistema de permisos deshabilitado temporalmente");
-      throw new Error("Temporarily disabled");
+      // Upsert permission
+      const { error } = await supabase
+        .from("user_permissions")
+        .upsert(
+          {
+            user_id: userId,
+            module_name: module,
+            [field]: value,
+          },
+          {
+            onConflict: "user_id,module_name",
+          }
+        );
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-module-permissions", userId] });

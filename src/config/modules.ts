@@ -32,11 +32,13 @@ export const MODULES = [
   { key: 'comisiones', path: '/comisiones', label: 'Comisiones', group: 'Administración' },
 
   // Gestión
-  { key: 'usuarios', path: '/usuarios', label: 'Usuarios', group: 'Gestión' },
+  { key: 'usuarios', path: '/herramientas/usuarios', label: 'Usuarios', group: 'Gestión' },
+  { key: 'identidades', path: '/herramientas/identidades', label: 'Identidades', group: 'Gestión' },
   { key: 'accesos', path: '/herramientas/accesos', label: 'Accesos', group: 'Gestión' },
   { key: 'sucursales', path: '/herramientas/sucursales', label: 'Sucursales', group: 'Gestión' },
   { key: 'centro_reglas', path: '/herramientas/reglas', label: 'Centro de Reglas', group: 'Gestión' },
   { key: 'contenido_corporativo', path: '/herramientas/contenido-corporativo', label: 'Contenido Corporativo', group: 'Gestión' },
+  { key: 'herramientas', path: '/herramientas/alianzas', label: 'Alianzas', group: 'Gestión' },
 
   // Portal Cliente (solo para clientes, no mostrar en sidebar interno)
   { key: 'client_portal', path: '/client/home', label: 'Mi Proyecto', group: 'ClientOnly' },
