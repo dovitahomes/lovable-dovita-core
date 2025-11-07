@@ -61,7 +61,7 @@ const VerComoCliente = lazy(() => import("./pages/VerComoCliente"));
 const ContenidoCorporativo = lazy(() => import("./pages/herramientas/ContenidoCorporativo"));
 const Sucursales = lazy(() => import("./pages/herramientas/Sucursales"));
 const Alianzas = lazy(() => import("./pages/herramientas/Alianzas"));
-const Identidades = lazy(() => import("./pages/herramientas/Identidades"));
+const GestionUsuarios = lazy(() => import("./pages/herramientas/GestionUsuarios"));
 const Accesos = lazy(() => import("./pages/herramientas/Accesos"));
 const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
