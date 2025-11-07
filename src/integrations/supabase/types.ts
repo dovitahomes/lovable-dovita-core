@@ -3649,40 +3649,43 @@ export type Database = {
       }
       v_client_documents: {
         Row: {
-          category: string | null
-          doc_id: string | null
+          created_at: string | null
+          etiqueta: string | null
           file_size: number | null
-          label: string | null
-          mime_type: string | null
-          name: string | null
+          file_type: string | null
+          file_url: string | null
+          firmado: boolean | null
+          id: string | null
+          nombre: string | null
           project_id: string | null
-          storage_path: string | null
-          uploaded_at: string | null
-          visibility: string | null
+          tipo_carpeta: string | null
+          updated_at: string | null
         }
         Insert: {
-          category?: string | null
-          doc_id?: string | null
+          created_at?: string | null
+          etiqueta?: string | null
           file_size?: number | null
-          label?: string | null
-          mime_type?: string | null
-          name?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          firmado?: boolean | null
+          id?: string | null
+          nombre?: string | null
           project_id?: string | null
-          storage_path?: string | null
-          uploaded_at?: string | null
-          visibility?: never
+          tipo_carpeta?: string | null
+          updated_at?: string | null
         }
         Update: {
-          category?: string | null
-          doc_id?: string | null
+          created_at?: string | null
+          etiqueta?: string | null
           file_size?: number | null
-          label?: string | null
-          mime_type?: string | null
-          name?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          firmado?: boolean | null
+          id?: string | null
+          nombre?: string | null
           project_id?: string | null
-          storage_path?: string | null
-          uploaded_at?: string | null
-          visibility?: never
+          tipo_carpeta?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -3855,37 +3858,37 @@ export type Database = {
       }
       v_client_photos: {
         Row: {
-          caption: string | null
+          created_at: string | null
+          descripcion: string | null
+          fecha_foto: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string | null
           latitude: number | null
           longitude: number | null
-          phase_name: string | null
-          photo_id: string | null
           project_id: string | null
-          storage_path: string | null
-          taken_at: string | null
-          visibility: string | null
         }
         Insert: {
-          caption?: string | null
+          created_at?: string | null
+          descripcion?: string | null
+          fecha_foto?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string | null
           latitude?: number | null
           longitude?: number | null
-          phase_name?: never
-          photo_id?: string | null
           project_id?: string | null
-          storage_path?: string | null
-          taken_at?: string | null
-          visibility?: never
         }
         Update: {
-          caption?: string | null
+          created_at?: string | null
+          descripcion?: string | null
+          fecha_foto?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string | null
           latitude?: number | null
           longitude?: number | null
-          phase_name?: never
-          photo_id?: string | null
           project_id?: string | null
-          storage_path?: string | null
-          taken_at?: string | null
-          visibility?: never
         }
         Relationships: [
           {

@@ -25,15 +25,15 @@ export function useUnifiedDocuments(projectId: string | null) {
     };
   }
   
-  // Transform real data to match UI format
+  // Transform real data to match UI format (using actual column names from v_client_documents)
   const transformedDocs = realDocs.map(doc => ({
-    id: doc.doc_id || '',
-    name: doc.name || '',
+    id: doc.id || '',
+    name: doc.nombre || '',
     size: doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(1)} MB` : '0 MB',
-    date: doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString('es-MX') : '',
-    type: (doc.mime_type?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
-    category: (doc.category || 'proyecto') as Document['category'],
-    url: doc.storage_path || undefined,
+    date: doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-MX') : '',
+    type: (doc.file_type?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
+    category: (doc.tipo_carpeta?.toLowerCase() || 'proyecto') as Document['category'],
+    url: doc.file_url || undefined,
   }));
   
   return {
@@ -58,14 +58,14 @@ export function useUnifiedPhotos(projectId: string | null) {
     };
   }
   
-  // Transform real data to match UI format
+  // Transform real data to match UI format (using actual column names from v_client_photos)
   const transformedPhotos = realPhotos.map(photo => ({
-    id: photo.photo_id || '',
+    id: photo.id || '',
     projectId: photo.project_id || '',
-    url: photo.storage_path || '',
-    phase: photo.phase_name || 'Construcción',
-    date: photo.taken_at ? new Date(photo.taken_at).toISOString().split('T')[0] : '',
-    description: photo.caption || '',
+    url: photo.file_url || '',
+    phase: 'Construcción', // phase_name doesn't exist in v_client_photos
+    date: photo.fecha_foto ? new Date(photo.fecha_foto).toISOString().split('T')[0] : '',
+    description: photo.descripcion || '',
     location: { 
       lat: photo.latitude || 0, 
       lng: photo.longitude || 0 

@@ -9,6 +9,7 @@ export const BUCKETS = {
   documentos: { private: true },
   project_docs: { private: true },
   'design-deliverables': { private: true },
+  'construction-photos': { private: true },
   cfdi: { private: true },
   firmas: { private: true },
 } as const;

@@ -679,17 +679,17 @@ export async function getProjectPhotos(projectId: string) {
       return [];
     }
 
-    // Get signed URLs for photos
+    // Get signed URLs for photos (using actual column names from v_client_photos)
     const photosWithUrls = await Promise.all(
       (photos || []).map(async (photo) => {
-        const signedUrl = await getSignedUrl(photo.storage_path);
+        const signedUrl = await getSignedUrl(photo.file_url);
         return {
-          id: photo.photo_id,
+          id: photo.id,
           projectId: photo.project_id,
-          url: signedUrl || photo.storage_path,
-          phase: photo.phase_name || 'Construcción',
-          date: photo.taken_at,
-          description: photo.caption || '',
+          url: signedUrl || photo.file_url,
+          phase: 'Construcción', // phase_name doesn't exist in v_client_photos
+          date: photo.fecha_foto,
+          description: photo.descripcion || '',
           location: photo.latitude && photo.longitude 
             ? { lat: Number(photo.latitude), lng: Number(photo.longitude) }
             : undefined
@@ -722,18 +722,18 @@ export async function getProjectDocuments(projectId: string) {
       return [];
     }
 
-    // Get signed URLs for documents
+    // Get signed URLs for documents (using actual column names from v_client_documents)
     const docsWithUrls = await Promise.all(
       (documents || []).map(async (doc) => {
-        const signedUrl = await getSignedUrl(doc.storage_path);
+        const signedUrl = await getSignedUrl(doc.file_url);
         return {
-          id: doc.doc_id,
-          name: doc.name,
+          id: doc.id,
+          name: doc.nombre,
           size: doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'N/A',
-          date: new Date(doc.uploaded_at).toLocaleDateString('es-MX'),
-          type: doc.mime_type?.includes('image') ? 'image' as const : 'pdf' as const,
-          category: doc.category as Document['category'],
-          url: signedUrl || doc.storage_path
+          date: new Date(doc.created_at).toLocaleDateString('es-MX'),
+          type: doc.file_type?.includes('image') ? 'image' as const : 'pdf' as const,
+          category: (doc.tipo_carpeta?.toLowerCase() || 'proyecto') as Document['category'],
+          url: signedUrl || doc.file_url
         };
       })
     );

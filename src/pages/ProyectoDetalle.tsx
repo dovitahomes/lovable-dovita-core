@@ -9,7 +9,8 @@ import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays } from "lucide-react";
+import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays, Camera } from "lucide-react";
 import { generateRoute } from "@/config/routes";
 
 export default function ProyectoDetalle() {
@@ -138,6 +139,10 @@ export default function ProyectoDetalle() {
             <FileText className="h-4 w-4" />
             Documentos
           </TabsTrigger>
+          <TabsTrigger value="fotos" className="gap-2">
+            <Camera className="h-4 w-4" />
+            Fotos
+          </TabsTrigger>
           <TabsTrigger value="diseno" className="gap-2">
             <PenTool className="h-4 w-4" />
             Diseño
@@ -156,6 +161,10 @@ export default function ProyectoDetalle() {
         
         <TabsContent value="documentos" className="mt-6">
           <DocumentsTab projectId={id!} />
+        </TabsContent>
+        
+        <TabsContent value="fotos" className="mt-6">
+          <ConstructionPhotosTab projectId={id!} />
         </TabsContent>
         
         <TabsContent value="diseno" className="mt-6">

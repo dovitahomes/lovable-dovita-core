@@ -1,21 +1,16 @@
 import { useState, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage/storage-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Upload, MapPin, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Upload, MapPin, Eye } from "lucide-react";
-import { useDropzone } from "react-dropzone";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ConstructionPhotosTabProps {
   projectId: string;
@@ -24,12 +19,12 @@ interface ConstructionPhotosTabProps {
 export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps) {
   const [photos, setPhotos] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [descripcion, setDescripcion] = useState("");
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [description, setDescription] = useState("");
   const [visibilidad, setVisibilidad] = useState<"interno" | "cliente">("interno");
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
-  const [showPhotoDialog, setShowPhotoDialog] = useState(false);
+  const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     loadPhotos();
@@ -37,11 +32,13 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
   }, [projectId]);
 
   const getCurrentLocation = () => {
-    if (navigator.geolocation) {
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLatitude(position.coords.latitude.toString());
-          setLongitude(position.coords.longitude.toString());
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -57,11 +54,9 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
       .eq("project_id", projectId)
       .order("fecha_foto", { ascending: false });
 
-    if (error) {
-      toast.error("Error al cargar fotos");
-      return;
+    if (!error && data) {
+      setPhotos(data);
     }
-    setPhotos(data || []);
   };
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -71,40 +66,44 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
     const file = acceptedFiles[0];
 
     try {
-      const { data: user } = await supabase.auth.getUser();
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${projectId}/${Date.now()}.${fileExt}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuario no autenticado");
 
-      const { error: uploadError } = await supabase.storage
-        .from("documentos")
-        .upload(fileName, file);
+      // Upload to storage using helper (path: projectId/YYYY-MM-uuid.ext)
+      const { path } = await uploadToBucket({
+        bucket: "construction-photos",
+        projectId,
+        file,
+        filename: file.name
+      });
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("documentos")
-        .getPublicUrl(fileName);
-
+      // Insert photo record
       const { error: insertError } = await supabase
         .from("construction_photos")
         .insert({
           project_id: projectId,
-          file_url: publicUrl,
+          file_url: path, // Store only the path
           file_name: file.name,
-          latitude: latitude ? parseFloat(latitude) : null,
-          longitude: longitude ? parseFloat(longitude) : null,
-          descripcion: descripcion || null,
+          latitude: location?.lat || null,
+          longitude: location?.lng || null,
+          descripcion: description || null,
           visibilidad,
-          uploaded_by: user?.user?.id || null,
+          uploaded_by: user.id,
+          fecha_foto: new Date().toISOString(),
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        // Cleanup: delete uploaded file if DB insert fails
+        await deleteFromBucket("construction-photos", path);
+        throw insertError;
+      }
 
-      toast.success("Foto subida correctamente");
-      setDescripcion("");
+      toast.success("Foto subida exitosamente");
+      setDescription("");
       loadPhotos();
     } catch (error: any) {
-      toast.error("Error al subir foto: " + error.message);
+      console.error("Error uploading photo:", error);
+      toast.error("Error al subir la foto: " + error.message);
     } finally {
       setUploading(false);
     }
@@ -117,9 +116,45 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
     disabled: uploading,
   });
 
-  const viewPhoto = (photo: any) => {
+  const viewPhoto = async (photo: any) => {
     setSelectedPhoto(photo);
-    setShowPhotoDialog(true);
+    setPhotoDialogOpen(true);
+    
+    // Get signed URL for private bucket
+    try {
+      const { url } = await getSignedUrl({
+        bucket: "construction-photos",
+        path: photo.file_url,
+        expiresInSeconds: 600 // 10 minutes
+      });
+      setPreviewUrl(url);
+    } catch (error) {
+      console.error("Error getting signed URL:", error);
+      toast.error("Error al cargar la foto");
+    }
+  };
+
+  const deletePhoto = async (photo: any) => {
+    if (!confirm(`¿Eliminar esta foto?`)) return;
+
+    try {
+      // Delete from storage
+      await deleteFromBucket("construction-photos", photo.file_url);
+
+      // Delete record
+      const { error } = await supabase
+        .from("construction_photos")
+        .delete()
+        .eq("id", photo.id);
+
+      if (error) throw error;
+
+      toast.success("Foto eliminada");
+      loadPhotos();
+    } catch (error: any) {
+      console.error("Error deleting photo:", error);
+      toast.error("Error al eliminar la foto");
+    }
   };
 
   return (
@@ -135,8 +170,8 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
               <Input
                 type="number"
                 step="any"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
+                value={location?.lat || ""}
+                onChange={(e) => setLocation(prev => ({ ...prev!, lat: parseFloat(e.target.value) || 0 }))}
                 placeholder="19.4326"
               />
             </div>
@@ -145,8 +180,8 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
               <Input
                 type="number"
                 step="any"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
+                value={location?.lng || ""}
+                onChange={(e) => setLocation(prev => ({ ...prev!, lng: parseFloat(e.target.value) || 0 }))}
                 placeholder="-99.1332"
               />
             </div>
@@ -155,8 +190,8 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
           <div>
             <Label>Descripción</Label>
             <Textarea
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Descripción de la foto..."
               rows={3}
             />
@@ -196,34 +231,42 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
 
       <Card>
         <CardHeader>
-          <CardTitle>Galería de Fotos</CardTitle>
+          <CardTitle>Galería de Fotografías</CardTitle>
         </CardHeader>
         <CardContent>
           {photos.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              No hay fotos subidas
-            </div>
+            <p className="text-muted-foreground text-center py-8">No hay fotografías aún</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {photos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="relative group cursor-pointer rounded-lg overflow-hidden aspect-square"
-                  onClick={() => viewPhoto(photo)}
-                >
-                  <img
-                    src={photo.file_url}
-                    alt={photo.file_name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Eye className="h-8 w-8 text-white" />
-                  </div>
-                  {(photo.latitude || photo.longitude) && (
-                    <div className="absolute top-2 right-2 bg-black/70 text-white p-1 rounded">
-                      <MapPin className="h-4 w-4" />
+                <div key={photo.id} className="relative group">
+                  <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Upload className="h-8 w-8 text-muted-foreground animate-pulse" />
                     </div>
+                  </div>
+                  <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => viewPhoto(photo)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" /> Ver
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deletePhoto(photo)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {photo.descripcion && (
+                    <p className="text-sm text-muted-foreground mt-2">{photo.descripcion}</p>
                   )}
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(photo.fecha_foto).toLocaleDateString('es-MX')}
+                  </p>
                 </div>
               ))}
             </div>
@@ -231,29 +274,38 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
         </CardContent>
       </Card>
 
-      <Dialog open={showPhotoDialog} onOpenChange={setShowPhotoDialog}>
+      <Dialog open={photoDialogOpen} onOpenChange={(open) => {
+        setPhotoDialogOpen(open);
+        if (!open) {
+          setPreviewUrl(null);
+          setSelectedPhoto(null);
+        }
+      }}>
         <DialogContent className="max-w-4xl">
-          {selectedPhoto && (
+          <DialogHeader>
+            <DialogTitle>Fotografía de Construcción</DialogTitle>
+          </DialogHeader>
+          {selectedPhoto && previewUrl && (
             <div className="space-y-4">
               <img
-                src={selectedPhoto.file_url}
-                alt={selectedPhoto.file_name}
-                className="w-full rounded-lg"
+                src={previewUrl}
+                alt={selectedPhoto.descripcion || "Foto de construcción"}
+                className="w-full max-h-[70vh] object-contain rounded-lg"
               />
-              <div className="space-y-2">
-                {selectedPhoto.descripcion && (
-                  <p className="text-sm">{selectedPhoto.descripcion}</p>
-                )}
-                {(selectedPhoto.latitude || selectedPhoto.longitude) && (
-                  <p className="text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 inline mr-1" />
-                    {selectedPhoto.latitude}, {selectedPhoto.longitude}
-                  </p>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  {new Date(selectedPhoto.fecha_foto).toLocaleString()}
-                </p>
-              </div>
+              {selectedPhoto.descripcion && (
+                <p className="text-sm">{selectedPhoto.descripcion}</p>
+              )}
+              {selectedPhoto.latitude && selectedPhoto.longitude && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span>
+                    {selectedPhoto.latitude.toFixed(6)}, {selectedPhoto.longitude.toFixed(6)}
+                  </span>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Subida: {new Date(selectedPhoto.fecha_foto).toLocaleString('es-MX')}
+              </p>
             </div>
           )}
         </DialogContent>
