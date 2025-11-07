@@ -110,29 +110,35 @@ Deno.serve(async (req) => {
 
       userId = authData.user.id;
 
-      // Create profile
-      const { error: profileError } = await supabaseAdmin.from('profiles').insert({
+      // Upsert profile (trigger may have already created it)
+      const { error: profileError } = await supabaseAdmin.from('profiles').upsert({
         id: userId,
         email,
         full_name: full_name || email.split('@')[0],
         phone: phone || null,
+      }, {
+        onConflict: 'id'
       });
 
       if (profileError) throw profileError;
 
-      // Create user metadata if needed
+      // Upsert user metadata if needed
       if (sucursal_id || fecha_nacimiento) {
-        await supabaseAdmin.from('user_metadata').insert({
+        await supabaseAdmin.from('user_metadata').upsert({
           user_id: userId,
           sucursal_id: sucursal_id || null,
           fecha_nacimiento: fecha_nacimiento || null,
+        }, {
+          onConflict: 'user_id'
         });
       }
 
-      // Assign role
-      const { error: roleError } = await supabaseAdmin.from('user_roles').insert({
+      // Assign role (use upsert to handle existing role)
+      const { error: roleError } = await supabaseAdmin.from('user_roles').upsert({
         user_id: userId,
         role_name: role,
+      }, {
+        onConflict: 'user_id,role_name'
       });
 
       if (roleError) throw roleError;
