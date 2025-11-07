@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { BudgetItemRow } from "@/components/BudgetItemRow";
 import { BudgetItemDialog } from "@/components/BudgetItemDialog";
+import { BudgetVersionHistory } from "@/components/BudgetVersionHistory";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as XLSX from 'xlsx';
 
 interface BudgetItem {
@@ -327,6 +329,19 @@ export default function PresupuestoEjecutivo() {
         </h1>
       </div>
 
+      <Tabs defaultValue="budget" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="budget">Presupuesto</TabsTrigger>
+          {!isNew && projectId && (
+            <TabsTrigger value="history" className="gap-2">
+              <History className="h-4 w-4" />
+              Historial
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="budget" className="space-y-6">
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="md:col-span-2">
           <CardHeader>
@@ -465,15 +480,26 @@ export default function PresupuestoEjecutivo() {
         )}
       </div>
 
-      {selectedItem && (
-        <BudgetItemDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          item={selectedItem}
-          tuNodes={tuNodes || []}
-          onSave={handleSaveItem}
-        />
-      )}
+        {selectedItem && (
+          <BudgetItemDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            item={selectedItem}
+            tuNodes={tuNodes || []}
+            onSave={handleSaveItem}
+          />
+        )}
+        </TabsContent>
+
+        {!isNew && projectId && (
+          <TabsContent value="history">
+            <BudgetVersionHistory 
+              projectId={projectId} 
+              currentBudgetId={id}
+            />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }

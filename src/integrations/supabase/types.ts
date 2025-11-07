@@ -218,6 +218,61 @@ export type Database = {
           },
         ]
       }
+      budget_audit: {
+        Row: {
+          budget_id: string | null
+          created_at: string | null
+          field: string
+          id: string
+          item_id: string | null
+          new_value: number | null
+          old_value: number | null
+          variation_percent: number | null
+        }
+        Insert: {
+          budget_id?: string | null
+          created_at?: string | null
+          field: string
+          id?: string
+          item_id?: string | null
+          new_value?: number | null
+          old_value?: number | null
+          variation_percent?: number | null
+        }
+        Update: {
+          budget_id?: string | null
+          created_at?: string | null
+          field?: string
+          id?: string
+          item_id?: string | null
+          new_value?: number | null
+          old_value?: number | null
+          variation_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_audit_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_audit_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_history"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_audit_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_exec_budget_mayor_totals"
+            referencedColumns: ["budget_id"]
+          },
+        ]
+      }
       budget_items: {
         Row: {
           budget_id: string
@@ -286,6 +341,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "budgets"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_history"
+            referencedColumns: ["budget_id"]
           },
           {
             foreignKeyName: "budget_items_budget_id_fkey"
@@ -3005,6 +3067,13 @@ export type Database = {
             foreignKeyName: "budget_items_budget_id_fkey"
             columns: ["budget_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_history"
+            referencedColumns: ["budget_id"]
+          },
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
             referencedRelation: "v_project_exec_budget_mayor_totals"
             referencedColumns: ["budget_id"]
           },
@@ -3056,6 +3125,71 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      v_budget_history: {
+        Row: {
+          alerts_over_5: number | null
+          budget_id: string | null
+          budget_total: number | null
+          client_id: string | null
+          created_at: string | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["budget_status"] | null
+          total_items: number | null
+          type: Database["public"]["Enums"]["budget_type"] | null
+          version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
           },
         ]
       }
