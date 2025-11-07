@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -7,17 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserById } from '@/hooks/useUserById';
 import { useUpdateUserProfile } from '@/hooks/useUpdateUserProfile';
+import { useUploadAvatar } from '@/hooks/useUploadAvatar';
 import { UserDocumentsTab } from './UserDocumentsTab';
 import { EmergencyContactForm } from './EmergencyContactForm';
 import { UserRoleBadges } from './UserRoleBadges';
-import { User, Calendar, Building, FileText } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { User, Calendar, Building, Phone, IdCard, Briefcase, Camera, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface UserDetailDialogProps {
   userId: string | null;
@@ -26,8 +30,14 @@ interface UserDetailDialogProps {
 }
 
 export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialogProps) {
+  const isMobile = useIsMobile();
   const { data: user, isLoading } = useUserById(userId);
   const updateMutation = useUpdateUserProfile();
+  const uploadAvatar = useUploadAvatar();
+  
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Fetch sucursales for dropdown
   const { data: sucursales = [] } = useQuery({
@@ -68,196 +78,346 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
     await updateMutation.mutateAsync({ userId, data: formData });
   };
   
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validar tamaño (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('La imagen debe pesar menos de 5MB');
+        return;
+      }
+      
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        toast.error('Solo se permiten imágenes');
+        return;
+      }
+      
+      setAvatarFile(file);
+      
+      // Preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleUploadAvatar = async () => {
+    if (!avatarFile || !userId) return;
+    
+    await uploadAvatar.mutateAsync({ userId, file: avatarFile });
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+  
+  const handleCancelAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
   const isClient = user?.roles?.includes('cliente');
   
   if (!open || !userId) return null;
   
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Detalle del Usuario</DialogTitle>
-        </DialogHeader>
-        
-        {isLoading && (
-          <div className="py-8 text-center text-muted-foreground">Cargando...</div>
-        )}
-        
-        {!isLoading && user && (
-          <div className="grid grid-cols-1 md:grid-cols-[300px,1fr] gap-6">
-            {/* Left Column - Avatar and Basic Info */}
-            <div className="space-y-4">
-              <div className="flex flex-col items-center space-y-4">
-                <Avatar className="w-40 h-40">
-                  <AvatarImage src={user.avatar_url || undefined} />
-                  <AvatarFallback className="text-4xl">
+  const content = (
+    <>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+          <p className="text-sm text-muted-foreground">Cargando información...</p>
+        </div>
+      ) : user ? (
+        <div className="flex flex-col h-full">
+          {/* Hero section con avatar */}
+          <div className="relative overflow-hidden -mx-6 -mt-6 mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/80" />
+            <div className="relative z-10 p-6 flex flex-col items-center space-y-4">
+              {/* Avatar con botón de edición */}
+              <div className="relative group">
+                <Avatar className="w-32 h-32 md:w-40 md:h-40 ring-4 ring-white/20">
+                  <AvatarImage src={avatarPreview || user.avatar_url || undefined} />
+                  <AvatarFallback className="text-4xl bg-white/20 text-white">
                     {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 
-                <div className="w-full space-y-2">
-                  <Label htmlFor="full-name">Nombre Completo</Label>
-                  <Input
-                    id="full-name"
-                    value={formData.full_name}
-                    onChange={(e) => handleChange('full_name', e.target.value)}
-                  />
-                </div>
+                {!avatarPreview && (
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 
+                             rounded-full flex items-center justify-center transition-opacity"
+                  >
+                    <Camera className="w-8 h-8 text-white" />
+                  </button>
+                )}
                 
-                <div className="w-full space-y-2">
-                  <Label>Email</Label>
-                  <Input value={user.email} disabled className="bg-muted" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+              </div>
+              
+              {/* Botones de confirmación de avatar */}
+              {avatarPreview && (
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleUploadAvatar} 
+                    disabled={uploadAvatar.isPending}
+                    size="sm"
+                    className="bg-white text-primary hover:bg-white/90"
+                  >
+                    {uploadAvatar.isPending ? 'Subiendo...' : 'Confirmar'}
+                  </Button>
+                  <Button 
+                    onClick={handleCancelAvatar}
+                    size="sm"
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
+              )}
+              
+              {/* Info básica */}
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-bold text-white">{user.full_name || user.email}</h2>
+                <p className="text-white/90 text-sm">{user.email}</p>
                 
-                <div className="w-full space-y-2">
-                  <Label>Roles</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {user.roles.map((role) => (
-                      <Badge key={role} variant="default">
-                        {role}
-                      </Badge>
-                    ))}
+                {/* Badges de roles translúcidos */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {user.roles.map((role) => (
+                    <Badge 
+                      key={role}
+                      className="bg-white/20 text-white border-white/30 backdrop-blur-sm"
+                    >
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Fechas importantes */}
+              <div className="flex flex-wrap gap-4 justify-center text-sm text-white/90">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>Creado: {format(new Date(user.created_at), 'dd MMM yyyy', { locale: es })}</span>
+                </div>
+                {user.fecha_nacimiento && (
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>Cumpleaños: {format(new Date(user.fecha_nacimiento), 'dd MMM', { locale: es })}</span>
                   </div>
-                </div>
-                
-                <Card className="w-full p-3 space-y-2 bg-muted/50">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Creado:</span>
-                    <span className="font-medium">
-                      {format(new Date(user.created_at), 'dd MMM yyyy', { locale: es })}
-                    </span>
-                  </div>
-                  {user.fecha_nacimiento && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Cumpleaños:</span>
-                      <span className="font-medium">
-                        {format(new Date(user.fecha_nacimiento), 'dd MMM yyyy', { locale: es })}
-                      </span>
-                    </div>
-                  )}
-                </Card>
+                )}
               </div>
             </div>
-            
-            {/* Right Column - Tabs */}
+          </div>
+          
+          {/* Tabs con información */}
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="personal">Información Personal</TabsTrigger>
-                <TabsTrigger value="laboral">Información Laboral</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="personal">Personal</TabsTrigger>
+                <TabsTrigger value="laboral">Laboral</TabsTrigger>
                 <TabsTrigger value="documentos">Documentos</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="personal" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fecha-nacimiento">Fecha de Nacimiento</Label>
-                    <Input
-                      id="fecha-nacimiento"
-                      type="date"
-                      value={formData.fecha_nacimiento}
-                      onChange={(e) => handleChange('fecha_nacimiento', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Teléfono</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => handleChange('phone', e.target.value)}
-                      placeholder="Ej: 444-123-4567"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="rfc">RFC</Label>
-                    <Input
-                      id="rfc"
-                      value={formData.rfc}
-                      onChange={(e) => handleChange('rfc', e.target.value)}
-                      placeholder="Ej: XAXX010101000"
-                    />
-                  </div>
-                  
-                  {!isClient && (
-                    <div className="space-y-2">
-                      <Label htmlFor="imss">Número de IMSS</Label>
-                      <Input
-                        id="imss"
-                        value={formData.imss_number}
-                        onChange={(e) => handleChange('imss_number', e.target.value)}
-                        placeholder="Ej: 12345678901"
-                      />
+              <TabsContent value="personal" className="space-y-4 animate-in fade-in-50 duration-300">
+                <Card className="border-0 shadow-md">
+                  <CardHeader className="flex flex-row items-center gap-2 pb-3">
+                    <User className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm">Información Personal</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="full-name" className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          Nombre Completo
+                        </Label>
+                        <Input
+                          id="full-name"
+                          value={formData.full_name}
+                          onChange={(e) => handleChange('full_name', e.target.value)}
+                          className="transition-all focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          Teléfono
+                        </Label>
+                        <Input
+                          id="phone"
+                          value={formData.phone}
+                          onChange={(e) => handleChange('phone', e.target.value)}
+                          placeholder="Ej: 444-123-4567"
+                          className="transition-all focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="fecha-nacimiento" className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-muted-foreground" />
+                          Fecha de Nacimiento
+                        </Label>
+                        <Input
+                          id="fecha-nacimiento"
+                          type="date"
+                          value={formData.fecha_nacimiento}
+                          onChange={(e) => handleChange('fecha_nacimiento', e.target.value)}
+                          className="transition-all focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="rfc" className="flex items-center gap-2">
+                          <IdCard className="w-4 h-4 text-muted-foreground" />
+                          RFC
+                        </Label>
+                        <Input
+                          id="rfc"
+                          value={formData.rfc}
+                          onChange={(e) => handleChange('rfc', e.target.value)}
+                          placeholder="Ej: XAXX010101000"
+                          className="transition-all focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      
+                      {!isClient && (
+                        <div className="space-y-2">
+                          <Label htmlFor="imss" className="flex items-center gap-2">
+                            <IdCard className="w-4 h-4 text-muted-foreground" />
+                            Número de IMSS
+                          </Label>
+                          <Input
+                            id="imss"
+                            value={formData.imss_number}
+                            onChange={(e) => handleChange('imss_number', e.target.value)}
+                            placeholder="Ej: 12345678901"
+                            className="transition-all focus:ring-2 focus:ring-primary"
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
                 
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3">Contacto de Emergencia</h3>
-                  <EmergencyContactForm
-                    value={formData.emergency_contact}
-                    onChange={(value) => handleChange('emergency_contact', value)}
-                  />
+                <Card className="border-0 shadow-md">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Contacto de Emergencia</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EmergencyContactForm
+                      value={formData.emergency_contact}
+                      onChange={(value) => handleChange('emergency_contact', value)}
+                    />
+                  </CardContent>
                 </Card>
               </TabsContent>
               
-              <TabsContent value="laboral" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {!isClient && (
-                    <div className="space-y-2">
-                      <Label htmlFor="fecha-ingreso">Fecha de Ingreso</Label>
-                      <Input
-                        id="fecha-ingreso"
-                        type="date"
-                        value={formData.fecha_ingreso}
-                        onChange={(e) => handleChange('fecha_ingreso', e.target.value)}
-                      />
+              <TabsContent value="laboral" className="space-y-4 animate-in fade-in-50 duration-300">
+                <Card className="border-0 shadow-md">
+                  <CardHeader className="flex flex-row items-center gap-2 pb-3">
+                    <Briefcase className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm">Información Laboral</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {!isClient && (
+                        <div className="space-y-2">
+                          <Label htmlFor="fecha-ingreso" className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            Fecha de Ingreso
+                          </Label>
+                          <Input
+                            id="fecha-ingreso"
+                            type="date"
+                            value={formData.fecha_ingreso}
+                            onChange={(e) => handleChange('fecha_ingreso', e.target.value)}
+                            className="transition-all focus:ring-2 focus:ring-primary"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="sucursal" className="flex items-center gap-2">
+                          <Building className="w-4 h-4 text-muted-foreground" />
+                          Sucursal
+                        </Label>
+                        <Select value={formData.sucursal_id} onValueChange={(value) => handleChange('sucursal_id', value)}>
+                          <SelectTrigger id="sucursal" className="transition-all focus:ring-2 focus:ring-primary">
+                            <SelectValue placeholder="Seleccionar sucursal" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sucursales.map((sucursal) => (
+                              <SelectItem key={sucursal.id} value={sucursal.id}>
+                                {sucursal.nombre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                  )}
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="sucursal">Sucursal</Label>
-                    <Select value={formData.sucursal_id} onValueChange={(value) => handleChange('sucursal_id', value)}>
-                      <SelectTrigger id="sucursal">
-                        <SelectValue placeholder="Seleccionar sucursal" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sucursales.map((sucursal) => (
-                          <SelectItem key={sucursal.id} value={sucursal.id}>
-                            {sucursal.nombre}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
                 
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3">Roles del Sistema</h3>
-                  <UserRoleBadges
-                    userId={userId}
-                    currentRoles={user.roles as any}
-                  />
+                <Card className="border-0 shadow-md">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Roles del Sistema</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <UserRoleBadges
+                      userId={userId}
+                      currentRoles={user.roles as any}
+                    />
+                  </CardContent>
                 </Card>
               </TabsContent>
               
-              <TabsContent value="documentos" className="mt-4">
+              <TabsContent value="documentos" className="animate-in fade-in-50 duration-300">
                 <UserDocumentsTab userId={userId} />
               </TabsContent>
             </Tabs>
           </div>
-        )}
-        
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave} disabled={updateMutation.isPending}>
-            {updateMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
+          
+          {/* Footer con botones */}
+          <div className="flex justify-end gap-2 px-6 py-4 border-t bg-background sticky bottom-0">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+            </Button>
+          </div>
         </div>
+      ) : null}
+    </>
+  );
+  
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[95vh]">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+        {content}
       </DialogContent>
     </Dialog>
   );
