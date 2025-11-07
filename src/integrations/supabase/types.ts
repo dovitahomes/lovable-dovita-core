@@ -4270,10 +4270,12 @@ export type Database = {
       }
     }
     Functions: {
-      admin_set_user_roles: {
-        Args: { p_roles: string[]; p_user_id: string }
-        Returns: undefined
-      }
+      admin_set_user_roles:
+        | { Args: { p_roles: string[]; p_user_id: string }; Returns: undefined }
+        | {
+            Args: { roles: string[]; target_user_id: string }
+            Returns: undefined
+          }
       bootstrap_first_admin: { Args: never; Returns: undefined }
       bootstrap_user_on_login: { Args: never; Returns: undefined }
       check_price_variance: {
