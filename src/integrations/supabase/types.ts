@@ -796,6 +796,42 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_rules: {
+        Row: {
+          active: boolean | null
+          applies_on: string | null
+          created_at: string | null
+          id: string
+          name: string
+          percent: number
+          product: string | null
+          project_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          applies_on?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          percent: number
+          product?: string | null
+          project_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          applies_on?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          percent?: number
+          product?: string | null
+          project_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       commissions: {
         Row: {
           base_amount: number
@@ -3948,6 +3984,33 @@ export type Database = {
           status: string | null
           terreno_m2: number | null
           ubicacion_json: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_commission_summary: {
+        Row: {
+          base_amount: number | null
+          client_id: string | null
+          client_name: string | null
+          collaborator_name: string | null
+          commission_amount: number | null
+          created_at: string | null
+          id: string | null
+          notes: string | null
+          paid_at: string | null
+          percent: number | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["commission_status"] | null
+          sujeto_id: string | null
+          tipo: Database["public"]["Enums"]["commission_type"] | null
         }
         Relationships: [
           {
