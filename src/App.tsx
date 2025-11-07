@@ -37,6 +37,7 @@ const Proyectos = lazy(() => import("./pages/Proyectos"));
 const ProyectoDetalle = lazy(() => import("./pages/ProyectoDetalle"));
 const ProyectoEquipo = lazy(() => import("./pages/ProyectoEquipo"));
 const ProyectoChat = lazy(() => import("./pages/ProyectoChat"));
+const ProyectoCalendario = lazy(() => import("./pages/ProyectoCalendario"));
 const Leads = lazy(() => import("./pages/Leads"));
 const Diseno = lazy(() => import("./pages/Diseno"));
 const Presupuestos = lazy(() => import("./pages/Presupuestos"));
@@ -142,6 +143,7 @@ const InternalLayout = () => {
                 <Route path={BACKOFFICE_ROUTES.PROYECTO_DETALLE} element={<Suspense fallback={<TabsSkeleton />}><ProyectoDetalle /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.PROYECTO_EQUIPO} element={<Suspense fallback={<TableSkeleton />}><ProyectoEquipo /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.PROYECTO_CHAT} element={<Suspense fallback={<TableSkeleton />}><ProyectoChat /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.PROYECTO_CALENDARIO} element={<Suspense fallback={<TableSkeleton />}><ProyectoCalendario /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.DISENO} element={<Suspense fallback={<TableSkeleton />}><Diseno /></Suspense>} />
                 
                 {/* ============================================ */}

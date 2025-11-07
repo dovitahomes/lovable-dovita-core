@@ -9,7 +9,7 @@ import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
 import { DocumentsTab } from "@/components/project/DocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays } from "lucide-react";
 import { generateRoute } from "@/config/routes";
 
 export default function ProyectoDetalle() {
@@ -68,6 +68,10 @@ export default function ProyectoDetalle() {
           <Button variant="outline" onClick={() => navigate(generateRoute.proyectoChat(id!))} className="gap-2">
             <MessageSquare className="h-4 w-4" />
             Chat
+          </Button>
+          <Button variant="outline" onClick={() => navigate(generateRoute.proyectoCalendario(id!))} className="gap-2">
+            <CalendarDays className="h-4 w-4" />
+            Calendario
           </Button>
           <Button onClick={() => navigate(`/construccion/${id}`)} className="gap-2">
             <HardHat className="h-4 w-4" />

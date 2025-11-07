@@ -75,6 +75,7 @@ export const BACKOFFICE_ROUTES = {
   PROYECTO_DETALLE: '/proyectos/:id',
   PROYECTO_EQUIPO: '/proyectos/:id/equipo',
   PROYECTO_CHAT: '/proyectos/:id/chat',
+  PROYECTO_CALENDARIO: '/proyectos/:id/calendario',
   DISENO: '/diseno',
   
   // Presupuestos
@@ -164,6 +165,7 @@ export const generateRoute = {
   proyectoDetalle: (id: string) => `/proyectos/${id}`,
   proyectoEquipo: (id: string) => `/proyectos/${id}/equipo`,
   proyectoChat: (id: string) => `/proyectos/${id}/chat`,
+  proyectoCalendario: (id: string) => `/proyectos/${id}/calendario`,
   construccionDetalle: (id: string) => `/construccion/${id}`,
   construccionCronograma: (projectId: string) => `/construccion/proyectos/${projectId}/cronograma`,
   
