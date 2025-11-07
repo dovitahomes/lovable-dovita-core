@@ -2152,28 +2152,45 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          fecha_nacimiento: string | null
           full_name: string | null
           id: string
+          last_login_at: string | null
           phone: string | null
+          sucursal_id: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           email: string
+          fecha_nacimiento?: string | null
           full_name?: string | null
           id: string
+          last_login_at?: string | null
           phone?: string | null
+          sucursal_id?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           email?: string
+          fecha_nacimiento?: string | null
           full_name?: string | null
           id?: string
+          last_login_at?: string | null
           phone?: string | null
+          sucursal_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_collaborators: {
         Row: {
@@ -2486,80 +2503,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
-          },
-        ]
-      }
-      project_members: {
-        Row: {
-          created_at: string
-          id: string
-          project_id: string
-          role_en_proyecto: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          project_id: string
-          role_en_proyecto?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          project_id?: string
-          role_en_proyecto?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_financial_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_project_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "vw_client_financial_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "vw_kpi_project_progress"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -2907,21 +2850,6 @@ export type Database = {
           },
         ]
       }
-      roles: {
-        Row: {
-          description: string | null
-          role_name: string
-        }
-        Insert: {
-          description?: string | null
-          role_name: string
-        }
-        Update: {
-          description?: string | null
-          role_name?: string
-        }
-        Relationships: []
-      }
       sucursales: {
         Row: {
           activa: boolean | null
@@ -3250,76 +3178,7 @@ export type Database = {
           role_name?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_role_name_fkey"
-            columns: ["role_name"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["role_name"]
-          },
-        ]
-      }
-      users: {
-        Row: {
-          created_at: string
-          email: string
-          fecha_nacimiento: string | null
-          full_name: string
-          id: string
-          last_login_at: string | null
-          phone: string | null
-          profile_id: string | null
-          sucursal_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          fecha_nacimiento?: string | null
-          full_name: string
-          id?: string
-          last_login_at?: string | null
-          phone?: string | null
-          profile_id?: string | null
-          sucursal_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          fecha_nacimiento?: string | null
-          full_name?: string
-          id?: string
-          last_login_at?: string | null
-          phone?: string | null
-          profile_id?: string | null
-          sucursal_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "users_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "vw_users_with_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "users_sucursal_id_fkey"
-            columns: ["sucursal_id"]
-            isOneToOne: false
-            referencedRelation: "sucursales"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       wishlists: {
         Row: {

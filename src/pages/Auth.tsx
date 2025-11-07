@@ -53,9 +53,9 @@ const Auth = () => {
         
         // Update last login
         await supabase
-          .from("users")
+          .from("profiles")
           .update({ last_login_at: new Date().toISOString() })
-          .eq("profile_id", data.user.id);
+          .eq("id", data.user.id);
 
         toast.success("¡Bienvenido!");
         navigate("/");

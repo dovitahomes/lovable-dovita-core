@@ -17,7 +17,7 @@ export function CollaboratorCommissionsTab() {
     queryKey: ["collaborators"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("users")
+        .from("profiles")
         .select("id, full_name")
         .order("full_name");
 
@@ -33,7 +33,7 @@ export function CollaboratorCommissionsTab() {
         .from("commissions")
         .select(`
           *,
-          users:sujeto_id (full_name),
+          profiles:sujeto_id (full_name),
           projects:deal_ref (id, client_id, clients(name))
         `)
         .eq("tipo", "colaborador")
@@ -154,7 +154,7 @@ export function CollaboratorCommissionsTab() {
             {commissions?.map((commission: any) => (
               <TableRow key={commission.id}>
                 <TableCell className="font-medium">
-                  {commission.users?.full_name || "N/A"}
+                  {commission.profiles?.full_name || "N/A"}
                 </TableCell>
                 <TableCell>{commission.projects?.id?.slice(0, 8) || "N/A"}</TableCell>
                 <TableCell>

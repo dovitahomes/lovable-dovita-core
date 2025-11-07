@@ -12,7 +12,7 @@ export const BirthdayWidget = () => {
       const currentMonth = new Date().getMonth() + 1;
       
       const { data, error } = await supabase
-        .from("users")
+        .from("profiles")
         .select("full_name, email, fecha_nacimiento")
         .not("fecha_nacimiento", "is", null)
         .order("fecha_nacimiento");

@@ -44,10 +44,10 @@ export function ProjectTeamTab({ projectId }: ProjectTeamTabProps) {
   }, [projectId]);
 
   const loadData = async () => {
-    // Load project members
+    // Load project collaborators
     const { data: membersData } = await supabase
-      .from("project_members")
-      .select("*, users(full_name, email)")
+      .from("project_collaborators")
+      .select("*, profiles(full_name, email)")
       .eq("project_id", projectId);
     setMembers(membersData || []);
 
@@ -161,9 +161,9 @@ export function ProjectTeamTab({ projectId }: ProjectTeamTabProps) {
                 <TableBody>
                   {members.map((m) => (
                     <TableRow key={m.id}>
-                      <TableCell>{m.users?.full_name}</TableCell>
-                      <TableCell>{m.users?.email}</TableCell>
-                      <TableCell>{m.role_en_proyecto}</TableCell>
+                      <TableCell>{m.profiles?.full_name}</TableCell>
+                      <TableCell>{m.profiles?.email}</TableCell>
+                      <TableCell>{m.role}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
