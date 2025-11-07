@@ -12,6 +12,7 @@ import { RoleChangeHistory } from "@/components/admin/RoleChangeHistory";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { inviteUser } from "@/lib/userManagement";
 
 type UserRow = {
   id: string;
@@ -52,11 +53,11 @@ export default function Usuarios() {
 
   const inviteUserMutation = useMutation({
     mutationFn: async ({ email, fullName }: { email: string; fullName: string }) => {
-      const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-        data: { full_name: fullName }
-      });
-      if (error) throw error;
-      return data;
+      const result = await inviteUser({ email, full_name: fullName });
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to invite user');
+      }
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });

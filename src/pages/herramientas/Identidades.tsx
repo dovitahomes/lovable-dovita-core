@@ -10,9 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Users, UserPlus, Mail, Key, UserX, Calendar } from "lucide-react";
+import { Users, UserPlus, Mail, Key, UserX, Activity, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { inviteUser, syncUserProfile, sendPasswordReset, healthCheckSupabase } from "@/lib/userManagement";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type UserRole = "admin" | "colaborador" | "cliente";
 
@@ -29,6 +31,8 @@ const Identidades = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [healthStatus, setHealthStatus] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
+  const [healthMessage, setHealthMessage] = useState<string>('');
   const [formData, setFormData] = useState<UserFormData>({
     full_name: "",
     email: "",
@@ -42,7 +46,7 @@ const Identidades = () => {
     queryKey: ["users-management"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("vw_users_with_roles")
+        .from("vw_users_extended")
         .select("*")
         .order("full_name");
 
@@ -67,48 +71,20 @@ const Identidades = () => {
 
   const inviteUserMutation = useMutation({
     mutationFn: async (userData: UserFormData) => {
-      // First, create the user in auth
-      const { data: authData, error: authError } = await supabase.auth.admin.inviteUserByEmail(
-        userData.email,
-        {
-          data: {
-            full_name: userData.full_name,
-          },
-        }
-      );
-
-      if (authError) throw authError;
-
-      // Create profile
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: authData.user.id,
+      const result = await inviteUser({
         email: userData.email,
         full_name: userData.full_name,
-        phone: userData.phone || null,
+        phone: userData.phone,
+        role: userData.role,
+        sucursal_id: userData.sucursal_id,
+        fecha_nacimiento: userData.fecha_nacimiento,
       });
 
-      if (profileError) throw profileError;
-
-      // Create user metadata
-      if (userData.sucursal_id || userData.fecha_nacimiento) {
-        const { error: metadataError } = await (supabase
-          .from("user_metadata" as any)
-          .insert({
-            user_id: authData.user.id,
-            sucursal_id: userData.sucursal_id || null,
-            fecha_nacimiento: userData.fecha_nacimiento || null,
-          }) as any);
-
-        if (metadataError) throw metadataError;
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to invite user');
       }
 
-      // Assign role
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: authData.user.id,
-        role_name: userData.role,
-      });
-
-      if (roleError) throw roleError;
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users-management"] });
@@ -167,28 +143,30 @@ const Identidades = () => {
     },
   });
 
-  const deactivateUserMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // Deactivate user in auth
-      const { error } = await supabase.auth.admin.updateUserById(id, {
-        ban_duration: "876000h", // ~100 years - effectively permanent
-      });
-
-      if (error) throw error;
+  const syncProfileMutation = useMutation({
+    mutationFn: async ({ userId, email, fullName }: { userId: string; email: string; fullName?: string }) => {
+      const result = await syncUserProfile(userId, email, fullName);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to sync profile');
+      }
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["users-management"] });
-      toast.success("Usuario desactivado");
+      toast.success(`Perfil ${data.action === 'created' ? 'creado' : 'actualizado'} exitosamente`);
     },
     onError: (error: any) => {
-      toast.error(error.message || "Error al desactivar usuario");
+      toast.error(error.message || "Error al sincronizar perfil");
     },
   });
 
   const resendInviteMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const { error } = await supabase.auth.admin.inviteUserByEmail(email);
-      if (error) throw error;
+    mutationFn: async ({ email, fullName }: { email: string; fullName?: string }) => {
+      const result = await inviteUser({ email, full_name: fullName });
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to resend invite');
+      }
+      return result;
     },
     onSuccess: () => {
       toast.success("Invitación reenviada");
@@ -200,10 +178,11 @@ const Identidades = () => {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset`,
-      });
-      if (error) throw error;
+      const result = await sendPasswordReset(email);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send reset email');
+      }
+      return result;
     },
     onSuccess: () => {
       toast.success("Email de recuperación enviado");
@@ -212,6 +191,23 @@ const Identidades = () => {
       toast.error(error.message || "Error al enviar email");
     },
   });
+
+  const handleHealthCheck = async () => {
+    setHealthStatus('checking');
+    setHealthMessage('Verificando conexión...');
+    
+    const result = await healthCheckSupabase();
+    
+    if (result.connected && result.profiles_accessible) {
+      setHealthStatus('ok');
+      setHealthMessage('✓ Conexión exitosa con Supabase');
+      toast.success('Conexión verificada');
+    } else {
+      setHealthStatus('error');
+      setHealthMessage(`✗ Error: ${result.error || 'No se pudo conectar'}`);
+      toast.error('Error de conexión');
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -275,19 +271,29 @@ const Identidades = () => {
           </div>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) {
-            setEditingUser(null);
-            resetForm();
-          }
-        }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <UserPlus className="h-4 w-4" />
-              Nuevo Usuario
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleHealthCheck}
+            disabled={healthStatus === 'checking'}
+          >
+            <Activity className="h-4 w-4 mr-2" />
+            {healthStatus === 'checking' ? 'Verificando...' : 'Health Check'}
+          </Button>
+
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              setEditingUser(null);
+              resetForm();
+            }
+          }}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <UserPlus className="h-4 w-4" />
+                Nuevo Usuario
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>{editingUser ? "Editar Usuario" : "Crear Nuevo Usuario"}</DialogTitle>
@@ -378,8 +384,15 @@ const Identidades = () => {
               </DialogFooter>
             </form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
+
+      {healthStatus !== 'idle' && (
+        <Alert variant={healthStatus === 'ok' ? 'default' : 'destructive'}>
+          <AlertDescription>{healthMessage}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -397,9 +410,7 @@ const Identidades = () => {
                   <TableHead>Email</TableHead>
                   <TableHead>Rol</TableHead>
                   <TableHead>Sucursal</TableHead>
-                  <TableHead>Estado</TableHead>
                   <TableHead>Cumpleaños</TableHead>
-                  <TableHead>Último Acceso</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -415,17 +426,9 @@ const Identidades = () => {
                     </TableCell>
                     <TableCell>{user.sucursal_nombre || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant="default">Activo</Badge>
-                    </TableCell>
-                    <TableCell>
                       {user.fecha_nacimiento 
                         ? format(new Date(user.fecha_nacimiento), "dd MMM", { locale: es })
                         : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {user.last_login_at
-                        ? format(new Date(user.last_login_at), "dd/MM/yyyy", { locale: es })
-                        : "Nunca"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -433,13 +436,31 @@ const Identidades = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => openEditDialog(user)}
+                          title="Editar usuario"
                         >
                           Editar
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => resendInviteMutation.mutate(user.email)}
+                          onClick={() => syncProfileMutation.mutate({ 
+                            userId: user.id, 
+                            email: user.email, 
+                            fullName: user.full_name 
+                          })}
+                          title="Sincronizar profile"
+                          disabled={syncProfileMutation.isPending}
+                        >
+                          <RefreshCw className={`h-4 w-4 ${syncProfileMutation.isPending ? 'animate-spin' : ''}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => resendInviteMutation.mutate({ 
+                            email: user.email, 
+                            fullName: user.full_name 
+                          })}
+                          title="Reenviar invitación"
                         >
                           <Mail className="h-4 w-4" />
                         </Button>
@@ -447,19 +468,9 @@ const Identidades = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => resetPasswordMutation.mutate(user.email)}
+                          title="Enviar reset de contraseña"
                         >
                           <Key className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm("¿Estás seguro de que deseas desactivar este usuario?")) {
-                              deactivateUserMutation.mutate(user.id);
-                            }
-                          }}
-                        >
-                          <UserX className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>

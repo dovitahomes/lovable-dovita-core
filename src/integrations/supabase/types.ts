@@ -3087,6 +3087,41 @@ export type Database = {
           },
         ]
       }
+      user_metadata: {
+        Row: {
+          created_at: string
+          fecha_nacimiento: string | null
+          id: string
+          sucursal_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fecha_nacimiento?: string | null
+          id?: string
+          sucursal_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fecha_nacimiento?: string | null
+          id?: string
+          sucursal_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_metadata_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_permissions: {
         Row: {
           can_create: boolean
@@ -4200,6 +4235,29 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_users_extended: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          fecha_nacimiento: string | null
+          full_name: string | null
+          id: string | null
+          phone: string | null
+          roles: string[] | null
+          sucursal_id: string | null
+          sucursal_nombre: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_metadata_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_users_with_roles: {
         Row: {
           email: string | null
@@ -4311,6 +4369,10 @@ export type Database = {
       seed_role_permissions: {
         Args: { p_role_name: string; p_user_id: string }
         Returns: undefined
+      }
+      sync_user_profile: {
+        Args: { p_email: string; p_full_name?: string; p_user_id: string }
+        Returns: Json
       }
       user_can_access_project: {
         Args: { p_project_id: string; p_user_id: string }
