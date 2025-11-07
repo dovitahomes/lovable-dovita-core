@@ -25,9 +25,21 @@ Deno.serve(async (req) => {
     }
 
     // Create Supabase client with service role for admin operations
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('[delete-user] Missing environment variables:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey
+      });
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log('[delete-user] Creating admin client with service role');
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
@@ -64,13 +76,24 @@ Deno.serve(async (req) => {
     console.log('[delete-user] Authenticated user:', requestingUser.id);
 
     // Verify requesting user is admin
+    console.log('[delete-user] Checking if user is admin:', requestingUser.id);
     const { data: roles, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role_name')
       .eq('user_id', requestingUser.id);
 
-    if (roleError || !roles?.some(r => r.role_name === 'admin')) {
-      console.error('[delete-user] User is not admin');
+    console.log('[delete-user] User roles:', { roles, roleError });
+
+    if (roleError) {
+      console.error('[delete-user] Error fetching roles:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Error al verificar permisos' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!roles?.some(r => r.role_name === 'admin')) {
+      console.error('[delete-user] User is not admin. Roles:', roles);
       return new Response(
         JSON.stringify({ error: 'Solo administradores pueden eliminar usuarios' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -100,15 +123,26 @@ Deno.serve(async (req) => {
     }
 
     // Delete from auth.users (this will cascade to user_roles and user_permissions via ON DELETE CASCADE)
-    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user_id);
+    console.log('[delete-user] Calling auth.admin.deleteUser for:', user_id);
+    const { data: deleteData, error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user_id);
 
     if (deleteAuthError) {
-      console.error('[delete-user] Error deleting from auth.users:', deleteAuthError);
+      console.error('[delete-user] Error deleting from auth.users:', {
+        message: deleteAuthError.message,
+        status: deleteAuthError.status,
+        code: deleteAuthError.code,
+        details: deleteAuthError
+      });
       return new Response(
-        JSON.stringify({ error: `Error al eliminar usuario: ${deleteAuthError.message}` }),
+        JSON.stringify({ 
+          error: `Error al eliminar usuario: ${deleteAuthError.message}`,
+          details: deleteAuthError.code || 'DATABASE_ERROR'
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('[delete-user] Auth user deleted successfully:', deleteData);
 
     // Also delete from profiles table explicitly (in case cascade doesn't work)
     const { error: deleteProfileError } = await supabaseAdmin
