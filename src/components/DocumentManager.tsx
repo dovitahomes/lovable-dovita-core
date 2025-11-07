@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage/storage-helpers";
+import type { BucketName } from "@/lib/storage/buckets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,20 +80,16 @@ export function DocumentManager({ projectId, userRole = 'user' }: DocumentManage
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${projectId}/${data.tipo_carpeta}/${Date.now()}-${file.name}`;
+      // Choose bucket based on visibility
+      const bucket: BucketName = data.visibilidad === "cliente" ? "project_docs" : "documentos";
 
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('documentos')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('documentos')
-        .getPublicUrl(fileName);
+      // Upload to storage with standardized path
+      const { path } = await uploadToBucket({
+        bucket,
+        projectId,
+        file,
+        filename: file.name
+      });
 
       // Create document record
       const { error: insertError } = await supabase
@@ -103,13 +101,17 @@ export function DocumentManager({ projectId, userRole = 'user' }: DocumentManage
           etiqueta: data.etiqueta || null,
           visibilidad: data.visibilidad,
           firmado: data.firmado,
-          file_url: publicUrl,
+          file_url: path, // Store only the path
           file_size: file.size,
           file_type: file.type,
           uploaded_by: user.id
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        // Cleanup: delete uploaded file if DB insert fails
+        await deleteFromBucket(bucket, path);
+        throw insertError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents', projectId] });
@@ -121,16 +123,12 @@ export function DocumentManager({ projectId, userRole = 'user' }: DocumentManage
 
   const deleteMutation = useMutation({
     mutationFn: async (doc: any) => {
-      // Extract file path from URL
-      const urlParts = doc.file_url.split('/documentos/');
-      const filePath = urlParts[1];
+      // Choose bucket based on visibility
+      const bucket: BucketName = doc.visibilidad === "cliente" ? "project_docs" : "documentos";
 
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('documentos')
-        .remove([filePath]);
-
-      if (storageError) throw storageError;
+      // Delete from storage (doc.file_url is now just the path)
+      const success = await deleteFromBucket(bucket, doc.file_url);
+      if (!success) throw new Error("Error al eliminar archivo de storage");
 
       // Delete record
       const { error: deleteError } = await supabase
@@ -191,23 +189,51 @@ export function DocumentManager({ projectId, userRole = 'user' }: DocumentManage
   };
 
   const handlePreview = async (doc: any) => {
-    if (doc.file_type?.startsWith('image/') || doc.file_type === 'application/pdf') {
-      setPreviewUrl(doc.file_url);
-      setPreviewOpen(true);
-    } else {
-      // For other file types, just download
-      window.open(doc.file_url, '_blank');
+    try {
+      // Choose bucket based on visibility
+      const bucket: BucketName = doc.visibilidad === "cliente" ? "project_docs" : "documentos";
+      
+      // Get signed URL for private bucket
+      const { url } = await getSignedUrl({
+        bucket,
+        path: doc.file_url,
+        expiresInSeconds: 600 // 10 minutes
+      });
+
+      if (doc.file_type?.startsWith('image/') || doc.file_type === 'application/pdf') {
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      } else {
+        // For other file types, just download
+        window.open(url, '_blank');
+      }
+    } catch (error: any) {
+      toast.error("Error al obtener URL: " + error.message);
     }
   };
 
   const handleDownload = async (doc: any) => {
-    const link = document.createElement('a');
-    link.href = doc.file_url;
-    link.download = doc.nombre;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // Choose bucket based on visibility
+      const bucket: BucketName = doc.visibilidad === "cliente" ? "project_docs" : "documentos";
+      
+      // Get signed URL for private bucket
+      const { url } = await getSignedUrl({
+        bucket,
+        path: doc.file_url,
+        expiresInSeconds: 300 // 5 minutes
+      });
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.nombre;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error: any) {
+      toast.error("Error al descargar: " + error.message);
+    }
   };
 
   const getVisibilityBadge = (visibility: string) => {

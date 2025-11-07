@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket, deleteFromBucket } from "@/lib/storage/storage-helpers";
 import { toast } from "sonner";
 
 interface UploadParams {
@@ -42,34 +43,19 @@ export function useClientDocumentsUpload() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
-      // Generate file path
-      const now = new Date();
-      const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-      const fileExt = file.name.split(".").pop();
-      const uuid = crypto.randomUUID();
-      const fileName = `${uuid}-${file.name}`;
-      const filePath = `${projectId}/${yearMonth}/${fileName}`;
-
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from("project_docs")
-        .upload(filePath, file, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("project_docs").getPublicUrl(filePath);
+      // Upload to storage with standardized path (always project_docs for client uploads)
+      const { path } = await uploadToBucket({
+        bucket: "project_docs",
+        projectId,
+        file,
+        filename: file.name
+      });
 
       // Insert document record
       const { error: insertError } = await supabase.from("documents").insert({
         project_id: projectId,
         nombre: file.name,
-        file_url: publicUrl,
+        file_url: path, // Store only the path
         file_type: file.type,
         file_size: file.size,
         tipo_carpeta: category || "general",
@@ -80,11 +66,11 @@ export function useClientDocumentsUpload() {
 
       if (insertError) {
         // Cleanup: delete uploaded file if DB insert fails
-        await supabase.storage.from("project_docs").remove([filePath]);
+        await deleteFromBucket("project_docs", path);
         throw insertError;
       }
 
-      return { fileName: file.name, url: publicUrl };
+      return { fileName: file.name };
     },
     onSuccess: (data) => {
       toast.success(`${data.fileName} subido correctamente`);
