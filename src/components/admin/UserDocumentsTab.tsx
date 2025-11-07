@@ -27,9 +27,14 @@ interface UserDocumentsTabProps {
 }
 
 export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
-  const { data: documents = [], isLoading } = useUserDocuments(userId);
+  const { data: documents = [], isLoading, error } = useUserDocuments(userId);
   const uploadMutation = useUploadUserDocument();
   const deleteMutation = useDeleteUserDocument();
+  
+  // Debug logging
+  console.log('[UserDocumentsTab] userId:', userId);
+  console.log('[UserDocumentsTab] documents:', documents);
+  console.log('[UserDocumentsTab] error:', error);
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<string>('');
@@ -131,7 +136,13 @@ export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
         
         {isLoading && <p className="text-sm text-muted-foreground">Cargando documentos...</p>}
         
-        {!isLoading && documents.length === 0 && (
+        {error && (
+          <Card className="p-4 border-destructive">
+            <p className="text-sm text-destructive">Error al cargar documentos: {error.message}</p>
+          </Card>
+        )}
+        
+        {!isLoading && !error && documents.length === 0 && (
           <p className="text-sm text-muted-foreground">No hay documentos subidos</p>
         )}
         
