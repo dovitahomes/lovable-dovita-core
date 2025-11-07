@@ -1,13 +1,31 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BankAccountsTab } from "@/components/finance/BankAccountsTab";
 import { PaymentBatchesTab } from "@/components/finance/PaymentBatchesTab";
 import { BankReconciliationTab } from "@/components/finance/BankReconciliationTab";
 import { TransactionsTab } from "@/components/finance/TransactionsTab";
 import { ProviderBalanceTab } from "@/components/finance/ProviderBalanceTab";
 import { ReportsTab } from "@/components/finance/ReportsTab";
-import { Building2, FileText, DollarSign, ArrowLeftRight, Receipt, TrendingUp, BarChart3 } from "lucide-react";
+import { Building2, FileText, DollarSign, ArrowLeftRight, Receipt, TrendingUp, BarChart3, AlertCircle } from "lucide-react";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
 
 export default function Finanzas() {
+  const { canView } = useModuleAccess();
+
+  if (!canView('finanzas')) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Acceso Denegado</AlertTitle>
+          <AlertDescription>
+            No tienes permisos para ver este módulo.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-2">

@@ -1,12 +1,30 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Percent } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Percent, AlertCircle } from "lucide-react";
 import { AllianceCommissionsTab } from "@/components/commissions/AllianceCommissionsTab";
 import { CollaboratorCommissionsTab } from "@/components/commissions/CollaboratorCommissionsTab";
 import { CommissionConfigTab } from "@/components/commissions/CommissionConfigTab";
 import { CommissionRulesTab } from "@/components/commissions/CommissionRulesTab";
 import { CommissionSummaryTab } from "@/components/commissions/CommissionSummaryTab";
+import { useModuleAccess } from "@/hooks/useModuleAccess";
 
 export default function Comisiones() {
+  const { canView } = useModuleAccess();
+
+  if (!canView('comisiones')) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Acceso Denegado</AlertTitle>
+          <AlertDescription>
+            No tienes permisos para ver este módulo.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-2">
