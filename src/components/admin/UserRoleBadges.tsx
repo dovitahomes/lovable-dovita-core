@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type AppRole = 'admin' | 'colaborador' | 'contador' | 'cliente';
 
@@ -20,9 +21,16 @@ interface UserRoleBadgesProps {
 export function UserRoleBadges({ userId, currentRoles, onRoleChange }: UserRoleBadgesProps) {
   const toggleRoleMutation = useMutation({
     mutationFn: async ({ role, enabled }: { role: AppRole; enabled: boolean }) => {
-      // Temporarily disabled - will be restored in Prompt 2
-      toast.error("Sistema de roles deshabilitado temporalmente");
-      throw new Error("Temporarily disabled");
+      const newRoles = enabled 
+        ? [...new Set([...currentRoles, role])]
+        : currentRoles.filter(r => r !== role);
+
+      const { error } = await (supabase.rpc("admin_set_user_roles" as any, {
+        target_user_id: userId,
+        roles: newRoles,
+      }) as any);
+
+      if (error) throw error;
     },
     onSuccess: (_, variables) => {
       toast.success(`Rol ${variables.role} ${variables.enabled ? 'asignado' : 'removido'} exitosamente`);

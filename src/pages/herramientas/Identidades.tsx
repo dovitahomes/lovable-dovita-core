@@ -21,8 +21,8 @@ interface UserFormData {
   email: string;
   phone: string;
   role: UserRole;
-  sucursal_id: string;
-  fecha_nacimiento: string;
+  sucursal_id?: string;
+  fecha_nacimiento?: string;
 }
 
 const Identidades = () => {
@@ -42,12 +42,8 @@ const Identidades = () => {
     queryKey: ["users-management"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("users")
-        .select(`
-          *,
-          user_roles (role),
-          sucursales (nombre)
-        `)
+        .from("vw_users_with_roles")
+        .select("*")
         .order("full_name");
 
       if (error) throw error;
@@ -83,19 +79,30 @@ const Identidades = () => {
 
       if (authError) throw authError;
 
-      // Then create user record in users table
-      const { error: userError } = await supabase.from("users").insert({
-        profile_id: authData.user.id,
+      // Create profile
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: authData.user.id,
         email: userData.email,
         full_name: userData.full_name,
-        phone: userData.phone,
-        sucursal_id: userData.sucursal_id || null,
-        fecha_nacimiento: userData.fecha_nacimiento || null,
+        phone: userData.phone || null,
       });
 
-      if (userError) throw userError;
+      if (profileError) throw profileError;
 
-      // Finally, assign role
+      // Create user metadata
+      if (userData.sucursal_id || userData.fecha_nacimiento) {
+        const { error: metadataError } = await (supabase
+          .from("user_metadata" as any)
+          .insert({
+            user_id: authData.user.id,
+            sucursal_id: userData.sucursal_id || null,
+            fecha_nacimiento: userData.fecha_nacimiento || null,
+          }) as any);
+
+        if (metadataError) throw metadataError;
+      }
+
+      // Assign role
       const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: authData.user.id,
         role_name: userData.role,
@@ -116,24 +123,34 @@ const Identidades = () => {
 
   const updateUserMutation = useMutation({
     mutationFn: async (userData: { id: string; data: Partial<UserFormData> }) => {
-      const { error } = await supabase
-        .from("users")
+      // Update profile
+      const { error: profileError } = await supabase
+        .from("profiles")
         .update({
           full_name: userData.data.full_name,
           phone: userData.data.phone,
+        })
+        .eq("id", userData.id);
+
+      if (profileError) throw profileError;
+
+      // Update or create user metadata
+      const { error: metadataError } = await (supabase
+        .from("user_metadata" as any)
+        .upsert({
+          user_id: userData.id,
           sucursal_id: userData.data.sucursal_id || null,
           fecha_nacimiento: userData.data.fecha_nacimiento || null,
-        })
-        .eq("profile_id", userData.id);
+        }) as any);
 
-      if (error) throw error;
+      if (metadataError) throw metadataError;
 
-      // Update role if changed
+      // Update role if changed (using RPC for security)
       if (userData.data.role) {
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .update({ role_name: userData.data.role })
-          .eq("user_id", userData.id);
+        const { error: roleError } = await (supabase.rpc("admin_set_user_roles" as any, {
+          target_user_id: userData.id,
+          roles: [userData.data.role],
+        }) as any);
 
         if (roleError) throw roleError;
       }
@@ -211,7 +228,7 @@ const Identidades = () => {
     e.preventDefault();
     if (editingUser) {
       updateUserMutation.mutate({
-        id: editingUser.profile_id,
+        id: editingUser.id,
         data: formData,
       });
     } else {
@@ -225,7 +242,7 @@ const Identidades = () => {
       full_name: user.full_name || "",
       email: user.email || "",
       phone: user.phone || "",
-      role: user.user_roles?.[0]?.role || "colaborador",
+      role: user.roles?.[0] || "colaborador",
       sucursal_id: user.sucursal_id || "",
       fecha_nacimiento: user.fecha_nacimiento || "",
     });
@@ -387,16 +404,16 @@ const Identidades = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user) => (
-                  <TableRow key={user.profile_id}>
+                {users?.map((user: any) => (
+                  <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.full_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant={getRoleBadgeVariant((user.user_roles as any)?.[0]?.role)}>
-                        {(user.user_roles as any)?.[0]?.role || "sin rol"}
+                      <Badge variant={getRoleBadgeVariant(user.roles?.[0] || "")}>
+                        {user.roles?.[0] || "sin rol"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{(user.sucursales as any)?.nombre || "-"}</TableCell>
+                    <TableCell>{user.sucursal_nombre || "-"}</TableCell>
                     <TableCell>
                       <Badge variant="default">Activo</Badge>
                     </TableCell>
@@ -438,7 +455,7 @@ const Identidades = () => {
                           size="sm"
                           onClick={() => {
                             if (confirm("¿Estás seguro de que deseas desactivar este usuario?")) {
-                              deactivateUserMutation.mutate(user.profile_id);
+                              deactivateUserMutation.mutate(user.id);
                             }
                           }}
                         >
