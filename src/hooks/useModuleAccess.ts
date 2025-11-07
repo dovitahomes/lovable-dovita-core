@@ -26,6 +26,17 @@ export function useModuleAccess() {
         return;
       }
       
+      // Verificar que el bootstrap haya completado
+      const bootstrapCompleted = sessionStorage.getItem('bootstrap_completed');
+      if (!bootstrapCompleted) {
+        console.warn('[useModuleAccess] Bootstrap no ha completado, esperando...');
+        // Reintentar después de 500ms
+        setTimeout(() => {
+          if (active) load();
+        }, 500);
+        return;
+      }
+      
       console.log('[useModuleAccess] Loading permissions for user:', user.id);
       setLoading(true);
       

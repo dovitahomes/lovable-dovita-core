@@ -11,7 +11,9 @@ export async function bootstrapUserAfterLogin(): Promise<boolean> {
       return false;
     }
     
-    console.info('[bootstrap] ✅ Bootstrap completado');
+    // Marcar bootstrap como completado
+    sessionStorage.setItem('bootstrap_completed', 'true');
+    console.info('[bootstrap] ✅ Bootstrap completado y marcado');
     return true;
   } catch (err) {
     console.error('[bootstrap] Excepción:', err);

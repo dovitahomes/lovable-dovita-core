@@ -26,6 +26,9 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Limpiar flag de bootstrap anterior
+    sessionStorage.removeItem('bootstrap_completed');
+    
     try {
       loginSchema.parse({ email, password });
     } catch (error) {
@@ -73,6 +76,9 @@ const Login = () => {
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Limpiar flag de bootstrap anterior
+    sessionStorage.removeItem('bootstrap_completed');
     
     if (!email || !z.string().email().safeParse(email).success) {
       toast.error("Por favor ingresa un correo válido");
