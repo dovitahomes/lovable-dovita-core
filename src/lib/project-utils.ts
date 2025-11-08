@@ -1,140 +1,321 @@
-import type { Project } from '@/contexts/ProjectContext';
+import { supabase } from "@/integrations/supabase/client";
+
+export type ProjectHealth = 'on-time' | 'at-risk' | 'delayed';
+
+interface ProjectHealthData {
+  status: ProjectHealth;
+  ganttDelayDays: number;
+  budgetOverrunPercent: number;
+  missingDocs: number;
+  details: string;
+}
 
 /**
- * Determina si el proyecto está en fase de diseño
+ * Calcula la "salud" de un proyecto basándose en:
+ * - Retraso en el Gantt (días)
+ * - Sobrecosto en presupuesto (%)
+ * - Documentos obligatorios pendientes (#)
  */
-export const isInDesignPhase = (project: Project | null): boolean => {
-  if (!project) return false;
-  return project.projectStage === 'design';
-};
-
-/**
- * Determina si el proyecto está en fase de construcción
- */
-export const isInConstructionPhase = (project: Project | null): boolean => {
-  if (!project) return false;
-  return project.projectStage === 'construction';
-};
-
-/**
- * Obtiene la imagen hero del proyecto
- * Prioriza: última imagen JPG de diseño > renders > heroImage default
- */
-export const getProjectHeroImage = (project: Project | null): string => {
-  if (!project) return '';
+export async function getProjectHealth(projectId: string): Promise<ProjectHealthData> {
+  // 1. Calcular retraso del Gantt
+  const ganttDelayDays = await calculateGanttDelay(projectId);
   
-  // Buscar documentos de diseño tipo imagen (JPG)
-  const designImages = project.documents
-    .filter(doc => doc.category === 'diseno' && doc.type === 'image')
-    .sort((a, b) => {
-      // Ordenar por fecha descendente (más reciente primero)
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateB.getTime() - dateA.getTime();
-    });
+  // 2. Calcular sobrecosto del presupuesto
+  const budgetOverrunPercent = await calculateBudgetOverrun(projectId);
   
-  // Si hay imágenes de diseño, usar la más reciente
-  if (designImages.length > 0) {
-    // Las imágenes en documents no tienen URL, solo name, así que usamos heroImage o renders
-    // En un sistema real, esto vendría del backend con URLs completas
+  // 3. Contar documentos obligatorios pendientes
+  const missingDocs = await countMissingRequiredDocs(projectId);
+
+  // Determinar estado de salud
+  let status: ProjectHealth;
+  let details: string;
+
+  if (ganttDelayDays > 7 || budgetOverrunPercent > 10 || missingDocs > 5) {
+    status = 'delayed';
+    details = buildDelayedDetails(ganttDelayDays, budgetOverrunPercent, missingDocs);
+  } else if (ganttDelayDays > 3 || budgetOverrunPercent > 5 || missingDocs > 2) {
+    status = 'at-risk';
+    details = buildAtRiskDetails(ganttDelayDays, budgetOverrunPercent, missingDocs);
+  } else {
+    status = 'on-time';
+    details = 'Proyecto en buen estado';
   }
-  
-  // Fallback a la imagen hero del proyecto
-  return project.heroImage;
-};
 
-/**
- * Determina si mostrar fotos de construcción
- * Solo se muestran en fase de construcción
- */
-export const shouldShowConstructionPhotos = (project: Project | null): boolean => {
-  return isInConstructionPhase(project);
-};
+  return {
+    status,
+    ganttDelayDays,
+    budgetOverrunPercent,
+    missingDocs,
+    details,
+  };
+}
 
-/**
- * Obtiene el título del cronograma según la fase del proyecto
- */
-export const getScheduleTitle = (project: Project | null): string => {
-  if (!project) return 'Cronograma';
-  
-  if (isInDesignPhase(project)) {
-    return 'Cronograma de Diseño';
+async function calculateGanttDelay(projectId: string): Promise<number> {
+  try {
+    // Obtener la fecha de fin planeada más reciente de las etapas de construcción
+    const { data: stages } = await supabase
+      .from('construction_stages')
+      .select('end_date')
+      .eq('project_id', projectId)
+      .order('end_date', { ascending: false })
+      .limit(1);
+
+    if (!stages || stages.length === 0) return 0;
+
+    const plannedEndDate = new Date(stages[0].end_date);
+    const today = new Date();
+    
+    // Si la fecha planeada ya pasó, calcular días de retraso
+    if (today > plannedEndDate) {
+      const diffTime = Math.abs(today.getTime() - plannedEndDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    return 0;
+  } catch (error) {
+    console.error('Error calculating gantt delay:', error);
+    return 0;
   }
-  
-  return 'Cronograma de Construcción';
-};
+}
 
-/**
- * Obtiene el subtítulo del cronograma según la fase del proyecto
- */
-export const getScheduleSubtitle = (project: Project | null): string => {
-  if (!project) return 'Seguimiento de fases';
-  
-  if (isInDesignPhase(project)) {
-    return 'Seguimiento detallado del proceso de diseño';
+async function calculateBudgetOverrun(projectId: string): Promise<number> {
+  try {
+    // Obtener presupuesto total del presupuesto ejecutivo publicado
+    const { data: budget } = await supabase
+      .from('budgets')
+      .select(`
+        id,
+        budget_items (
+          total
+        )
+      `)
+      .eq('project_id', projectId)
+      .eq('type', 'ejecutivo')
+      .eq('status', 'publicado')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!budget) return 0;
+
+    const budgetedTotal = (budget.budget_items as any[])?.reduce(
+      (sum, item) => sum + (item.total || 0),
+      0
+    ) || 0;
+
+    if (budgetedTotal === 0) return 0;
+
+    // Simplificar: solo contar qty_ordenada como proxy del gasto
+    const { data: orders } = await supabase
+      .from('purchase_orders')
+      .select('qty_ordenada')
+      .eq('project_id', projectId);
+
+    // Estimación simplificada del gasto basada en cantidad ordenada
+    const orderedQty = orders?.reduce((sum, order) => sum + (order.qty_ordenada || 0), 0) || 0;
+    const spentTotal = budgetedTotal > 0 ? (orderedQty / 100) * budgetedTotal : 0;
+
+    // Calcular porcentaje de sobrecosto
+    const overrunPercent = ((spentTotal - budgetedTotal) / budgetedTotal) * 100;
+    
+    return Math.max(0, Math.round(overrunPercent));
+  } catch (error) {
+    console.error('Error calculating budget overrun:', error);
+    return 0;
   }
+}
+
+async function countMissingRequiredDocs(projectId: string): Promise<number> {
+  try {
+    const { data: docs } = await supabase
+      .from('required_documents')
+      .select('id, subido')
+      .eq('project_id', projectId)
+      .eq('obligatorio', true);
+
+    if (!docs) return 0;
+
+    const missing = docs.filter(doc => !doc.subido).length;
+    return missing;
+  } catch (error) {
+    console.error('Error counting missing docs:', error);
+    return 0;
+  }
+}
+
+function buildDelayedDetails(ganttDelay: number, budgetOverrun: number, missingDocs: number): string {
+  const issues: string[] = [];
   
-  return 'Seguimiento detallado del proceso de construcción';
-};
+  if (ganttDelay > 7) {
+    issues.push(`${ganttDelay} días de retraso`);
+  }
+  if (budgetOverrun > 10) {
+    issues.push(`${budgetOverrun}% sobre presupuesto`);
+  }
+  if (missingDocs > 5) {
+    issues.push(`${missingDocs} docs pendientes`);
+  }
+
+  return issues.join(', ');
+}
+
+function buildAtRiskDetails(ganttDelay: number, budgetOverrun: number, missingDocs: number): string {
+  const issues: string[] = [];
+  
+  if (ganttDelay > 3) {
+    issues.push(`${ganttDelay} días de retraso`);
+  }
+  if (budgetOverrun > 5) {
+    issues.push(`${budgetOverrun}% sobre presupuesto`);
+  }
+  if (missingDocs > 2) {
+    issues.push(`${missingDocs} docs pendientes`);
+  }
+
+  return issues.join(', ');
+}
 
 /**
- * Calcula el progreso general del proyecto basándose en sus fases
- * Cada fase vale (100 / número_de_fases)%
- * El progreso se calcula sumando: fases completadas + (fase_actual.progress * valor_fase / 100)
+ * Calcula el progreso general del proyecto basado en etapas de construcción
  */
-export const calculateProjectProgress = (project: Project | null): number => {
-  if (!project || !project.phases || project.phases.length === 0) return 0;
-  
-  const phases = project.phases;
-  const phaseValue = 100 / phases.length; // Valor de cada fase
-  
-  let totalProgress = 0;
-  
-  phases.forEach(phase => {
-    // Cada fase aporta su progreso multiplicado por su valor proporcional
-    totalProgress += (phase.progress * phaseValue) / 100;
-  });
-  
-  return Math.round(totalProgress);
-};
+export async function getProjectProgress(projectId: string): Promise<number> {
+  try {
+    const { data: stages } = await supabase
+      .from('construction_stages')
+      .select('progress')
+      .eq('project_id', projectId);
+
+    if (!stages || stages.length === 0) return 0;
+
+    const avgProgress = stages.reduce((sum, s) => sum + (s.progress || 0), 0) / stages.length;
+    return Math.round(avgProgress);
+  } catch (error) {
+    console.error('Error calculating project progress:', error);
+    return 0;
+  }
+}
+
+/**
+ * Calcula días restantes hasta el fin del proyecto
+ */
+export async function getDaysRemaining(projectId: string): Promise<number | null> {
+  try {
+    const { data: stages } = await supabase
+      .from('construction_stages')
+      .select('end_date')
+      .eq('project_id', projectId)
+      .order('end_date', { ascending: false })
+      .limit(1);
+
+    if (!stages || stages.length === 0) return null;
+
+    const endDate = new Date(stages[0].end_date);
+    const today = new Date();
+    
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  } catch (error) {
+    console.error('Error calculating days remaining:', error);
+    return null;
+  }
+}
+
+// ============================================
+// FUNCIONES PARA CLIENT APP
+// ============================================
+
+/**
+ * Calcula el progreso del proyecto para Client App
+ */
+export async function calculateProjectProgress(projectId: string): Promise<number> {
+  return getProjectProgress(projectId);
+}
 
 /**
  * Obtiene la fase actual del proyecto
- * Prioriza: la fase en progreso más reciente (progress > 0 y < 100)
- * Si hay varias en progreso, toma la más reciente (última en el array)
  */
-export const getCurrentPhase = (project: Project | null): { name: string; progress: number } | null => {
-  if (!project || !project.phases || project.phases.length === 0) {
+export async function getCurrentPhase(projectId: string): Promise<string> {
+  try {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('status')
+      .eq('id', projectId)
+      .single();
+
+    return project?.status || 'prospecto';
+  } catch (error) {
+    console.error('Error getting current phase:', error);
+    return 'prospecto';
+  }
+}
+
+/**
+ * Verifica si el proyecto está en fase de diseño
+ */
+export async function isInDesignPhase(projectId: string): Promise<boolean> {
+  const phase = await getCurrentPhase(projectId);
+  return phase === 'en_diseno';
+}
+
+/**
+ * Determina si se deben mostrar fotos de construcción
+ */
+export async function shouldShowConstructionPhotos(projectId: string): Promise<boolean> {
+  const phase = await getCurrentPhase(projectId);
+  return phase === 'en_construccion' || phase === 'completado';
+}
+
+/**
+ * Obtiene el título del cronograma según la fase
+ */
+export function getScheduleTitle(phase: string): string {
+  const titles: Record<string, string> = {
+    en_diseno: 'Cronograma de Diseño',
+    presupuestado: 'Cronograma de Proyecto',
+    en_construccion: 'Cronograma de Construcción',
+    completado: 'Cronograma Final',
+  };
+  return titles[phase] || 'Cronograma';
+}
+
+/**
+ * Obtiene el subtítulo del cronograma
+ */
+export function getScheduleSubtitle(phase: string): string {
+  const subtitles: Record<string, string> = {
+    en_diseno: 'Planificación y diseño del proyecto',
+    presupuestado: 'Planificación general',
+    en_construccion: 'Avance de construcción',
+    completado: 'Proyecto finalizado',
+  };
+  return subtitles[phase] || 'Detalles del proyecto';
+}
+
+/**
+ * Obtiene la imagen hero del proyecto
+ */
+export async function getProjectHeroImage(projectId: string): Promise<string | null> {
+  try {
+    const { data: photos } = await supabase
+      .from('construction_photos')
+      .select('file_path')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (!photos || photos.length === 0) return null;
+
+    const { data } = await supabase
+      .storage
+      .from('construction-photos')
+      .createSignedUrl(photos[0].file_path, 3600);
+
+    return data?.signedUrl || null;
+  } catch (error) {
+    console.error('Error getting project hero image:', error);
     return null;
   }
-  
-  // Buscar fases en progreso (progress > 0 y < 100)
-  const inProgressPhases = project.phases.filter(
-    phase => phase.progress > 0 && phase.progress < 100
-  );
-  
-  // Si hay fases en progreso, tomar la última (más reciente)
-  if (inProgressPhases.length > 0) {
-    const currentPhase = inProgressPhases[inProgressPhases.length - 1];
-    return {
-      name: currentPhase.name,
-      progress: currentPhase.progress
-    };
-  }
-  
-  // Si no hay fases en progreso, buscar la primera pendiente
-  const pendingPhase = project.phases.find(phase => phase.progress === 0);
-  if (pendingPhase) {
-    return {
-      name: pendingPhase.name,
-      progress: 0
-    };
-  }
-  
-  // Si todas están completas, mostrar la última
-  const lastPhase = project.phases[project.phases.length - 1];
-  return {
-    name: lastPhase.name,
-    progress: lastPhase.progress
-  };
-};
+}

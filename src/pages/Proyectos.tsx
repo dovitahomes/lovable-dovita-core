@@ -11,16 +11,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, LayoutGrid, LayoutList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LoadingError } from "@/components/common/LoadingError";
+import { ProjectCard } from "@/components/projects/ProjectCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Proyectos() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [filterSucursal, setFilterSucursal] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>(isMobile ? 'cards' : 'cards'); // Default cards
   const [formData, setFormData] = useState({
     client_id: "",
     sucursal_id: "",
@@ -153,16 +157,37 @@ export default function Proyectos() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Proyectos</h1>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" /> Nuevo Proyecto
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold">Proyectos</h1>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Toggle vista (mobile fuerza cards) */}
+          {!isMobile && (
+            <div className="flex items-center gap-1 border rounded-lg p-1">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+              >
+                <LayoutList className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => { resetForm(); setOpen(true); }} className="flex-1 sm:flex-none">
+                <Plus className="mr-2 h-4 w-4" /> Nuevo Proyecto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingProject ? 'Editar' : 'Crear'} Proyecto</DialogTitle>
             </DialogHeader>
@@ -240,6 +265,7 @@ export default function Proyectos() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>
@@ -290,7 +316,18 @@ export default function Proyectos() {
             emptyMessage="Aún no hay proyectos"
             onRetry={() => queryClient.invalidateQueries({ queryKey: ['projects', filterSucursal, filterStatus] })}
           />
-          {!isLoading && !error && projects && projects.length > 0 && (
+          
+          {/* Vista Cards */}
+          {!isLoading && !error && projects && projects.length > 0 && (isMobile || viewMode === 'cards') && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )}
+
+          {/* Vista Tabla (solo desktop) */}
+          {!isLoading && !error && projects && projects.length > 0 && !isMobile && viewMode === 'table' && (
             <Table>
               <TableHeader>
                 <TableRow>
