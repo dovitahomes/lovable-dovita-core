@@ -16,9 +16,13 @@ import { LoadingError } from '@/components/common/LoadingError';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { UserCardMobile } from '@/components/admin/UserCardMobile';
+import { cn } from '@/lib/utils';
 
 export default function GestionUsuarios() {
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -190,13 +194,21 @@ export default function GestionUsuarios() {
     <div className="container mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold">Gestión de Usuarios</CardTitle>
+          <div className={cn(
+            "flex items-center justify-between",
+            isMobile ? "flex-col gap-3 items-stretch" : "flex-row"
+          )}>
+            <CardTitle className={cn(
+              "font-bold",
+              isMobile ? "text-xl" : "text-2xl"
+            )}>
+              Gestión de Usuarios
+            </CardTitle>
             <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className={isMobile ? "w-full" : ""}>
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Invitar Usuario
+                  {isMobile ? 'Invitar' : 'Invitar Usuario'}
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -267,14 +279,31 @@ export default function GestionUsuarios() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Buscar por nombre, email o rol..."
+              placeholder={isMobile ? "Buscar..." : "Buscar por nombre, email o rol..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className={cn("pl-10", isMobile && "text-base")}
+              type="search"
+              autoComplete="off"
+              autoCapitalize="none"
             />
           </div>
           
-          <ResponsiveTable
+          {isMobile ? (
+            <div className="space-y-2">
+              {filteredUsers.map((user) => (
+                <UserCardMobile
+                  key={user.id}
+                  user={user}
+                  onView={() => handleRowClick(user)}
+                  onResetPassword={() => resetPasswordMutation.mutate(user.email)}
+                  onResendInvite={() => resetPasswordMutation.mutate(user.email)}
+                  onDelete={() => setDeleteDialog({ open: true, user })}
+                />
+              ))}
+            </div>
+          ) : (
+            <ResponsiveTable
             data={filteredUsers}
             columns={columns}
             keyExtractor={(user: any) => user.id}
@@ -317,7 +346,8 @@ export default function GestionUsuarios() {
                 </Button>
               </div>
             )}
-          />
+            />
+          )}
         </CardContent>
       </Card>
       

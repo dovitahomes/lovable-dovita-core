@@ -18,6 +18,7 @@ import { EmergencyContactForm } from './EmergencyContactForm';
 import { UserRoleBadges } from './UserRoleBadges';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { User, Calendar, Building, Phone, IdCard, Briefcase, Camera, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -160,12 +161,21 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   const heroSection = (
     <div className="flex-shrink-0 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/80" />
-      <div className="relative z-10 p-6 flex flex-col items-center space-y-4">
+      <div className={cn(
+        "relative z-10 flex flex-col items-center",
+        isMobile ? "p-4 space-y-2" : "p-6 space-y-4"
+      )}>
         {/* Avatar con botón de edición */}
         <div className="relative group">
-          <Avatar className="w-32 h-32 md:w-40 md:h-40 ring-4 ring-white/20">
+          <Avatar className={cn(
+            "ring-4 ring-white/20",
+            isMobile ? "w-20 h-20" : "w-32 h-32 md:w-40 md:h-40"
+          )}>
             <AvatarImage src={avatarPreview || user.avatar_url || undefined} />
-            <AvatarFallback className="text-4xl bg-white/20 text-white">
+            <AvatarFallback className={cn(
+              "bg-white/20 text-white",
+              isMobile ? "text-2xl" : "text-4xl"
+            )}>
               {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -213,15 +223,28 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
         
         {/* Info básica */}
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-white">{user.full_name || user.email}</h2>
-          <p className="text-white/90 text-sm">{user.email}</p>
+          <h2 className={cn(
+            "font-bold text-white",
+            isMobile ? "text-lg" : "text-2xl"
+          )}>
+            {user.full_name || user.email}
+          </h2>
+          <p className={cn(
+            "text-white/90",
+            isMobile ? "text-xs" : "text-sm"
+          )}>
+            {user.email}
+          </p>
           
           {/* Badges de roles translúcidos */}
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-1.5 justify-center">
             {user.roles.map((role) => (
               <Badge 
                 key={role}
-                className="bg-white/20 text-white border-white/30 backdrop-blur-sm"
+                className={cn(
+                  "bg-white/20 text-white border-white/30 backdrop-blur-sm",
+                  isMobile && "text-xs px-2 py-0.5"
+                )}
               >
                 {role}
               </Badge>
