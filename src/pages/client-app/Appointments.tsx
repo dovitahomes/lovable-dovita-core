@@ -2,52 +2,93 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
-import AppointmentCard from '@/components/client-app/AppointmentCard';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
-import { mockAppointments } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
-import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import { Plus, Clock, MapPin, User, Calendar as CalendarIcon } from 'lucide-react';
-import { format, isSameDay, isFuture, isToday } from 'date-fns';
+import { useProjectAppointments, useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
+import { Plus, Clock, User, Calendar as CalendarIcon, CheckCircle2, X } from 'lucide-react';
+import { format, isSameDay, isFuture, isToday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatDateTime } from '@/lib/datetime';
+import { toast } from 'sonner';
 
 export default function Appointments() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState<typeof mockAppointments[0] | undefined>();
-
-  // Filter appointments by current project
-  const projectAppointments = mockAppointments.filter(apt => apt.projectId === currentProject?.id);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  
+  const { data: appointments, isLoading } = useProjectAppointments(currentProject?.id || null);
+  const deleteAppointment = useDeleteAppointment();
+  const updateAppointment = useUpdateAppointment();
 
   // Get upcoming appointments (future or today)
-  const upcomingAppointments = projectAppointments
+  const upcomingAppointments = (appointments || [])
     .filter(apt => {
-      const aptDate = new Date(apt.date);
+      const aptDate = parseISO(apt.start_time);
       return isToday(aptDate) || isFuture(aptDate);
     })
-    .sort((a, b) => {
-      const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
-      if (dateCompare !== 0) return dateCompare;
-      return a.time.localeCompare(b.time);
-    });
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    .slice(0, 5);
 
   // Get all dates that have appointments
-  const appointmentDates = projectAppointments.map(apt => new Date(apt.date));
+  const appointmentDates = (appointments || []).map(apt => parseISO(apt.start_time));
 
   // Filter appointments for selected date
   const appointmentsForSelectedDate = selectedDate
-    ? projectAppointments.filter(apt => isSameDay(new Date(apt.date), selectedDate))
+    ? (appointments || []).filter(apt => isSameDay(parseISO(apt.start_time), selectedDate))
     : [];
 
   // Sort appointments by time
   const sortedAppointments = [...appointmentsForSelectedDate].sort((a, b) => {
-    return a.time.localeCompare(b.time);
+    return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
   });
+
+  const handleViewDetails = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleCancelAppointment = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!selectedAppointment) return;
+    
+    try {
+      await updateAppointment.mutateAsync({
+        id: selectedAppointment.id,
+        status: 'cancelada'
+      });
+      toast.success('Cita cancelada exitosamente');
+      setCancelDialogOpen(false);
+      setSelectedAppointment(null);
+    } catch (error) {
+      toast.error('Error al cancelar la cita');
+    }
+  };
+
+  const confirmAppointment = async () => {
+    if (!selectedAppointment) return;
+    
+    try {
+      await updateAppointment.mutateAsync({
+        id: selectedAppointment.id,
+        status: 'confirmada'
+      });
+      toast.success('Cita confirmada exitosamente');
+      setDetailsDialogOpen(false);
+    } catch (error) {
+      toast.error('Error al confirmar la cita');
+    }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -67,10 +108,13 @@ export default function Appointments() {
       />
 
       {/* Upcoming Appointments Card */}
-      <Card>
+      <Card className="bg-gradient-to-br from-primary/5 to-secondary/10 border-primary/20">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium">Próximas citas</p>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary" />
+              <p className="text-sm font-medium">Próximas citas</p>
+            </div>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -80,7 +124,15 @@ export default function Appointments() {
               Ver todas
             </Button>
           </div>
-          <p className="text-2xl font-bold">{upcomingAppointments.length}</p>
+          <p className="text-3xl font-bold text-primary">{upcomingAppointments.length}</p>
+          {upcomingAppointments.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-border/50">
+              <p className="text-xs text-muted-foreground">Próxima:</p>
+              <p className="text-sm font-medium mt-1">
+                {formatDateTime(upcomingAppointments[0].start_time, "d 'de' MMMM, HH:mm")}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -101,8 +153,19 @@ export default function Appointments() {
           </span>
         </div>
 
-        {sortedAppointments.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2].map(i => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-4">
+                  <div className="h-20 bg-muted rounded" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : sortedAppointments.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
+            <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No hay citas programadas para este día</p>
             <Button
               className="mt-4 bg-secondary hover:bg-secondary/90 text-primary"
@@ -114,18 +177,72 @@ export default function Appointments() {
           </div>
         ) : (
           <div className="space-y-3">
-            {sortedAppointments.map((appointment) => (
-              <AppointmentCard
-                key={appointment.id}
-                appointment={appointment}
-                onViewDetails={() => {
-                  // Handle view details
-                }}
-                onCancel={() => {
-                  // Handle cancel
-                }}
-              />
-            ))}
+            {sortedAppointments.map((appointment) => {
+              const startDate = parseISO(appointment.start_time);
+              const endDate = parseISO(appointment.end_time);
+              const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
+              
+              return (
+                <Card key={appointment.id} className="border-l-4 border-l-primary">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base">{appointment.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {formatDateTime(appointment.start_time, "EEEE d 'de' MMMM")}
+                        </p>
+                        <p className="text-sm font-medium text-primary mt-0.5">
+                          {formatDateTime(appointment.start_time, 'HH:mm')}
+                        </p>
+                      </div>
+                      <Badge className={
+                        appointment.status === 'confirmada' 
+                          ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                          : appointment.status === 'cancelada'
+                          ? 'bg-red-100 text-red-700 hover:bg-red-100'
+                          : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                      }>
+                        {appointment.status === 'confirmada' ? 'Confirmada' : 
+                         appointment.status === 'cancelada' ? 'Cancelada' : 'Pendiente'}
+                      </Badge>
+                    </div>
+
+                    {appointment.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {appointment.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-xs">{duration} min</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1" 
+                        onClick={() => handleViewDetails(appointment)}
+                      >
+                        Ver Detalles
+                      </Button>
+                      {appointment.status !== 'cancelada' && isFuture(startDate) && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleCancelAppointment(appointment)}
+                        >
+                          Cancelar
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
@@ -142,18 +259,10 @@ export default function Appointments() {
       {/* Appointment Modal */}
       <AppointmentModal
         open={isModalOpen}
-        onOpenChange={(open) => {
-          setIsModalOpen(open);
-          if (!open) {
-            setEditingAppointment(undefined);
-          }
-        }}
+        onOpenChange={setIsModalOpen}
         onAppointmentCreated={() => {
-          // Refresh appointments
-          setEditingAppointment(undefined);
+          // Refresh appointments handled by react-query
         }}
-        appointment={editingAppointment}
-        mode={editingAppointment ? 'edit' : 'create'}
       />
 
       {/* Upcoming Appointments Dialog */}
@@ -161,57 +270,63 @@ export default function Appointments() {
         <DialogContent className="max-w-[95vw] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Próximas Citas</DialogTitle>
+            <DialogDescription>
+              Tus {upcomingAppointments.length} próximas citas programadas
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-3 mt-4">
             {upcomingAppointments.length > 0 ? (
-              upcomingAppointments.map((appointment) => (
-                <Card 
-                  key={appointment.id} 
-                  className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/50 transition-colors"
-                  onClick={() => {
-                    setEditingAppointment(appointment);
-                    setIsModalOpen(true);
-                    setUpcomingDialogOpen(false);
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{appointment.type}</h3>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                             <Badge className={appointment.status === 'confirmed' ? "bg-green-100 text-green-700 hover:bg-green-100 text-xs" : "text-xs bg-amber-100 text-amber-700 hover:bg-amber-100"}>
-                              {appointment.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(appointment.date), "d 'de' MMMM, yyyy", { locale: es })}
-                            </span>
+              upcomingAppointments.map((appointment) => {
+                const startDate = parseISO(appointment.start_time);
+                const endDate = parseISO(appointment.end_time);
+                const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
+                
+                return (
+                  <Card 
+                    key={appointment.id} 
+                    className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => {
+                      setUpcomingDialogOpen(false);
+                      handleViewDetails(appointment);
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold">{appointment.title}</h3>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <Badge className={
+                                appointment.status === 'confirmada' 
+                                  ? 'text-xs bg-green-100 text-green-700 hover:bg-green-100'
+                                  : 'text-xs bg-amber-100 text-amber-700 hover:bg-amber-100'
+                              }>
+                                {appointment.status === 'confirmada' ? 'Confirmada' : 'Pendiente'}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDateTime(appointment.start_time, "d 'de' MMMM, yyyy")}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4 flex-shrink-0" />
-                          <span>{appointment.time} - {appointment.duration} min</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
-                          <span className="break-words">{appointment.location}</span>
-                        </div>
-                        <div className="flex items-start gap-2 text-muted-foreground">
-                          <User className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="mb-1">Con: {appointment.teamMember.name}</p>
-                            <p className="text-xs">{appointment.notes}</p>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Clock className="h-4 w-4 flex-shrink-0" />
+                            <span>{formatDateTime(appointment.start_time, 'HH:mm')} - {duration} min</span>
                           </div>
+                          {appointment.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2 pl-6">
+                              {appointment.description}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                );
+              })
             ) : (
               <div className="text-center py-12">
                 <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -221,6 +336,102 @@ export default function Appointments() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Appointment Details Dialog */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[85vh] overflow-y-auto">
+          {selectedAppointment && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedAppointment.title}</DialogTitle>
+                <DialogDescription>
+                  {formatDateTime(selectedAppointment.start_time, "EEEE d 'de' MMMM, yyyy")}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Horario</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDateTime(selectedAppointment.start_time, 'HH:mm')} - {formatDateTime(selectedAppointment.end_time, 'HH:mm')}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className={
+                    selectedAppointment.status === 'confirmada' 
+                      ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                      : selectedAppointment.status === 'cancelada'
+                      ? 'bg-red-100 text-red-700 hover:bg-red-100'
+                      : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                  }>
+                    {selectedAppointment.status === 'confirmada' ? 'Confirmada' : 
+                     selectedAppointment.status === 'cancelada' ? 'Cancelada' : 'Pendiente'}
+                  </Badge>
+                </div>
+
+                {selectedAppointment.description && (
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-sm font-medium mb-1">Notas</p>
+                    <p className="text-sm text-muted-foreground">{selectedAppointment.description}</p>
+                  </div>
+                )}
+
+                {selectedAppointment.created_by_name && (
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                    <User className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Creado por</p>
+                      <p className="text-xs text-muted-foreground">{selectedAppointment.created_by_name}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="gap-2">
+                {selectedAppointment.status === 'propuesta' && (
+                  <Button onClick={confirmAppointment} className="bg-green-600 hover:bg-green-700">
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Confirmar Cita
+                  </Button>
+                )}
+                {selectedAppointment.status !== 'cancelada' && isFuture(parseISO(selectedAppointment.start_time)) && (
+                  <Button variant="destructive" onClick={() => {
+                    setDetailsDialogOpen(false);
+                    handleCancelAppointment(selectedAppointment);
+                  }}>
+                    <X className="h-4 w-4 mr-2" />
+                    Cancelar Cita
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+                  Cerrar
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cancelar esta cita?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción notificará al equipo sobre la cancelación. ¿Estás seguro de que deseas cancelar esta cita?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, mantener</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCancel} className="bg-destructive hover:bg-destructive/90">
+              Sí, cancelar cita
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </div>
   );
