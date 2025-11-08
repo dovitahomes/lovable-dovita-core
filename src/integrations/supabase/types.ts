@@ -1819,6 +1819,7 @@ export type Database = {
       }
       invoices: {
         Row: {
+          cfdi_metadata: Json | null
           created_at: string
           emisor_id: string | null
           folio: string | null
@@ -1827,14 +1828,16 @@ export type Database = {
           meta_json: Json | null
           metodo_pago: Database["public"]["Enums"]["payment_method"]
           paid: boolean
+          pdf_path: string | null
           receptor_id: string | null
           tipo: Database["public"]["Enums"]["invoice_type"]
           total_amount: number
           updated_at: string
           uuid: string | null
-          xml_url: string | null
+          xml_path: string | null
         }
         Insert: {
+          cfdi_metadata?: Json | null
           created_at?: string
           emisor_id?: string | null
           folio?: string | null
@@ -1843,14 +1846,16 @@ export type Database = {
           meta_json?: Json | null
           metodo_pago: Database["public"]["Enums"]["payment_method"]
           paid?: boolean
+          pdf_path?: string | null
           receptor_id?: string | null
           tipo: Database["public"]["Enums"]["invoice_type"]
           total_amount: number
           updated_at?: string
           uuid?: string | null
-          xml_url?: string | null
+          xml_path?: string | null
         }
         Update: {
+          cfdi_metadata?: Json | null
           created_at?: string
           emisor_id?: string | null
           folio?: string | null
@@ -1859,12 +1864,13 @@ export type Database = {
           meta_json?: Json | null
           metodo_pago?: Database["public"]["Enums"]["payment_method"]
           paid?: boolean
+          pdf_path?: string | null
           receptor_id?: string | null
           tipo?: Database["public"]["Enums"]["invoice_type"]
           total_amount?: number
           updated_at?: string
           uuid?: string | null
-          xml_url?: string | null
+          xml_path?: string | null
         }
         Relationships: [
           {

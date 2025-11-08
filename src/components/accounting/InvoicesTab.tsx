@@ -30,7 +30,9 @@ interface Invoice {
   total_amount: number;
   emisor_id: string | null;
   receptor_id: string | null;
-  xml_url: string | null; // Relative path to XML in cfdi bucket
+  xml_path: string | null;
+  pdf_path: string | null;
+  cfdi_metadata: any;
   paid: boolean;
   emisor?: { name: string };
   receptor?: { name: string };
@@ -267,13 +269,13 @@ export function InvoicesTab() {
                       </TableCell>
                        <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {invoice.xml_url && (
+                          {invoice.xml_path && (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={async () => {
                                 try {
-                                  const { url } = await getCfdiSignedUrl(invoice.xml_url!);
+                                  const { url } = await getCfdiSignedUrl(invoice.xml_path!);
                                   window.open(url, '_blank');
                                 } catch (error) {
                                   console.error('Error getting signed URL:', error);

@@ -1,198 +1,249 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { uploadCfdiXml } from "@/lib/storage/storage-helpers";
-import { parseCfdiXml } from "@/utils/cfdi/parseCfdi";
-import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Upload, FileText, Eye, X } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { useUploadCfdi } from "@/hooks/useUploadCfdi";
+import { cn } from "@/lib/utils";
 
 interface CfdiUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  providerId?: string;
+  projectId?: string;
 }
 
-export function CfdiUploadDialog({ open, onOpenChange, onSuccess }: CfdiUploadDialogProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+export function CfdiUploadDialog({ 
+  open, 
+  onOpenChange, 
+  onSuccess,
+  providerId,
+  projectId 
+}: CfdiUploadDialogProps) {
+  const [xmlFile, setXmlFile] = useState<File | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [metadata, setMetadata] = useState<any>(null);
+  
+  const { uploadCfdi, uploading, progress } = useUploadCfdi();
+
+  const { getRootProps: getXmlRootProps, getInputProps: getXmlInputProps, isDragActive: isXmlDragActive } = useDropzone({
+    accept: { 'text/xml': ['.xml'] },
+    multiple: false,
+    maxSize: 5 * 1024 * 1024, // 5MB
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        setXmlFile(acceptedFiles[0]);
+        setMetadata(null); // Reset metadata cuando se selecciona nuevo archivo
+      }
+    }
+  });
+
+  const { getRootProps: getPdfRootProps, getInputProps: getPdfInputProps, isDragActive: isPdfDragActive } = useDropzone({
+    accept: { 'application/pdf': ['.pdf'] },
+    multiple: false,
+    maxSize: 10 * 1024 * 1024, // 10MB
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        setPdfFile(acceptedFiles[0]);
+      }
+    }
+  });
 
   const handleUpload = async () => {
-    if (!file) {
-      toast.error("Selecciona un archivo XML");
-      return;
-    }
+    if (!xmlFile || !providerId) return;
 
-    setUploading(true);
     try {
-      // Read file content
-      const text = await file.text();
-      
-      // Parse CFDI
-      const cfdi = parseCfdiXml(text);
+      const result = await uploadCfdi({
+        xmlFile,
+        pdfFile: pdfFile || undefined,
+        emisorId: providerId,
+        projectId,
+      });
 
-      // Check if UUID already exists
-      const { data: existing } = await supabase
-        .from('invoices')
-        .select('id')
-        .eq('uuid', cfdi.timbre.uuid)
-        .single();
-
-      if (existing) {
-        toast.error("Factura duplicada: Ya existe una factura con este UUID");
-        setUploading(false);
-        return;
-      }
-
-      // Upload XML to storage using CFDI conventions
-      // Format: emisor_rfc/YYMM-uuid-filename.xml
-      const { path: xmlFilePath } = await uploadCfdiXml(
-        cfdi.emisor.rfc,
-        file,
-        `${cfdi.timbre.uuid}.xml`
-      );
-
-      // Find or create emisor/receptor
-      let emisorId = null;
-      let receptorId = null;
-
-      // Try to match RFC in providers (emisor)
-      const { data: providers } = await supabase
-        .from('providers')
-        .select('id, fiscales_json');
-      
-      const matchingProvider = providers?.find(p => 
-        p.fiscales_json && 
-        typeof p.fiscales_json === 'object' && 
-        'rfc' in p.fiscales_json &&
-        p.fiscales_json.rfc === cfdi.emisor.rfc
-      );
-
-      if (matchingProvider) {
-        emisorId = matchingProvider.id;
-      } else {
-        // Auto-create provider if not found
-        const { data: newProvider, error: providerError } = await supabase
-          .from('providers')
-          .insert({
-            name: cfdi.emisor.nombre,
-            code_short: cfdi.emisor.rfc.substring(0, 10),
-            fiscales_json: {
-              rfc: cfdi.emisor.rfc,
-              razon_social: cfdi.emisor.nombre,
-              regimen_fiscal: cfdi.emisor.regimenFiscal
-            },
-            activo: true
-          })
-          .select('id')
-          .single();
-        
-        if (!providerError && newProvider) {
-          emisorId = newProvider.id;
-          toast.success(`Proveedor creado: ${cfdi.emisor.nombre}`);
-        }
-      }
-
-      // Try to match RFC in clients (receptor)
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('id, fiscal_json');
-      
-      const matchingClient = clients?.find(c => 
-        c.fiscal_json && 
-        typeof c.fiscal_json === 'object' && 
-        'rfc' in c.fiscal_json &&
-        c.fiscal_json.rfc === cfdi.receptor.rfc
-      );
-
-      if (matchingClient) {
-        receptorId = matchingClient.id;
-      } else {
-        // Auto-create client if not found
-        const { data: newClient, error: clientError } = await supabase
-          .from('clients')
-          .insert({
-            name: cfdi.receptor.nombre,
-            person_type: cfdi.receptor.rfc.length === 12 ? 'moral' : 'fisica',
-            fiscal_json: {
-              rfc: cfdi.receptor.rfc,
-              razon_social: cfdi.receptor.nombre,
-              regimen_fiscal: cfdi.receptor.regimenFiscal,
-              uso_cfdi: cfdi.receptor.usoCfdi,
-              domicilio_fiscal: cfdi.receptor.domicilioFiscal
-            }
-          })
-          .select('id')
-          .single();
-        
-        if (!clientError && newClient) {
-          receptorId = newClient.id;
-          toast.success(`Cliente creado: ${cfdi.receptor.nombre}`);
-        }
-      }
-
-      // Determine tipo: I=ingreso, E=egreso
-      const tipo = cfdi.tipoComprobante === 'I' ? 'ingreso' : 'egreso';
-
-      // Insert invoice
-      const { error: insertError } = await supabase
-        .from('invoices')
-        .insert([{
-          tipo,
-          metodo_pago: (cfdi.metodoPago || 'PUE') as any,
-          issued_at: cfdi.fecha.toISOString().split('T')[0],
-          uuid: cfdi.timbre.uuid,
-          folio: cfdi.folio ? `${cfdi.serie || ''}-${cfdi.folio}` : null,
-          total_amount: cfdi.total,
-          emisor_id: emisorId,
-          receptor_id: receptorId,
-          xml_url: xmlFilePath, // Store relative path (emisor_rfc/YYMM-uuid-filename.xml), not full URL
-          meta_json: cfdi as any,
-          paid: false
-        }]);
-
-      if (insertError) throw insertError;
-
-      toast.success("CFDI cargado exitosamente");
+      setMetadata(result.metadata);
       onSuccess?.();
-      onOpenChange(false);
-      setFile(null);
+      
+      // No cerrar inmediatamente para mostrar preview de metadatos
+      // El usuario cierra manualmente después de ver los metadatos
     } catch (error) {
-      console.error('Error uploading CFDI:', error);
-      toast.error("Error al cargar CFDI: " + (error instanceof Error ? error.message : "Error desconocido"));
-    } finally {
-      setUploading(false);
+      // Error ya manejado en el hook
     }
   };
 
+  const handleClose = () => {
+    setXmlFile(null);
+    setPdfFile(null);
+    setMetadata(null);
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Subir CFDI (XML)</DialogTitle>
+          <DialogTitle>Subir CFDI (XML/PDF)</DialogTitle>
         </DialogHeader>
+        
         <div className="space-y-4">
+          {/* XML Upload */}
           <div>
-            <Label htmlFor="cfdi-file">Archivo XML</Label>
-            <Input
-              id="cfdi-file"
-              type="file"
-              accept=".xml"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
+            <Label>Archivo XML *</Label>
+            <div
+              {...getXmlRootProps()}
+              className={cn(
+                "mt-2 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+                isXmlDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50",
+                xmlFile && "border-green-500 bg-green-500/5"
+              )}
+            >
+              <input {...getXmlInputProps()} />
+              {xmlFile ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-green-600" />
+                    <span className="text-sm font-medium">{xmlFile.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({(xmlFile.size / 1024).toFixed(1)} KB)
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setXmlFile(null);
+                      setMetadata(null);
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Arrastra el archivo XML aquí o haz clic para seleccionar
+                  </p>
+                  <p className="text-xs text-muted-foreground">Máx. 5MB</p>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleUpload} disabled={uploading || !file}>
-              <Upload className="h-4 w-4 mr-2" />
-              {uploading ? 'Cargando...' : 'Cargar'}
-            </Button>
+
+          {/* PDF Upload (opcional) */}
+          <div>
+            <Label>Archivo PDF (opcional)</Label>
+            <div
+              {...getPdfRootProps()}
+              className={cn(
+                "mt-2 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+                isPdfDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50",
+                pdfFile && "border-blue-500 bg-blue-500/5"
+              )}
+            >
+              <input {...getPdfInputProps()} />
+              {pdfFile ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm font-medium">{pdfFile.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({(pdfFile.size / 1024).toFixed(1)} KB)
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPdfFile(null);
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Arrastra el archivo PDF aquí o haz clic para seleccionar
+                  </p>
+                  <p className="text-xs text-muted-foreground">Máx. 10MB</p>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Progress */}
+          {uploading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Cargando...</span>
+                <span className="font-medium">{progress}%</span>
+              </div>
+              <Progress value={progress} />
+            </div>
+          )}
+
+          {/* Metadata Preview */}
+          {metadata && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Metadatos Extraídos</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">UUID:</span>
+                    <p className="font-mono text-xs break-all">{metadata.uuid || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Folio:</span>
+                    <p className="font-medium">{metadata.folio_number || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Fecha:</span>
+                    <p className="font-medium">{metadata.fecha_emision || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Total:</span>
+                    <p className="font-medium">${metadata.total?.toFixed(2) || '0.00'}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Emisor:</span>
+                    <p className="font-medium text-xs">{metadata.emisor?.nombre || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">RFC Emisor:</span>
+                    <p className="font-mono text-xs">{metadata.emisor?.rfc || 'N/A'}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={handleClose}>
+            {metadata ? 'Cerrar' : 'Cancelar'}
+          </Button>
+          {!metadata && (
+            <Button 
+              onClick={handleUpload} 
+              disabled={uploading || !xmlFile || !providerId}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {uploading ? 'Cargando...' : 'Cargar CFDI'}
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
