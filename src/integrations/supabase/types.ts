@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          account_type: string | null
+          billing_address_json: Json | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          industry: string | null
+          name: string
+          notes: string | null
+          owner_id: string | null
+          phone: string | null
+          shipping_address_json: Json | null
+          sucursal_id: string | null
+          tax_id: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          account_type?: string | null
+          billing_address_json?: Json | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          notes?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          shipping_address_json?: Json | null
+          sucursal_id?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          account_type?: string | null
+          billing_address_json?: Json | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          notes?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          shipping_address_json?: Json | null
+          sucursal_id?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_sucursal_id_fkey"
+            columns: ["sucursal_id"]
+            isOneToOne: false
+            referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alianzas: {
         Row: {
           activa: boolean | null
@@ -1063,6 +1128,65 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          account_id: string | null
+          birthdate: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          first_name: string
+          id: string
+          job_title: string | null
+          last_name: string
+          mobile: string | null
+          notes: string | null
+          owner_id: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          birthdate?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          job_title?: string | null
+          last_name: string
+          mobile?: string | null
+          notes?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          birthdate?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          job_title?: string | null
+          last_name?: string
+          mobile?: string | null
+          notes?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contenido_corporativo: {
         Row: {
           color_primario: string | null
@@ -1111,6 +1235,78 @@ export type Database = {
           telefono_principal?: string | null
           telefono_secundario?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          description: string
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata_json: Json | null
+          performed_by: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          description: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata_json?: Json | null
+          performed_by: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          description?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata_json?: Json | null
+          performed_by?: string
+        }
+        Relationships: []
+      }
+      crm_attachments: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          notes: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          notes?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          notes?: string | null
+          uploaded_by?: string | null
         }
         Relationships: []
       }
@@ -1909,6 +2105,114 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_construction_progress"
             referencedColumns: ["stage_id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          account_id: string
+          amount: number | null
+          closed_date: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          expected_close_date: string | null
+          folio: string
+          id: string
+          loss_reason: string | null
+          name: string
+          notes: string | null
+          owner_id: string | null
+          probability: number | null
+          stage: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount?: number | null
+          closed_date?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expected_close_date?: string | null
+          folio: string
+          id?: string
+          loss_reason?: string | null
+          name: string
+          notes?: string | null
+          owner_id?: string | null
+          probability?: number | null
+          stage?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number | null
+          closed_date?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expected_close_date?: string | null
+          folio?: string
+          id?: string
+          loss_reason?: string | null
+          name?: string
+          notes?: string | null
+          owner_id?: string | null
+          probability?: number | null
+          stage?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_units: {
+        Row: {
+          created_at: string
+          id: string
+          opportunity_id: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_units_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_units_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2910,6 +3214,54 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string | null
+          related_to_id: string | null
+          related_to_type: string | null
+          status: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           account_id: string
@@ -3099,6 +3451,106 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tu_nodes"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      units: {
+        Row: {
+          amenities_json: Json | null
+          area_m2: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          created_by: string | null
+          floor_number: number | null
+          id: string
+          notes: string | null
+          parking_spaces: number | null
+          price: number | null
+          project_id: string | null
+          status: string | null
+          unit_number: string
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          amenities_json?: Json | null
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          created_by?: string | null
+          floor_number?: number | null
+          id?: string
+          notes?: string | null
+          parking_spaces?: number | null
+          price?: number | null
+          project_id?: string | null
+          status?: string | null
+          unit_number: string
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amenities_json?: Json | null
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          created_by?: string | null
+          floor_number?: number | null
+          id?: string
+          notes?: string | null
+          parking_spaces?: number | null
+          price?: number | null
+          project_id?: string | null
+          status?: string | null
+          unit_number?: string
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
           },
         ]
       }

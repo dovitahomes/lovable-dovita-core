@@ -12,6 +12,7 @@ export const BUCKETS = {
   'construction-photos': { private: true },
   cfdi: { private: true },
   firmas: { private: true },
+  'crm-attachments': { private: true },
 } as const;
 
 export type BucketName = keyof typeof BUCKETS;

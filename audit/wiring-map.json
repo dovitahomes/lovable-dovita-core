@@ -1,207 +1,87 @@
 {
-  "version": "2.0.0",
-  "generated_at": "2025-01-07T18:00:00Z",
-  "description": "Storage wiring map - all components now standardized with helpers",
-  "status": "✅ COMPLETE",
-  "components": [
-    {
-      "file": "src/components/DocumentManager.tsx",
-      "status": "✅ COMPLETE",
-      "table": "public.documents",
-      "columns": ["project_id", "nombre", "file_url", "tipo_carpeta", "etiqueta", "visibilidad", "file_size", "file_type", "uploaded_by"],
-      "bucket": "documentos (interno) | project_docs (cliente)",
-      "path_pattern": "projectId/YYMM-uuid-filename.ext",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"],
-      "notes": "✅ Bucket selection based on visibilidad, stores relative paths, uses signed URLs"
+  "version": "3.0.0",
+  "generated_at": "2025-01-08T00:00:00Z",
+  "description": "CRM Module - Complete UI to Supabase wiring",
+  "status": "✅ BLOQUE 2 COMPLETE",
+  "crm_module": {
+    "accounts": {
+      "table": "public.accounts",
+      "hooks": "src/hooks/crm/useAccounts.ts",
+      "fields": ["name", "account_type", "industry", "email", "phone", "tax_id", "notes"],
+      "relations": ["sucursal_id -> sucursales"],
+      "operations": ["list", "create", "update", "delete"],
+      "search": "name, email, phone",
+      "pagination": "client-side"
     },
-    {
-      "file": "src/hooks/useProjectDocuments.ts",
-      "status": "✅ COMPLETE",
-      "table": "public.documents",
-      "columns": ["project_id", "nombre", "file_url", "tipo_carpeta", "visibilidad", "file_size", "file_type", "uploaded_by"],
-      "bucket": "project_docs",
-      "path_pattern": "projectId/YYMM-uuid-filename.ext",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"],
-      "notes": "✅ Standard implementation for ERP document management"
+    "contacts": {
+      "table": "public.contacts",
+      "hooks": "src/hooks/crm/useContacts.ts",
+      "fields": ["first_name", "last_name", "job_title", "email", "phone", "mobile"],
+      "relations": ["account_id -> accounts"],
+      "operations": ["list", "create", "update", "delete"],
+      "search": "first_name, last_name, email"
     },
-    {
-      "file": "src/hooks/useClientDocumentsUpload.ts",
-      "status": "✅ COMPLETE",
-      "table": "public.documents",
-      "columns": ["project_id", "nombre", "file_url", "tipo_carpeta", "etiqueta", "visibilidad", "file_size", "file_type", "uploaded_by"],
-      "bucket": "project_docs",
-      "path_pattern": "projectId/YYMM-uuid-filename.ext",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket", "deleteFromBucket"],
-      "notes": "✅ Client-facing document upload with standard helpers"
+    "opportunities": {
+      "table": "public.opportunities",
+      "hooks": "src/hooks/crm/useOpportunities.ts",
+      "fields": ["folio", "name", "stage", "amount", "probability", "expected_close_date"],
+      "relations": ["account_id -> accounts (required)", "contact_id -> contacts (optional)"],
+      "operations": ["list", "create", "update", "delete"],
+      "units_link": "opportunity_units table (many-to-many)",
+      "folio_generation": "Auto via trigger: OPP-YYYYMM-XXX",
+      "search": "name, folio"
     },
-    {
-      "file": "src/components/construction/ConstructionPhotosTab.tsx",
-      "status": "✅ COMPLETE",
-      "table": "public.construction_photos",
-      "columns": ["project_id", "file_url", "file_name", "latitude", "longitude", "fecha_foto", "descripcion", "visibilidad", "uploaded_by"],
-      "bucket": "construction-photos",
-      "path_pattern": "projectId/YYMM-uuid-filename.ext",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"],
-      "notes": "✅ Construction photos with signed URLs and standard paths"
+    "tasks": {
+      "table": "public.tasks",
+      "hooks": "src/hooks/crm/useTasks.ts",
+      "fields": ["subject", "description", "due_date", "priority", "status", "assigned_to"],
+      "relations": ["related_to_type + related_to_id (polymorphic)"],
+      "operations": ["list", "create", "update", "delete"],
+      "soft_complete": "completed_at set on status=completada"
     },
-    {
-      "file": "src/hooks/useDesignDeliverables.ts",
-      "status": "✅ COMPLETE",
-      "table": "public.design_deliverables",
-      "columns": ["project_id", "phase_id", "file_name", "file_url", "file_type", "file_size", "description", "uploaded_by"],
-      "bucket": "design-deliverables",
-      "path_pattern": "projectId/YYMM-uuid-filename.ext",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"],
-      "notes": "✅ Design deliverables with cleanup on DB insert failure"
+    "units": {
+      "table": "public.units",
+      "hooks": "src/hooks/crm/useUnits.ts",
+      "fields": ["unit_number", "unit_type", "area_m2", "price", "status"],
+      "relations": ["project_id -> projects (optional)"],
+      "operations": ["list", "create", "update", "delete"]
     },
-    {
-      "file": "src/components/BudgetItemDialog.tsx",
-      "status": "✅ COMPLETE",
-      "table": "public.budget_attachments",
-      "columns": ["budget_item_id", "file_name", "file_url", "file_type", "file_size"],
-      "bucket": "documentos",
-      "path_pattern": "budget_item_id/YYMM-uuid-filename.ext",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket"],
-      "notes": "✅ Uses budget_item_id as projectId for path organization"
+    "attachments": {
+      "table": "public.crm_attachments",
+      "hooks": "src/hooks/crm/useCrmAttachments.ts",
+      "bucket": "crm-attachments (private)",
+      "path_pattern": "entityId/YYMM-uuid-filename.ext",
+      "read_mode": "signed URL (600s)",
+      "operations": ["upload", "download", "delete"],
+      "helpers": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"]
     },
-    {
-      "file": "src/components/accounting/CfdiUploadDialog.tsx",
-      "status": "✅ COMPLETE",
-      "table": "public.invoices",
-      "columns": ["tipo", "metodo_pago", "issued_at", "uuid", "folio", "total_amount", "emisor_id", "receptor_id", "xml_url", "meta_json"],
-      "bucket": "cfdi",
-      "path_pattern": "emisor_rfc/YYMM-uuid-{uuid}.xml",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket"],
-      "notes": "✅ Uses emisor RFC as projectId, stores path in xml_url"
-    },
-    {
-      "file": "src/components/WishlistForm.tsx",
-      "status": "✅ COMPLETE",
-      "table": "public.wishlists",
-      "columns": ["project_id", "payload", "firma_tipo", "firma_url", "firmado", "firmado_at"],
-      "bucket": "firmas",
-      "path_pattern": "projectId/YYMM-uuid-firma.{ext}",
-      "read_mode": "signed",
-      "helpers_used": ["uploadToBucket"],
-      "notes": "✅ Handles both canvas signatures (PNG) and PDF uploads"
+    "activities": {
+      "table": "public.crm_activities",
+      "hooks": "src/hooks/crm/useCrmActivities.ts",
+      "auto_log": "Triggers on accounts, contacts, opportunities, tasks, leads",
+      "operations": ["view only"]
     }
-  ],
-  "client_app_views": [
-    {
-      "file": "src/hooks/useClientDocuments.ts",
-      "status": "✅ COMPLETE",
-      "view": "public.v_client_documents",
-      "bucket": "project_docs",
-      "read_mode": "signed",
-      "notes": "✅ Read-only view for client-visible documents, uses getSignedUrl for downloads"
-    },
-    {
-      "file": "src/hooks/useClientPhotos.ts",
-      "status": "✅ COMPLETE",
-      "view": "public.v_client_photos",
-      "bucket": "construction-photos",
-      "read_mode": "signed",
-      "notes": "✅ Read-only view for client-visible photos, uses getSignedUrl for viewing"
-    },
-    {
-      "file": "src/features/client/hooks/useClientDocuments.ts",
-      "status": "✅ COMPLETE",
-      "table": "public.documents",
-      "bucket": "project_docs",
-      "read_mode": "signed",
-      "notes": "✅ Alternative client documents hook, queries documents table directly with filters"
+  },
+  "storage": {
+    "bucket": "crm-attachments",
+    "privacy": "private",
+    "rls": "module permission: crm",
+    "conventions": {
+      "path": "entityId/YYMM-uuid-filename.ext",
+      "storage_column": "file_url (relative path only)",
+      "access": "createSignedUrl() with 600s expiry"
     }
-  ],
-  "storage_helpers": {
-    "file": "src/lib/storage/storage-helpers.ts",
-    "status": "✅ COMPLETE",
-    "functions": [
-      {
-        "name": "buildPath",
-        "description": "Generates standardized path: projectId/YYMM-uuid-slugified-filename.ext",
-        "params": ["projectId", "filename"],
-        "returns": "string"
-      },
-      {
-        "name": "uploadToBucket",
-        "description": "Uploads file to bucket with standard path, returns { path }",
-        "params": ["bucket", "projectId", "file", "filename?"],
-        "returns": "Promise<{ path: string }>"
-      },
-      {
-        "name": "getSignedUrl",
-        "description": "Generates temporary signed URL (default 600s)",
-        "params": ["bucket", "path", "expiresInSeconds?"],
-        "returns": "Promise<{ url: string }>"
-      },
-      {
-        "name": "deleteFromBucket",
-        "description": "Deletes file from bucket",
-        "params": ["bucket", "path"],
-        "returns": "Promise<boolean>"
-      }
-    ],
-    "notes": "Central storage helper used across all upload/read/delete flows"
   },
-  "buckets": {
-    "file": "src/lib/storage/buckets.ts",
-    "status": "✅ COMPLETE",
-    "buckets": [
-      {
-        "name": "documentos",
-        "private": true,
-        "usage": "Internal documents and budget attachments"
-      },
-      {
-        "name": "project_docs",
-        "private": true,
-        "usage": "Client-visible documents"
-      },
-      {
-        "name": "design-deliverables",
-        "private": true,
-        "usage": "Design phase deliverables"
-      },
-      {
-        "name": "construction-photos",
-        "private": true,
-        "usage": "Construction progress photos"
-      },
-      {
-        "name": "cfdi",
-        "private": true,
-        "usage": "CFDI XML invoices"
-      },
-      {
-        "name": "firmas",
-        "private": true,
-        "usage": "Digital signatures (canvas and PDF)"
-      }
-    ]
+  "rls_policies": {
+    "pattern": "Same as leads: admin all, module permissions for CRM",
+    "modules": ["crm"],
+    "permissions": ["view", "create", "edit", "delete"]
   },
-  "conventions": {
-    "path_format": "projectId/YYMM-uuid-slugified-filename.ext",
-    "storage_column": "file_url (stores relative path only)",
-    "read_method": "createSignedUrl() with 600s default expiry",
-    "upload_method": "uploadToBucket() helper",
-    "delete_method": "deleteFromBucket() helper",
-    "security": "All buckets private, no service keys in frontend"
-  },
-  "summary": {
-    "total_components": 8,
-    "total_views": 3,
-    "all_standardized": true,
-    "using_helpers": true,
-    "storing_relative_paths": true,
-    "using_signed_urls": true,
-    "path_convention_applied": true,
-    "status": "✅ ALL COMPONENTS COMPLETE"
-  }
+  "next_steps": [
+    "Create UI pages: Accounts, Contacts, Opportunities, Tasks, Units",
+    "Create dialogs for CRUD operations",
+    "Add routes to sidebar",
+    "Test all CRUD flows",
+    "Verify RLS permissions"
+  ]
 }
