@@ -93,7 +93,7 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
-      let firmaUrl = existingWishlist?.firma_url;
+      let firmaPath = existingWishlist?.firma_url;
       let firmaTipo = existingWishlist?.firma_tipo;
 
       if (firmar) {
@@ -114,7 +114,7 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
             filename: `firma-${Date.now()}.png`
           });
 
-          firmaUrl = path;
+          firmaPath = path;
           firmaTipo = "manuscrita";
         } else if (firmaTab === "pdf") {
           if (!pdfFile) {
@@ -129,7 +129,7 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
             filename: pdfFile.name
           });
 
-          firmaUrl = path;
+          firmaPath = path;
           firmaTipo = "pdf";
         }
       }
@@ -138,7 +138,7 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
         project_id: projectId,
         payload: formData,
         firma_tipo: firmar ? firmaTipo : existingWishlist?.firma_tipo,
-        firma_url: firmar ? firmaUrl : existingWishlist?.firma_url,
+        firma_url: firmar ? firmaPath : existingWishlist?.firma_url, // Store relative path
         firmado: firmar,
         firmado_at: firmar ? new Date().toISOString() : existingWishlist?.firmado_at
       };

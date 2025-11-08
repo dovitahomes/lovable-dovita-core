@@ -1,275 +1,125 @@
 {
-  "version": "3.2.0",
-  "generated_at": "2025-01-08T14:30:00Z",
-  "description": "Dovita Core - Complete UI to Supabase Wiring Map (Storage Unified)",
-  "status": "✅ BLOQUE 3 STORAGE COMPLETE",
-  
-  "storage_unified": {
-    "convention": "${projectId}/${YYYY-MM}-${uuid}-${safeName}",
-    "helpers_file": "src/lib/storage/storage-helpers.ts",
-    "barrel_export": "src/lib/storage-helpers.ts",
-    "documentation": "docs/STORAGE_CONVENTIONS.md",
-    
-    "buckets": {
-      "documentos": {
-        "privacy": "private",
-        "purpose": "General internal documents, user documents",
-        "path_format": "projectId|userId/YYYY-MM-uuid-filename.ext",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "user_documents.file_url",
-          "documents.file_url (visibilidad=interno|admin)"
-        ],
-        "status": "✅ All hooks updated"
-      },
-      "project_docs": {
-        "privacy": "private",
-        "purpose": "Project documents visible to clients",
-        "path_format": "projectId/YYYY-MM-uuid-filename.ext",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "documents.file_url (visibilidad=cliente)"
-        ],
-        "status": "✅ All hooks updated"
-      },
-      "design-deliverables": {
-        "privacy": "private",
-        "purpose": "Design phase deliverables (planos, renders, maquetas)",
-        "path_format": "projectId/YYYY-MM-uuid-filename.ext",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "design_deliverables.file_url"
-        ],
-        "status": "✅ All hooks updated"
-      },
-      "construction-photos": {
-        "privacy": "private",
-        "purpose": "Construction progress photos",
-        "path_format": "projectId/YYYY-MM-uuid-filename.ext",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "construction_photos.file_url"
-        ],
-        "status": "⏳ Pending update"
-      },
-      "cfdi": {
-        "privacy": "private",
-        "purpose": "CFDI XML and PDF invoices",
-        "path_format": "emisor_rfc/YYYY-MM-uuid-filename.xml",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "invoices.xml_file_url",
-          "invoices.pdf_file_url"
-        ],
-        "special_processing": "extract_cfdi_metadata(xml_content) after upload",
-        "status": "⏳ Pending update"
-      },
-      "firmas": {
-        "privacy": "private",
-        "purpose": "Digital signatures from wishlists, change logs",
-        "path_format": "projectId/YYYY-MM-uuid-firma.png",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "design_change_logs.signature_url",
-          "wishlists.firma_url"
-        ],
-        "status": "⏳ Pending update"
-      },
-      "crm-attachments": {
-        "privacy": "private",
-        "purpose": "CRM entity attachments",
-        "path_format": "entityId/YYYY-MM-uuid-filename.ext",
-        "access": "createSignedUrl(path, 600)",
-        "tables": [
-          "crm_attachments.file_url"
-        ],
-        "status": "✅ All hooks updated"
-      }
+  "unified_storage": {
+    "description": "Mapa de auditoría del sistema de storage unificado. Todas las rutas son relativas (sin bucket/dominio). Lectura usa signed URLs para buckets privados.",
+    "updated_at": "2025-01-08",
+    "storage_helpers": "src/lib/storage/storage-helpers.ts",
+    "buckets": "src/lib/storage/buckets.ts"
+  },
+  "mappings": {
+    "construction_photos.file_url": {
+      "bucket": "project_photos",
+      "private": true,
+      "path_format": "{project_id}/{YYMM}-{uuid}-{filename}",
+      "hooks": [
+        "src/hooks/useConstructionPhotosUpload.ts",
+        "src/hooks/useProjectPhotos.ts",
+        "src/hooks/useClientPhotos.ts"
+      ],
+      "components": [
+        "src/components/construction/ConstructionPhotosTab.tsx"
+      ],
+      "views": ["v_client_photos"],
+      "status": "✅ Implementado - rutas relativas + signed URLs"
     },
-    
-    "components_updated": {
-      "useUploadUserDocument": {
-        "file": "src/hooks/useUploadUserDocument.ts",
-        "status": "✅ Updated",
-        "changes": [
-          "Uses uploadToBucket with standardized paths",
-          "Stores only path in file_url",
-          "Cleanup on DB error",
-          "Removed getPublicUrl usage"
-        ]
-      },
-      "useDesignDeliverables": {
-        "file": "src/hooks/useDesignDeliverables.ts",
-        "status": "✅ Compliant",
-        "changes": "Already using helpers correctly"
-      },
-      "useCrmAttachments": {
-        "file": "src/hooks/crm/useCrmAttachments.ts",
-        "status": "✅ Compliant",
-        "changes": "Already using helpers correctly"
-      },
-      "useProjectDocuments": {
-        "file": "src/hooks/useProjectDocuments.ts",
-        "status": "✅ Compliant",
-        "changes": "Already using helpers correctly"
-      },
-      "useClientDocumentsUpload": {
-        "file": "src/hooks/useClientDocumentsUpload.ts",
-        "status": "✅ Compliant",
-        "changes": "Already using helpers correctly"
-      },
-      "DocumentManager": {
-        "file": "src/components/DocumentManager.tsx",
-        "status": "✅ Compliant",
-        "changes": "Already using helpers correctly"
-      }
+    "documents.file_url": {
+      "bucket": "project_docs",
+      "private": true,
+      "path_format": "{project_id}/{YYMM}-{uuid}-{filename}",
+      "hooks": [
+        "src/hooks/useDocumentsUpload.ts",
+        "src/hooks/useUnifiedProjectDocuments.ts",
+        "src/features/client/hooks/useClientDocuments.ts"
+      ],
+      "components": [
+        "src/components/project/ProjectDocumentsTab.tsx"
+      ],
+      "views": ["v_client_documents"],
+      "status": "✅ Implementado - rutas relativas + signed URLs"
     },
-    
-    "pending_updates": {
-      "ConstructionPhotosTab": {
-        "file": "src/components/construction/ConstructionPhotosTab.tsx",
-        "changes_needed": [
-          "Use uploadToBucket({ bucket: 'construction-photos', projectId, file })",
-          "Store path in construction_photos.file_url",
-          "Use getSignedUrl('construction-photos', path)"
-        ]
-      },
-      "CfdiUploadDialog": {
-        "file": "src/components/accounting/CfdiUploadDialog.tsx",
-        "changes_needed": [
-          "Use uploadCfdiXml(emisorRfc, xmlFile)",
-          "Store path in invoices.xml_file_url",
-          "Use getCfdiSignedUrl(path) for viewing"
-        ]
-      },
-      "DesignChangeLogs": {
-        "file": "src/components/design/ChangeLogsSection.tsx",
-        "changes_needed": [
-          "Convert signature canvas to Blob",
-          "Use buildPath(projectId, 'firma.png')",
-          "Upload to 'firmas' bucket"
-        ]
-      }
+    "crm_attachments.file_url": {
+      "bucket": "crm-attachments",
+      "private": true,
+      "path_format": "{entity_id}/{YYMM}-{uuid}-{filename}",
+      "hooks": [
+        "src/hooks/crm/useCrmAttachments.ts"
+      ],
+      "components": [
+        "src/components/crm/AttachmentsTab.tsx"
+      ],
+      "status": "✅ Implementado - rutas relativas + signed URLs"
+    },
+    "budget_attachments.file_url": {
+      "bucket": "documentos",
+      "private": true,
+      "path_format": "{budget_item_id}/{YYMM}-{uuid}-{filename}",
+      "components": [
+        "src/components/BudgetItemDialog.tsx"
+      ],
+      "status": "✅ Implementado - rutas relativas (bucket documentos compartido)"
+    },
+    "invoices.xml_path": {
+      "bucket": "cfdi",
+      "private": true,
+      "path_format": "{emisor_rfc}/{YYYY-MM}-{uuid}-{filename}.xml",
+      "notes": "Usa buildCfdiPath() con formato específico YYYY-MM",
+      "status": "⚠️ Pendiente - requiere hook useUploadCfdi + extract_cfdi_metadata RPC"
+    },
+    "invoices.pdf_path": {
+      "bucket": "cfdi",
+      "private": true,
+      "path_format": "{emisor_rfc}/{YYYY-MM}-{uuid}-{filename}.pdf",
+      "status": "⚠️ Pendiente - misma implementación que xml_path"
+    },
+    "wishlists.firma_url": {
+      "bucket": "firmas",
+      "private": true,
+      "path_format": "{project_id}/{YYMM}-{uuid}-firma.png",
+      "components": [
+        "src/components/WishlistForm.tsx"
+      ],
+      "status": "✅ Implementado - rutas relativas"
+    },
+    "profiles.avatar_url": {
+      "bucket": "avatars",
+      "private": false,
+      "path_format": "{user_id}/{YYMM}-{uuid}-{filename}",
+      "hooks": [
+        "src/hooks/useUploadAvatar.ts"
+      ],
+      "status": "✅ Implementado - bucket público, guarda ruta relativa"
     }
   },
-
-  "crm_module": {
-    "accounts": {
-      "table": "public.accounts",
-      "hooks": "src/hooks/crm/useAccounts.ts",
-      "pages": "src/pages/crm/Accounts.tsx",
-      "fields": ["name", "account_type", "industry", "email", "phone", "tax_id", "notes"],
-      "relations": ["sucursal_id -> sucursales"],
-      "operations": ["list", "create", "update", "delete"],
-      "search": "name, email, phone",
-      "pagination": "client-side",
-      "attachments": "✅ AttachmentsTab enabled"
-    },
-    "contacts": {
-      "table": "public.contacts",
-      "hooks": "src/hooks/crm/useContacts.ts",
-      "pages": "src/pages/crm/Contacts.tsx",
-      "fields": ["first_name", "last_name", "job_title", "email", "phone", "mobile"],
-      "relations": ["account_id -> accounts"],
-      "operations": ["list", "create", "update", "delete"],
-      "search": "first_name, last_name, email",
-      "attachments": "✅ AttachmentsTab enabled"
-    },
-    "leads": {
-      "table": "public.leads",
-      "hooks": "src/hooks/useLeads.ts",
-      "pages": "src/pages/Leads.tsx",
-      "fields": ["name", "email", "phone", "status", "source", "budget_range"],
-      "operations": ["list", "create", "update", "delete", "convert"],
-      "conversion": "✅ ConvertLeadToOpportunityDialog",
-      "kanban": "✅ Drag-drop by status"
-    },
-    "opportunities": {
-      "table": "public.opportunities",
-      "hooks": "src/hooks/crm/useOpportunities.ts",
-      "pages": "src/pages/crm/Opportunities.tsx",
-      "fields": ["folio", "name", "stage", "amount", "probability", "expected_close_date", "closed_date"],
-      "relations": ["account_id -> accounts (required)", "contact_id -> contacts (optional)"],
-      "operations": ["list", "create", "update", "delete"],
-      "units_link": "✅ opportunity_units table (many-to-many)",
-      "folio_generation": "Auto via trigger: OPP-YYYYMM-XXX",
-      "search": "name, folio",
-      "kanban": "✅ OpportunityKanban with drag-drop",
-      "attachments": "✅ AttachmentsTab enabled"
-    },
-    "tasks": {
-      "table": "public.tasks",
-      "hooks": "src/hooks/crm/useTasks.ts",
-      "pages": "⏳ Pending creation",
-      "fields": ["subject", "description", "due_date", "priority", "status", "assigned_to"],
-      "relations": ["related_to_type + related_to_id (polymorphic)"],
-      "operations": ["list", "create", "update", "delete"],
-      "soft_complete": "completed_at set on status=completada",
-      "attachments": "✅ AttachmentsTab ready"
-    },
-    "units": {
-      "table": "public.units",
-      "hooks": "src/hooks/crm/useUnits.ts",
-      "fields": ["unit_number", "unit_type", "area_m2", "price", "status"],
-      "relations": ["project_id -> projects (optional)"],
-      "operations": ["list", "create", "update", "delete"],
-      "linking": "✅ Via opportunity_units in Opportunities page"
-    },
-    "attachments": {
-      "table": "public.crm_attachments",
-      "hooks": "src/hooks/crm/useCrmAttachments.ts",
-      "component": "src/components/crm/AttachmentsTab.tsx",
-      "bucket": "crm-attachments (private)",
-      "path_pattern": "entityId/YYYY-MM-uuid-filename.ext",
-      "read_mode": "createSignedUrl(path, 600)",
-      "operations": ["upload", "download", "preview", "delete"],
-      "helpers": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"],
-      "status": "✅ Fully implemented"
-    },
-    "activities": {
-      "table": "public.crm_activities",
-      "hooks": "src/hooks/crm/useCrmActivities.ts",
-      "auto_log": "Triggers on accounts, contacts, opportunities, tasks, leads",
-      "operations": ["view only"],
-      "status": "✅ Recording conversions and stage changes"
+  "pending_migrations": [
+    {
+      "module": "Finanzas/CFDI",
+      "actions": [
+        "Crear hook useUploadCfdi con validación XML",
+        "Implementar llamada a extract_cfdi_metadata(xml_text) RPC",
+        "Actualizar CfdiUploadDialog para usar nuevo hook",
+        "Agregar signed URL display para XMLs/PDFs existentes"
+      ],
+      "priority": "media"
     }
+  ],
+  "normalization_rules": {
+    "path_storage": "Siempre guardar SOLO ruta relativa en DB (sin bucket, sin dominio)",
+    "url_generation": "Usar getSignedUrl(bucket, path, ttl) para buckets privados",
+    "public_buckets": "Solo 'avatars' es público; usar getPublicUrl solo para este",
+    "filename_slugify": "Normalizar con buildPath: lowercase, sin acentos, _ para espacios",
+    "cleanup_on_error": "Si falla INSERT en DB, eliminar archivo de storage (deleteFromBucket)"
   },
-
-  "user_management": {
-    "role_assignment": {
-      "rpc_function": "admin_set_user_roles",
-      "signature": "admin_set_user_roles(p_user_id uuid, p_roles text[])",
-      "component": "src/components/admin/UserDetailDialog.tsx",
-      "status": "✅ Fixed",
-      "changes": [
-        "Uses correct RPC parameter names",
-        "Invalidates queries after success",
-        "Reloads page if current user's roles change"
-      ]
-    }
+  "helper_functions": {
+    "uploadToBucket": "Upload file y retorna { path }",
+    "getSignedUrl": "Genera URL firmada con TTL (default 600s para private buckets)",
+    "deleteFromBucket": "Elimina archivo de storage",
+    "buildPath": "Construye ruta normalizada {projectId}/{YYMM}-{uuid}-{slugified}",
+    "buildCfdiPath": "Construye ruta CFDI {rfc}/{YYYY-MM}-{uuid}-{filename}",
+    "extractFileMetadata": "Extrae metadata de File object (size, type, etc.)"
   },
-
-  "rls_policies": {
-    "pattern": "Module permissions: admin all, collaborators by module permission",
-    "modules": ["crm", "presupuestos", "construccion", "diseno", "finanzas", "proyectos"],
-    "permissions": ["view", "create", "edit", "delete"],
-    "client_access": "Specific policies for cliente role (read-only, filtered by client_id)",
-    "storage_access": "All private buckets use RLS + signed URLs"
-  },
-
-  "next_steps": [
-    "✅ Create storage helpers (src/lib/storage/storage-helpers.ts)",
-    "✅ Create barrel export (src/lib/storage-helpers.ts)",
-    "✅ Update useUploadUserDocument",
-    "✅ Update useDesignDeliverables",
-    "✅ Update useCrmAttachments",
-    "✅ Update useProjectDocuments",
-    "✅ Update DocumentManager",
-    "✅ Update wiring-map.json",
-    "⏳ Update ConstructionPhotosTab",
-    "⏳ Update CfdiUploadDialog + metadata extraction",
-    "⏳ Update DesignChangeLogs signature upload",
-    "⏳ Create Tasks page with kanban and attachments",
-    "⏳ Add timeline/activities view to CRM entity details"
-  ]
+  "client_app_integration": {
+    "data_source": "Siempre consume vistas v_client_* (filtradas por visibilidad='cliente')",
+    "signed_urls": "Todos los archivos mostrados usan signed URLs con TTL 3600s",
+    "no_writes": "Client App es read-only; no puede subir/eliminar archivos",
+    "mock_toggle": "PreviewBar permite alternar mock/real data (default: real)"
+  }
 }

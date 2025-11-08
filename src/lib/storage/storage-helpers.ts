@@ -159,6 +159,7 @@ export function extractFileMetadata(file: File): FileMetadata {
 
 /**
  * Build storage path: {project_id}/{YYMM}-{uuid}-{filename}
+ * Normalizes filename to safe format and adds timestamp+uuid prefix
  */
 export function buildPath({
   projectId,
@@ -178,6 +179,7 @@ export function buildPath({
   const ext = lastDotIndex > -1 ? filename.slice(lastDotIndex) : '';
   const nameWithoutExt = lastDotIndex > -1 ? filename.slice(0, lastDotIndex) : filename;
   
+  // Normalize filename: lowercase, remove accents, replace non-alphanumeric with underscore
   const slugified = nameWithoutExt
     .toLowerCase()
     .normalize('NFD')
@@ -191,7 +193,7 @@ export function buildPath({
     return `${projectId}/${fullName}`;
   }
   
-  return `${fullName}`;
+  return fullName;
 }
 
 /**

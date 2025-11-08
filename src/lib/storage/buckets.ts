@@ -14,6 +14,7 @@ export const BUCKETS = {
   cfdi: { private: true },
   firmas: { private: true },
   'crm-attachments': { private: true },
+  avatars: { private: false }, // Public bucket
 } as const;
 
 export type BucketName = keyof typeof BUCKETS;

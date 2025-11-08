@@ -21,15 +21,15 @@ export function useUploadAvatar() {
       
       if (uploadError) throw uploadError;
       
-      // 2. Obtener URL pública
+      // 2. Obtener URL pública (avatars es bucket público)
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
       
-      // 3. Actualizar profiles.avatar_url
+      // 3. Actualizar profiles.avatar_url con ruta relativa
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: filePath })
         .eq('id', userId);
       
       if (updateError) throw updateError;
