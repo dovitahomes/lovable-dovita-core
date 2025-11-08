@@ -69,6 +69,7 @@ const Accesos = lazy(() => import("./pages/herramientas/Accesos"));
 const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
+const RenderDelMes = lazy(() => import("./pages/herramientas/RenderDelMes"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 const Budgets = lazy(() => import("./pages/erp/Budgets"));
 const BudgetWizard = lazy(() => import("./pages/erp/BudgetWizard"));
@@ -142,6 +143,11 @@ const InternalLayout = () => {
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS} element={
                   <ProtectedRoute moduleName="usuarios">
                     <Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_RENDER_DEL_MES} element={
+                  <ProtectedRoute moduleName="contenido_corporativo">
+                    <Suspense fallback={<TableSkeleton />}><RenderDelMes /></Suspense>
                   </ProtectedRoute>
                 } />
                 

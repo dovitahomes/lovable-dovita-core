@@ -870,6 +870,64 @@ export type Database = {
         }
         Relationships: []
       }
+      company_manuals: {
+        Row: {
+          categoria: string | null
+          created_at: string | null
+          created_by: string | null
+          descripcion: string | null
+          file_path: string
+          id: string
+          titulo: string
+          updated_at: string | null
+          visible_para_roles: string[] | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          descripcion?: string | null
+          file_path: string
+          id?: string
+          titulo: string
+          updated_at?: string | null
+          visible_para_roles?: string[] | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          descripcion?: string | null
+          file_path?: string
+          id?: string
+          titulo?: string
+          updated_at?: string | null
+          visible_para_roles?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_manuals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_manuals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_users_extended"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_manuals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_users_with_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       construction_photos: {
         Row: {
           created_at: string
@@ -1158,6 +1216,67 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      corporate_promotions: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          descripcion: string | null
+          fecha_fin: string
+          fecha_inicio: string
+          id: string
+          imagen_path: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          descripcion?: string | null
+          fecha_fin: string
+          fecha_inicio: string
+          id?: string
+          imagen_path?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          descripcion?: string | null
+          fecha_fin?: string
+          fecha_inicio?: string
+          id?: string
+          imagen_path?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_promotions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_promotions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_users_extended"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corporate_promotions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_users_with_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_activities: {
         Row: {
@@ -1603,6 +1722,215 @@ export type Database = {
           {
             foreignKeyName: "documents_project_id_fkey"
             columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      employee_calendar_events: {
+        Row: {
+          created_at: string | null
+          descripcion: string | null
+          fecha_fin: string | null
+          fecha_inicio: string
+          id: string
+          proyecto_id: string | null
+          tipo: string | null
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          descripcion?: string | null
+          fecha_fin?: string | null
+          fecha_inicio: string
+          id?: string
+          proyecto_id?: string | null
+          tipo?: string | null
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          descripcion?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string
+          id?: string
+          proyecto_id?: string | null
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_calendar_events_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "vw_users_extended"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_calendar_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "vw_users_with_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      featured_renders: {
+        Row: {
+          active: boolean | null
+          autor: string | null
+          caption: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          imagen_path: string
+          mes_ano: string
+          proyecto_id: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          autor?: string | null
+          caption?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          imagen_path: string
+          mes_ano: string
+          proyecto_id?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          autor?: string | null
+          caption?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          imagen_path?: string
+          mes_ano?: string
+          proyecto_id?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_renders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_renders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_users_extended"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_renders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_users_with_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_renders_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "featured_renders_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "featured_renders_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "featured_renders_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "featured_renders_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "featured_renders_proyecto_id_fkey"
+            columns: ["proyecto_id"]
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]

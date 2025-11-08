@@ -119,6 +119,7 @@ export const BACKOFFICE_ROUTES = {
   HERRAMIENTAS_ACCESOS: '/herramientas/accesos',
   HERRAMIENTAS_REGLAS: '/herramientas/reglas',
   HERRAMIENTAS_USUARIOS: '/herramientas/usuarios',
+  HERRAMIENTAS_RENDER_DEL_MES: '/herramientas/render-del-mes',
   
   // ERP
   ERP_TRANSACTIONS: '/erp/transactions',
