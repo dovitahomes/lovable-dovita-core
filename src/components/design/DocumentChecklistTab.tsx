@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { useRequiredDocuments, useUnmarkDocumentUploaded } from "@/hooks/useRequiredDocuments";
+import { useRequiredDocuments, useUnmarkDocumentUploaded, useDeleteRequiredDocument } from "@/hooks/useRequiredDocuments";
 import { useChecklistDocumentUpload } from "@/hooks/useChecklistDocumentUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { FileText, CheckCircle2, Circle, AlertCircle, Upload } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { FileText, CheckCircle2, Circle, AlertCircle, Upload, Plus, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocumentUploadDialog } from "./DocumentUploadDialog";
+import { AddRequiredDocumentDialog } from "./AddRequiredDocumentDialog";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -20,9 +22,13 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
   const { data: documents, isLoading } = useRequiredDocuments(projectId);
   const unmarkUploaded = useUnmarkDocumentUploaded();
   const uploadMutation = useChecklistDocumentUpload();
+  const deleteMutation = useDeleteRequiredDocument();
   
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<{ id: string; tipo: string } | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
 
   const faseLabels = {
     arquitectonico: "Fase Arquitectónica",
@@ -78,6 +84,19 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
     );
   };
 
+  const handleDeleteClick = (docId: string) => {
+    setDocumentToDelete(docId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (documentToDelete) {
+      await deleteMutation.mutateAsync({ id: documentToDelete, projectId });
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -96,9 +115,15 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Progreso General del Checklist</span>
-            <Badge variant={overallProgress === 100 ? "default" : "secondary"}>
-              {overallProgress}%
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant={overallProgress === 100 ? "default" : "secondary"}>
+                {overallProgress}%
+              </Badge>
+              <Button size="sm" onClick={() => setAddDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Documento
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -186,16 +211,27 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
                       </div>
                     </div>
 
-                    {!doc.subido && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleOpenUpload(doc.id, doc.documento_tipo)}
-                      >
-                        <Upload className="h-4 w-4 mr-1" />
-                        Subir
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {!doc.subido && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleOpenUpload(doc.id, doc.documento_tipo)}
+                        >
+                          <Upload className="h-4 w-4 mr-1" />
+                          Subir
+                        </Button>
+                      )}
+                      {!doc.subido && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteClick(doc.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -222,6 +258,29 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
         isPending={uploadMutation.isPending}
         documentType={selectedDoc?.tipo}
       />
+
+      <AddRequiredDocumentDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        projectId={projectId}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar documento del checklist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El documento será eliminado permanentemente del checklist.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

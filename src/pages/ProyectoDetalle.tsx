@@ -4,13 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { WishlistForm } from "@/components/WishlistForm";
 import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
 import { ProjectDocumentsTab } from "@/components/project/ProjectDocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
 import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays, Camera } from "lucide-react";
+import { useChecklistProgress } from "@/hooks/useChecklistProgress";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays, Camera, CheckCircle2 } from "lucide-react";
 import { generateRoute } from "@/config/routes";
 
 export default function ProyectoDetalle() {
@@ -43,6 +46,8 @@ export default function ProyectoDetalle() {
       return data;
     }
   });
+
+  const { data: checklistProgress } = useChecklistProgress(id || null);
 
   if (isLoading) {
     return <div className="container mx-auto p-6">Cargando...</div>;
@@ -81,7 +86,7 @@ export default function ProyectoDetalle() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -127,6 +132,41 @@ export default function ProyectoDetalle() {
               )}
               {project.ubicacion_json && typeof project.ubicacion_json === 'object' && 'descripcion' in project.ubicacion_json && (
                 <div><span className="font-medium">Ubicación:</span> {String(project.ubicacion_json.descripcion)}</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" /> Documentos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Progreso Total</span>
+                  <span className="font-medium">{checklistProgress?.completed || 0}/{checklistProgress?.total || 0}</span>
+                </div>
+                <Progress value={checklistProgress?.porcentajeTotal || 0} className="h-2" />
+              </div>
+              
+              {checklistProgress && checklistProgress.obligatorios > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Obligatorios:</span>
+                  <Badge 
+                    variant={
+                      checklistProgress.obligatoriosCompletos === checklistProgress.obligatorios 
+                        ? "default" 
+                        : "destructive"
+                    }
+                    className="text-xs"
+                  >
+                    {checklistProgress.obligatoriosCompletos}/{checklistProgress.obligatorios}
+                  </Badge>
+                </div>
               )}
             </div>
           </CardContent>

@@ -134,18 +134,35 @@ export function BudgetItemDialog({
           if (Math.abs(variance) >= threshold) {
             setShowVarianceAlert(true);
             
-            // Notify admin about price variance (optional, requires notifications table)
+            // Notify all admins about price variance
             try {
-              const { data: { user } } = await supabase.auth.getUser();
-              // Note: notifications table would need to be created for this feature
-              // Skipping for now as table doesn't exist yet
-              console.log('Price variance detected:', {
-                variance_pct: variance,
-                old_price: previousPrice,
-                new_price: formData.costo_unit
-              });
+              const { data: admins } = await supabase
+                .from('user_roles')
+                .select('user_id')
+                .eq('role_name', 'admin');
+              
+              if (admins && admins.length > 0) {
+                const subpartida = tuNodes.find(n => n.id === formData.subpartida_id);
+                
+                for (const admin of admins) {
+                  await supabase.from('notifications').insert({
+                    user_id: admin.user_id,
+                    type: 'price_variance',
+                    title: 'Variación de Precio Detectada',
+                    message: `${subpartida?.name || 'Subpartida'}: varianza ${variance.toFixed(1)}% (${previousPrice.toFixed(2)} → ${formData.costo_unit.toFixed(2)} MXN)`,
+                    metadata: {
+                      budget_item_id: formData.id,
+                      variance_pct: variance,
+                      old_price: previousPrice,
+                      new_price: formData.costo_unit,
+                      subpartida_id: formData.subpartida_id,
+                      subpartida_name: subpartida?.name,
+                    }
+                  });
+                }
+              }
             } catch (e) {
-              console.error('Error logging variance:', e);
+              console.error('Error creating notification:', e);
             }
           }
           
