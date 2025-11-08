@@ -29,20 +29,21 @@ interface CfdiPathParams {
 }
 
 /**
- * Convert Date to YYMM format (e.g., "2501" for January 2025)
+ * Convert Date to YYYY-MM format (e.g., "2025-01" for January 2025)
+ * Updated to match new storage convention
  * 
  * @param date - Date object
- * @returns String in YYMM format
+ * @returns String in YYYY-MM format
  */
-export function toYYMM(date: Date): string {
-  const yy = String(date.getFullYear()).slice(-2);
+export function toYYYYMM(date: Date): string {
+  const yyyy = String(date.getFullYear());
   const mm = String(date.getMonth() + 1).padStart(2, '0');
-  return `${yy}${mm}`;
+  return `${yyyy}-${mm}`;
 }
 
 /**
  * Build a storage path following CFDI conventions
- * Format: scope/YYMM-uuid-filename
+ * Format: scope/YYYY-MM-uuid-filename
  * 
  * @param params - Path parameters
  * @returns Standardized path string
@@ -54,7 +55,7 @@ export function buildCfdiPath(params: CfdiPathParams): string {
 
 /**
  * Generate a standardized storage path for projects
- * Format: projectId/YYMM-uuid-slugified-filename.ext
+ * Format: projectId/YYYY-MM/uuid-slugified-filename.ext
  * 
  * @param projectId - The project UUID
  * @param filename - Original filename
@@ -62,7 +63,7 @@ export function buildCfdiPath(params: CfdiPathParams): string {
  */
 export function buildPath(projectId: string, filename: string): string {
   const now = new Date();
-  const yymm = toYYMM(now);
+  const yyyyMm = toYYYYMM(now);
   
   const uuid = crypto.randomUUID();
   
@@ -71,15 +72,15 @@ export function buildPath(projectId: string, filename: string): string {
   const ext = lastDotIndex > -1 ? filename.slice(lastDotIndex) : '';
   const nameWithoutExt = lastDotIndex > -1 ? filename.slice(0, lastDotIndex) : filename;
   
-  // Slugify: lowercase, replace spaces/special chars with dashes
+  // Slugify: lowercase, replace spaces/special chars with underscores
   const slugified = nameWithoutExt
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dashes
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
+    .replace(/[^a-z0-9.]+/g, '_') // Replace non-alphanumeric with underscores
+    .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
   
-  return `${projectId}/${yymm}-${uuid}-${slugified}${ext}`;
+  return `${projectId}/${yyyyMm}/${uuid}-${slugified}${ext}`;
 }
 
 /**
@@ -111,7 +112,7 @@ export async function uploadToBucket(params: UploadParams): Promise<{ path: stri
 
 /**
  * Upload CFDI XML file following CFDI-specific conventions
- * Format: emisor_rfc/YYMM-uuid-filename.xml
+ * Format: emisor_rfc/YYYY-MM-uuid-filename.xml
  * 
  * @param emisorRfc - RFC del emisor
  * @param file - File to upload
@@ -124,13 +125,13 @@ export async function uploadCfdiXml(
   file: File,
   filename?: string
 ): Promise<{ path: string }> {
-  const yymm = toYYMM(new Date());
+  const yyyyMm = toYYYYMM(new Date());
   const uuid = crypto.randomUUID();
   const finalFilename = filename || file.name;
   
   const path = buildCfdiPath({
     scope: emisorRfc,
-    yymm,
+    yymm: yyyyMm,
     uuid,
     filename: finalFilename
   });
@@ -212,14 +213,15 @@ export async function deleteFromBucket(bucket: BucketName, path: string): Promis
 }
 
 /**
- * Get public URL for a file (only use with public buckets)
- * This is kept for backwards compatibility but should NOT be used with private buckets
+ * Extract basic file metadata
  * 
- * @param bucket - Bucket name
- * @param path - File path
- * @returns Public URL
+ * @param file - File object
+ * @returns Object with file metadata
  */
-export function getPublicUrl(bucket: BucketName, path: string): string {
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+export function extractFileMetadata(file: File) {
+  return {
+    file_name: file.name,
+    file_size: file.size,
+    file_type: file.type || 'application/octet-stream',
+  };
 }

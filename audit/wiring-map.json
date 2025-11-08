@@ -1,8 +1,139 @@
 {
-  "version": "3.0.0",
-  "generated_at": "2025-01-08T00:00:00Z",
-  "description": "CRM Module - Complete UI to Supabase wiring",
-  "status": "✅ BLOQUE 2 COMPLETE",
+  "version": "3.1.0",
+  "generated_at": "2025-01-08T12:00:00Z",
+  "description": "Dovita Core - Complete UI to Supabase Wiring Map (Including Storage)",
+  "status": "✅ BLOQUE 3 IN PROGRESS",
+  
+  "storage_unified": {
+    "convention": "${projectId}/${YYYY}-${MM}/${uuid}-${safeName}",
+    "helpers_file": "src/lib/storage/storage-helpers.ts",
+    "documentation": "docs/STORAGE_CONVENTIONS.md",
+    
+    "buckets": {
+      "documentos": {
+        "privacy": "private",
+        "purpose": "General project documents, budget attachments, construction photos",
+        "path_format": "projectId/YYYY-MM/uuid-filename.ext",
+        "access": "createSignedUrl(path, 600)",
+        "tables": [
+          "project_documents.file_url",
+          "budget_attachments.file_url",
+          "construction_photos.file_url"
+        ]
+      },
+      "design-deliverables": {
+        "privacy": "private",
+        "purpose": "Design phase deliverables (planos, renders, maquetas)",
+        "path_format": "projectId/YYYY-MM/uuid-filename.ext",
+        "access": "createSignedUrl(path, 600)",
+        "tables": [
+          "design_deliverables.file_url"
+        ]
+      },
+      "cfdi": {
+        "privacy": "private",
+        "purpose": "CFDI XML and PDF invoices",
+        "path_format": "emisor_rfc/YYYY-MM-uuid-filename.xml",
+        "access": "createSignedUrl(path, 600)",
+        "tables": [
+          "invoices.xml_file_url",
+          "invoices.pdf_file_url"
+        ],
+        "special_processing": "extract_cfdi_metadata(xml_content) after upload"
+      },
+      "firmas": {
+        "privacy": "private",
+        "purpose": "Digital signatures from wishlists, change logs",
+        "path_format": "projectId/YYYY-MM/uuid-firma.png",
+        "access": "createSignedUrl(path, 600)",
+        "tables": [
+          "design_change_logs.signature_url",
+          "wishlists.firma_url"
+        ]
+      },
+      "avatars": {
+        "privacy": "public",
+        "purpose": "User profile avatars",
+        "path_format": "userId/avatar.ext",
+        "access": "getPublicUrl() OR createSignedUrl() for consistency",
+        "tables": [
+          "profiles.avatar_url"
+        ]
+      },
+      "crm-attachments": {
+        "privacy": "private",
+        "purpose": "CRM entity attachments",
+        "path_format": "entityId/YYYY-MM-uuid-filename.ext",
+        "access": "createSignedUrl(path, 600)",
+        "tables": [
+          "crm_attachments.file_url"
+        ]
+      }
+    },
+    
+    "components_requiring_update": {
+      "DocumentManager": {
+        "file": "src/components/DocumentManager.tsx",
+        "current_status": "❌ Needs update",
+        "changes_needed": [
+          "Use buildPath(projectId, filename) for uploads",
+          "Store only path in project_documents.file_url",
+          "Use getSignedUrl('documentos', path) for reading",
+          "Apply extractFileMetadata(file) for metadata"
+        ]
+      },
+      "DesignDeliverablesSection": {
+        "file": "src/components/design/DeliverablesSection.tsx",
+        "current_status": "❌ Needs update",
+        "changes_needed": [
+          "Use uploadToBucket({ bucket: 'design-deliverables', projectId, file })",
+          "Store path in design_deliverables.file_url",
+          "Use getSignedUrl('design-deliverables', path) for display"
+        ]
+      },
+      "BudgetItemDialog": {
+        "file": "src/components/BudgetItemDialog.tsx",
+        "current_status": "❌ Needs update",
+        "changes_needed": [
+          "Derive projectId from budget_item → budgets.project_id",
+          "Use buildPath(projectId, filename)",
+          "Store path in budget_attachments.file_url",
+          "Use getSignedUrl('documentos', path)"
+        ]
+      },
+      "ConstructionPhotosTab": {
+        "file": "src/components/construction/ConstructionPhotosTab.tsx",
+        "current_status": "❌ Needs update",
+        "changes_needed": [
+          "Use buildPath(projectId, filename)",
+          "Store path in construction_photos.file_url",
+          "Use getSignedUrl('documentos', path)",
+          "Include visibilidad field"
+        ]
+      },
+      "CfdiUploadDialog": {
+        "file": "src/components/accounting/CfdiUploadDialog.tsx",
+        "current_status": "❌ Needs update",
+        "changes_needed": [
+          "Use uploadCfdiXml(emisorRfc, xmlFile) helper",
+          "Store path in invoices.xml_file_url",
+          "Call supabase.rpc('extract_cfdi_metadata', { xml_content })",
+          "Use getSignedUrl('cfdi', path) for viewing"
+        ]
+      },
+      "DesignChangeLogs": {
+        "file": "src/components/design/ChangeLogsSection.tsx",
+        "current_status": "❌ Needs update",
+        "changes_needed": [
+          "Convert signature canvas to Blob",
+          "Use buildPath(projectId, 'firma.png')",
+          "Upload to 'firmas' bucket",
+          "Store path in design_change_logs.signature_url"
+        ]
+      }
+    }
+  },
+
   "crm_module": {
     "accounts": {
       "table": "public.accounts",
@@ -50,8 +181,8 @@
       "table": "public.crm_attachments",
       "hooks": "src/hooks/crm/useCrmAttachments.ts",
       "bucket": "crm-attachments (private)",
-      "path_pattern": "entityId/YYMM-uuid-filename.ext",
-      "read_mode": "signed URL (600s)",
+      "path_pattern": "entityId/YYYY-MM/uuid-filename.ext",
+      "read_mode": "createSignedUrl(path, 600)",
       "operations": ["upload", "download", "delete"],
       "helpers": ["uploadToBucket", "getSignedUrl", "deleteFromBucket"]
     },
@@ -62,26 +193,24 @@
       "operations": ["view only"]
     }
   },
-  "storage": {
-    "bucket": "crm-attachments",
-    "privacy": "private",
-    "rls": "module permission: crm",
-    "conventions": {
-      "path": "entityId/YYMM-uuid-filename.ext",
-      "storage_column": "file_url (relative path only)",
-      "access": "createSignedUrl() with 600s expiry"
-    }
-  },
+
   "rls_policies": {
-    "pattern": "Same as leads: admin all, module permissions for CRM",
-    "modules": ["crm"],
-    "permissions": ["view", "create", "edit", "delete"]
+    "pattern": "Module permissions: admin all, collaborators by module permission",
+    "modules": ["crm", "presupuestos", "construccion", "diseno", "finanzas", "proyectos"],
+    "permissions": ["view", "create", "edit", "delete"],
+    "client_access": "Specific policies for cliente role (read-only, filtered by client_id)"
   },
+
   "next_steps": [
-    "Create UI pages: Accounts, Contacts, Opportunities, Tasks, Units",
-    "Create dialogs for CRUD operations",
-    "Add routes to sidebar",
-    "Test all CRUD flows",
-    "Verify RLS permissions"
+    "✅ Create storage helpers (DONE)",
+    "✅ Update docs/STORAGE_CONVENTIONS.md (DONE)",
+    "⏳ Update DocumentManager to use new helpers",
+    "⏳ Update DesignDeliverablesSection",
+    "⏳ Update BudgetItemDialog (derive projectId)",
+    "⏳ Update ConstructionPhotosTab",
+    "⏳ Update CfdiUploadDialog + metadata extraction",
+    "⏳ Update DesignChangeLogs signature upload",
+    "⏳ Test all upload/download flows",
+    "⏳ Verify RLS on all buckets"
   ]
 }
