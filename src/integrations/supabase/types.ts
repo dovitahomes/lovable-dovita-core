@@ -4864,6 +4864,7 @@ export type Database = {
           qty_requested: number
         }[]
       }
+      get_user_project_ids: { Args: { p_user_id: string }; Returns: string[] }
       has_role: {
         Args: { p_role_name: string; p_user_id: string }
         Returns: boolean

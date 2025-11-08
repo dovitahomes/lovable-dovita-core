@@ -40,6 +40,10 @@ export const CLIENT_APP_ROUTES = {
   SCHEDULE: '/client/schedule',
   APPOINTMENTS: '/client/appointments',
   SETTINGS: '/client/settings',
+  
+  // Nueva sección de proyectos (Client App con Supabase views)
+  PROJECTS: '/cliente/proyectos',
+  PROJECT_DETAIL: '/cliente/proyectos/:id',
 } as const;
 
 // Sub-rutas relativas para usar dentro de ClientAppWrapper

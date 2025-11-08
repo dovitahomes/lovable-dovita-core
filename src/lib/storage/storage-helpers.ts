@@ -1,16 +1,14 @@
 /**
- * Storage Helper Functions
- * 
- * Provides standardized functions for uploading files to Supabase Storage
- * and retrieving signed URLs for private buckets.
+ * Storage Helper Functions for Supabase Storage
+ * Unified approach for file uploads, signed URLs, and path management
  */
 
-import { supabase } from "@/integrations/supabase/client";
-import type { BucketName } from "./buckets";
+import { supabase } from '@/integrations/supabase/client';
+import type { BucketName } from './buckets';
 
 interface UploadParams {
   bucket: BucketName;
-  projectId: string;
+  projectId?: string;
   file: File;
   filename?: string;
 }
@@ -21,66 +19,11 @@ interface SignedUrlParams {
   expiresInSeconds?: number;
 }
 
-interface CfdiPathParams {
-  scope: string; // RFC del emisor
-  yymm: string;  // YYMM format
-  uuid: string;  // UUID único
-  filename: string;
-}
-
-/**
- * Convert Date to YYYY-MM format (e.g., "2025-01" for January 2025)
- * Updated to match new storage convention
- * 
- * @param date - Date object
- * @returns String in YYYY-MM format
- */
-export function toYYYYMM(date: Date): string {
-  const yyyy = String(date.getFullYear());
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  return `${yyyy}-${mm}`;
-}
-
-/**
- * Build a storage path following CFDI conventions
- * Format: scope/YYYY-MM-uuid-filename
- * 
- * @param params - Path parameters
- * @returns Standardized path string
- */
-export function buildCfdiPath(params: CfdiPathParams): string {
-  const { scope, yymm, uuid, filename } = params;
-  return `${scope}/${yymm}-${uuid}-${filename}`;
-}
-
-/**
- * Generate a standardized storage path for projects
- * Format: projectId/YYYY-MM/uuid-slugified-filename.ext
- * 
- * @param projectId - The project UUID
- * @param filename - Original filename
- * @returns Standardized path string
- */
-export function buildPath(projectId: string, filename: string): string {
-  const now = new Date();
-  const yyyyMm = toYYYYMM(now);
-  
-  const uuid = crypto.randomUUID();
-  
-  // Extract extension
-  const lastDotIndex = filename.lastIndexOf('.');
-  const ext = lastDotIndex > -1 ? filename.slice(lastDotIndex) : '';
-  const nameWithoutExt = lastDotIndex > -1 ? filename.slice(0, lastDotIndex) : filename;
-  
-  // Slugify: lowercase, replace spaces/special chars with underscores
-  const slugified = nameWithoutExt
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9.]+/g, '_') // Replace non-alphanumeric with underscores
-    .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
-  
-  return `${projectId}/${yyyyMm}/${uuid}-${slugified}${ext}`;
+interface FileMetadata {
+  name: string;
+  size: number;
+  type: string;
+  lastModified: number;
 }
 
 /**
@@ -93,7 +36,7 @@ export function buildPath(projectId: string, filename: string): string {
 export async function uploadToBucket(params: UploadParams): Promise<{ path: string }> {
   const { bucket, projectId, file, filename } = params;
   
-  const path = buildPath(projectId, filename || file.name);
+  const path = buildPath({ projectId, filename: filename || file.name });
   
   const { error } = await supabase.storage
     .from(bucket)
@@ -113,12 +56,6 @@ export async function uploadToBucket(params: UploadParams): Promise<{ path: stri
 /**
  * Upload CFDI XML file following CFDI-specific conventions
  * Format: emisor_rfc/YYYY-MM-uuid-filename.xml
- * 
- * @param emisorRfc - RFC del emisor
- * @param file - File to upload
- * @param filename - Optional custom filename
- * @returns Object with the storage path (relative, not URL)
- * @throws Error if upload fails
  */
 export async function uploadCfdiXml(
   emisorRfc: string,
@@ -129,12 +66,14 @@ export async function uploadCfdiXml(
   const uuid = crypto.randomUUID();
   const finalFilename = filename || file.name;
   
-  const path = buildCfdiPath({
-    scope: emisorRfc,
-    yymm: yyyyMm,
-    uuid,
-    filename: finalFilename
-  });
+  const slugified = finalFilename
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9.]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  
+  const path = buildCfdiPath({ emisorRfc, yyyyMm, uuid, filename: slugified });
   
   const { error } = await supabase.storage
     .from('cfdi')
@@ -152,76 +91,131 @@ export async function uploadCfdiXml(
 }
 
 /**
- * Generate a signed URL for accessing a file in a private bucket
- * 
- * @param params - Signed URL parameters
- * @returns Object with the signed URL
- * @throws Error if URL generation fails
+ * Get signed URL for private bucket files
  */
 export async function getSignedUrl(params: SignedUrlParams): Promise<{ url: string }> {
-  const { bucket, path, expiresInSeconds = 600 } = params; // Default 10 minutes
+  const { bucket, path, expiresInSeconds = 600 } = params;
   
   const { data, error } = await supabase.storage
     .from(bucket)
     .createSignedUrl(path, expiresInSeconds);
   
-  if (error || !data?.signedUrl) {
+  if (error) {
     console.error('Signed URL error:', error);
-    throw new Error(`Failed to generate signed URL: ${error?.message || 'Unknown error'}`);
+    throw new Error(`Failed to generate signed URL: ${error.message}`);
+  }
+  
+  if (!data?.signedUrl) {
+    throw new Error('No signed URL returned');
   }
   
   return { url: data.signedUrl };
 }
 
 /**
- * Get a signed URL specifically for CFDI XML files
- * Convenience wrapper with default 600s expiration
- * 
- * @param xmlPath - Relative path to the XML file in cfdi bucket
- * @param expiresInSeconds - Optional expiration time (default 600s)
- * @returns Object with the signed URL
+ * Get signed URL for CFDI files
  */
 export async function getCfdiSignedUrl(
-  xmlPath: string,
+  path: string,
   expiresInSeconds: number = 600
 ): Promise<{ url: string }> {
   return getSignedUrl({
     bucket: 'cfdi',
-    path: xmlPath,
+    path,
     expiresInSeconds
   });
 }
 
 /**
- * Delete a file from a Supabase Storage bucket
- * 
- * @param bucket - Bucket name
- * @param path - File path
- * @returns True if deletion succeeded
+ * Delete file from bucket
  */
-export async function deleteFromBucket(bucket: BucketName, path: string): Promise<boolean> {
+export async function deleteFromBucket(
+  bucket: BucketName,
+  path: string
+): Promise<boolean> {
   const { error } = await supabase.storage
     .from(bucket)
     .remove([path]);
   
   if (error) {
     console.error('Delete error:', error);
-    return false;
+    throw new Error(`Failed to delete file: ${error.message}`);
   }
   
   return true;
 }
 
 /**
- * Extract basic file metadata
- * 
- * @param file - File object
- * @returns Object with file metadata
+ * Extract metadata from File object
  */
-export function extractFileMetadata(file: File) {
+export function extractFileMetadata(file: File): FileMetadata {
   return {
-    file_name: file.name,
-    file_size: file.size,
-    file_type: file.type || 'application/octet-stream',
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    lastModified: file.lastModified
   };
+}
+
+/**
+ * Build storage path: {project_id}/{YYMM}-{uuid}-{filename}
+ */
+export function buildPath({
+  projectId,
+  filename,
+}: {
+  projectId?: string;
+  filename: string;
+}): string {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yymm = `${yy}${mm}`;
+  
+  const uuid = crypto.randomUUID();
+  
+  const lastDotIndex = filename.lastIndexOf('.');
+  const ext = lastDotIndex > -1 ? filename.slice(lastDotIndex) : '';
+  const nameWithoutExt = lastDotIndex > -1 ? filename.slice(0, lastDotIndex) : filename;
+  
+  const slugified = nameWithoutExt
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9.]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  
+  const fullName = `${yymm}-${uuid}-${slugified}${ext}`;
+  
+  if (projectId) {
+    return `${projectId}/${fullName}`;
+  }
+  
+  return `${fullName}`;
+}
+
+/**
+ * Build CFDI path: emisor_rfc/YYYY-MM-uuid-filename.xml
+ */
+export function buildCfdiPath({
+  emisorRfc,
+  yyyyMm,
+  uuid,
+  filename
+}: {
+  emisorRfc: string;
+  yyyyMm: string;
+  uuid: string;
+  filename: string;
+}): string {
+  return `${emisorRfc}/${yyyyMm}-${uuid}-${filename}`;
+}
+
+/**
+ * Format date to YYYY-MM
+ */
+export function toYYYYMM(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
 }

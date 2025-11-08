@@ -2,23 +2,23 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_CONFIG } from '@/lib/queryConfig';
 
-export function useClientProjects(clientId: string | null) {
+export function useClientDocuments(projectId: string | null) {
   return useQuery({
-    queryKey: ['client-projects', clientId],
+    queryKey: ['client-documents', projectId],
     queryFn: async () => {
-      if (!clientId) return [];
+      if (!projectId) return [];
       
-      // Filtro explícito en FE además de RLS
+      // Usar vista que filtra por visibilidad = 'cliente'
       const { data, error } = await supabase
-        .from('v_client_projects')
+        .from('v_client_documents')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('project_id', projectId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data;
     },
-    enabled: !!clientId,
+    enabled: !!projectId,
     ...CACHE_CONFIG.active,
   });
 }

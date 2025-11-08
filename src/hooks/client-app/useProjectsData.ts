@@ -1,7 +1,8 @@
 import { useMemo, useEffect } from 'react';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { useAuthClientId } from './useAuthClientId';
-import { useClientProjects, useClientProjectSummary } from './useClientProjects';
+import { useClientProjects } from './useClientProjects';
+import { useClientProjectSummary } from './useClientProjectSummary';
 import { useClientDocuments, useClientPhotos } from './useClientData';
 import { mockClientData } from '@/lib/client-app/client-data';
 import { transformProjectToUI } from '@/lib/client-app/dataAdapters';
