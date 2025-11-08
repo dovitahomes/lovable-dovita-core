@@ -6,13 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadToBucket } from "@/lib/storage/storage-helpers";
+import { uploadToBucket, getSignedUrl } from "@/lib/storage-helpers";
 import { toast } from "sonner";
 import SignatureCanvas from "react-signature-canvas";
-import { Trash2, Upload, Save } from "lucide-react";
+import { Trash2, Save, Eye } from "lucide-react";
 
 interface WishlistFormProps {
   projectId: string;
@@ -25,6 +25,9 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [firmaTab, setFirmaTab] = useState<"manuscrita" | "pdf">("manuscrita");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [showSignaturePreview, setShowSignaturePreview] = useState(false);
+  const [signaturePreviewUrl, setSignaturePreviewUrl] = useState<string | null>(null);
+  const [isLoadingSignature, setIsLoadingSignature] = useState(false);
   
   const [formData, setFormData] = useState({
     // Información General
@@ -88,6 +91,24 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
     });
   };
 
+  const handleViewSignature = async () => {
+    if (!existingWishlist?.firma_url) return;
+    
+    setIsLoadingSignature(true);
+    try {
+      const { url } = await getSignedUrl({
+        bucket: 'firmas',
+        path: existingWishlist.firma_url
+      });
+      setSignaturePreviewUrl(url);
+      setShowSignaturePreview(true);
+    } catch (error: any) {
+      toast.error("Error al cargar firma: " + error.message);
+    } finally {
+      setIsLoadingSignature(false);
+    }
+  };
+
   const handleSave = async (firmar: boolean = false) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -103,15 +124,13 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
             return;
           }
 
-          const signatureData = signatureRef.current.toDataURL();
+          const signatureData = signatureRef.current.toDataURL('image/png');
           const blob = await (await fetch(signatureData)).blob();
-          const fileName = `${user.id}/${projectId}-${Date.now()}.png`;
 
           const { path } = await uploadToBucket({
             bucket: 'firmas',
             projectId,
-            file: new File([blob], `firma-${Date.now()}.png`, { type: 'image/png' }),
-            filename: `firma-${Date.now()}.png`
+            file: new File([blob], `firma-${Date.now()}.png`, { type: 'image/png' })
           });
 
           firmaPath = path;
@@ -125,8 +144,7 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
           const { path } = await uploadToBucket({
             bucket: 'firmas',
             projectId,
-            file: pdfFile,
-            filename: pdfFile.name
+            file: pdfFile
           });
 
           firmaPath = path;
@@ -428,13 +446,21 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
                 <TabsTrigger value="pdf">Subir PDF Firmado</TabsTrigger>
               </TabsList>
               <TabsContent value="manuscrita" className="space-y-4">
-                <div className="border rounded-lg p-2 bg-white">
-                  <SignatureCanvas
-                    ref={signatureRef}
-                    canvasProps={{
-                      className: 'w-full h-40 border-b-2 border-dashed',
-                    }}
-                  />
+                <div>
+                  <Label className="mb-2 block">Dibuje su firma con el mouse o con el dedo</Label>
+                  <div className="border-2 rounded-lg p-2 bg-white shadow-sm">
+                    <SignatureCanvas
+                      ref={signatureRef}
+                      canvasProps={{
+                        className: 'w-full h-48 touch-none',
+                        style: { touchAction: 'none' }
+                      }}
+                      backgroundColor="rgb(255, 255, 255)"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Firma dentro del recuadro. Usa tu dedo en dispositivos móviles.
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -477,23 +503,80 @@ export function WishlistForm({ projectId, existingWishlist, onSaved }: WishlistF
           </>
         )}
         {isFirmado && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 w-full">
-            <p className="text-green-800 font-medium">
-              ✓ Wishlist firmado el {new Date(existingWishlist.firmado_at).toLocaleDateString('es-MX')}
-            </p>
-            {existingWishlist.firma_url && (
-              <a 
-                href={existingWishlist.firma_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline"
-              >
-                Ver firma
-              </a>
-            )}
-          </div>
+          <Card className="bg-green-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-green-800 font-medium text-lg mb-1">
+                    ✓ Wishlist Firmado
+                  </p>
+                  <p className="text-sm text-green-700">
+                    Firmado el {new Date(existingWishlist.firmado_at).toLocaleDateString('es-MX', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                  {existingWishlist.firma_tipo && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Tipo de firma: {existingWishlist.firma_tipo === 'manuscrita' ? 'Manuscrita Digital' : 'PDF Firmado'}
+                    </p>
+                  )}
+                </div>
+                {existingWishlist.firma_url && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleViewSignature}
+                    disabled={isLoadingSignature}
+                    className="border-green-300 hover:bg-green-100"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {isLoadingSignature ? 'Cargando...' : 'Ver Firma'}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
+
+      {/* Preview Dialog for Signature */}
+      <Dialog open={showSignaturePreview} onOpenChange={setShowSignaturePreview}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Firma del Wishlist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {signaturePreviewUrl && existingWishlist?.firma_tipo === 'manuscrita' && (
+              <div className="border rounded-lg p-4 bg-white">
+                <img 
+                  src={signaturePreviewUrl} 
+                  alt="Firma del cliente" 
+                  className="w-full h-auto max-h-96 object-contain"
+                />
+              </div>
+            )}
+            {signaturePreviewUrl && existingWishlist?.firma_tipo === 'pdf' && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  PDF firmado disponible para descarga
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(signaturePreviewUrl, '_blank')}
+                >
+                  Abrir PDF en Nueva Pestaña
+                </Button>
+              </div>
+            )}
+            <div className="text-sm text-muted-foreground">
+              <p><strong>Firmado:</strong> {new Date(existingWishlist?.firmado_at).toLocaleString('es-MX')}</p>
+              <p><strong>Tipo:</strong> {existingWishlist?.firma_tipo === 'manuscrita' ? 'Firma Manuscrita Digital' : 'PDF Firmado'}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
