@@ -1,8 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DesignPhaseTimeline } from "./DesignPhaseTimeline";
 import { PhasesSection } from "./PhasesSection";
 import { ChangeLogsSection } from "./ChangeLogsSection";
 import { DeliverablesSection } from "./DeliverablesSection";
-import { Layers, FileText, Upload } from "lucide-react";
+import { Layers, FileText, Upload, TrendingUp } from "lucide-react";
 
 interface DesignTabProps {
   projectId: string;
@@ -10,8 +11,12 @@ interface DesignTabProps {
 
 export function DesignTab({ projectId }: DesignTabProps) {
   return (
-    <Tabs defaultValue="phases" className="w-full">
+    <Tabs defaultValue="timeline" className="w-full">
       <TabsList>
+        <TabsTrigger value="timeline" className="gap-2">
+          <TrendingUp className="h-4 w-4" />
+          Timeline
+        </TabsTrigger>
         <TabsTrigger value="phases" className="gap-2">
           <Layers className="h-4 w-4" />
           Fases
@@ -25,6 +30,10 @@ export function DesignTab({ projectId }: DesignTabProps) {
           Entregables
         </TabsTrigger>
       </TabsList>
+
+      <TabsContent value="timeline" className="mt-6">
+        <DesignPhaseTimeline projectId={projectId} />
+      </TabsContent>
 
       <TabsContent value="phases" className="mt-6">
         <PhasesSection projectId={projectId} />

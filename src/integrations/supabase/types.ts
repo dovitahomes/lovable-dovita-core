@@ -1236,6 +1236,8 @@ export type Database = {
           changes_json: Json
           created_at: string
           created_by: string | null
+          firma_url: string | null
+          firmado: boolean | null
           id: string
           meeting_date: string
           notes: string | null
@@ -1244,12 +1246,15 @@ export type Database = {
           requested_by: string | null
           signature_url: string | null
           signed: boolean
+          signed_at: string | null
           updated_at: string
         }
         Insert: {
           changes_json: Json
           created_at?: string
           created_by?: string | null
+          firma_url?: string | null
+          firmado?: boolean | null
           id?: string
           meeting_date?: string
           notes?: string | null
@@ -1258,12 +1263,15 @@ export type Database = {
           requested_by?: string | null
           signature_url?: string | null
           signed?: boolean
+          signed_at?: string | null
           updated_at?: string
         }
         Update: {
           changes_json?: Json
           created_at?: string
           created_by?: string | null
+          firma_url?: string | null
+          firmado?: boolean | null
           id?: string
           meeting_date?: string
           notes?: string | null
@@ -1272,6 +1280,7 @@ export type Database = {
           requested_by?: string | null
           signature_url?: string | null
           signed?: boolean
+          signed_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1417,36 +1426,45 @@ export type Database = {
       }
       design_phases: {
         Row: {
+          actual_end_date: string | null
+          actual_start_date: string | null
           created_at: string
           end_at: string | null
           id: string
           order_index: number
           phase_key: string
           phase_name: string
+          progress_pct: number | null
           project_id: string
           start_at: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
           created_at?: string
           end_at?: string | null
           id?: string
           order_index?: number
           phase_key: string
           phase_name: string
+          progress_pct?: number | null
           project_id: string
           start_at?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
           created_at?: string
           end_at?: string | null
           id?: string
           order_index?: number
           phase_key?: string
           phase_name?: string
+          progress_pct?: number | null
           project_id?: string
           start_at?: string | null
           status?: string

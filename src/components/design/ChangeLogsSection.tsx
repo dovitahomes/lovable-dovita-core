@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,8 @@ import {
   useDeleteChangeLog 
 } from "@/hooks/useDesignChangeLogs";
 import { useDesignPhases } from "@/hooks/useDesignPhases";
-import { Plus, Trash2 } from "lucide-react";
+import { ChangeLogDialog } from "./ChangeLogDialog";
+import { Plus, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +28,8 @@ export function ChangeLogsSection({ projectId }: ChangeLogsSectionProps) {
   const [search, setSearch] = useState("");
   const [phaseFilter, setPhaseFilter] = useState<string | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
   
   const { data: logs, isLoading } = useDesignChangeLogs(projectId, { 
     requested_by: search,
@@ -242,20 +245,36 @@ export function ChangeLogsSection({ projectId }: ChangeLogsSectionProps) {
                       </span>
                     </TableCell>
                     <TableCell>
-                      {log.signed ? (
-                        <Badge variant="outline">Firmado</Badge>
+                      {log.firmado ? (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          Firmado
+                        </Badge>
                       ) : (
                         <Badge variant="secondary">Pendiente</Badge>
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteLog.mutate({ id: log.id, projectId })}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLog(log);
+                            setShowDetailDialog(true);
+                          }}
+                          title="Ver detalles"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteLog.mutate({ id: log.id, projectId })}
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -264,6 +283,13 @@ export function ChangeLogsSection({ projectId }: ChangeLogsSectionProps) {
           </Table>
         </CardContent>
       </Card>
+
+      <ChangeLogDialog
+        open={showDetailDialog}
+        onOpenChange={setShowDetailDialog}
+        changeLog={selectedLog}
+        projectId={projectId}
+      />
     </div>
   );
 }

@@ -11,9 +11,14 @@ interface DesignPhase {
   status: 'pendiente' | 'en_proceso' | 'terminada';
   start_at?: string;
   end_at?: string;
+  progress_pct?: number;
+  actual_start_date?: string;
+  actual_end_date?: string;
   created_at: string;
   updated_at: string;
 }
+
+export type { DesignPhase };
 
 const DEFAULT_PHASES = [
   { phase_key: 'visita_reglamento', phase_name: 'Visita de sitio y Reglamento', order_index: 0 },
@@ -130,6 +135,55 @@ export function useFinishPhase() {
           status: 'terminada',
           end_at: new Date().toISOString(),
         },
+      });
+    },
+  });
+}
+
+export function useUpdatePhaseProgress() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ phaseId, progress_pct }: { phaseId: string; progress_pct: number }) => {
+      const updates: any = { progress_pct };
+      
+      // Auto-set actual dates based on progress
+      if (progress_pct > 0) {
+        const { data: existingPhase } = await supabase
+          .from('design_phases')
+          .select('actual_start_date')
+          .eq('id', phaseId)
+          .single();
+        
+        if (!existingPhase?.actual_start_date) {
+          updates.actual_start_date = new Date().toISOString().split('T')[0];
+        }
+      }
+      
+      if (progress_pct === 100) {
+        updates.actual_end_date = new Date().toISOString().split('T')[0];
+        updates.status = 'terminada';
+      }
+      
+      const { data, error } = await supabase
+        .from('design_phases')
+        .update(updates)
+        .eq('id', phaseId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['design-phases', data.project_id] });
+      toast({ description: "Progreso actualizado" });
+    },
+    onError: (error) => {
+      console.error('Error updating progress:', error);
+      toast({ 
+        variant: "destructive",
+        description: "Error al actualizar progreso" 
       });
     },
   });

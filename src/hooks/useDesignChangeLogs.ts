@@ -135,3 +135,36 @@ export function useDeleteChangeLog() {
     },
   });
 }
+
+export function useSignChangeLog() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, firma_url, projectId }: { id: string; firma_url: string; projectId: string }) => {
+      const { data, error } = await supabase
+        .from('design_change_logs')
+        .update({
+          firmado: true,
+          firma_url,
+          signed_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['design-change-logs'] });
+      toast({ description: "Bitácora firmada exitosamente" });
+    },
+    onError: (error) => {
+      console.error('Error signing change log:', error);
+      toast({ 
+        variant: "destructive",
+        description: "Error al firmar bitácora" 
+      });
+    },
+  });
+}
