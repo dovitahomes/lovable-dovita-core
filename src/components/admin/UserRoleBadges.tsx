@@ -26,8 +26,8 @@ export function UserRoleBadges({ userId, currentRoles, onRoleChange }: UserRoleB
         : currentRoles.filter(r => r !== role);
 
       const { error } = await supabase.rpc("admin_set_user_roles", {
-        p_user_id: userId,
-        p_roles: newRoles,
+        target_user_id: userId,
+        roles: newRoles,
       });
 
       if (error) throw error;

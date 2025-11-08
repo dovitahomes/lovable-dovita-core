@@ -104,8 +104,8 @@ export default function Accesos() {
   const updatePermissionMutation = useMutation({
     mutationFn: async ({ userId, roles }: { userId: string; roles: string[] }) => {
       const { error } = await supabase.rpc('admin_set_user_roles', {
-        p_user_id: userId,
-        p_roles: roles,
+        target_user_id: userId,
+        roles: roles,
       });
       
       if (error) throw error;
