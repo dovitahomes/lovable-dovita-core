@@ -1,20 +1,71 @@
 import { useState, useEffect } from 'react';
-import { Bell, Database, Check, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import { Bell, BellOff, Database, ChevronLeft, User, Lock, LogOut, Save, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import DovitaHeaderDesktop from '@/components/client-app/DovitaHeaderDesktop';
+import PreviewBar from '@/components/client-app/PreviewBar';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useAuth } from '@/app/auth/AuthProvider';
+import { useAuthClientId } from '@/hooks/client-app/useAuthClientId';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { appSignOut } from '@/lib/auth/logout';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+const profileSchema = z.object({
+  full_name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
+  phone: z.string().optional(),
+});
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(6, 'Mínimo 6 caracteres'),
+  newPassword: z.string().min(6, 'Mínimo 6 caracteres'),
+  confirmPassword: z.string().min(6, 'Mínimo 6 caracteres'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
+type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function SettingsDesktop() {
   const navigate = useNavigate();
-  const { isPreviewMode } = useDataSource();
+  const { user } = useAuth();
+  const { data: clientData } = useAuthClientId();
+  
   const [pushEnabled, setPushEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
-  const [useMock, setUseMock] = useState(true);
+  const [useMock, setUseMock] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  
+  // Preferencias de notificaciones individuales
   const [preferences, setPreferences] = useState({
     chat: true,
     calendar: true,
@@ -22,27 +73,55 @@ export default function SettingsDesktop() {
     photos: true,
   });
 
+  const profileForm = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      full_name: '',
+      phone: '',
+    },
+  });
+
+  const passwordForm = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+
   useEffect(() => {
+    // Cargar preferencias guardadas
+    const savedPushEnabled = localStorage.getItem('pushNotificationsEnabled') === 'true';
+    const savedUseMock = localStorage.getItem('clientapp.useMock') === 'true';
+    const savedPreferences = localStorage.getItem('notificationPreferences');
+    
+    setPushEnabled(savedPushEnabled);
+    setUseMock(savedUseMock);
+    
+    if (savedPreferences) {
+      try {
+        setPreferences(JSON.parse(savedPreferences));
+      } catch (e) {
+        console.error('Error parsing saved preferences:', e);
+      }
+    }
+    
+    // Verificar permiso actual de notificaciones del navegador
     if ('Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
-
-    const savedPrefs = localStorage.getItem('notificationPreferences');
-    if (savedPrefs) {
-      setPreferences(JSON.parse(savedPrefs));
-    }
-
-    const savedPushEnabled = localStorage.getItem('pushNotificationsEnabled');
-    if (savedPushEnabled) {
-      setPushEnabled(savedPushEnabled === 'true');
-    }
-
-    // Load data source preference
-    const savedUseMock = localStorage.getItem('clientapp.useMock');
-    if (savedUseMock !== null) {
-      setUseMock(savedUseMock === 'true');
-    }
   }, []);
+
+  // Cargar datos del usuario
+  useEffect(() => {
+    if (clientData) {
+      profileForm.reset({
+        full_name: clientData.name || '',
+        phone: '',
+      });
+    }
+  }, [clientData]);
 
   const requestNotificationPermission = async () => {
     if (!('Notification' in window)) {
@@ -95,191 +174,422 @@ export default function SettingsDesktop() {
 
   const handleDataSourceToggle = (checked: boolean) => {
     setUseMock(checked);
-    localStorage.setItem('clientapp.useMock', checked.toString());
+    localStorage.setItem('clientapp.useMock', String(checked));
     toast.info('La fuente de datos se actualizará al cambiar de pantalla');
   };
 
+  const handleProfileSubmit = async (data: ProfileFormData) => {
+    if (!user) return;
+    
+    setUpdatingProfile(true);
+    try {
+      // Actualizar en tabla clients si existe clientData
+      if (clientData?.id) {
+        const { error } = await supabase
+          .from('clients')
+          .update({ name: data.full_name })
+          .eq('id', clientData.id);
+        
+        if (error) throw error;
+      }
+      
+      toast.success('Perfil actualizado correctamente');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Error al actualizar el perfil');
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (data: PasswordFormData) => {
+    setChangingPassword(true);
+    try {
+      // Actualizar contraseña
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Contraseña actualizada correctamente');
+      passwordForm.reset();
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error('Error al cambiar la contraseña');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await appSignOut();
+  };
+
   return (
-    <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
-      <div className="max-w-4xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/app')}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
-        </Button>
+    <>
+      <div className="min-h-screen bg-background">
+        <PreviewBar />
+        <DovitaHeaderDesktop />
+        
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          {/* Header con botón de regreso */}
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/app')}
+              className="mb-4"
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
+            <h1 className="text-3xl font-bold">Ajustes</h1>
+            <p className="text-muted-foreground mt-2">Configura tus preferencias y notificaciones</p>
+          </div>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">Configuración</h1>
-          <p className="text-muted-foreground mt-2 text-lg">
-            Gestiona tus preferencias de notificaciones
-          </p>
-        </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Bell className="h-6 w-6" />
-                Notificaciones Push
-              </CardTitle>
-              <CardDescription className="text-base">
-                Recibe notificaciones en tiempo real sobre tu proyecto
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-1">
-                  <Label htmlFor="push-toggle-desktop" className="text-base font-medium">
-                    Activar notificaciones
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {notificationPermission === 'granted' 
-                      ? 'Las notificaciones están permitidas' 
-                      : notificationPermission === 'denied'
-                      ? 'Debes habilitar las notificaciones en la configuración de tu navegador'
-                      : 'Permite que Dovita te envíe notificaciones'}
-                  </p>
+          {/* Content */}
+          <div className="grid gap-6">
+            {/* Datos Personales */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-primary" />
+                  <CardTitle>Datos Personales</CardTitle>
                 </div>
-                <Switch
-                  id="push-toggle-desktop"
-                  checked={pushEnabled}
-                  onCheckedChange={handleTogglePush}
-                  disabled={notificationPermission === 'denied'}
-                />
-              </div>
+                <CardDescription>
+                  Actualiza tu información personal
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...profileForm}>
+                  <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={profileForm.control}
+                        name="full_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre Completo</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Juan Pérez" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={profileForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Teléfono</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="+52 123 456 7890" type="tel" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-              {notificationPermission === 'denied' && (
-                <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
-                  <p className="font-medium">Notificaciones bloqueadas</p>
-                  <p className="mt-2 text-sm">
-                    Para activar las notificaciones, ve a la configuración de tu navegador y permite las notificaciones para este sitio.
-                  </p>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Email</Label>
+                      <p className="text-sm font-medium mt-1">{user?.email || 'No disponible'}</p>
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      disabled={updatingProfile}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {updatingProfile ? 'Guardando...' : 'Guardar Cambios'}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+
+            {/* Cambiar Contraseña */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-primary" />
+                  <CardTitle>Cambiar Contraseña</CardTitle>
                 </div>
-              )}
-
-              {pushEnabled && notificationPermission === 'granted' && (
-                <>
-                  <Separator />
-                  
-                  <div className="space-y-6">
-                    <p className="font-medium">Tipos de notificaciones</p>
+                <CardDescription>
+                  Actualiza tu contraseña de acceso
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...passwordForm}>
+                  <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)} className="space-y-4">
+                    <FormField
+                      control={passwordForm.control}
+                      name="currentPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contraseña Actual</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" placeholder="••••••••" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
-                    <div className="grid gap-6">
-                      <div className="flex items-center justify-between py-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="chat-notif-desktop" className="font-normal">
-                            Mensajes del chat
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Nuevos mensajes de tu equipo de construcción
-                          </p>
-                        </div>
-                        <Switch
-                          id="chat-notif-desktop"
-                          checked={preferences.chat}
-                          onCheckedChange={() => handlePreferenceChange('chat')}
-                        />
-                      </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={passwordForm.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nueva Contraseña</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="password" placeholder="••••••••" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                      <div className="flex items-center justify-between py-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="calendar-notif-desktop" className="font-normal">
-                            Citas y calendario
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Recordatorios de citas y eventos
-                          </p>
-                        </div>
-                        <Switch
-                          id="calendar-notif-desktop"
-                          checked={preferences.calendar}
-                          onCheckedChange={() => handlePreferenceChange('calendar')}
-                        />
-                      </div>
+                      <FormField
+                        control={passwordForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirmar Nueva Contraseña</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="password" placeholder="••••••••" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                      <div className="flex items-center justify-between py-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="documents-notif-desktop" className="font-normal">
-                            Documentos
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Nuevos archivos y documentos agregados
-                          </p>
-                        </div>
-                        <Switch
-                          id="documents-notif-desktop"
-                          checked={preferences.documents}
-                          onCheckedChange={() => handlePreferenceChange('documents')}
-                        />
-                      </div>
+                    <Button 
+                      type="submit" 
+                      disabled={changingPassword}
+                    >
+                      <Lock className="h-4 w-4 mr-2" />
+                      {changingPassword ? 'Actualizando...' : 'Actualizar Contraseña'}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
 
-                      <div className="flex items-center justify-between py-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="photos-notif-desktop" className="font-normal">
-                            Fotos de avance
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Nuevas fotos del progreso de tu proyecto
-                          </p>
+            {/* Notificaciones Push */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  {pushEnabled && notificationPermission === 'granted' ? (
+                    <Bell className="h-5 w-5 text-primary" />
+                  ) : (
+                    <BellOff className="h-5 w-5 text-muted-foreground" />
+                  )}
+                  <CardTitle>Notificaciones Push</CardTitle>
+                </div>
+                <CardDescription>
+                  Recibe alertas en tiempo real sobre tu proyecto
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between py-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="push-toggle-desktop" className="text-base font-medium">
+                      Activar notificaciones
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {notificationPermission === 'granted' 
+                        ? 'Las notificaciones están permitidas' 
+                        : notificationPermission === 'denied'
+                        ? 'Debes habilitar las notificaciones en la configuración de tu navegador'
+                        : 'Permite que Dovita te envíe notificaciones'}
+                    </p>
+                  </div>
+                  <Switch
+                    id="push-toggle-desktop"
+                    checked={pushEnabled}
+                    onCheckedChange={handleTogglePush}
+                    disabled={notificationPermission === 'denied'}
+                  />
+                </div>
+
+                {notificationPermission === 'denied' && (
+                  <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+                    <p className="font-medium">Notificaciones bloqueadas</p>
+                    <p className="mt-2 text-sm">
+                      Para activar las notificaciones, ve a la configuración de tu navegador y permite las notificaciones para este sitio.
+                    </p>
+                  </div>
+                )}
+
+                {pushEnabled && notificationPermission === 'granted' && (
+                  <>
+                    <Separator />
+                    
+                    <div className="space-y-6">
+                      <p className="font-medium">Tipos de notificaciones</p>
+                      
+                      <div className="grid gap-6">
+                        <div className="flex items-center justify-between py-2">
+                          <div className="space-y-1">
+                            <Label htmlFor="chat-notif-desktop" className="font-normal">
+                              Mensajes del chat
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Nuevos mensajes de tu equipo de construcción
+                            </p>
+                          </div>
+                          <Switch
+                            id="chat-notif-desktop"
+                            checked={preferences.chat}
+                            onCheckedChange={() => handlePreferenceChange('chat')}
+                          />
                         </div>
-                        <Switch
-                          id="photos-notif-desktop"
-                          checked={preferences.photos}
-                          onCheckedChange={() => handlePreferenceChange('photos')}
-                        />
+
+                        <div className="flex items-center justify-between py-2">
+                          <div className="space-y-1">
+                            <Label htmlFor="calendar-notif-desktop" className="font-normal">
+                              Citas y calendario
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Recordatorios de citas y eventos
+                            </p>
+                          </div>
+                          <Switch
+                            id="calendar-notif-desktop"
+                            checked={preferences.calendar}
+                            onCheckedChange={() => handlePreferenceChange('calendar')}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between py-2">
+                          <div className="space-y-1">
+                            <Label htmlFor="documents-notif-desktop" className="font-normal">
+                              Documentos
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Nuevos archivos y documentos agregados
+                            </p>
+                          </div>
+                          <Switch
+                            id="documents-notif-desktop"
+                            checked={preferences.documents}
+                            onCheckedChange={() => handlePreferenceChange('documents')}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between py-2">
+                          <div className="space-y-1">
+                            <Label htmlFor="photos-notif-desktop" className="font-normal">
+                              Fotos de avance
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Nuevas fotos del progreso de tu proyecto
+                            </p>
+                          </div>
+                          <Switch
+                            id="photos-notif-desktop"
+                            checked={preferences.photos}
+                            onCheckedChange={() => handlePreferenceChange('photos')}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
-          {pushEnabled && notificationPermission === 'granted' && (
-            <div className="bg-primary/5 border border-primary/20 p-6 rounded-lg mt-6">
-              <div className="flex gap-4">
-                <Check className="h-6 w-6 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium">Notificaciones configuradas</p>
-                  <p className="text-muted-foreground mt-1">
-                    Recibirás notificaciones push según tus preferencias seleccionadas
-                  </p>
+            {pushEnabled && notificationPermission === 'granted' && (
+              <div className="bg-primary/5 border border-primary/20 p-6 rounded-lg">
+                <div className="flex gap-4">
+                  <Check className="h-6 w-6 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Notificaciones configuradas</p>
+                    <p className="text-muted-foreground mt-1">
+                      Recibirás notificaciones push según tus preferencias seleccionadas
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Database className="h-6 w-6" />
-                Fuente de Datos
-              </CardTitle>
-              <CardDescription className="text-base">
-                Alternar entre datos de ejemplo y datos reales de Supabase
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between py-2">
-                <div className="space-y-1">
-                  <Label htmlFor="mock-toggle-desktop" className="text-base font-medium">
-                    Usar datos de ejemplo (Mock)
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {useMock ? 'Mostrando datos de ejemplo' : 'Conectado a Supabase'}
-                  </p>
+            {/* Fuente de Datos */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Database className="h-5 w-5 text-primary" />
+                  <CardTitle>Fuente de Datos</CardTitle>
                 </div>
-                <Switch
-                  id="mock-toggle-desktop"
-                  checked={useMock}
-                  onCheckedChange={handleDataSourceToggle}
-              />
-            </div>
-          </CardContent>
-        </Card>
+                <CardDescription>
+                  Alternar entre datos de ejemplo y datos reales de Supabase
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between py-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="mock-toggle-desktop" className="text-base font-medium">
+                      Usar datos de ejemplo (Mock)
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {useMock ? 'Mostrando datos de ejemplo' : 'Conectado a Supabase'}
+                    </p>
+                  </div>
+                  <Switch
+                    id="mock-toggle-desktop"
+                    checked={useMock}
+                    onCheckedChange={handleDataSourceToggle}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cerrar Sesión */}
+            <Card className="border-destructive/50">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <LogOut className="h-5 w-5 text-destructive" />
+                  <CardTitle className="text-destructive">Cerrar Sesión</CardTitle>
+                </div>
+                <CardDescription>
+                  Salir de tu cuenta de Dovita
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowLogoutDialog(true)}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Cerrar Sesión
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se cerrará tu sesión y tendrás que volver a iniciar sesión para acceder.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} className="bg-destructive hover:bg-destructive/90">
+              Cerrar Sesión
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
