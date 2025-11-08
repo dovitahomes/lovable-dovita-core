@@ -1,12 +1,12 @@
 import { useMemo, useEffect } from 'react';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { useAuthClientId } from './useAuthClientId';
-import { useClientProjects } from './useClientProjects';
-import { useClientProjectSummary } from './useClientProjectSummary';
 import { useClientDocuments, useClientPhotos } from './useClientData';
 import { mockClientData } from '@/lib/client-app/client-data';
 import { transformProjectToUI } from '@/lib/client-app/dataAdapters';
 import type { Project } from '@/contexts/client-app/ProjectContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 export function useProjectsData() {
   const { source, forceClientId, isPreviewMode, setSource } = useDataSource();
@@ -20,8 +20,24 @@ export function useProjectsData() {
     return authClient?.id || null;
   }, [isPreviewMode, forceClientId, authClient?.id]);
   
-  // Datos reales de Supabase
-  const { data: realProjects = [], isLoading: loadingProjects } = useClientProjects(effectiveClientId);
+  // Datos reales de Supabase - inline query
+  const { data: realProjects = [], isLoading: loadingProjects } = useQuery({
+    queryKey: ['client-projects', effectiveClientId],
+    queryFn: async () => {
+      if (!effectiveClientId) return [];
+      
+      const { data, error } = await supabase
+        .from('v_client_projects')
+        .select('*')
+        .eq('client_id', effectiveClientId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!effectiveClientId,
+    staleTime: 1000 * 60 * 2,
+  });
   
   // AUTO-CORREGIR: Si está en preview mode, source es 'real' pero no hay proyectos,
   // cambiar automáticamente a mock para evitar quedarse en loading infinito
@@ -67,7 +83,25 @@ export function useProjectsData() {
 export function useFullProjectData(projectId: string | null) {
   const { source } = useDataSource();
   
-  const { data: summary } = useClientProjectSummary(projectId);
+  // Inline query for project summary
+  const { data: summary } = useQuery({
+    queryKey: ['client-project-summary', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      
+      const { data, error } = await supabase
+        .from('v_client_project_summary')
+        .select('*')
+        .eq('project_id', projectId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+    staleTime: 1000 * 60 * 2,
+  });
+  
   const { data: documents = [] } = useClientDocuments(projectId);
   const { data: photos = [] } = useClientPhotos(projectId);
   

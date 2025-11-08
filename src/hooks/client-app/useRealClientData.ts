@@ -160,7 +160,7 @@ export function useRealClientData(clientId: string | null, projectId: string | n
       if (!projectId) return null;
       
       const { data, error } = await supabase
-        .from('vw_client_financial_summary')
+        .from('v_client_financial_summary')
         .select('*')
         .eq('project_id', projectId)
         .maybeSingle();

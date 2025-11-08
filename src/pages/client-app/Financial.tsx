@@ -37,9 +37,9 @@ export default function Financial() {
     ? budgetCategories.filter(b => b.projectId === project?.id)
     : (realData.financialSummary ? [{
         projectId: project?.id,
-        name: realData.financialSummary.mayor_name || 'Presupuesto',
-        budgeted: realData.financialSummary.total_deposits || 0,
-        spent: realData.financialSummary.total_expenses || 0,
+        name: 'Presupuesto Total',
+        budgeted: realData.financialSummary.total_amount || 0,
+        spent: realData.financialSummary.spent_amount || 0,
       }] : []);
 
   if (!project) {
