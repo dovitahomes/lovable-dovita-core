@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage/storage-helpers";
+import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage-helpers";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 
 export type AttachmentEntityType = 'lead' | 'account' | 'contact' | 'opportunity' | 'task';
@@ -56,7 +56,7 @@ export function useUploadCrmAttachment() {
     }) => {
       // Upload to storage
       const { path } = await uploadToBucket({ 
-        bucket: BUCKET_NAME as any, 
+        bucket: BUCKET_NAME, 
         projectId: entityId, 
         file 
       });
@@ -74,13 +74,17 @@ export function useUploadCrmAttachment() {
           file_size: file.size,
           notes,
           uploaded_by: userId
-        } as any)
+        })
         .select()
         .single();
       
       if (error) {
         // Cleanup on error
-        await deleteFromBucket(BUCKET_NAME, path);
+        try {
+          await deleteFromBucket(BUCKET_NAME, path);
+        } catch (e) {
+          console.error('Error cleaning up file:', e);
+        }
         throw error;
       }
       
@@ -103,8 +107,13 @@ export function useDeleteCrmAttachment() {
   
   return useMutation({
     mutationFn: async (attachment: CrmAttachment) => {
-      // Delete from storage
-      await deleteFromBucket(BUCKET_NAME as any, attachment.file_url);
+      // Delete from storage first
+      try {
+        await deleteFromBucket(BUCKET_NAME, attachment.file_url);
+      } catch (e) {
+        console.error('Error deleting file from storage:', e);
+        // Continue to delete DB record even if storage deletion fails
+      }
       
       // Delete record
       const { error } = await supabase
@@ -128,7 +137,7 @@ export function useDeleteCrmAttachment() {
 
 export async function getAttachmentSignedUrl(relativePath: string): Promise<string> {
   const { url } = await getSignedUrl({ 
-    bucket: BUCKET_NAME as any, 
+    bucket: BUCKET_NAME, 
     path: relativePath 
   });
   return url;
