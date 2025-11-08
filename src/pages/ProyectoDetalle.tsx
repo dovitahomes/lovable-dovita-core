@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WishlistForm } from "@/components/WishlistForm";
 import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
-import { DocumentsTab } from "@/components/project/DocumentsTab";
+import { ProjectDocumentsTab } from "@/components/project/ProjectDocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
 import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
 import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays, Camera } from "lucide-react";
@@ -160,7 +160,7 @@ export default function ProyectoDetalle() {
         </TabsList>
         
         <TabsContent value="documentos" className="mt-6">
-          <DocumentsTab projectId={id!} />
+          <ProjectDocumentsTab projectId={id!} />
         </TabsContent>
         
         <TabsContent value="fotos" className="mt-6">
