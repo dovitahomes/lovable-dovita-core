@@ -3,7 +3,8 @@ import { DesignPhaseTimeline } from "./DesignPhaseTimeline";
 import { PhasesSection } from "./PhasesSection";
 import { ChangeLogsSection } from "./ChangeLogsSection";
 import { DeliverablesSection } from "./DeliverablesSection";
-import { Layers, FileText, Upload, TrendingUp } from "lucide-react";
+import { DocumentChecklistTab } from "./DocumentChecklistTab";
+import { Layers, FileText, Upload, TrendingUp, CheckSquare } from "lucide-react";
 
 interface DesignTabProps {
   projectId: string;
@@ -29,6 +30,10 @@ export function DesignTab({ projectId }: DesignTabProps) {
           <Upload className="h-4 w-4" />
           Entregables
         </TabsTrigger>
+        <TabsTrigger value="checklist" className="gap-2">
+          <CheckSquare className="h-4 w-4" />
+          Checklist
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="timeline" className="mt-6">
@@ -45,6 +50,10 @@ export function DesignTab({ projectId }: DesignTabProps) {
 
       <TabsContent value="deliverables" className="mt-6">
         <DeliverablesSection projectId={projectId} />
+      </TabsContent>
+
+      <TabsContent value="checklist" className="mt-6">
+        <DocumentChecklistTab projectId={projectId} />
       </TabsContent>
     </Tabs>
   );

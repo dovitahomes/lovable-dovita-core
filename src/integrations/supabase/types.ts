@@ -3123,6 +3123,88 @@ export type Database = {
           },
         ]
       }
+      required_documents: {
+        Row: {
+          created_at: string
+          document_id: string | null
+          documento_tipo: string
+          fase: string
+          fecha_subida: string | null
+          id: string
+          obligatorio: boolean
+          project_id: string
+          subido: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_id?: string | null
+          documento_tipo: string
+          fase: string
+          fecha_subida?: string | null
+          id?: string
+          obligatorio?: boolean
+          project_id: string
+          subido?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string | null
+          documento_tipo?: string
+          fase?: string
+          fecha_subida?: string | null
+          id?: string
+          obligatorio?: boolean
+          project_id?: string
+          subido?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "required_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "required_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "required_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "required_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "required_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "required_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       sucursales: {
         Row: {
           activa: boolean | null
