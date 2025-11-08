@@ -22,6 +22,10 @@ import { PUBLIC_ROUTES, BACKOFFICE_ROUTES, LEGACY_ROUTES } from "@/config/routes
 // Client App imports
 import ClientAppWrapper from "@/layouts/ClientAppWrapper";
 
+// Client App - New standalone pages (Supabase views)
+const ProjectsList = lazy(() => import("./pages/client-app/ProjectsList"));
+const ProjectDetail = lazy(() => import("./pages/client-app/ProjectDetail"));
+
 // Eager loaded (critical routes)
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
@@ -318,6 +322,25 @@ const App = () => {
                   <Route path={PUBLIC_ROUTES.AUTH_SETUP_PASSWORD} element={<SetupPassword />} />
                   <Route path={PUBLIC_ROUTES.AUTH} element={<Navigate to={PUBLIC_ROUTES.AUTH_LOGIN} replace />} />
                   <Route path={PUBLIC_ROUTES.SIGNUP} element={<Navigate to={PUBLIC_ROUTES.AUTH_LOGIN} replace />} />
+                  
+                  {/* ============================================ */}
+                  {/* CLIENT APP - Standalone (Supabase views)    */}
+                  {/* /cliente/proyectos - Solo lectura           */}
+                  {/* ============================================ */}
+                  <Route path="/cliente/proyectos" element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<PageHeaderSkeleton />}>
+                        <ProjectsList />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/cliente/proyectos/:id" element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<PageHeaderSkeleton />}>
+                        <ProjectDetail />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } />
                   
                   {/* ============================================ */}
                   {/* CLIENT APP (para clientes finales)          */}
