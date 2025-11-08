@@ -79,7 +79,8 @@ export function useProjectAppointments(projectId: string | null) {
       return (data || []) as ProjectAppointment[];
     },
     enabled: !!projectId && !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    gcTime: 1000 * 60 * 10, // Cache 10min
   });
 }
 

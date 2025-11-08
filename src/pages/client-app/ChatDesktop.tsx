@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AvatarCustomizationDialog from "@/components/client-app/AvatarCustomizationDialog";
+import ChatMessage from "@/components/client-app/ChatMessage.memo";
 
 interface Message {
   id: number;
@@ -62,31 +63,36 @@ export default function ChatDesktop() {
     return <AvatarImage src={clientAvatar.value} />;
   };
 
+  // Memoize filtered messages
+  const filteredMessages = useMemo(() => {
+    return mockChatMessages.filter(msg => msg.projectId === currentProject?.id);
+  }, [currentProject?.id]);
+
   // Update messages when project changes
   useEffect(() => {
-    setMessages(mockChatMessages.filter(msg => msg.projectId === currentProject?.id));
-  }, [currentProject?.id]);
+    setMessages(filteredMessages);
+  }, [filteredMessages]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     if (!input.trim()) return;
 
     const newMessage: Message = {
       id: messages.length + 1,
       projectId: currentProject?.id || '',
       content: input,
-      timestamp: new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date().toISOString(),
       isClient: true,
       status: "sent",
     };
 
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     setInput("");
-  };
+  }, [input, messages.length, currentProject?.id]);
 
   return (
     <div className="h-[calc(100vh-100px)] grid grid-cols-12 gap-6">
@@ -125,47 +131,18 @@ export default function ChatDesktop() {
         </div>
 
         <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => {
-            const isClient = message.isClient;
-            return (
-              <div key={message.id} className={`flex ${isClient ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[70%] ${isClient ? "order-2" : "order-1"}`}>
-                  {!isClient && message.sender && (
-                    <div className="flex items-center gap-2 mb-1">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={message.sender.avatar} />
-                        <AvatarFallback>{message.sender.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-muted-foreground">{message.sender.name}</span>
-                    </div>
-                  )}
-                  {isClient && (
-                    <div className="flex items-center gap-2 mb-1 justify-end">
-                      <span className="text-xs text-muted-foreground">Tú</span>
-                      <Avatar className="h-6 w-6">
-                        {getAvatarContent()}
-                      </Avatar>
-                    </div>
-                  )}
-                  <div
-                    className={`rounded-2xl px-4 py-2 ${
-                      isClient
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1 px-2">
-                    <span className="text-xs text-muted-foreground">{message.timestamp}</span>
-                    {isClient && message.status && (
-                      <span className="text-xs text-muted-foreground capitalize">{message.status}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {messages.map((message) => (
+            <ChatMessage
+              key={message.id}
+              id={message.id.toString()}
+              content={message.content}
+              timestamp={message.timestamp}
+              isClient={message.isClient}
+              status={message.status as any}
+              sender={message.sender}
+              clientAvatar={clientAvatar}
+            />
+          ))}
         </div>
 
         <div className="border-t p-4">

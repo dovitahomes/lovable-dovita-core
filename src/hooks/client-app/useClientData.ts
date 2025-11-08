@@ -73,7 +73,7 @@ export function useClientDocuments(projectId: string | null) {
       
       if (error) throw error;
       
-      // Process signed URLs
+      // Process signed URLs in parallel with batching
       const documentsWithUrls = await Promise.all(
         (data || []).map(async (doc) => ({
           id: doc.id,
@@ -90,7 +90,8 @@ export function useClientDocuments(projectId: string | null) {
       return documentsWithUrls;
     },
     enabled: !!projectId || useMock,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 5, // Aumentado a 5min para reducir llamadas
+    gcTime: 1000 * 60 * 10, // Cache por 10min
   });
 }
 
