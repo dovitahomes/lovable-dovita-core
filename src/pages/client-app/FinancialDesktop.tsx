@@ -1,11 +1,12 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { mockMinistraciones } from "@/lib/client-app/client-data";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from "@/contexts/client-app/ProjectContext";
-import { useDataSource } from "@/contexts/client-app/DataSourceContext";
+import { useClientMinistrations, useClientFinancialSummary } from "@/hooks/client-app/useClientData";
 import { isInDesignPhase } from "@/lib/project-utils";
-import { DollarSign, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, CreditCard, CheckCircle2, Clock, Calendar, AlertCircle, Filter } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,28 +15,86 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+type FilterStatus = 'all' | 'paid' | 'pending' | 'future';
 
 export default function FinancialDesktop() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
   const project = currentProject;
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   
-  // Filter payments by current project
-  const payments = mockMinistraciones.filter(m => m.projectId === project?.id);
+  // Fetch data using unified hooks
+  const { data: ministrations = [], isLoading: loadingMinistrations } = useClientMinistrations(project?.id || null);
+  const { data: financialSummary } = useClientFinancialSummary(project?.id || null);
   
   if (!project) {
-    return <div className="h-full flex items-center justify-center">Cargando datos financieros...</div>;
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="text-lg font-medium text-muted-foreground">Cargando datos financieros...</p>
+        </div>
+      </div>
+    );
   }
   
   const inDesignPhase = isInDesignPhase(project);
-  const remaining = project.totalAmount - project.totalPaid;
-  const percentSpent = (project.totalPaid / project.totalAmount) * 100;
+  
+  // Calculate totals from financial summary or fallback to project data
+  const totalAmount = financialSummary?.total_amount || project.totalAmount || 5000000;
+  const totalPaid = financialSummary?.spent_amount || project.totalPaid || 0;
+  const totalPending = totalAmount - totalPaid;
+  const percentPaid = (totalPaid / totalAmount) * 100;
+  
+  // Filter ministrations
+  const filteredMinistrations = statusFilter === 'all' 
+    ? ministrations 
+    : ministrations.filter(m => m.status === statusFilter);
+
+  // Find next pending payment
+  const nextPayment = ministrations.find(m => m.status === 'pending' || m.status === 'future');
+  
+  // Count by status
+  const paidCount = ministrations.filter(m => m.status === 'paid').length;
+  const pendingCount = ministrations.filter(m => m.status === 'pending').length;
+  const futureCount = ministrations.filter(m => m.status === 'future').length;
 
   const formatAmount = (amount: number) => {
     if (inDesignPhase) {
-      return `$${amount.toLocaleString()}`;
+      return `$${amount.toLocaleString('es-MX')}`;
     }
-    return `$${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(1)}M`;
+    }
+    return `$${(amount / 1000).toFixed(0)}k`;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'default';
+      case 'pending':
+        return 'outline';
+      case 'future':
+        return 'secondary';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'Pagado';
+      case 'pending':
+        return 'Pendiente';
+      case 'future':
+        return 'Futuro';
+      default:
+        return 'Desconocido';
+    }
   };
 
   return (
@@ -52,30 +111,30 @@ export default function FinancialDesktop() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatAmount(project.totalAmount)}</div>
+            <div className="text-2xl font-bold">{formatAmount(totalAmount)}</div>
             <p className="text-xs text-muted-foreground mt-1">Costo total del proyecto</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gastado</CardTitle>
-            <TrendingDown className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-sm font-medium">Pagado</CardTitle>
+            <TrendingDown className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatAmount(project.totalPaid)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{percentSpent.toFixed(1)}% del presupuesto</p>
+            <div className="text-2xl font-bold text-green-600">{formatAmount(totalPaid)}</div>
+            <p className="text-xs text-muted-foreground mt-1">{percentPaid.toFixed(1)}% del presupuesto</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Restante</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium">Por Pagar</CardTitle>
+            <TrendingUp className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatAmount(remaining)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{(100 - percentSpent).toFixed(1)}% disponible</p>
+            <div className="text-2xl font-bold text-orange-600">{formatAmount(totalPending)}</div>
+            <p className="text-xs text-muted-foreground mt-1">{(100 - percentPaid).toFixed(1)}% restante</p>
           </CardContent>
         </Card>
 
@@ -85,62 +144,106 @@ export default function FinancialDesktop() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,000</div>
-            <p className="text-xs text-muted-foreground mt-1">Vence el 20 Nov 2024</p>
+            {nextPayment ? (
+              <>
+                <div className="text-2xl font-bold">{formatAmount(nextPayment.amount)}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Vence el {format(new Date(nextPayment.date), "d MMM yyyy", { locale: es })}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Sin pagos pendientes</p>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Progreso del Presupuesto</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span>Gastado: {formatAmount(project.totalPaid)}</span>
-              <span className="text-muted-foreground">{percentSpent.toFixed(1)}%</span>
+      {/* Next Payment Destacado */}
+      {nextPayment && (
+        <Card className="border-l-4 border-l-amber-500 bg-amber-50/50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <CardTitle>Próximo Pago Programado</CardTitle>
             </div>
-            <Progress value={percentSpent} variant="yellow" className="h-3" />
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>$0</span>
-              <span>{formatAmount(project.totalAmount)}</span>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-semibold text-lg">{nextPayment.concept}</p>
+                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                  <Calendar className="h-4 w-4" />
+                  {format(new Date(nextPayment.date), "d 'de' MMMM, yyyy", { locale: es })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-amber-700">{formatAmount(nextPayment.amount)}</p>
+                <Badge className="mt-2 bg-amber-100 text-amber-700">
+                  {getStatusLabel(nextPayment.status)}
+                </Badge>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Filtros */}
       <Card>
         <CardHeader>
-          <CardTitle>Historial de Pagos</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Historial de Pagos</CardTitle>
+            </div>
+            <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as FilterStatus)}>
+              <TabsList>
+                <TabsTrigger value="all">Todos ({ministrations.length})</TabsTrigger>
+                <TabsTrigger value="paid">Pagados ({paidCount})</TabsTrigger>
+                <TabsTrigger value="pending">Pendientes ({pendingCount})</TabsTrigger>
+                <TabsTrigger value="future">Futuros ({futureCount})</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Concepto</TableHead>
-                <TableHead>Monto</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Método</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium">{payment.date}</TableCell>
-                  <TableCell>{payment.concept}</TableCell>
-                  <TableCell className="font-bold">{formatAmount(payment.amount)}</TableCell>
-                  <TableCell>
-                    <Badge variant={payment.status === "paid" ? "default" : "outline"} className={payment.status === "pending" ? "bg-[hsl(var(--dovita-yellow))]/20 text-[hsl(var(--dovita-yellow))]" : ""}>
-                      {payment.status === "paid" ? "Pagado" : payment.status === "pending" ? "Pendiente" : "Futuro"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">Transferencia</TableCell>
+          {loadingMinistrations ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Cargando pagos...</p>
+            </div>
+          ) : filteredMinistrations.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                No hay pagos {statusFilter !== 'all' ? `con estado "${getStatusLabel(statusFilter)}"` : 'disponibles'}
+              </p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Concepto</TableHead>
+                  <TableHead>Monto</TableHead>
+                  <TableHead>Estado</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredMinistrations.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium">
+                      {format(new Date(payment.date), "d MMM yyyy", { locale: es })}
+                    </TableCell>
+                    <TableCell>{payment.concept}</TableCell>
+                    <TableCell className="font-bold">{formatAmount(payment.amount)}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusColor(payment.status)}>
+                        {getStatusLabel(payment.status)}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
