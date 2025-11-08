@@ -27,9 +27,25 @@ export function useModuleAccess() {
         return;
       }
       
-      console.log('[useModuleAccess] Loading permissions for user:', user.id);
+      console.log('[useModuleAccess] 🔍 Loading permissions for user:', user.id);
       
       try {
+        // LOGGING: Verificar sesión JWT antes de consultar
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('[useModuleAccess] ❌ Session error:', sessionError.message);
+        }
+        
+        if (!session) {
+          console.error('[useModuleAccess] ❌ No valid session - JWT missing');
+          setPerms([]);
+          setLoading(false);
+          return;
+        }
+        
+        console.log('[useModuleAccess] ✓ Valid session found, user_id:', session.user.id);
+        
         const { data, error } = await supabase
           .from('user_permissions')
           .select('module_name, can_view, can_create, can_edit, can_delete')
@@ -37,26 +53,37 @@ export function useModuleAccess() {
 
         if (!active) return;
         
+        // LOGGING: Detallar resultado de la consulta
+        console.log('[useModuleAccess] Query result:', {
+          user_id: user.id,
+          data_length: data?.length || 0,
+          error_message: error?.message,
+          error_code: error?.code,
+          raw_data_sample: data?.slice(0, 3)
+        });
+        
         if (error) {
-          console.error('[useModuleAccess] Error loading permissions:', error.message);
+          console.error('[useModuleAccess] ❌ Error loading permissions:', error.message, 'Code:', error.code);
           setPerms([]);
         } else if (!data || data.length === 0) {
-          console.warn('[useModuleAccess] No permissions found for user', user.id);
+          console.warn('[useModuleAccess] ⚠️ No permissions found for user', user.id);
           setPerms([]);
         } else {
-          console.info(`[useModuleAccess] ✓ Loaded ${data.length} permissions`);
-          setPerms(data.map((d: any) => ({
+          console.info(`[useModuleAccess] ✓ Loaded ${data.length} permissions for user ${user.id}`);
+          const mappedPerms = data.map((d: any) => ({
             module_name: d.module_name,
             can_view: !!d.can_view,
             can_create: !!d.can_create,
             can_edit: !!d.can_edit,
             can_delete: !!d.can_delete,
-          })));
+          }));
+          console.log('[useModuleAccess] 📋 Permissions:', mappedPerms);
+          setPerms(mappedPerms);
         }
         
         setLoading(false);
       } catch (err) {
-        console.error('[useModuleAccess] Exception loading permissions:', err);
+        console.error('[useModuleAccess] ❌ Exception loading permissions:', err);
         setPerms([]);
         setLoading(false);
       }

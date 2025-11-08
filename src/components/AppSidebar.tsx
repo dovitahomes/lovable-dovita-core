@@ -64,10 +64,10 @@ export function AppSidebar() {
     };
   }, []);
 
-  const { canView, loading: permsLoading } = useModuleAccess();
+  const { canView, loading: permsLoading, perms } = useModuleAccess();
   
-  // Log sidebar filtering for debugging
-  console.log('[AppSidebar] Filtering routes, total sections:', SIDEBAR_SECTIONS.length, 'permsLoading:', permsLoading);
+  // LOGGING: Estado de carga de permisos
+  console.log('[AppSidebar] 🔍 Filtering routes, total sections:', SIDEBAR_SECTIONS.length, 'permsLoading:', permsLoading, 'totalPerms:', perms.length);
   
   // Si está cargando, mostrar todas las secciones con skeleton
   // Si no, filtrar por permisos
@@ -76,7 +76,8 @@ export function AppSidebar() {
     : SIDEBAR_SECTIONS.map(section => {
         const filteredItems = section.items.filter(item => {
           const can = canView(item.moduleName);
-          console.log('[AppSidebar] Module:', item.moduleName, 'canView:', can);
+          // LOGGING: Detallar cada módulo
+          console.log('[AppSidebar] 📋 Module:', item.moduleName, 'canView:', can, 'totalPerms:', perms.length);
           return can;
         });
         return {
@@ -85,7 +86,7 @@ export function AppSidebar() {
         };
       }).filter(section => section.items.length > 0);
   
-  console.log('[AppSidebar] Routes to show:', routesToShow.length, 'sections');
+  console.log('[AppSidebar] ✓ Routes to show:', routesToShow.length, 'sections');
 
   const handleLogout = async () => {
     const { appSignOut } = await import('@/lib/auth/logout');
