@@ -118,6 +118,17 @@ export default function GestionUsuarios() {
   
   const handleDelete = async () => {
     if (!deleteDialog.user) return;
+    
+    // Verificar si es el último admin
+    const isAdmin = deleteDialog.user.roles?.includes('admin');
+    const adminCount = users.filter(u => u.roles?.includes('admin')).length;
+    
+    if (isAdmin && adminCount <= 1) {
+      toast.error('No se puede eliminar el último administrador del sistema');
+      setDeleteDialog({ open: false, user: null });
+      return;
+    }
+    
     await deleteMutation.mutateAsync(deleteDialog.user.id);
   };
   

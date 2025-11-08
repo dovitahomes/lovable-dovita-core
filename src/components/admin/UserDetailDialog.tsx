@@ -37,6 +37,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   const updateMutation = useUpdateUserProfile();
   const uploadAvatar = useUploadAvatar();
   
+  const [isEditMode, setIsEditMode] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +58,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   const [formData, setFormData] = useState<any>({});
   
   useEffect(() => {
+    setIsEditMode(false); // Reset to read-only when user changes
     if (user) {
       setFormData({
         full_name: user.full_name || '',
@@ -78,6 +80,23 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   const handleSave = async () => {
     if (!userId) return;
     await updateMutation.mutateAsync({ userId, data: formData });
+    setIsEditMode(false); // Return to read-only after saving
+  };
+  
+  const handleCancelEdit = () => {
+    if (user) {
+      setFormData({
+        full_name: user.full_name || '',
+        phone: user.phone || '',
+        fecha_nacimiento: user.fecha_nacimiento || '',
+        rfc: user.rfc || '',
+        imss_number: user.imss_number || '',
+        fecha_ingreso: user.fecha_ingreso || '',
+        emergency_contact: user.emergency_contact || null,
+        sucursal_id: user.sucursal_id || '',
+      });
+    }
+    setIsEditMode(false);
   };
   
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,7 +199,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
             </AvatarFallback>
           </Avatar>
           
-          {!avatarPreview && (
+          {!avatarPreview && isEditMode && (
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 
@@ -304,7 +323,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   id="full-name"
                   value={formData.full_name}
                   onChange={(e) => handleChange('full_name', e.target.value)}
-                  className="transition-all focus:ring-2 focus:ring-primary"
+                  disabled={!isEditMode}
+                  className={cn(
+                    "transition-all focus:ring-2 focus:ring-primary",
+                    !isEditMode && "bg-muted cursor-not-allowed"
+                  )}
                 />
               </div>
               
@@ -318,7 +341,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   value={formData.phone}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   placeholder="Ej: 444-123-4567"
-                  className="transition-all focus:ring-2 focus:ring-primary"
+                  disabled={!isEditMode}
+                  className={cn(
+                    "transition-all focus:ring-2 focus:ring-primary",
+                    !isEditMode && "bg-muted cursor-not-allowed"
+                  )}
                 />
               </div>
               
@@ -332,7 +359,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   type="date"
                   value={formData.fecha_nacimiento}
                   onChange={(e) => handleChange('fecha_nacimiento', e.target.value)}
-                  className="transition-all focus:ring-2 focus:ring-primary"
+                  disabled={!isEditMode}
+                  className={cn(
+                    "transition-all focus:ring-2 focus:ring-primary",
+                    !isEditMode && "bg-muted cursor-not-allowed"
+                  )}
                 />
               </div>
               
@@ -346,7 +377,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   value={formData.rfc}
                   onChange={(e) => handleChange('rfc', e.target.value)}
                   placeholder="Ej: XAXX010101000"
-                  className="transition-all focus:ring-2 focus:ring-primary"
+                  disabled={!isEditMode}
+                  className={cn(
+                    "transition-all focus:ring-2 focus:ring-primary",
+                    !isEditMode && "bg-muted cursor-not-allowed"
+                  )}
                 />
               </div>
               
@@ -361,7 +396,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                     value={formData.imss_number}
                     onChange={(e) => handleChange('imss_number', e.target.value)}
                     placeholder="Ej: 12345678901"
-                    className="transition-all focus:ring-2 focus:ring-primary"
+                    disabled={!isEditMode}
+                    className={cn(
+                      "transition-all focus:ring-2 focus:ring-primary",
+                      !isEditMode && "bg-muted cursor-not-allowed"
+                    )}
                   />
                 </div>
               )}
@@ -377,6 +416,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
             <EmergencyContactForm
               value={formData.emergency_contact}
               onChange={(value) => handleChange('emergency_contact', value)}
+              disabled={!isEditMode}
             />
           </CardContent>
         </Card>
@@ -401,7 +441,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                     type="date"
                     value={formData.fecha_ingreso}
                     onChange={(e) => handleChange('fecha_ingreso', e.target.value)}
-                    className="transition-all focus:ring-2 focus:ring-primary"
+                    disabled={!isEditMode}
+                    className={cn(
+                      "transition-all focus:ring-2 focus:ring-primary",
+                      !isEditMode && "bg-muted cursor-not-allowed"
+                    )}
                   />
                 </div>
               )}
@@ -411,8 +455,18 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   <Building className="w-4 h-4 text-muted-foreground" />
                   Sucursal
                 </Label>
-                <Select value={formData.sucursal_id} onValueChange={(value) => handleChange('sucursal_id', value)}>
-                  <SelectTrigger id="sucursal" className="transition-all focus:ring-2 focus:ring-primary">
+                <Select 
+                  value={formData.sucursal_id} 
+                  onValueChange={(value) => handleChange('sucursal_id', value)}
+                  disabled={!isEditMode}
+                >
+                  <SelectTrigger 
+                    id="sucursal" 
+                    className={cn(
+                      "transition-all focus:ring-2 focus:ring-primary",
+                      !isEditMode && "bg-muted cursor-not-allowed"
+                    )}
+                  >
                     <SelectValue placeholder="Seleccionar sucursal" />
                   </SelectTrigger>
                   <SelectContent>
@@ -436,6 +490,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
             <UserRoleBadges
               userId={userId}
               currentRoles={user.roles as any}
+              readOnly={!isEditMode}
             />
           </CardContent>
         </Card>
@@ -453,20 +508,42 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
       "flex-shrink-0 flex gap-2 border-t bg-background",
       isMobile ? "flex-col px-4 py-3" : "justify-end px-6 py-4"
     )}>
-      <Button 
-        variant="outline" 
-        onClick={() => onOpenChange(false)}
-        className={cn(isMobile && "w-full")}
-      >
-        Cancelar
-      </Button>
-      <Button 
-        onClick={handleSave} 
-        disabled={updateMutation.isPending}
-        className={cn(isMobile && "w-full")}
-      >
-        {updateMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
-      </Button>
+      {!isEditMode ? (
+        // Modo Read-Only
+        <>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className={cn(isMobile && "w-full")}
+          >
+            Cerrar
+          </Button>
+          <Button 
+            onClick={() => setIsEditMode(true)}
+            className={cn(isMobile && "w-full")}
+          >
+            Editar
+          </Button>
+        </>
+      ) : (
+        // Modo Edición
+        <>
+          <Button 
+            variant="outline" 
+            onClick={handleCancelEdit}
+            className={cn(isMobile && "w-full")}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={updateMutation.isPending}
+            className={cn(isMobile && "w-full")}
+          >
+            {updateMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+          </Button>
+        </>
+      )}
     </div>
   );
   

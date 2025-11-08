@@ -10,9 +10,10 @@ interface EmergencyContact {
 interface EmergencyContactFormProps {
   value: EmergencyContact | null;
   onChange: (value: EmergencyContact) => void;
+  disabled?: boolean;
 }
 
-export function EmergencyContactForm({ value, onChange }: EmergencyContactFormProps) {
+export function EmergencyContactForm({ value, onChange, disabled = false }: EmergencyContactFormProps) {
   const contact = value || {};
   
   const handleChange = (field: keyof EmergencyContact, val: string) => {
@@ -31,6 +32,7 @@ export function EmergencyContactForm({ value, onChange }: EmergencyContactFormPr
           value={contact.name || ''}
           onChange={(e) => handleChange('name', e.target.value)}
           placeholder="Ej: María López"
+          disabled={disabled}
         />
       </div>
       
@@ -41,6 +43,7 @@ export function EmergencyContactForm({ value, onChange }: EmergencyContactFormPr
           value={contact.phone || ''}
           onChange={(e) => handleChange('phone', e.target.value)}
           placeholder="Ej: 444-123-4567"
+          disabled={disabled}
         />
       </div>
       
@@ -51,6 +54,7 @@ export function EmergencyContactForm({ value, onChange }: EmergencyContactFormPr
           value={contact.relationship || ''}
           onChange={(e) => handleChange('relationship', e.target.value)}
           placeholder="Ej: Esposa, Hermano, Padre"
+          disabled={disabled}
         />
       </div>
     </div>
