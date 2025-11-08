@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { subMonths } from "date-fns";
 
 export interface CalendarEvent {
   id: string;
@@ -8,8 +7,8 @@ export interface CalendarEvent {
   start_at: string;
   end_at: string;
   notes?: string | null;
-  attendees?: Array<{ user_id: string; name?: string }> | null;
   created_by: string;
+  created_by_name?: string;
 }
 
 export function useClientCalendar(projectId: string | null) {
@@ -18,22 +17,27 @@ export function useClientCalendar(projectId: string | null) {
     queryFn: async () => {
       if (!projectId) return [];
 
-      const sixMonthsAgo = subMonths(new Date(), 6);
+      const today = new Date().toISOString();
 
       const { data, error } = await supabase
-        .from('calendar_events')
-        .select('id, title, start_at, end_at, notes, attendees, created_by')
+        .from('v_client_events')
+        .select('*')
         .eq('project_id', projectId)
-        .gte('end_at', sixMonthsAgo.toISOString())
-        .order('start_at', { ascending: true });
+        .gte('end_time', today)
+        .order('start_time', { ascending: true });
 
       if (error) {
         throw new Error(`No se pudieron cargar los eventos del calendario: ${error.message}`);
       }
 
       return (data || []).map(event => ({
-        ...event,
-        attendees: event.attendees as Array<{ user_id: string; name?: string }> | null,
+        id: event.id,
+        title: event.title,
+        start_at: event.start_time,
+        end_at: event.end_time,
+        notes: event.description,
+        created_by: event.created_by,
+        created_by_name: event.created_by_name,
       })) as CalendarEvent[];
     },
     enabled: !!projectId,

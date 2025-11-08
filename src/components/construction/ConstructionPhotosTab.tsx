@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadToBucket, getSignedUrl, deleteFromBucket } from "@/lib/storage/storage-helpers";
+import { getSignedUrl, deleteFromBucket } from "@/lib/storage-helpers";
+import { useConstructionPhotosUpload } from "@/hooks/useConstructionPhotosUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,13 +19,14 @@ interface ConstructionPhotosTabProps {
 
 export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps) {
   const [photos, setPhotos] = useState<any[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [description, setDescription] = useState("");
   const [visibilidad, setVisibilidad] = useState<"interno" | "cliente">("interno");
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  const uploadMutation = useConstructionPhotosUpload();
 
   useEffect(() => {
     loadPhotos();
@@ -62,90 +64,60 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
-    setUploading(true);
     const file = acceptedFiles[0];
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuario no autenticado");
-
-      // Upload to storage using helper (path: projectId/YYYY-MM-uuid.ext)
-      const { path } = await uploadToBucket({
-        bucket: "construction-photos",
-        projectId,
-        file,
-        filename: file.name
-      });
-
-      // Insert photo record
-      const { error: insertError } = await supabase
-        .from("construction_photos")
-        .insert({
-          project_id: projectId,
-          file_url: path, // Store only the path
-          file_name: file.name,
-          latitude: location?.lat || null,
-          longitude: location?.lng || null,
-          descripcion: description || null,
-          visibilidad,
-          uploaded_by: user.id,
-          fecha_foto: new Date().toISOString(),
-        });
-
-      if (insertError) {
-        // Cleanup: delete uploaded file if DB insert fails
-        await deleteFromBucket("construction-photos", path);
-        throw insertError;
+    uploadMutation.mutate({
+      projectId,
+      file,
+      description,
+      visibilidad,
+      latitude: location?.lat,
+      longitude: location?.lng,
+    }, {
+      onSuccess: () => {
+        setDescription("");
+        loadPhotos();
       }
-
-      toast.success("Foto subida exitosamente");
-      setDescription("");
-      loadPhotos();
-    } catch (error: any) {
-      console.error("Error uploading photo:", error);
-      toast.error("Error al subir la foto: " + error.message);
-    } finally {
-      setUploading(false);
-    }
+    });
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/*": [] },
+    accept: { "image/*": [".jpg", ".jpeg", ".png", ".webp"] },
     maxFiles: 1,
-    disabled: uploading,
+    disabled: uploadMutation.isPending,
   });
 
   const viewPhoto = async (photo: any) => {
-    setSelectedPhoto(photo);
-    setPhotoDialogOpen(true);
-    
-    // Get signed URL for private bucket
     try {
+      // Generate signed URL for viewing
       const { url } = await getSignedUrl({
-        bucket: "construction-photos",
+        bucket: "project_photos",
         path: photo.file_url,
-        expiresInSeconds: 600 // 10 minutes
+        expiresInSeconds: 600
       });
+      
       setPreviewUrl(url);
+      setSelectedPhoto(photo);
+      setPhotoDialogOpen(true);
     } catch (error) {
-      console.error("Error getting signed URL:", error);
-      toast.error("Error al cargar la foto");
+      console.error("Error loading photo:", error);
+      toast.error("No se pudo cargar la foto");
     }
   };
 
-  const deletePhoto = async (photo: any) => {
-    if (!confirm(`¿Eliminar esta foto?`)) return;
+  const deletePhoto = async (photoId: string, filePath: string) => {
+    if (!confirm("¿Estás seguro de eliminar esta foto?")) return;
 
     try {
       // Delete from storage
-      await deleteFromBucket("construction-photos", photo.file_url);
+      await deleteFromBucket("project_photos", filePath);
 
-      // Delete record
+      // Delete from database
       const { error } = await supabase
         .from("construction_photos")
         .delete()
-        .eq("id", photo.id);
+        .eq("id", photoId);
 
       if (error) throw error;
 
@@ -153,7 +125,7 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
       loadPhotos();
     } catch (error: any) {
       console.error("Error deleting photo:", error);
-      toast.error("Error al eliminar la foto");
+      toast.error(error.message || "Error al eliminar la foto");
     }
   };
 
@@ -214,11 +186,11 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
               isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25"
-            } ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+            } ${uploadMutation.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <input {...getInputProps()} />
             <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            {uploading ? (
+            {uploadMutation.isPending ? (
               <p>Subiendo...</p>
             ) : isDragActive ? (
               <p>Suelta la imagen aquí...</p>
@@ -256,7 +228,7 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => deletePhoto(photo)}
+                      onClick={() => deletePhoto(photo.id, photo.file_url)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

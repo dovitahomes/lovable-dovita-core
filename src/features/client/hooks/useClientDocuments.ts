@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getSignedUrl } from "@/lib/storage-helpers";
 
 export interface ClientDocument {
   id: string;
@@ -11,6 +12,7 @@ export interface ClientDocument {
   file_size: number | null;
   created_at: string;
   tipo_carpeta: string;
+  url?: string; // Signed URL
 }
 
 export function useClientDocuments(projectId: string | null, tipoCarpeta?: string) {
@@ -20,8 +22,8 @@ export function useClientDocuments(projectId: string | null, tipoCarpeta?: strin
       if (!projectId) return [];
 
       let query = supabase
-        .from('documents')
-        .select('id, project_id, nombre, etiqueta, file_url, file_type, file_size, created_at, tipo_carpeta')
+        .from('v_client_documents')
+        .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -33,7 +35,25 @@ export function useClientDocuments(projectId: string | null, tipoCarpeta?: strin
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as ClientDocument[];
+      
+      // Generate signed URLs for each document
+      const docsWithSignedUrls = await Promise.all(
+        (data || []).map(async (doc) => {
+          try {
+            const { url } = await getSignedUrl({
+              bucket: 'project_docs',
+              path: doc.file_url,
+              expiresInSeconds: 3600 // 1 hour
+            });
+            return { ...doc, url };
+          } catch (err) {
+            console.error(`Error generating signed URL for document ${doc.id}:`, err);
+            return { ...doc, url: null };
+          }
+        })
+      );
+
+      return docsWithSignedUrls as ClientDocument[];
     },
     enabled: !!projectId,
     staleTime: 1000 * 60 * 2, // 2 minutes
