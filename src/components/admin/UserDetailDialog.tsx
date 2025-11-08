@@ -163,7 +163,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
       <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/80" />
       <div className={cn(
         "relative z-10 flex flex-col items-center",
-        isMobile ? "p-4 space-y-2" : "p-6 space-y-4"
+        isMobile ? "p-3 space-y-1.5" : "p-6 space-y-4"
       )}>
         {/* Avatar con botón de edición */}
         <div className="relative group">
@@ -272,10 +272,19 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   // Contenido scrolleable
   const scrollableContent = (
     <Tabs defaultValue="personal" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-6">
-        <TabsTrigger value="personal">Personal</TabsTrigger>
-        <TabsTrigger value="laboral">Laboral</TabsTrigger>
-        <TabsTrigger value="documentos">Documentos</TabsTrigger>
+      <TabsList className={cn(
+        "grid w-full mb-6",
+        isMobile ? "grid-cols-3 h-auto" : "grid-cols-3"
+      )}>
+        <TabsTrigger value="personal" className={cn(isMobile && "text-xs px-2 py-2")}>
+          Personal
+        </TabsTrigger>
+        <TabsTrigger value="laboral" className={cn(isMobile && "text-xs px-2 py-2")}>
+          Laboral
+        </TabsTrigger>
+        <TabsTrigger value="documentos" className={cn(isMobile && "text-xs px-2 py-2")}>
+          Documentos
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="personal" className="space-y-4 animate-in fade-in-50 duration-300">
@@ -440,11 +449,22 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
 
   // Footer - Fijo (no scrolleable)
   const footerSection = (
-    <div className="flex-shrink-0 flex justify-end gap-2 px-6 py-4 border-t bg-background">
-      <Button variant="outline" onClick={() => onOpenChange(false)}>
+    <div className={cn(
+      "flex-shrink-0 flex gap-2 border-t bg-background",
+      isMobile ? "flex-col px-4 py-3" : "justify-end px-6 py-4"
+    )}>
+      <Button 
+        variant="outline" 
+        onClick={() => onOpenChange(false)}
+        className={cn(isMobile && "w-full")}
+      >
         Cancelar
       </Button>
-      <Button onClick={handleSave} disabled={updateMutation.isPending}>
+      <Button 
+        onClick={handleSave} 
+        disabled={updateMutation.isPending}
+        className={cn(isMobile && "w-full")}
+      >
         {updateMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
       </Button>
     </div>
@@ -453,11 +473,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[95vh] flex flex-col">
+        <DrawerContent className="max-h-[96vh] flex flex-col">
           {heroSection}
           
-          <ScrollArea className="flex-1 h-0">
-            <div className="px-6 pb-24">
+          <ScrollArea className="flex-1 overflow-auto">
+            <div className="px-4 pb-6">
               {scrollableContent}
             </div>
           </ScrollArea>

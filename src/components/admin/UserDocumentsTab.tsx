@@ -11,6 +11,8 @@ import { Upload, Download, Trash2, FileText } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const DOCUMENT_CATEGORIES = [
   { value: 'contrato', label: 'Contrato' },
@@ -27,6 +29,7 @@ interface UserDocumentsTabProps {
 }
 
 export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
+  const isMobile = useIsMobile();
   const { data: documents = [], isLoading, error } = useUserDocuments(userId);
   const uploadMutation = useUploadUserDocument();
   const deleteMutation = useDeleteUserDocument();
@@ -91,22 +94,32 @@ export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
   return (
     <div className="space-y-6">
       {/* Upload Section */}
-      <Card className="p-4">
-        <h3 className="font-semibold mb-4">Subir Nuevo Documento</h3>
+      <Card className={cn("p-4", isMobile && "p-3")}>
+        <h3 className={cn("font-semibold mb-4", isMobile && "text-sm mb-3")}>
+          Subir Nuevo Documento
+        </h3>
         <div className="grid gap-4">
           <div className="space-y-2">
-            <Label htmlFor="file-upload">Archivo</Label>
+            <Label htmlFor="file-upload" className={cn(isMobile && "text-sm")}>
+              Archivo
+            </Label>
             <Input
               id="file-upload"
               type="file"
               onChange={handleFileChange}
+              className={cn(isMobile && "text-base")}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="category">Categoría</Label>
+            <Label htmlFor="category" className={cn(isMobile && "text-sm")}>
+              Categoría
+            </Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger id="category">
+              <SelectTrigger 
+                id="category"
+                className={cn(isMobile && "h-11")}
+              >
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -122,7 +135,7 @@ export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
           <Button
             onClick={handleUpload}
             disabled={!selectedFile || !category || uploadMutation.isPending}
-            className="w-full"
+            className={cn("w-full", isMobile && "h-11")}
           >
             <Upload className="w-4 h-4 mr-2" />
             {uploadMutation.isPending ? 'Subiendo...' : 'Subir Documento'}
@@ -147,41 +160,66 @@ export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
         )}
         
         {documents.map((doc) => (
-          <Card key={doc.id} className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3 flex-1">
-                <FileText className="w-5 h-5 text-muted-foreground mt-0.5" />
+          <Card key={doc.id} className={cn("p-4", isMobile && "p-3")}>
+            <div className={cn(
+              "flex items-start",
+              isMobile ? "flex-col gap-2" : "justify-between"
+            )}>
+              <div className="flex items-start gap-3 flex-1 w-full">
+                <FileText className={cn(
+                  "text-muted-foreground mt-0.5",
+                  isMobile ? "w-4 h-4" : "w-5 h-5"
+                )} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{doc.file_name}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary">
+                  <p className={cn(
+                    "font-medium truncate",
+                    isMobile && "text-sm"
+                  )}>
+                    {doc.file_name}
+                  </p>
+                  <div className={cn(
+                    "flex items-center gap-2 mt-1",
+                    isMobile && "flex-wrap"
+                  )}>
+                    <Badge variant="secondary" className={cn(isMobile && "text-xs")}>
                       {DOCUMENT_CATEGORIES.find(c => c.value === doc.category)?.label || doc.category}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
                       {formatFileSize(doc.file_size)}
                     </span>
-                    <span className="text-xs text-muted-foreground">•</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: es })}
-                    </span>
+                    {!isMobile && (
+                      <>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: es })}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className={cn(
+                "flex items-center gap-2",
+                isMobile && "w-full justify-end mt-2"
+              )}>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size={isMobile ? "default" : "sm"}
                   onClick={() => window.open(doc.file_url, '_blank')}
+                  className={cn(isMobile && "flex-1")}
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4 mr-2" />
+                  {isMobile && <span className="text-sm">Descargar</span>}
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size={isMobile ? "default" : "sm"}
                   onClick={() => setDeleteDialog({ open: true, document: doc })}
+                  className={cn(isMobile && "flex-1")}
                 >
-                  <Trash2 className="w-4 h-4 text-destructive" />
+                  <Trash2 className="w-4 h-4 text-destructive mr-2" />
+                  {isMobile && <span className="text-sm text-destructive">Eliminar</span>}
                 </Button>
               </div>
             </div>
