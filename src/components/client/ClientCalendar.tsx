@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { CalendarPlus, Calendar as CalendarIcon, Clock, Users, X, Download } from "lucide-react";
 import { format, addDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatDateTime, toUTCFromMexico } from "@/lib/datetime";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { cn } from "@/lib/utils";
 
@@ -112,13 +113,14 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
-      const startDate = new Date(formData.desired_start_at);
-      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour default
+      const startUTC = toUTCFromMexico(formData.desired_start_at);
+      const endDate = new Date(startUTC);
+      endDate.setHours(endDate.getHours() + 1); // +1 hour default
 
       const { error } = await supabase.from("calendar_events").insert({
         project_id: projectId,
         title: `Solicitud: ${formData.title}`,
-        start_at: startDate.toISOString(),
+        start_at: startUTC,
         end_at: endDate.toISOString(),
         notes: formData.notes || null,
         created_by: user.id,
@@ -250,11 +252,11 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                   <div className="flex items-center gap-1">
                     <CalendarIcon className="h-4 w-4" />
-                    <span>{format(startDate, "d MMM yyyy", { locale: es })}</span>
+                    <span>{formatDateTime(event.start_at, "d MMM yyyy")}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    <span>{format(startDate, "HH:mm", { locale: es })}</span>
+                    <span>{formatDateTime(event.start_at, "HH:mm")}</span>
                   </div>
                 </div>
 
@@ -361,13 +363,13 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CalendarIcon className="h-5 w-5" />
                   <span className="font-medium">
-                    {format(parseISO(selectedEvent.start_at), "EEEE, d MMMM yyyy", { locale: es })}
+                    {formatDateTime(selectedEvent.start_at, "EEEE, d MMMM yyyy")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground ml-7">
                   <Clock className="h-4 w-4" />
                   <span>
-                    {format(parseISO(selectedEvent.start_at), "HH:mm", { locale: es })} - {format(parseISO(selectedEvent.end_at), "HH:mm", { locale: es })}
+                    {formatDateTime(selectedEvent.start_at, "HH:mm")} - {formatDateTime(selectedEvent.end_at, "HH:mm")}
                   </span>
                 </div>
               </div>

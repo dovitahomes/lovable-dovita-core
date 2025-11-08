@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatDateTime, fromUTCToMexico, toUTCFromMexico, nowInMexico, isSameDayInMexico } from "@/lib/datetime";
 
 interface CalendarEvent {
   id: string;
@@ -70,17 +71,18 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
       setFormData({
         title: event.title,
         notes: event.notes || "",
-        start_at: format(new Date(event.start_at), "yyyy-MM-dd'T'HH:mm"),
-        end_at: format(new Date(event.end_at), "yyyy-MM-dd'T'HH:mm"),
+        start_at: fromUTCToMexico(event.start_at),
+        end_at: fromUTCToMexico(event.end_at),
       });
     } else {
       setSelectedEvent(null);
-      const now = new Date();
+      const now = nowInMexico();
+      const oneHourLater = new Date(now.getTime() + 3600000);
       setFormData({
         title: "",
         notes: "",
         start_at: format(now, "yyyy-MM-dd'T'HH:mm"),
-        end_at: format(new Date(now.getTime() + 3600000), "yyyy-MM-dd'T'HH:mm"),
+        end_at: format(oneHourLater, "yyyy-MM-dd'T'HH:mm"),
       });
     }
     setShowEventDialog(true);
@@ -100,8 +102,8 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
         project_id: projectId,
         title: formData.title,
         notes: formData.notes,
-        start_at: new Date(formData.start_at).toISOString(),
-        end_at: new Date(formData.end_at).toISOString(),
+        start_at: toUTCFromMexico(formData.start_at),
+        end_at: toUTCFromMexico(formData.end_at),
         created_by: user.id,
       };
 
@@ -158,7 +160,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
 
   const getEventsForDay = (day: Date) => {
     return events.filter(event => 
-      isSameDay(new Date(event.start_at), day)
+      isSameDayInMexico(event.start_at, day)
     );
   };
 
@@ -210,7 +212,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
             {days.map(day => {
               const dayEvents = getEventsForDay(day);
               const isCurrentMonth = isSameMonth(day, currentDate);
-              const isToday = isSameDay(day, new Date());
+              const isToday = isSameDayInMexico(new Date().toISOString(), day);
 
               return (
                 <div
@@ -231,7 +233,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
                       >
                         <div className="font-medium truncate">{event.title}</div>
                         <div className="text-muted-foreground">
-                          {format(new Date(event.start_at), 'HH:mm')}
+                          {formatDateTime(event.start_at, 'HH:mm')}
                         </div>
                       </div>
                     ))}

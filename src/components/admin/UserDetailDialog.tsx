@@ -21,8 +21,7 @@ import { User, Calendar, Building, Phone, IdCard, Briefcase, Camera, X } from 'l
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDateOnly, formatDateTime } from '@/lib/datetime';
 import { toast } from 'sonner';
 
 interface UserDetailDialogProps {
@@ -275,12 +274,12 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
         <div className="flex flex-wrap gap-4 justify-center text-sm text-white/90">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            <span>Creado: {format(new Date(user.created_at), 'dd MMM yyyy', { locale: es })}</span>
+            <span>Creado: {formatDateTime(user.created_at, 'dd MMM yyyy')}</span>
           </div>
           {user.fecha_nacimiento && (
             <div className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              <span>Cumpleaños: {format(new Date(user.fecha_nacimiento), 'dd MMM', { locale: es })}</span>
+              <span>Cumpleaños: {formatDateOnly(user.fecha_nacimiento, 'dd MMM')}</span>
             </div>
           )}
         </div>
