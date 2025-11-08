@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedUrl } from "@/lib/storage/storage-helpers";
 
-// Helper to process signed URLs for files
+// Helper to process signed URLs for files (60s expiration for security)
 async function processFileUrl(fileUrl: string | null): Promise<string> {
   if (!fileUrl) return "";
   
@@ -20,17 +20,18 @@ async function processFileUrl(fileUrl: string | null): Promise<string> {
   let path = fileUrl;
   
   // Common bucket names to detect
-  const knownBuckets = ['project_docs', 'design-deliverables', 'cfdi', 'firmas', 'documentos'];
+  const knownBuckets = ['project_docs', 'project_photos', 'design-deliverables', 'cfdi', 'firmas', 'documentos'];
   if (knownBuckets.includes(parts[0])) {
     bucket = parts[0];
     path = parts.slice(1).join('/');
   }
   
   try {
-    const { url } = await getSignedUrl({ bucket: bucket as any, path, expiresInSeconds: 300 });
+    // 60 segundos de expiración para seguridad
+    const { url } = await getSignedUrl({ bucket: bucket as any, path, expiresInSeconds: 60 });
     return url;
   } catch (error) {
-    console.error('Error generating signed URL:', error);
+    console.error('[useRealClientData] Error generating signed URL:', error);
     return fileUrl; // Fallback to original
   }
 }
@@ -165,7 +166,10 @@ export function useRealClientData(clientId: string | null, projectId: string | n
         .eq('project_id', projectId)
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error('[useRealClientData] Error fetching financial summary:', error);
+        throw error;
+      }
       return data;
     },
     enabled: !!projectId,

@@ -9,6 +9,7 @@ import { ArrowLeft, Database, Eye, AlertCircle, ChevronDown } from "lucide-react
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useDataSource } from "@/contexts/client-app/DataSourceContext";
+import { useClientDataMode } from "@/contexts/client-app/ClientDataModeProvider";
 import { useAppMode } from "@/hooks/client-app/useAppMode";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -121,11 +122,16 @@ export default function PreviewBar() {
     });
   };
 
+  const { setUseMock } = useClientDataMode();
+  
   const handleMockToggle = (checked: boolean) => {
     setIsSwitching(true);
     
     const newSource = checked ? 'mock' : 'real';
     setSource(newSource);
+    
+    // Sincronizar con ClientDataModeProvider
+    setUseMock(checked);
     
     // Clear current selections when switching
     localStorage.removeItem("currentProjectId");

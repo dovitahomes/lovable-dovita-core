@@ -3,10 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockPhotos } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
-import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import { useRealClientData } from '@/hooks/client-app/useRealClientData';
+import { useClientPhotos } from '@/hooks/client-app/useClientData';
 import { shouldShowConstructionPhotos, isInDesignPhase } from '@/lib/project-utils';
 import { MapPin, Calendar, Image as ImageIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
@@ -16,30 +14,12 @@ import PhotoViewer from '@/components/client-app/PhotoViewer';
 
 export default function Photos() {
   const { currentProject } = useProject();
-  const { source, forceClientId } = useDataSource();
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
 
-  // Fetch real data if not in mock mode
-  const { data: realData, isLoading: loadingRealData } = useRealClientData(
-    source === 'real' ? forceClientId : null,
-    source === 'real' ? currentProject?.id || null : null
-  );
-
-  // Use mock or real data based on source
-  const useMock = source === 'mock';
-  const projectPhotos = useMock 
-    ? mockPhotos.filter(photo => photo.projectId === currentProject?.id)
-    : (realData.photos || []).map((photo: any) => ({
-        id: photo.id,
-        projectId: photo.project_id,
-        url: photo.url || '',
-        phase: photo.fase || 'General',
-        date: photo.fecha_foto || new Date().toISOString(),
-        description: photo.descripcion || 'Sin descripción',
-        location: { lat: 0, lng: 0 }, // Not available in view
-      }));
+  // Fetch photos using unified hook
+  const { data: projectPhotos = [], isLoading } = useClientPhotos(currentProject?.id || null);
 
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
@@ -71,8 +51,12 @@ export default function Photos() {
   // Determine if in design phase
   const inDesignPhase = isInDesignPhase(currentProject);
   
-  // Get unique phases from project photos
-  const projectPhases = Array.from(new Set(projectPhotos.map(photo => photo.phase)));
+  // Get unique phases from project photos (handle both mock and real data)
+  const projectPhases = Array.from(new Set(
+    projectPhotos.map(photo => 
+      typeof photo === 'object' && photo && 'phase' in photo ? photo.phase : 'Construcción'
+    )
+  ));
 
   // Get unique phases for tabs
   const phases = ['all', ...projectPhases];
@@ -152,7 +136,7 @@ export default function Photos() {
         {/* Galería de Fotos (Grid 2 columnas) */}
         {filteredPhotos.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
-            {filteredPhotos.map((photo, index) => (
+            {filteredPhotos.map((photo: any, index) => (
               <Card 
                 key={photo.id} 
                 className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -162,18 +146,18 @@ export default function Photos() {
                 <div className="relative aspect-square">
                   <img
                     src={photo.url}
-                    alt={photo.description}
+                    alt={photo.description || photo.descripcion || 'Foto'}
                     className="w-full h-full object-cover"
                   />
                   {/* Badge de Fase */}
                   <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm text-white">
-                    {photo.phase}
+                    {photo.phase || 'Construcción'}
                   </Badge>
                   {/* Overlay de Hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
                     <div className="absolute bottom-0 left-0 right-0 p-3">
                       <p className="text-white text-xs font-medium line-clamp-2">
-                        {photo.description}
+                        {photo.description || photo.descripcion || 'Sin descripción'}
                       </p>
                     </div>
                   </div>
@@ -182,7 +166,7 @@ export default function Photos() {
                 <div className="p-3 space-y-2">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {format(new Date(photo.date), "d MMM yyyy", { locale: es })}
+                    {format(new Date(photo.date || photo.fecha_foto || new Date()), "d MMM yyyy", { locale: es })}
                   </p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -209,7 +193,7 @@ export default function Photos() {
         onOpenChange={(open) => {
           if (!open) setSelectedPhotoIndex(null);
         }}
-        photos={projectPhotos}
+        photos={projectPhotos as any}
         currentIndex={selectedPhotoIndex ?? 0}
         onNavigate={setSelectedPhotoIndex}
       />

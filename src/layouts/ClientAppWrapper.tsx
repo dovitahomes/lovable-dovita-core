@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { DataSourceProvider } from '@/contexts/client-app/DataSourceContext';
+import { ClientDataModeProvider } from '@/contexts/client-app/ClientDataModeProvider';
 import { ProjectProvider } from '@/contexts/client-app/ProjectContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useAppMode } from '@/hooks/client-app/useAppMode';
@@ -58,9 +59,11 @@ export default function ClientAppWrapper() {
   return (
     <div className="client-app-container">
       <DataSourceProvider>
-        <NotificationProvider>
-          <ClientAppContent />
-        </NotificationProvider>
+        <ClientDataModeProvider>
+          <NotificationProvider>
+            <ClientAppContent />
+          </NotificationProvider>
+        </ClientDataModeProvider>
       </DataSourceProvider>
     </div>
   );
