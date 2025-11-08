@@ -18,6 +18,7 @@ import {
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientDocuments } from '@/hooks/client-app/useClientData';
+import { ClientEmptyState, ClientLoadingState } from '@/components/client-app/ClientSkeletons';
 import {
   Table,
   TableBody,
@@ -207,18 +208,15 @@ export default function DocumentsDesktop() {
         
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Cargando documentos...</p>
-            </div>
+            <ClientLoadingState message="Cargando documentos..." />
           ) : filteredDocuments.length === 0 ? (
-            <div className="text-center py-12 space-y-2">
-              <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">
-                {searchQuery 
-                  ? 'No se encontraron documentos con esa búsqueda' 
-                  : 'No hay documentos en esta categoría'}
-              </p>
-            </div>
+            <ClientEmptyState
+              icon={FileText}
+              title="No hay documentos"
+              description={searchQuery 
+                ? 'No se encontraron documentos con esa búsqueda' 
+                : 'No hay documentos en esta categoría'}
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -239,7 +237,7 @@ export default function DocumentsDesktop() {
               </TableHeader>
               <TableBody>
                 {filteredDocuments.map((doc) => (
-                  <TableRow key={doc.id}>
+                  <TableRow key={doc.id} className="hover-lift transition-smooth">
                     <TableCell>
                       <Checkbox
                         checked={selectedDocs.has(doc.id)}

@@ -19,6 +19,7 @@ import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientDocuments } from '@/hooks/client-app/useClientData';
 import type { Document } from '@/lib/client-app/client-data';
+import { DocumentsListSkeleton, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 
 type DocumentCategory = 'all' | 'cliente' | 'proyecto' | 'legal' | 'diseno' | 'construccion' | 'contractual' | 'presupuesto';
 
@@ -236,24 +237,23 @@ export default function Documents() {
 
         {/* Document List */}
         {isLoading ? (
-          <Card className="p-6">
-            <p className="text-center text-muted-foreground">Cargando documentos...</p>
-          </Card>
+          <DocumentsListSkeleton count={5} />
         ) : filteredDocuments.length === 0 ? (
-          <Card className="p-6">
-            <div className="text-center space-y-2">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">
-                {searchQuery 
-                  ? 'No se encontraron documentos con esa búsqueda' 
-                  : 'No hay documentos en esta categoría'}
-              </p>
-            </div>
-          </Card>
+          <ClientEmptyState
+            icon={FileText}
+            title="No hay documentos"
+            description={searchQuery 
+              ? 'No se encontraron documentos con esa búsqueda' 
+              : 'No hay documentos en esta categoría'}
+          />
         ) : (
-          <div className="space-y-2">
-            {filteredDocuments.map((doc) => (
-              <Card key={doc.id} className="hover:shadow-lg transition-shadow">
+          <div className="space-y-2 animate-fade-in">
+            {filteredDocuments.map((doc, index) => (
+              <Card 
+                key={doc.id} 
+                className="hover-lift transition-smooth"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     <Checkbox
@@ -279,12 +279,13 @@ export default function Documents() {
                     </div>
                     
                     <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => handleViewDocument(doc)}>
+                      <Button size="icon" variant="ghost" className="hover-scale" onClick={() => handleViewDocument(doc)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button 
                         size="icon" 
                         variant="ghost"
+                        className="hover-scale"
                         onClick={async () => {
                           try {
                             const response = await fetch(doc.url);

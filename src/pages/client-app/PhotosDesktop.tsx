@@ -13,6 +13,7 @@ import { useAuth } from '@/app/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { PhotosGridSkeletonDesktop, ClientLoadingState } from '@/components/client-app/ClientSkeletons';
 
 
 export default function PhotosDesktop() {
@@ -69,11 +70,7 @@ export default function PhotosDesktop() {
   }
   
   if (isLoading) {
-    return (
-      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2 flex items-center justify-center">
-        <p>Cargando fotos...</p>
-      </div>
-    );
+    return <PhotosGridSkeletonDesktop count={12} />;
   }
 
   const handleDownloadAll = async () => {
@@ -118,11 +115,12 @@ export default function PhotosDesktop() {
       </div>
 
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 animate-fade-in">
         {photos.map((photo: any, index) => (
           <Card 
             key={photo.id}
-            className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all"
+            className="group cursor-pointer overflow-hidden hover-lift transition-smooth"
+            style={{ animationDelay: `${index * 0.03}s` }}
             onClick={() => setSelectedPhotoIndex(index)}
           >
             <div className="relative aspect-square">

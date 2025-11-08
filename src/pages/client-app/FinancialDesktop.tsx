@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ClientLoadingState, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 
 type FilterStatus = 'all' | 'paid' | 'pending' | 'future';
 
@@ -30,14 +31,7 @@ export default function FinancialDesktop() {
   const { data: financialSummary } = useClientFinancialSummary(project?.id || null);
   
   if (!project) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="text-lg font-medium text-muted-foreground">Cargando datos financieros...</p>
-        </div>
-      </div>
-    );
+    return <ClientLoadingState message="Cargando datos financieros..." />;
   }
   
   const inDesignPhase = isInDesignPhase(project);
@@ -104,8 +98,8 @@ export default function FinancialDesktop() {
         <p className="text-muted-foreground">Gestión de pagos y presupuesto</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 animate-fade-in">
+        <Card className="hover-lift transition-smooth">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Presupuesto Total</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -116,7 +110,7 @@ export default function FinancialDesktop() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-lift transition-smooth" style={{ animationDelay: '0.05s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pagado</CardTitle>
             <TrendingDown className="h-4 w-4 text-green-600" />
@@ -127,7 +121,7 @@ export default function FinancialDesktop() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-lift transition-smooth" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Por Pagar</CardTitle>
             <TrendingUp className="h-4 w-4 text-orange-600" />
@@ -138,7 +132,7 @@ export default function FinancialDesktop() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-lift transition-smooth" style={{ animationDelay: '0.15s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Próximo Pago</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -207,15 +201,13 @@ export default function FinancialDesktop() {
         </CardHeader>
         <CardContent>
           {loadingMinistrations ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Cargando pagos...</p>
-            </div>
+            <ClientLoadingState message="Cargando pagos..." />
           ) : filteredMinistrations.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                No hay pagos {statusFilter !== 'all' ? `con estado "${getStatusLabel(statusFilter)}"` : 'disponibles'}
-              </p>
-            </div>
+            <ClientEmptyState
+              icon={DollarSign}
+              title="No hay pagos"
+              description={`No hay pagos ${statusFilter !== 'all' ? `con estado "${getStatusLabel(statusFilter)}"` : 'disponibles'}`}
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -228,7 +220,7 @@ export default function FinancialDesktop() {
               </TableHeader>
               <TableBody>
                 {filteredMinistrations.map((payment) => (
-                  <TableRow key={payment.id}>
+                  <TableRow key={payment.id} className="hover-lift transition-smooth">
                     <TableCell className="font-medium">
                       {format(new Date(payment.date), "d MMM yyyy", { locale: es })}
                     </TableCell>

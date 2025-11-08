@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { Calendar, MapPin, Video, Clock, User, FileText, MessageCircle, Image as
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { ClientLoadingState } from '@/components/client-app/ClientSkeletons';
 
 export default function Dashboard() {
   const { currentProject } = useProject();
@@ -25,17 +26,7 @@ export default function Dashboard() {
   
   // Early return if no project
   if (!project) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center space-y-3">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="text-lg font-medium text-muted-foreground">Cargando proyecto...</p>
-          <p className="text-sm text-muted-foreground">
-            Si no hay datos, activa Mock Data en la barra superior.
-          </p>
-        </div>
-      </div>
-    );
+    return <ClientLoadingState message="Cargando proyecto..." />;
   }
   
   // Get current hero image (prioriza diseños recientes > renders > heroImage)
@@ -110,9 +101,9 @@ export default function Dashboard() {
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-[130px]">
         {/* Welcome Card with Hero Image */}
-        <Card className="border-0 overflow-hidden relative min-h-[200px]">
+        <Card className="border-0 overflow-hidden relative min-h-[200px] animate-fade-in hover-lift">
           {/* Background Image */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
               backgroundImage: `url('${heroImage}')`,
@@ -164,7 +155,7 @@ export default function Dashboard() {
 
         {/* Current Phase Card */}
         <Card 
-          className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+          className="cursor-pointer hover-scale press-feedback animate-slide-in-up"
           onClick={() => navigate('/client/schedule')}
         >
           <CardHeader className="pb-3">
@@ -188,7 +179,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3">
           {/* Tarjeta Pagado */}
           <Card 
-            className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+            className="cursor-pointer hover-scale press-feedback animate-slide-in-right"
             onClick={() => navigate('/client/financial')}
           >
             <CardHeader className="pb-2">
@@ -211,7 +202,8 @@ export default function Dashboard() {
           
           {/* Tarjeta Pendiente */}
           <Card 
-            className="cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+            className="cursor-pointer hover-scale press-feedback animate-slide-in-right"
+            style={{ animationDelay: '0.1s' }}
             onClick={() => navigate('/client/financial')}
           >
             <CardHeader className="pb-2">
@@ -235,7 +227,7 @@ export default function Dashboard() {
 
         {/* Next Appointment */}
         {nextAppointment && (
-          <Card className="border-l-4 border-l-primary">
+          <Card className="border-l-4 border-l-primary animate-fade-in hover-lift">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
@@ -305,6 +297,7 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
+                className="hover-scale press-feedback"
                 onClick={() => navigate('/client/photos')}
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
@@ -361,7 +354,7 @@ export default function Dashboard() {
                 {recentImages.map((item, idx) => (
                   <div 
                     key={idx} 
-                    className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    className="aspect-square rounded-lg overflow-hidden cursor-pointer hover-scale press-feedback transition-smooth"
                     onClick={handleImageClick}
                   >
                     <img

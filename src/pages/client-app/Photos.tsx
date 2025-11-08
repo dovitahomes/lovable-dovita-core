@@ -14,6 +14,7 @@ import PhotoViewer from '@/components/client-app/PhotoViewer';
 import { CameraCapture } from '@/components/construction/CameraCapture';
 import { useAuth } from '@/app/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { PhotosGridSkeleton, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 
 
 export default function Photos() {
@@ -117,11 +118,12 @@ export default function Photos() {
       <div className="px-4 space-y-4 pb-8">
         {/* Galería de Fotos (Grid 2 columnas) */}
         {filteredPhotos.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 animate-fade-in">
             {filteredPhotos.map((photo, index) => (
               <Card 
                 key={photo.id} 
-                className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="overflow-hidden cursor-pointer hover-scale press-feedback transition-smooth"
+                style={{ animationDelay: `${index * 0.05}s` }}
                 onClick={() => handlePhotoClick(index)}
               >
                 {/* Contenedor de Imagen */}
@@ -159,13 +161,11 @@ export default function Photos() {
             ))}
           </div>
         ) : (
-          /* Estado Vacío */
-          <div className="text-center py-12">
-            <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">
-              No hay fotos disponibles para esta fase
-            </p>
-          </div>
+          <ClientEmptyState
+            icon={ImageIcon}
+            title="No hay fotos"
+            description="No hay fotos disponibles para esta fase"
+          />
         )}
       </div>
 

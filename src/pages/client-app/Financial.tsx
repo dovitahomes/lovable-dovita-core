@@ -10,6 +10,7 @@ import { CheckCircle2, Clock, Calendar, AlertCircle, DollarSign, TrendingUp, Fil
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { isInDesignPhase } from '@/lib/project-utils';
+import { PaymentCardSkeleton, ClientLoadingState, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 
 type FilterStatus = 'all' | 'paid' | 'pending' | 'future';
 
@@ -23,14 +24,7 @@ export default function Financial() {
   const { data: financialSummary } = useClientFinancialSummary(project?.id || null);
   
   if (!project) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center space-y-3">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="text-lg font-medium text-muted-foreground">Cargando datos financieros...</p>
-        </div>
-      </div>
-    );
+    return <ClientLoadingState message="Cargando datos financieros..." />;
   }
 
   const inDesignPhase = isInDesignPhase(project);
@@ -127,7 +121,7 @@ export default function Financial() {
 
       <div className="px-4 space-y-4">
         {/* Financial Summary Card */}
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg animate-fade-in">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -160,7 +154,7 @@ export default function Financial() {
 
         {/* Next Payment Destacado */}
         {nextPayment && (
-          <Card className="border-l-4 border-l-amber-500 bg-amber-50/50">
+          <Card className="border-l-4 border-l-amber-500 bg-amber-50/50 animate-slide-in-up hover-lift">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-amber-600" />
@@ -214,26 +208,29 @@ export default function Financial() {
           <h2 className="text-lg font-semibold">Historial de Pagos</h2>
           
           {loadingMinistrations ? (
-            <Card className="p-6">
-              <p className="text-center text-muted-foreground">Cargando pagos...</p>
-            </Card>
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <PaymentCardSkeleton key={i} />
+              ))}
+            </div>
           ) : filteredMinistrations.length === 0 ? (
-            <Card className="p-6">
-              <p className="text-center text-muted-foreground">
-                No hay pagos {statusFilter !== 'all' ? `con estado "${getStatusLabel(statusFilter)}"` : 'disponibles'}
-              </p>
-            </Card>
+            <ClientEmptyState
+              icon={DollarSign}
+              title="No hay pagos"
+              description={`No hay pagos ${statusFilter !== 'all' ? `con estado "${getStatusLabel(statusFilter)}"` : 'disponibles'}`}
+            />
           ) : (
-            filteredMinistrations.map((ministracion) => (
+            filteredMinistrations.map((ministracion, index) => (
               <Card 
                 key={ministracion.id} 
-                className={`border-l-4 ${
+                className={`border-l-4 animate-slide-in-right ${
                   ministracion.status === 'paid' 
                     ? 'border-l-green-500' 
                     : ministracion.status === 'pending'
                     ? 'border-l-amber-500'
                     : 'border-l-gray-300'
-                }`}
+                } hover-lift`}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
