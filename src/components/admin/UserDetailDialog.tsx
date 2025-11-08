@@ -409,7 +409,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
         </Card>
       </TabsContent>
       
-      <TabsContent value="documentos" className="animate-in fade-in-50 duration-300">
+      <TabsContent value="documentos" className="animate-in fade-in-50 duration-300 pb-6">
         <UserDocumentsTab userId={userId} />
       </TabsContent>
     </Tabs>
@@ -433,7 +433,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
         <DrawerContent className="max-h-[95vh] flex flex-col">
           {heroSection}
           
-          <ScrollArea className="flex-1 overflow-hidden">
+          <ScrollArea className="flex-1 h-0">
             <div className="px-6 pb-24">
               {scrollableContent}
             </div>
@@ -447,10 +447,10 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 flex flex-col overflow-hidden">
+      <DialogContent className="max-w-4xl h-[90vh] p-0 flex flex-col overflow-hidden">
         {heroSection}
         
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 h-0">
           <div className="px-6 pb-6">
             {scrollableContent}
           </div>
