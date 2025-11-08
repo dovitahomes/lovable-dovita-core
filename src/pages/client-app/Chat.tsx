@@ -19,12 +19,14 @@ export default function Chat() {
     mockChatMessages.filter(msg => msg.projectId === currentProject?.id)
   );
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
     const saved = localStorage.getItem("clientAvatar");
     return saved ? JSON.parse(saved) : null;
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
 
   const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
     setClientAvatar(avatar);
@@ -37,23 +39,47 @@ export default function Chat() {
     setMessages(mockChatMessages.filter(msg => msg.projectId === currentProject?.id));
   }, [currentProject?.id]);
 
-  // Auto scroll to bottom on new messages
+  // Smart auto-scroll: only scroll if user is near bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (shouldAutoScrollRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
-  const handleSendMessage = (content: string) => {
+  // Track if user is scrolled to bottom
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (!scrollArea) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollArea;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      shouldAutoScrollRef.current = isNearBottom;
+    };
+
+    scrollArea.addEventListener('scroll', handleScroll);
+    return () => scrollArea.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleSendMessage = (content: string, attachments?: File[]) => {
     const newMessage = {
       id: messages.length + 1,
       projectId: currentProject?.id || '',
       content,
+      attachments: attachments?.map(f => ({ name: f.name, size: f.size, type: f.type })),
       timestamp: new Date().toISOString(),
       isClient: true,
       status: 'sent' as const
     } as any;
 
     setMessages([...messages, newMessage]);
+    shouldAutoScrollRef.current = true; // Force scroll on send
     
+    // Simulate typing indicator
+    setTimeout(() => {
+      setIsTyping(true);
+    }, 500);
+
     // Simulate message delivery
     setTimeout(() => {
       setMessages(prev => 
@@ -65,16 +91,31 @@ export default function Chat() {
       );
     }, 1000);
 
-    // Simulate read receipt
+    // Simulate team response with typing
     setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, status: 'read' as const }
-            : msg
-        )
-      );
-    }, 2000);
+      setIsTyping(false);
+      const teamResponse = {
+        id: messages.length + 2,
+        projectId: currentProject?.id || '',
+        content: '¡Mensaje recibido! Nos pondremos en contacto contigo pronto.',
+        timestamp: new Date().toISOString(),
+        isClient: false,
+        sender: currentProject?.team[0]
+      } as any;
+      
+      setMessages(prev => [...prev, teamResponse]);
+      
+      // Mark original message as read
+      setTimeout(() => {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === newMessage.id 
+              ? { ...msg, status: 'read' as const }
+              : msg
+          )
+        );
+      }, 1000);
+    }, 2500);
 
     toast.success('Mensaje enviado');
   };
@@ -157,6 +198,24 @@ export default function Chat() {
               ))}
             </div>
           ))}
+
+          {/* Typing Indicator */}
+          {isTyping && (
+            <div className="flex gap-2 mb-4">
+              <img
+                src={currentProject?.team[0]?.avatar}
+                alt={currentProject?.team[0]?.name}
+                className="h-8 w-8 rounded-full flex-shrink-0 mt-1"
+              />
+              <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div ref={messagesEndRef} />
         </div>
