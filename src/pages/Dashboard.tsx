@@ -6,6 +6,7 @@ import { RenderOfTheMonth } from "@/components/dashboard/RenderOfTheMonth";
 import { CorporatePromotions } from "@/components/dashboard/CorporatePromotions";
 import { EmployeeCalendar } from "@/components/dashboard/EmployeeCalendar";
 import { CompanyManuals } from "@/components/dashboard/CompanyManuals";
+import { MyProjectsWidget } from "@/components/dashboard/MyProjectsWidget";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
@@ -53,6 +54,9 @@ const Dashboard = () => {
 
       {/* Manuales de Operación */}
       <CompanyManuals />
+
+      {/* Mis Proyectos */}
+      <MyProjectsWidget />
     </div>
   );
 };
