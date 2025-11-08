@@ -5,6 +5,7 @@ import { BirthdayWidget } from "@/components/BirthdayWidget";
 import { RenderOfTheMonth } from "@/components/dashboard/RenderOfTheMonth";
 import { CorporatePromotions } from "@/components/dashboard/CorporatePromotions";
 import { EmployeeCalendar } from "@/components/dashboard/EmployeeCalendar";
+import { CompanyManuals } from "@/components/dashboard/CompanyManuals";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
@@ -50,21 +51,8 @@ const Dashboard = () => {
         <EmployeeCalendar />
       </div>
 
-      {/* Sección inferior - se completará en fases siguientes */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
-            <CardHeader>
-              <CardTitle>Acerca de Dovita</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                Sistema integral de gestión empresarial diseñado para optimizar tus procesos de construcción y diseño.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      {/* Manuales de Operación */}
+      <CompanyManuals />
     </div>
   );
 };
