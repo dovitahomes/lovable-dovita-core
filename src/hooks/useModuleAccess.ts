@@ -30,22 +30,31 @@ export function useModuleAccess() {
       console.log('[useModuleAccess] 🔍 Loading permissions for user:', user.id);
       
       try {
-        // LOGGING: Verificar sesión JWT antes de consultar
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // PASO 1: Verificar y refrescar sesión si es necesario
+        let { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error('[useModuleAccess] ❌ Session error:', sessionError.message);
         }
         
         if (!session) {
-          console.error('[useModuleAccess] ❌ No valid session - JWT missing');
-          setPerms([]);
-          setLoading(false);
-          return;
+          console.warn('[useModuleAccess] ⚠️ No session, attempting refresh...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError || !refreshData.session) {
+            console.error('[useModuleAccess] ❌ Refresh failed, cannot load permissions');
+            setPerms([]);
+            setLoading(false);
+            return;
+          }
+          
+          session = refreshData.session;
+          console.log('[useModuleAccess] ✓ Session refreshed successfully');
         }
         
         console.log('[useModuleAccess] ✓ Valid session found, user_id:', session.user.id);
         
+        // PASO 2: Consultar permisos con sesión válida
         const { data, error } = await supabase
           .from('user_permissions')
           .select('module_name, can_view, can_create, can_edit, can_delete')
@@ -53,13 +62,14 @@ export function useModuleAccess() {
 
         if (!active) return;
         
-        // LOGGING: Detallar resultado de la consulta
-        console.log('[useModuleAccess] Query result:', {
+        // PASO 3: Logging detallado del resultado
+        console.log('[useModuleAccess] 📊 Query result:', {
           user_id: user.id,
           data_length: data?.length || 0,
           error_message: error?.message,
           error_code: error?.code,
-          raw_data_sample: data?.slice(0, 3)
+          has_clientes: data?.some(p => p.module_name === 'clientes'),
+          sample: data?.filter(p => p.module_name === 'clientes')
         });
         
         if (error) {
@@ -77,7 +87,7 @@ export function useModuleAccess() {
             can_edit: !!d.can_edit,
             can_delete: !!d.can_delete,
           }));
-          console.log('[useModuleAccess] 📋 Permissions:', mappedPerms);
+          console.log('[useModuleAccess] 📋 Permissions mapped successfully');
           setPerms(mappedPerms);
         }
         

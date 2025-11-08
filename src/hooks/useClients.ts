@@ -7,6 +7,19 @@ export function useClientsList(search: string = "") {
   return useQuery({
     queryKey: ['clients', search],
     queryFn: async () => {
+      // LOGGING: Verificar sesión antes de consultar
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('[useClientsList] 🔍 Session check:', {
+        has_session: !!session,
+        user_id: session?.user?.id,
+        error: sessionError?.message
+      });
+      
+      if (!session) {
+        console.error('[useClientsList] ❌ No session available');
+        throw new Error('No hay sesión activa');
+      }
+      
       let query = supabase
         .from('clients')
         .select('*')
@@ -16,8 +29,22 @@ export function useClientsList(search: string = "") {
         query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
       }
       
+      console.log('[useClientsList] 📡 Executing query to clients table...');
       const { data, error } = await query;
-      if (error) throw error;
+      
+      console.log('[useClientsList] 📊 Query result:', {
+        success: !error,
+        count: data?.length || 0,
+        error_message: error?.message,
+        error_code: error?.code,
+        error_details: error?.details
+      });
+      
+      if (error) {
+        console.error('[useClientsList] ❌ Query failed:', error);
+        throw error;
+      }
+      
       return data;
     },
     ...CACHE_CONFIG.active,
