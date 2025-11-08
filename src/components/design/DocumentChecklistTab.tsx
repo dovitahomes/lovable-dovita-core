@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { useRequiredDocuments, useMarkDocumentUploaded, useUnmarkDocumentUploaded } from "@/hooks/useRequiredDocuments";
+import { useRequiredDocuments, useUnmarkDocumentUploaded } from "@/hooks/useRequiredDocuments";
+import { useChecklistDocumentUpload } from "@/hooks/useChecklistDocumentUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FileText, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileText, CheckCircle2, Circle, AlertCircle, Upload } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DocumentUploadDialog } from "./DocumentUploadDialog";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -15,8 +18,11 @@ interface DocumentChecklistTabProps {
 
 export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
   const { data: documents, isLoading } = useRequiredDocuments(projectId);
-  const markUploaded = useMarkDocumentUploaded();
   const unmarkUploaded = useUnmarkDocumentUploaded();
+  const uploadMutation = useChecklistDocumentUpload();
+  
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<{ id: string; tipo: string } | null>(null);
 
   const faseLabels = {
     arquitectonico: "Fase Arquitectónica",
@@ -46,6 +52,31 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
 
   // Calculate overall progress
   const overallProgress = documents ? calculateProgress(documents) : 0;
+
+  const handleOpenUpload = (docId: string, docTipo: string) => {
+    setSelectedDoc({ id: docId, tipo: docTipo });
+    setUploadDialogOpen(true);
+  };
+
+  const handleUpload = (file: File, etiqueta: string, visibilidad: 'interno' | 'cliente') => {
+    if (!selectedDoc) return;
+    
+    uploadMutation.mutate(
+      {
+        projectId,
+        requiredDocId: selectedDoc.id,
+        file,
+        etiqueta,
+        visibilidad,
+      },
+      {
+        onSuccess: () => {
+          setUploadDialogOpen(false);
+          setSelectedDoc(null);
+        },
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -118,18 +149,11 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
                       <Checkbox
                         checked={doc.subido}
                         onCheckedChange={(checked) => {
-                          if (checked) {
-                            // In real scenario, this would trigger document upload
-                            // For now, just mark as uploaded
-                            markUploaded.mutate({
-                              id: doc.id,
-                              document_id: "temp-doc-id", // Replace with actual document_id
-                            });
-                          } else {
+                          if (!checked) {
                             unmarkUploaded.mutate(doc.id);
                           }
                         }}
-                        disabled={markUploaded.isPending || unmarkUploaded.isPending}
+                        disabled={unmarkUploaded.isPending}
                       />
                       
                       <div className="flex items-center gap-2">
@@ -161,6 +185,17 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
                         )}
                       </div>
                     </div>
+
+                    {!doc.subido && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenUpload(doc.id, doc.documento_tipo)}
+                      >
+                        <Upload className="h-4 w-4 mr-1" />
+                        Subir
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -179,6 +214,14 @@ export function DocumentChecklistTab({ projectId }: DocumentChecklistTabProps) {
           </CardContent>
         </Card>
       )}
+
+      <DocumentUploadDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onUpload={handleUpload}
+        isPending={uploadMutation.isPending}
+        documentType={selectedDoc?.tipo}
+      />
     </div>
   );
 }

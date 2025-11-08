@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useUnifiedProjectDocuments } from "@/hooks/useUnifiedProjectDocuments";
 import { useDocumentsUpload } from "@/hooks/useDocumentsUpload";
+import { useMarkDocumentUploaded } from "@/hooks/useRequiredDocuments";
 import { deleteFromBucket } from "@/lib/storage-helpers";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Upload, Download, Trash2, FileText, Filter } from "lucide-react";
+import { ChecklistAssociationDialog } from "@/components/design/ChecklistAssociationDialog";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -23,8 +25,11 @@ export function ProjectDocumentsTab({ projectId }: ProjectDocumentsTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [visibilidad, setVisibilidad] = useState<"interno" | "cliente">("interno");
   const [etiqueta, setEtiqueta] = useState("");
+  const [showAssociationDialog, setShowAssociationDialog] = useState(false);
+  const [lastUploadedDocId, setLastUploadedDocId] = useState<string | null>(null);
   
   const { data: documents = [], isLoading } = useUnifiedProjectDocuments(projectId);
+  const markUploaded = useMarkDocumentUploaded();
   
   // Filter by category in the frontend
   const filteredDocuments = selectedCategory === "all" 
@@ -47,10 +52,41 @@ export function ProjectDocumentsTab({ projectId }: ProjectDocumentsTabProps) {
       visibilidad,
       etiqueta,
     }, {
-      onSuccess: () => {
+      onSuccess: async () => {
         setEtiqueta("");
+        
+        // Get the newly uploaded document ID
+        const { data: newDoc } = await supabase
+          .from("documents")
+          .select("id")
+          .eq("project_id", projectId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (newDoc) {
+          setLastUploadedDocId(newDoc.id);
+          setShowAssociationDialog(true);
+        }
       }
     });
+  };
+
+  const handleAssociate = (requiredDocId: string) => {
+    if (!lastUploadedDocId) return;
+    
+    markUploaded.mutate(
+      {
+        id: requiredDocId,
+        document_id: lastUploadedDocId,
+      },
+      {
+        onSuccess: () => {
+          setShowAssociationDialog(false);
+          setLastUploadedDocId(null);
+        },
+      }
+    );
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -255,6 +291,15 @@ export function ProjectDocumentsTab({ projectId }: ProjectDocumentsTabProps) {
           )}
         </CardContent>
       </Card>
+
+      <ChecklistAssociationDialog
+        open={showAssociationDialog}
+        onOpenChange={setShowAssociationDialog}
+        projectId={projectId}
+        documentId={lastUploadedDocId || ""}
+        onAssociate={handleAssociate}
+        isPending={markUploaded.isPending}
+      />
     </div>
   );
 }
