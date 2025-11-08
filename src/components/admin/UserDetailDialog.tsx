@@ -19,7 +19,7 @@ import { UserRoleBadges } from './UserRoleBadges';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { User, Calendar, Building, Phone, IdCard, Briefcase, Camera, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDateOnly, formatDateTime } from '@/lib/datetime';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ interface UserDetailDialogProps {
 }
 
 export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialogProps) {
+  const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const { data: user, isLoading } = useUserById(userId);
   const updateMutation = useUpdateUserProfile();
@@ -39,6 +40,8 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
   const [isEditMode, setIsEditMode] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [editingRoles, setEditingRoles] = useState(false);
+  const [tempRoles, setTempRoles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Fetch sucursales for dropdown
@@ -123,7 +126,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleUploadAvatar = async () => {
     if (!avatarFile || !userId) return;
     
@@ -137,6 +140,36 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
     setAvatarPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRolesSave = async () => {
+    if (!userId) return;
+    
+    try {
+      const { error } = await supabase.rpc('admin_set_user_roles', {
+        target_user_id: userId,
+        roles: tempRoles,
+      });
+
+      if (error) throw error;
+
+      // Invalidar queries para refrescar datos
+      await queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      await queryClient.invalidateQueries({ queryKey: ['users-management'] });
+      
+      // Si es el usuario actual, recargar la sesión completa
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser?.id === userId) {
+        // Forzar recarga de permisos y navegación
+        window.location.reload();
+      }
+      
+      toast.success('Roles actualizados exitosamente');
+      setEditingRoles(false);
+    } catch (error: any) {
+      console.error('Error updating roles:', error);
+      toast.error('Error al actualizar roles: ' + error.message);
     }
   };
   

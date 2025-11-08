@@ -68,9 +68,12 @@ export const BACKOFFICE_ROUTES = {
   
   // CRM
   LEADS: '/leads',
+  ACCOUNTS: '/crm/accounts',
+  CONTACTS: '/crm/contacts',
+  OPPORTUNITIES: '/crm/opportunities',
   CLIENTES: '/clientes',
   CLIENTE_DETALLE: '/clientes/:id',
-  
+
   // Proyectos
   PROYECTOS: '/proyectos',
   PROYECTO_DETALLE: '/proyectos/:id',
@@ -161,9 +164,12 @@ export const LEGACY_ROUTES = {
 // HELPERS para generar rutas dinámicas
 // ============================================
 export const generateRoute = {
-  // Clientes
+  // Clientes y CRM
   clienteDetalle: (id: string) => `/clientes/${id}`,
-  
+  accountDetail: (id: string) => `/crm/accounts/${id}`,
+  contactDetail: (id: string) => `/crm/contacts/${id}`,
+  opportunityDetail: (id: string) => `/crm/opportunities/${id}`,
+
   // Proyectos
   proyectoDetalle: (id: string) => `/proyectos/${id}`,
   proyectoEquipo: (id: string) => `/proyectos/${id}/equipo`,

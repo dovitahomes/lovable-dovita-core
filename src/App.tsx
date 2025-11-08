@@ -40,6 +40,9 @@ const ProyectoEquipo = lazy(() => import("./pages/ProyectoEquipo"));
 const ProyectoChat = lazy(() => import("./pages/ProyectoChat"));
 const ProyectoCalendario = lazy(() => import("./pages/ProyectoCalendario"));
 const Leads = lazy(() => import("./pages/Leads"));
+const Accounts = lazy(() => import("./pages/crm/Accounts"));
+const Contacts = lazy(() => import("./pages/crm/Contacts"));
+const Opportunities = lazy(() => import("./pages/crm/Opportunities"));
 const Diseno = lazy(() => import("./pages/Diseno"));
 const Presupuestos = lazy(() => import("./pages/Presupuestos"));
 const PresupuestoParametrico = lazy(() => import("./pages/PresupuestoParametrico"));
@@ -163,6 +166,21 @@ const InternalLayout = () => {
                 {/* CRM - LEADS Y CLIENTES                      */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.LEADS} element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.ACCOUNTS} element={
+                  <ProtectedRoute moduleName="crm">
+                    <Suspense fallback={<TableSkeleton />}><Accounts /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.CONTACTS} element={
+                  <ProtectedRoute moduleName="crm">
+                    <Suspense fallback={<TableSkeleton />}><Contacts /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.OPPORTUNITIES} element={
+                  <ProtectedRoute moduleName="crm">
+                    <Suspense fallback={<TableSkeleton />}><Opportunities /></Suspense>
+                  </ProtectedRoute>
+                } />
                 <Route path={BACKOFFICE_ROUTES.CLIENTES} element={
                   <ProtectedRoute moduleName="clientes">
                     <Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>

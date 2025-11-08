@@ -2,6 +2,8 @@ import {
   LayoutDashboard,
   TrendingUp,
   Briefcase,
+  UserCircle,
+  Target,
   FolderKanban,
   PenTool,
   Calculator,
@@ -60,13 +62,31 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       { 
         title: "Leads", 
         url: BACKOFFICE_ROUTES.LEADS, 
-        icon: TrendingUp, 
+        icon: Target, 
         moduleName: "leads" 
+      },
+      { 
+        title: "Cuentas", 
+        url: BACKOFFICE_ROUTES.ACCOUNTS, 
+        icon: Building2, 
+        moduleName: "crm" 
+      },
+      { 
+        title: "Contactos", 
+        url: BACKOFFICE_ROUTES.CONTACTS, 
+        icon: UserCircle, 
+        moduleName: "crm" 
+      },
+      { 
+        title: "Oportunidades", 
+        url: BACKOFFICE_ROUTES.OPPORTUNITIES, 
+        icon: Briefcase, 
+        moduleName: "crm" 
       },
       { 
         title: "Clientes", 
         url: BACKOFFICE_ROUTES.CLIENTES, 
-        icon: Briefcase, 
+        icon: Users, 
         moduleName: "clientes" 
       },
     ],
