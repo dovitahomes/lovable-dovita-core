@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { mockPhotos, mockMinistraciones } from "@/lib/client-app/client-data";
 import { useProject } from "@/contexts/client-app/ProjectContext";
 import { useDataSource } from "@/contexts/client-app/DataSourceContext";
-import { getProjectHeroImage, calculateProjectProgress, getCurrentPhase, isInDesignPhase } from "@/lib/project-utils";
+import { isInDesignPhase } from "@/lib/project-utils";
 import { Calendar, DollarSign, Image, Clock, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -33,10 +33,10 @@ export default function DashboardDesktop() {
   }
 
   // Calcular progreso dinámicamente basado en fases
-  const projectProgress = calculateProjectProgress(project);
+  const projectProgress = project.progress || 0;
   
   // Obtener la fase actual
-  const currentPhase = getCurrentPhase(project);
+  const currentPhaseName = project.currentPhase || 'Diseño';
 
   // Calcular pagos según la fase del proyecto
   const inDesignPhase = isInDesignPhase(project);
@@ -93,7 +93,7 @@ export default function DashboardDesktop() {
         <Card className="col-span-1 lg:col-span-2 xl:col-span-3 relative overflow-hidden h-[220px]">
           <div 
             className="absolute inset-0 bg-cover bg-center" 
-            style={{ backgroundImage: `url(${getProjectHeroImage(project)})` }}
+            style={{ backgroundImage: `url(${project.heroImage || project.renders?.[0]?.url || ''})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-primary/80" />
           </div>
@@ -138,10 +138,10 @@ export default function DashboardDesktop() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold mb-2">{currentPhase?.progress || 0}%</div>
-            <Progress value={currentPhase?.progress || 0} variant="yellow" className="mb-2" />
+            <div className="text-2xl font-bold mb-2">{projectProgress}%</div>
+            <Progress value={projectProgress} variant="yellow" className="mb-2" />
             <p className="text-xs text-muted-foreground">
-              {currentPhase?.name || project.currentPhase}
+              {currentPhaseName}
             </p>
           </CardContent>
         </Card>

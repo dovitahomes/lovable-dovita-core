@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { mockAppointments } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientPhotos, useClientMinistrations } from '@/hooks/client-app/useClientData';
-import { calculateProjectProgress, getCurrentPhase, isInDesignPhase } from '@/lib/project-utils';
+import { isInDesignPhase } from '@/lib/project-utils';
 import { getProjectHeroImage } from '@/lib/client-app/dataAdapters';
 import { Calendar, MapPin, Video, Clock, User, FileText, MessageCircle, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
@@ -65,10 +65,10 @@ export default function Dashboard() {
   };
 
   // Calcular progreso dinámicamente basado en fases
-  const projectProgress = calculateProjectProgress(project);
+  const projectProgress = project.progress || 0;
   
   // Obtener la fase actual
-  const currentPhase = getCurrentPhase(project);
+  const currentPhaseName = project.currentPhase || 'Diseño';
 
   // Calcular pagos según la fase del proyecto
   const inDesignPhase = isInDesignPhase(project);
@@ -175,7 +175,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-3xl font-bold text-primary">{projectProgress}%</p>
-                <p className="text-sm text-muted-foreground">{currentPhase.name}</p>
+                <p className="text-sm text-muted-foreground">{currentPhaseName}</p>
               </div>
               <Button variant="outline" size="sm">
                 Ver Detalles

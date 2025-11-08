@@ -1,25 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProject } from '@/contexts/client-app/ProjectContext';
-import { useClientPhotos } from '@/hooks/client-app/useClientData';
+import { useProjectPhotos } from '@/hooks/useProjectPhotos';
 import { shouldShowConstructionPhotos, isInDesignPhase } from '@/lib/project-utils';
-import { MapPin, Calendar, Image as ImageIcon, Filter } from 'lucide-react';
+import { MapPin, Calendar, Image as ImageIcon, Filter, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import PhotoViewer from '@/components/client-app/PhotoViewer';
+import { CameraCapture } from '@/components/construction/CameraCapture';
+import { useAuth } from '@/app/auth/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
+
 
 export default function Photos() {
   const { currentProject } = useProject();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   // Fetch photos using unified hook
-  const { data: projectPhotos = [], isLoading } = useClientPhotos(currentProject?.id || null);
+  const { data: projectPhotos = [], isLoading } = useProjectPhotos(currentProject?.id || null);
+
+  // Check user role - only staff can upload
+  const [isStaff, setIsStaff] = useState(false);
+  
+  // UseEffect to check role
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('user_roles')
+        .select('role_name')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          setIsStaff(data?.role_name !== 'cliente');
+        });
+    }
+  }, [user]);
 
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
@@ -53,24 +76,14 @@ export default function Photos() {
   
   // Get unique phases from project photos (handle both mock and real data)
   const projectPhases = Array.from(new Set(
-    projectPhotos.map(photo => 
-      typeof photo === 'object' && photo && 'phase' in photo ? photo.phase : 'Construcción'
-    )
+    projectPhotos.map(photo => 'Construcción') // Simplified - no phase field in real data
   ));
 
   // Get unique phases for tabs
-  const phases = ['all', ...projectPhases];
+  const phases = ['all'];
 
   // Filter photos by phase
-  const filteredPhotos = selectedPhase === 'all' 
-    ? projectPhotos 
-    : projectPhotos.filter(photo => photo.phase === selectedPhase);
-
-  // Calculate stats by phase
-  const phaseStats = projectPhases.reduce((acc, phase) => {
-    acc[phase] = projectPhotos.filter(p => p.phase === phase).length;
-    return acc;
-  }, {} as Record<string, number>);
+  const filteredPhotos = projectPhotos;
 
   const handlePhotoClick = (index: number) => {
     // Find the original index in the full project photos array
@@ -102,41 +115,10 @@ export default function Photos() {
       </div>
 
       <div className="px-4 space-y-4 pb-8">
-        {/* Filtros por Fase */}
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filtrar por Fase</span>
-          </div>
-          <Tabs value={selectedPhase} onValueChange={setSelectedPhase}>
-            <TabsList className="w-full grid grid-cols-4">
-              {phases.slice(0, 4).map((phase) => (
-                <TabsTrigger key={phase} value={phase} className="text-xs">
-                  {phase === 'all' ? 'Todas' : phase}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </Card>
-
-        {/* Tarjetas de Estadísticas (3 columnas) */}
-        <div className="grid grid-cols-3 gap-3">
-          {projectPhases.slice(0, 2).map((phase) => (
-            <Card key={phase} className="p-3 text-center">
-              <p className="text-2xl font-bold text-primary">{phaseStats[phase]}</p>
-              <p className="text-xs text-muted-foreground mt-1">{phase}</p>
-            </Card>
-          ))}
-          <Card className="p-3 text-center">
-            <p className="text-2xl font-bold text-secondary">{projectPhotos.length}</p>
-            <p className="text-xs text-muted-foreground mt-1">Total</p>
-          </Card>
-        </div>
-
         {/* Galería de Fotos (Grid 2 columnas) */}
         {filteredPhotos.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
-            {filteredPhotos.map((photo: any, index) => (
+            {filteredPhotos.map((photo, index) => (
               <Card 
                 key={photo.id} 
                 className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -146,18 +128,18 @@ export default function Photos() {
                 <div className="relative aspect-square">
                   <img
                     src={photo.url}
-                    alt={photo.description || photo.descripcion || 'Foto'}
+                    alt={photo.descripcion || 'Foto'}
                     className="w-full h-full object-cover"
                   />
-                  {/* Badge de Fase */}
+                  {/* Badge de Fecha */}
                   <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm text-white">
-                    {photo.phase || 'Construcción'}
+                    {format(new Date(photo.fecha_foto || new Date()), "d MMM", { locale: es })}
                   </Badge>
                   {/* Overlay de Hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
                     <div className="absolute bottom-0 left-0 right-0 p-3">
                       <p className="text-white text-xs font-medium line-clamp-2">
-                        {photo.description || photo.descripcion || 'Sin descripción'}
+                        {photo.descripcion || 'Sin descripción'}
                       </p>
                     </div>
                   </div>
@@ -166,7 +148,7 @@ export default function Photos() {
                 <div className="p-3 space-y-2">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {format(new Date(photo.date || photo.fecha_foto || new Date()), "d MMM yyyy", { locale: es })}
+                    {format(new Date(photo.fecha_foto || new Date()), "d MMM yyyy", { locale: es })}
                   </p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -186,6 +168,26 @@ export default function Photos() {
           </div>
         )}
       </div>
+
+      {/* FAB - Floating Action Button (solo para staff) */}
+      {isStaff && (
+        <Button
+          size="lg"
+          className="fixed right-4 bottom-24 h-14 w-14 rounded-full shadow-lg z-50"
+          onClick={() => setCameraOpen(true)}
+        >
+          <Camera className="h-6 w-6" />
+        </Button>
+      )}
+
+      {/* Camera Capture Modal */}
+      {currentProject && (
+        <CameraCapture
+          projectId={currentProject.id}
+          open={cameraOpen}
+          onOpenChange={setCameraOpen}
+        />
+      )}
 
       {/* Photo Viewer Modal */}
       <PhotoViewer

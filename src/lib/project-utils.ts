@@ -253,19 +253,21 @@ export async function getCurrentPhase(projectId: string): Promise<string> {
 }
 
 /**
- * Verifica si el proyecto está en fase de diseño
+ * Verifica si el proyecto está en fase de diseño (versión síncrona con objeto Project)
  */
-export async function isInDesignPhase(projectId: string): Promise<boolean> {
-  const phase = await getCurrentPhase(projectId);
-  return phase === 'en_diseno';
+export function isInDesignPhase(project: any): boolean {
+  if (!project) return false;
+  const phase = project.status || project.currentPhase || 'prospecto';
+  return phase === 'en_diseno' || phase === 'Diseño';
 }
 
 /**
- * Determina si se deben mostrar fotos de construcción
+ * Determina si se deben mostrar fotos de construcción (versión síncrona con objeto Project)
  */
-export async function shouldShowConstructionPhotos(projectId: string): Promise<boolean> {
-  const phase = await getCurrentPhase(projectId);
-  return phase === 'en_construccion' || phase === 'completado';
+export function shouldShowConstructionPhotos(project: any): boolean {
+  if (!project) return false;
+  const phase = project.status || project.currentPhase || 'prospecto';
+  return phase === 'en_construccion' || phase === 'completado' || phase === 'Construcción' || phase === 'Finalizado';
 }
 
 /**
@@ -301,7 +303,7 @@ export async function getProjectHeroImage(projectId: string): Promise<string | n
   try {
     const { data: photos } = await supabase
       .from('construction_photos')
-      .select('file_path')
+      .select('file_url')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false })
       .limit(1);
@@ -310,8 +312,8 @@ export async function getProjectHeroImage(projectId: string): Promise<string | n
 
     const { data } = await supabase
       .storage
-      .from('construction-photos')
-      .createSignedUrl(photos[0].file_path, 3600);
+      .from('project_photos')
+      .createSignedUrl(photos[0].file_url, 3600);
 
     return data?.signedUrl || null;
   } catch (error) {

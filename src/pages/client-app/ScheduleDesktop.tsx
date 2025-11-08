@@ -4,8 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { useProject } from "@/contexts/client-app/ProjectContext";
-import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import { getScheduleTitle, getScheduleSubtitle } from "@/lib/project-utils";
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -31,7 +29,6 @@ const getStatusBadge = (status: string) => {
 
 export default function ScheduleDesktop() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
   const [expandedPhaseId, setExpandedPhaseId] = useState<number | null>(
     phases.find(p => p.status === 'in-progress')?.id || phases[0]?.id || null
@@ -49,8 +46,8 @@ export default function ScheduleDesktop() {
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div>
-        <h1 className="text-3xl font-bold mb-2">{getScheduleTitle(currentProject)}</h1>
-        <p className="text-muted-foreground">{getScheduleSubtitle(currentProject)}</p>
+        <h1 className="text-3xl font-bold mb-2">Cronograma</h1>
+        <p className="text-muted-foreground">Seguimiento de las fases del proyecto</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

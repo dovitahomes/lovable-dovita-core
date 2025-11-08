@@ -3,12 +3,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Clock } from 'lucide-react';
 import { useProject } from '@/contexts/client-app/ProjectContext';
-import { useDataSource } from '@/contexts/client-app/DataSourceContext';
-import { getScheduleTitle } from '@/lib/project-utils';
 
 export default function Schedule() {
   const { currentProject } = useProject();
-  const { isPreviewMode } = useDataSource();
   const phases = currentProject?.phases || [];
   const [expandedPhaseId, setExpandedPhaseId] = useState<number | null>(
     phases.find(p => p.status === 'in-progress')?.id || phases[0]?.id || null
@@ -22,7 +19,7 @@ export default function Schedule() {
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-[130px]">
         <div>
-          <h1 className="text-2xl font-bold">{getScheduleTitle(currentProject)}</h1>
+          <h1 className="text-2xl font-bold">Cronograma</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Seguimiento de las fases del proyecto
           </p>
