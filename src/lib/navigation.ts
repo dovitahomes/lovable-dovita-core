@@ -89,7 +89,6 @@ export function useTypedNavigate() {
     toERPBudgetDetail: (id: string) => navigate(generateRoute.budgetDetail(id)),
     
     // Otros
-    toUsuarios: () => navigate(BACKOFFICE_ROUTES.USUARIOS),
     toMetrics: () => navigate(BACKOFFICE_ROUTES.METRICS),
     
     // ============================================

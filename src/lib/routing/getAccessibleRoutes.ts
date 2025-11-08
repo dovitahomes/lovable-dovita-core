@@ -79,7 +79,7 @@ export const ALL_ROUTES: RouteGroup[] = [
   {
     label: "Gestión",
     items: [
-      { title: "Usuarios", url: BACKOFFICE_ROUTES.USUARIOS, icon: UserCog, moduleName: "usuarios" },
+      { title: "Gestión de Usuarios", url: BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS, icon: Users, moduleName: "usuarios" },
       { title: "Accesos", url: BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS, icon: ShieldCheck, moduleName: "accesos" },
       { title: "Sucursales", url: BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES, icon: MapPin, moduleName: "sucursales" },
       { title: "Centro de Reglas", url: BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS, icon: FileText, moduleName: "centro_reglas" },

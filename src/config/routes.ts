@@ -120,7 +120,6 @@ export const BACKOFFICE_ROUTES = {
   ERP_BUDGET_DETAIL: '/erp/budgets/:id',
   
   // Otros
-  USUARIOS: '/usuarios',
   METRICS: '/metrics',
 } as const;
 
@@ -153,6 +152,9 @@ export const LEGACY_ROUTES = {
   
   // Tools legacy
   HERRAMIENTAS_CATALOGO_TU: '/herramientas/catalogo-tu',
+  
+  // Usuarios legacy (redirige a Gestión de Usuarios)
+  USUARIOS_OLD: '/usuarios',
 } as const;
 
 // ============================================

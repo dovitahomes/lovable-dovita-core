@@ -55,7 +55,6 @@ const Finanzas = lazy(() => import("./pages/Finanzas"));
 const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
-const Usuarios = lazy(() => import("./pages/Usuarios"));
 const VerComoCliente = lazy(() => import("./pages/VerComoCliente"));
 
 // Admin tools (lazy loaded)
@@ -153,10 +152,12 @@ const InternalLayout = () => {
                 <Route path={BACKOFFICE_ROUTES.ERP_BUDGET_DETAIL} element={<Suspense fallback={<TableSkeleton />}><BudgetEditor /></Suspense>} />
                 
                 {/* ============================================ */}
-                {/* USUARIOS Y METRICS                          */}
+                {/* METRICS                                     */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.METRICS} element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.USUARIOS} element={<Suspense fallback={<TableSkeleton />}><Usuarios /></Suspense>} />
+                
+                {/* Legacy redirect: old usuarios route */}
+                <Route path={LEGACY_ROUTES.USUARIOS_OLD} element={<Navigate to={BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS} replace />} />
                 
                 {/* ============================================ */}
                 {/* CRM - LEADS Y CLIENTES                      */}

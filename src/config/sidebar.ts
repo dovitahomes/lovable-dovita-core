@@ -156,12 +156,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     label: "Gestión",
     items: [
       { 
-        title: "Usuarios", 
-        url: BACKOFFICE_ROUTES.USUARIOS, 
-        icon: UserCog, 
-        moduleName: "usuarios" 
-      },
-      { 
         title: "Métricas", 
         url: BACKOFFICE_ROUTES.METRICS, 
         icon: TrendingUp, 
