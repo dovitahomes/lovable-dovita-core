@@ -272,10 +272,10 @@ export function useClientAppointments(projectId: string | null) {
       if (!projectId) return [];
       
       const { data, error } = await supabase
-        .from('v_client_appointments')
+        .from('v_client_events')
         .select('*')
         .eq('project_id', projectId)
-        .order('fecha', { ascending: true });
+        .order('start_time', { ascending: true });
       
       if (error) throw error;
       

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,18 +9,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { formatDateTime, fromUTCToMexico, toUTCFromMexico, nowInMexico, isSameDayInMexico } from "@/lib/datetime";
 
 interface CalendarEvent {
   id: string;
   project_id: string | null;
   title: string;
-  notes: string | null;
-  start_at: string;
-  end_at: string;
-  attendees: any;
+  description?: string | null;
+  notes?: string | null;
+  start_time: string;
+  end_time: string;
+  status: string;
+  visibilidad: string;
+  location?: string | null;
   created_by: string;
 }
 
@@ -36,26 +38,23 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
   const [formData, setFormData] = useState({
     title: "",
     notes: "",
-    start_at: "",
-    end_at: "",
+    start: "",
+    end: "",
   });
 
-  useEffect(() => {
-    loadEvents();
-  }, [projectId, currentDate]);
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
+    if (!projectId) return;
     try {
       const startDate = startOfMonth(currentDate);
       const endDate = endOfMonth(currentDate);
 
       const { data, error } = await supabase
-        .from('calendar_events')
+        .from('project_events')
         .select('*')
         .eq('project_id', projectId)
-        .gte('start_at', startDate.toISOString())
-        .lte('start_at', endDate.toISOString())
-        .order('start_at', { ascending: true });
+        .gte('start_time', startDate.toISOString())
+        .lte('start_time', endDate.toISOString())
+        .order('start_time', { ascending: true });
 
       if (error) throw error;
       setEvents(data || []);
@@ -63,26 +62,30 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
       console.error('Error loading events:', error);
       toast.error('Error al cargar eventos');
     }
-  };
+  }, [projectId, currentDate]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   const handleOpenDialog = (event?: CalendarEvent) => {
     if (event) {
       setSelectedEvent(event);
       setFormData({
         title: event.title,
-        notes: event.notes || "",
-        start_at: fromUTCToMexico(event.start_at),
-        end_at: fromUTCToMexico(event.end_at),
+        notes: event.notes || event.description || '',
+        start: event.start_time.slice(0, 16),
+        end: event.end_time.slice(0, 16),
       });
     } else {
       setSelectedEvent(null);
-      const now = nowInMexico();
+      const now = new Date();
       const oneHourLater = new Date(now.getTime() + 3600000);
       setFormData({
         title: "",
         notes: "",
-        start_at: format(now, "yyyy-MM-dd'T'HH:mm"),
-        end_at: format(oneHourLater, "yyyy-MM-dd'T'HH:mm"),
+        start: format(now, "yyyy-MM-dd'T'HH:mm"),
+        end: format(oneHourLater, "yyyy-MM-dd'T'HH:mm"),
       });
     }
     setShowEventDialog(true);
@@ -101,15 +104,18 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
       const eventData = {
         project_id: projectId,
         title: formData.title,
-        notes: formData.notes,
-        start_at: toUTCFromMexico(formData.start_at),
-        end_at: toUTCFromMexico(formData.end_at),
+        description: formData.notes || null,
+        notes: formData.notes || null,
+        start_time: new Date(formData.start).toISOString(),
+        end_time: new Date(formData.end).toISOString(),
         created_by: user.id,
+        status: 'propuesta' as const,
+        visibilidad: 'cliente' as const,
       };
 
       if (selectedEvent) {
         const { error } = await supabase
-          .from('calendar_events')
+          .from('project_events')
           .update(eventData)
           .eq('id', selectedEvent.id);
         
@@ -117,8 +123,8 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
         toast.success('Evento actualizado');
       } else {
         const { error } = await supabase
-          .from('calendar_events')
-          .insert(eventData);
+          .from('project_events')
+          .insert([eventData]);
         
         if (error) throw error;
         toast.success('Evento creado');
@@ -137,7 +143,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
 
     try {
       const { error } = await supabase
-        .from('calendar_events')
+        .from('project_events')
         .delete()
         .eq('id', selectedEvent.id);
 
@@ -158,10 +164,11 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
     return eachDayOfInterval({ start, end });
   };
 
-  const getEventsForDay = (day: Date) => {
-    return events.filter(event => 
-      isSameDayInMexico(event.start_at, day)
-    );
+  const getEventsForDay = (date: Date) => {
+    return events.filter(event => {
+      const eventDate = new Date(event.start_time);
+      return isSameDay(eventDate, date);
+    });
   };
 
   const days = getDaysInMonth();
@@ -212,7 +219,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
             {days.map(day => {
               const dayEvents = getEventsForDay(day);
               const isCurrentMonth = isSameMonth(day, currentDate);
-              const isToday = isSameDayInMexico(new Date().toISOString(), day);
+              const isToday = isSameDay(day, new Date());
 
               return (
                 <div
@@ -233,7 +240,7 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
                       >
                         <div className="font-medium truncate">{event.title}</div>
                         <div className="text-muted-foreground">
-                          {formatDateTime(event.start_at, 'HH:mm')}
+                          {format(new Date(event.start_time), 'HH:mm')}
                         </div>
                       </div>
                     ))}
@@ -278,8 +285,8 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
                 <Label>Inicio *</Label>
                 <Input
                   type="datetime-local"
-                  value={formData.start_at}
-                  onChange={(e) => setFormData({ ...formData, start_at: e.target.value })}
+                  value={formData.start}
+                  onChange={(e) => setFormData({ ...formData, start: e.target.value })}
                 />
               </div>
 
@@ -287,8 +294,8 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
                 <Label>Fin *</Label>
                 <Input
                   type="datetime-local"
-                  value={formData.end_at}
-                  onChange={(e) => setFormData({ ...formData, end_at: e.target.value })}
+                  value={formData.end}
+                  onChange={(e) => setFormData({ ...formData, end: e.target.value })}
                 />
               </div>
             </div>

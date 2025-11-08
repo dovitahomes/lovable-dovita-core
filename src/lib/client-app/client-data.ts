@@ -752,10 +752,10 @@ export async function getProjectAppointments(projectId: string) {
 
   try {
     const { data: appointments, error } = await supabase
-      .from('v_client_appointments')
+      .from('v_client_events')
       .select('*')
       .eq('project_id', projectId)
-      .order('starts_at', { ascending: true });
+      .order('start_time', { ascending: true });
 
     if (error) {
       console.error('Error fetching appointments:', error);
@@ -763,12 +763,12 @@ export async function getProjectAppointments(projectId: string) {
     }
 
     return (appointments || []).map((event) => {
-      const startDate = new Date(event.starts_at);
-      const endDate = new Date(event.ends_at);
+      const startDate = new Date(event.start_time);
+      const endDate = new Date(event.end_time);
       const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
       
       return {
-        id: event.appointment_id,
+        id: event.id,
         projectId: event.project_id,
         type: event.title,
         date: startDate.toISOString().split('T')[0],
@@ -782,7 +782,7 @@ export async function getProjectAppointments(projectId: string) {
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Team'
         },
         location: event.location || 'Por definir',
-        notes: event.notes || '',
+        notes: event.notes || event.description || '',
         isVirtual: false
       };
     });

@@ -726,85 +726,6 @@ export type Database = {
           },
         ]
       }
-      calendar_events: {
-        Row: {
-          attendees: Json | null
-          created_at: string
-          created_by: string
-          end_at: string
-          id: string
-          notes: string | null
-          project_id: string | null
-          start_at: string
-          title: string
-        }
-        Insert: {
-          attendees?: Json | null
-          created_at?: string
-          created_by: string
-          end_at: string
-          id?: string
-          notes?: string | null
-          project_id?: string | null
-          start_at: string
-          title: string
-        }
-        Update: {
-          attendees?: Json | null
-          created_at?: string
-          created_by?: string
-          end_at?: string
-          id?: string
-          notes?: string | null
-          project_id?: string | null
-          start_at?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_financial_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_project_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "vw_client_financial_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "vw_kpi_project_progress"
-            referencedColumns: ["project_id"]
-          },
-        ]
-      }
       clients: {
         Row: {
           address_json: Json | null
@@ -2753,10 +2674,13 @@ export type Database = {
           description: string | null
           end_time: string
           id: string
+          location: string | null
+          notes: string | null
           project_id: string
           start_time: string
           status: string
           title: string
+          visibilidad: string | null
         }
         Insert: {
           created_at?: string
@@ -2764,10 +2688,13 @@ export type Database = {
           description?: string | null
           end_time: string
           id?: string
+          location?: string | null
+          notes?: string | null
           project_id: string
           start_time: string
           status?: string
           title: string
+          visibilidad?: string | null
         }
         Update: {
           created_at?: string
@@ -2775,10 +2702,13 @@ export type Database = {
           description?: string | null
           end_time?: string
           id?: string
+          location?: string | null
+          notes?: string | null
           project_id?: string
           start_time?: string
           status?: string
           title?: string
+          visibilidad?: string | null
         }
         Relationships: [
           {
@@ -4055,82 +3985,6 @@ export type Database = {
           },
         ]
       }
-      v_client_appointments: {
-        Row: {
-          appointment_id: string | null
-          attendees: Json | null
-          ends_at: string | null
-          location: string | null
-          notes: string | null
-          project_id: string | null
-          starts_at: string | null
-          title: string | null
-        }
-        Insert: {
-          appointment_id?: string | null
-          attendees?: Json | null
-          ends_at?: string | null
-          location?: never
-          notes?: string | null
-          project_id?: string | null
-          starts_at?: string | null
-          title?: never
-        }
-        Update: {
-          appointment_id?: string | null
-          attendees?: Json | null
-          ends_at?: string | null
-          location?: never
-          notes?: string | null
-          project_id?: string | null
-          starts_at?: string | null
-          title?: never
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_financial_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_project_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "vw_client_financial_summary"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "vw_kpi_project_progress"
-            referencedColumns: ["project_id"]
-          },
-        ]
-      }
       v_client_budget_categories: {
         Row: {
           budgeted: number | null
@@ -4284,10 +4138,13 @@ export type Database = {
           description: string | null
           end_time: string | null
           id: string | null
+          location: string | null
+          notes: string | null
           project_id: string | null
           start_time: string | null
           status: string | null
           title: string | null
+          visibilidad: string | null
         }
         Relationships: [
           {

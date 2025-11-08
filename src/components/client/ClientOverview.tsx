@@ -260,7 +260,7 @@ export function ClientOverview({ projectId, clientName }: ClientOverviewProps) {
                     {event.title}
                   </p>
                   <p className="text-xs text-slate-600">
-                    {new Date(event.start_at).toLocaleDateString("es-MX", {
+                    {new Date(event.start_time).toLocaleDateString("es-MX", {
                       weekday: "short",
                       month: "short",
                       day: "numeric",

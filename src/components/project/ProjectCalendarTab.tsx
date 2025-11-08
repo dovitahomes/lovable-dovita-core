@@ -44,9 +44,11 @@ export default function ProjectCalendarTab({ projectId }: ProjectCalendarTabProp
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    location: '',
     start_time: '',
     end_time: '',
     status: 'propuesta' as const,
+    visibilidad: 'cliente' as const,
   });
   
   const handlePreviousMonth = () => {
@@ -79,9 +81,11 @@ export default function ProjectCalendarTab({ projectId }: ProjectCalendarTabProp
     setFormData({
       title: '',
       description: '',
+      location: '',
       start_time: '',
       end_time: '',
       status: 'propuesta',
+      visibilidad: 'cliente',
     });
   };
   
@@ -110,7 +114,7 @@ export default function ProjectCalendarTab({ projectId }: ProjectCalendarTabProp
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Calendario de Citas</h3>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -138,6 +142,15 @@ export default function ProjectCalendarTab({ projectId }: ProjectCalendarTabProp
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Detalles de la cita"
                   rows={3}
+                />
+              </div>
+
+              <div>
+                <Label>Ubicación</Label>
+                <Input
+                  value={formData.location || ''}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="Lugar de la cita"
                 />
               </div>
               

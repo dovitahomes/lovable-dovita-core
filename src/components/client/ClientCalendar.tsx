@@ -8,20 +8,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CalendarPlus, Calendar as CalendarIcon, Clock, Users, X, Download } from "lucide-react";
-import { format, addDays, parseISO } from "date-fns";
+import { CalendarPlus, Calendar as CalendarIcon, Clock, MapPin, X, Download } from "lucide-react";
+import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { formatDateTime, toUTCFromMexico } from "@/lib/datetime";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { cn } from "@/lib/utils";
 
 interface CalendarEvent {
   id: string;
   title: string;
-  start_at: string;
-  end_at: string;
+  start_time: string;
+  end_time: string;
   notes?: string | null;
-  attendees?: Array<{ user_id: string; name?: string }> | null;
+  description?: string | null;
+  location?: string | null;
+  status: string;
   created_by: string;
 }
 
@@ -40,7 +41,7 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
   
   const [formData, setFormData] = useState({
     title: "",
-    desired_start_at: "",
+    desiredDate: "",
     notes: "",
   });
 
@@ -52,38 +53,24 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
     try {
       setLoading(true);
 
-      const now = new Date();
-      let endDate: Date;
-      
-      switch (rangeFilter) {
-        case "today":
-          endDate = addDays(now, 1);
-          break;
-        case "7d":
-          endDate = addDays(now, 7);
-          break;
-        case "14d":
-          endDate = addDays(now, 14);
-          break;
+      const filterDate = new Date();
+      if (rangeFilter === '7d') {
+        filterDate.setDate(filterDate.getDate() + 7);
+      } else if (rangeFilter === '14d') {
+        filterDate.setDate(filterDate.getDate() + 14);
       }
-
-      const { data, error: fetchError } = await supabase
-        .from("calendar_events")
-        .select("id, title, start_at, end_at, notes, attendees, created_by")
-        .eq("project_id", projectId)
-        .gte("start_at", now.toISOString())
-        .lte("start_at", endDate.toISOString())
-        .order("start_at", { ascending: true });
-
-      if (fetchError) throw fetchError;
       
-      // Map the data to ensure proper typing for attendees
-      const mappedEvents: CalendarEvent[] = (data || []).map(event => ({
-        ...event,
-        attendees: event.attendees as Array<{ user_id: string; name?: string }> | null,
-      }));
+      const { data, error } = await supabase
+        .from('v_client_events')
+        .select('*')
+        .eq('project_id', projectId)
+        .gte('start_time', new Date().toISOString())
+        .lte('start_time', filterDate.toISOString())
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
       
-      setEvents(mappedEvents);
+      setEvents(data || []);
     } catch (err) {
       console.error("Error loading events:", err);
       toast.error("Error al cargar los eventos");
@@ -94,53 +81,52 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
 
   // Realtime subscription
   useRealtimeSubscription({
-    table: "calendar_events",
+    table: 'project_events',
     filter: `project_id=eq.${projectId}`,
-    event: "*",
-    onInsert: () => loadEvents(),
-    onUpdate: () => loadEvents(),
-    onDelete: () => loadEvents(),
-    enabled: !!projectId,
+    event: '*',
+    onInsert: loadEvents,
+    onUpdate: loadEvents,
+    onDelete: loadEvents,
   });
 
-  const handleRequestAppointment = async () => {
-    if (!formData.title || !formData.desired_start_at) {
-      toast.error("El motivo y la fecha sugerida son obligatorios");
+  const handleRequestAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!projectId) return;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Debes estar autenticado");
+      return;
+    }
+    
+    const { error } = await supabase
+      .from('project_events')
+      .insert([{
+        project_id: projectId,
+        title: `Solicitud: ${formData.title}`,
+        description: formData.notes,
+        notes: formData.notes,
+        start_time: formData.desiredDate,
+        end_time: new Date(new Date(formData.desiredDate).getTime() + 60 * 60 * 1000).toISOString(),
+        created_by: user.id,
+        status: 'propuesta' as const,
+        visibilidad: 'cliente' as const,
+      }]);
+
+    if (error) {
+      console.error(error);
+      toast.error("Error al enviar solicitud");
       return;
     }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuario no autenticado");
-
-      const startUTC = toUTCFromMexico(formData.desired_start_at);
-      const endDate = new Date(startUTC);
-      endDate.setHours(endDate.getHours() + 1); // +1 hour default
-
-      const { error } = await supabase.from("calendar_events").insert({
-        project_id: projectId,
-        title: `Solicitud: ${formData.title}`,
-        start_at: startUTC,
-        end_at: endDate.toISOString(),
-        notes: formData.notes || null,
-        created_by: user.id,
-        attendees: [{ user_id: user.id }],
-      });
-
-      if (error) throw error;
-
-      toast.success("Solicitud enviada correctamente");
-      setIsRequestDialogOpen(false);
-      setFormData({ title: "", desired_start_at: "", notes: "" });
-    } catch (err) {
-      console.error("Error saving request:", err);
-      toast.error("Error al enviar la solicitud");
-    }
+    toast.success("Solicitud enviada");
+    setIsRequestDialogOpen(false);
+    setFormData({ title: "", desiredDate: "", notes: "" });
   };
 
   const downloadICS = (event: CalendarEvent) => {
-    const startDate = new Date(event.start_at);
-    const endDate = new Date(event.end_at);
+    const startDate = new Date(event.start_time);
+    const endDate = new Date(event.end_time);
     
     const formatICSDate = (date: Date) => {
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -156,7 +142,7 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
       `DTSTART:${formatICSDate(startDate)}`,
       `DTEND:${formatICSDate(endDate)}`,
       `SUMMARY:${event.title}`,
-      event.notes ? `DESCRIPTION:${event.notes.replace(/\n/g, '\\n')}` : '',
+      `DESCRIPTION:${event.notes || event.description || ''}`,
       'END:VEVENT',
       'END:VCALENDAR'
     ].filter(Boolean).join('\r\n');
@@ -168,11 +154,6 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
     link.click();
     
     toast.success("Evento descargado");
-  };
-
-  const getInitials = (name?: string) => {
-    if (!name) return "?";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
   if (loading) {
@@ -227,59 +208,30 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
           </div>
         ) : (
           events.map((event) => {
-            const startDate = parseISO(event.start_at);
             const isRequest = event.title.startsWith("Solicitud:");
             
             return (
               <div
                 key={event.id}
+                className="p-4 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                 onClick={() => setSelectedEvent(event)}
-                className={cn(
-                  "bg-card border rounded-xl p-4 shadow-sm hover:shadow-md",
-                  "transition-all duration-200 active:scale-[0.98] cursor-pointer",
-                  isRequest && "border-l-4 border-l-yellow-500"
-                )}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-foreground flex-1">{event.title}</h3>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-base mb-1 truncate">
+                      {event.title}
+                    </h4>
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+                      <span>
+                        {format(new Date(event.start_time), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                      </span>
+                    </p>
+                  </div>
                   {isRequest && (
-                    <Badge variant="secondary" className="ml-2">
-                      Pendiente
-                    </Badge>
+                    <Badge variant="secondary">Pendiente</Badge>
                   )}
                 </div>
-                
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                  <div className="flex items-center gap-1">
-                    <CalendarIcon className="h-4 w-4" />
-                    <span>{formatDateTime(event.start_at, "d MMM yyyy")}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{formatDateTime(event.start_at, "HH:mm")}</span>
-                  </div>
-                </div>
-
-                {event.attendees && event.attendees.length > 0 && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex gap-1">
-                      {event.attendees.slice(0, 3).map((attendee, idx) => (
-                        <div
-                          key={idx}
-                          className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium"
-                        >
-                          {getInitials(attendee.name)}
-                        </div>
-                      ))}
-                      {event.attendees.length > 3 && (
-                        <div className="h-6 w-6 rounded-full bg-muted text-muted-foreground text-xs flex items-center justify-center">
-                          +{event.attendees.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })
@@ -301,7 +253,7 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
           <DialogHeader>
             <DialogTitle>Solicitar cita</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleRequestAppointment} className="space-y-4">
             <div>
               <Label htmlFor="request-title">Motivo *</Label>
               <Input
@@ -309,6 +261,7 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Ej: Revisión de avance"
+                required
               />
             </div>
             <div>
@@ -316,8 +269,9 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
               <Input
                 id="desired-date"
                 type="datetime-local"
-                value={formData.desired_start_at}
-                onChange={(e) => setFormData({ ...formData, desired_start_at: e.target.value })}
+                value={formData.desiredDate}
+                onChange={(e) => setFormData({ ...formData, desiredDate: e.target.value })}
+                required
               />
             </div>
             <div>
@@ -330,15 +284,15 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
                 rows={3}
               />
             </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsRequestDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleRequestAppointment}>
-              Enviar solicitud
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsRequestDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Enviar solicitud
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -358,68 +312,50 @@ export function ClientCalendar({ projectId }: ClientCalendarProps) {
           
           {selectedEvent && (
             <div className="p-4 space-y-4">
-              {/* Date and Time */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CalendarIcon className="h-5 w-5" />
-                  <span className="font-medium">
-                    {formatDateTime(selectedEvent.start_at, "EEEE, d MMMM yyyy")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground ml-7">
-                  <Clock className="h-4 w-4" />
-                  <span>
-                    {formatDateTime(selectedEvent.start_at, "HH:mm")} - {formatDateTime(selectedEvent.end_at, "HH:mm")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Notes */}
-              {selectedEvent.notes && (
-                <div className="pt-2 border-t">
-                  <h4 className="font-medium mb-2">Notas</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {selectedEvent.notes}
-                  </p>
-                </div>
-              )}
-
-              {/* Attendees */}
-              {selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
-                <div className="pt-2 border-t">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-4 w-4" />
-                    <h4 className="font-medium">Asistentes</h4>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">{selectedEvent.title}</h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                    <CalendarIcon className="h-4 w-4" />
+                    <span>
+                      {format(new Date(selectedEvent.start_time), "d 'de' MMMM, yyyy", { locale: es })}
+                    </span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedEvent.attendees.map((attendee, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 bg-muted rounded-full px-3 py-1"
-                      >
-                        <div className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">
-                          {getInitials(attendee.name)}
-                        </div>
-                        <span className="text-sm">{attendee.name || "Usuario"}</span>
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      {format(new Date(selectedEvent.start_time), "HH:mm", { locale: es })} - {format(new Date(selectedEvent.end_time), "HH:mm", { locale: es })}
+                    </span>
                   </div>
                 </div>
-              )}
 
-              {/* Actions */}
-              <div className="pt-4 border-t">
-                <Button
-                  onClick={() => {
-                    downloadICS(selectedEvent);
-                    setSelectedEvent(null);
-                  }}
-                  className="w-full"
-                  variant="outline"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Agregar a mi calendario
-                </Button>
+                {(selectedEvent.notes || selectedEvent.description) && (
+                  <div>
+                    <h4 className="font-medium mb-2">Notas</h4>
+                    <p className="text-sm text-muted-foreground">{selectedEvent.notes || selectedEvent.description}</p>
+                  </div>
+                )}
+
+                {selectedEvent.location && (
+                  <div>
+                    <h4 className="font-medium mb-2">Ubicación</h4>
+                    <p className="text-sm text-muted-foreground">{selectedEvent.location}</p>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t">
+                  <Button
+                    onClick={() => {
+                      downloadICS(selectedEvent);
+                      setSelectedEvent(null);
+                    }}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Agregar a mi calendario
+                  </Button>
+                </div>
               </div>
             </div>
           )}

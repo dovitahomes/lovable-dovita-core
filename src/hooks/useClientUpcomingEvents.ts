@@ -8,11 +8,11 @@ export function useClientUpcomingEvents(projectId: string | null) {
       if (!projectId) return [];
 
       const { data, error } = await supabase
-        .from("calendar_events")
-        .select("id, title, start_at, end_at, notes")
+        .from("v_client_events")
+        .select("id, title, start_time, end_time, notes")
         .eq("project_id", projectId)
-        .gte("start_at", new Date().toISOString())
-        .order("start_at", { ascending: true })
+        .gte("start_time", new Date().toISOString())
+        .order("start_time", { ascending: true })
         .limit(3);
 
       if (error) throw error;
