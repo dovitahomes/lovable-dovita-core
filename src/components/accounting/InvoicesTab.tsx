@@ -12,12 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Upload, ExternalLink, Plus, Link as LinkIcon } from "lucide-react";
+import { Upload, Download, Plus, Link as LinkIcon } from "lucide-react";
 import { CfdiUploadDialog } from "./CfdiUploadDialog";
 import { PaymentComplementDialog } from "./PaymentComplementDialog";
 import { ReconcileDialog } from "./ReconcileDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getCfdiSignedUrl } from "@/lib/storage/storage-helpers";
 
 interface Invoice {
   id: string;
@@ -29,7 +30,7 @@ interface Invoice {
   total_amount: number;
   emisor_id: string | null;
   receptor_id: string | null;
-  xml_url: string | null;
+  xml_url: string | null; // Relative path to XML in cfdi bucket
   paid: boolean;
   emisor?: { name: string };
   receptor?: { name: string };
@@ -264,15 +265,23 @@ export function InvoicesTab() {
                       <TableCell>
                         {getReconciliationBadge(invoice)}
                       </TableCell>
-                      <TableCell className="text-right">
+                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           {invoice.xml_url && (
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => window.open(invoice.xml_url!, '_blank')}
+                              onClick={async () => {
+                                try {
+                                  const { url } = await getCfdiSignedUrl(invoice.xml_url!);
+                                  window.open(url, '_blank');
+                                } catch (error) {
+                                  console.error('Error getting signed URL:', error);
+                                  toast.error('Error al acceder al XML');
+                                }
+                              }}
                             >
-                              <ExternalLink className="h-4 w-4" />
+                              <Download className="h-4 w-4" />
                             </Button>
                           )}
                           {invoice.metodo_pago === 'PPD' && invoice.balance > 0 && (
