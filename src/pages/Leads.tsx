@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
 import { LeadDialog } from "@/components/forms/LeadDialog";
 import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
+import { ConvertLeadToOpportunityDialog } from "@/components/crm/ConvertLeadToOpportunityDialog";
 import { KanbanColumn } from "@/components/leads/KanbanColumn";
 import { LeadCard } from "@/components/leads/LeadCard";
 import { useLeadsByStatus, useUpdateLeadStatus, type LeadStatus } from "@/hooks/useLeads";
@@ -21,6 +22,7 @@ export default function Leads() {
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [convertToOppOpen, setConvertToOppOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [activeDragLead, setActiveDragLead] = useState<any>(null);
 
@@ -118,11 +120,18 @@ export default function Leads() {
       <LeadDialog open={createOpen} onOpenChange={setCreateOpen} />
       
       {selectedLead && (
-        <ConvertLeadDialog
-          open={convertOpen}
-          onOpenChange={setConvertOpen}
-          lead={selectedLead}
-        />
+        <>
+          <ConvertLeadDialog
+            open={convertOpen}
+            onOpenChange={setConvertOpen}
+            lead={selectedLead}
+          />
+          <ConvertLeadToOpportunityDialog
+            open={convertToOppOpen}
+            onOpenChange={setConvertToOppOpen}
+            lead={selectedLead}
+          />
+        </>
       )}
     </div>
   );
