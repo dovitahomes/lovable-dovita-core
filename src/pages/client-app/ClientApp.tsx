@@ -31,11 +31,20 @@ export default function ClientApp() {
     <div className="h-screen overflow-hidden flex flex-col bg-background">
       <DovitaHeader />
 
-      <main className="flex-1 overflow-y-auto overflow-x-hidden mt-[calc(68px+env(safe-area-inset-top))]">
+      <main 
+        id="main-content" 
+        className="flex-1 overflow-y-auto overflow-x-hidden mt-[calc(68px+env(safe-area-inset-top))]"
+        role="main"
+        tabIndex={-1}
+      >
         <Outlet />
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-card pb-[env(safe-area-inset-bottom)]">
+      <footer 
+        className="fixed bottom-0 left-0 right-0 z-50 bg-card pb-[env(safe-area-inset-bottom)]"
+        role="navigation"
+        aria-label="Navegación principal"
+      >
         <InteractiveMenu
           items={menuItems.map((item) => ({ 
             label: item.label, 

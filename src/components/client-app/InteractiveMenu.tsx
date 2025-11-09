@@ -79,6 +79,7 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
     <nav
       className="client-menu"
       role="navigation"
+      aria-label="Navegación principal del cliente"
       style={navStyle}
     >
       {finalItems.map((item, index) => {
@@ -94,8 +95,17 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
             onClick={() => handleItemClick(index)}
             ref={(el) => (itemRefs.current[index] = el)}
             style={{ '--lineWidth': '0px' } as React.CSSProperties}
+            aria-label={`${item.label}${isActive ? ' (página actual)' : ''}`}
+            aria-current={isActive ? 'page' : undefined}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleItemClick(index);
+              }
+            }}
           >
-            <div className="client-menu__icon">
+            <div className="client-menu__icon" aria-hidden="true">
               <IconComponent className="icon" />
             </div>
             <strong
