@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Circle, Clock } from "lucide-react";
+import { CheckCircle2, Circle, Clock, CalendarDays } from "lucide-react";
+import { ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 import { useProject } from "@/contexts/client-app/ProjectContext";
 
 const getStatusIcon = (status: string) => {
@@ -56,7 +57,14 @@ export default function ScheduleDesktop() {
             <CardTitle>Fases del Proyecto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {phases.map((phase, index) => {
+            {phases.length === 0 ? (
+              <ClientEmptyState
+                icon={CalendarDays}
+                title="No hay fases disponibles"
+                description="El cronograma de tu proyecto aparecerá aquí cuando el equipo lo configure."
+              />
+            ) : (
+            phases.map((phase, index) => {
               const isExpanded = expandedPhaseId === phase.id;
               
               return (
@@ -95,7 +103,8 @@ export default function ScheduleDesktop() {
                 </div>
               </div>
               );
-            })}
+            })
+            )}
           </CardContent>
         </Card>
 

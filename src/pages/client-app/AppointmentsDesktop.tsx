@@ -9,6 +9,8 @@ import AppointmentModal from "@/components/client-app/AppointmentModal";
 import { useProject } from "@/contexts/client-app/ProjectContext";
 import { useProjectAppointments, useUpdateAppointment } from '@/hooks/useProjectAppointments';
 import { Plus, Clock, User, Calendar as CalendarIcon, CheckCircle2, X, AlertCircle } from "lucide-react";
+import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 import { format, isSameDay, isFuture, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatDateTime } from '@/lib/datetime';
@@ -16,6 +18,7 @@ import { toast } from 'sonner';
 
 export default function AppointmentsDesktop() {
   const { currentProject } = useProject();
+  const { handleError } = useClientError();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -23,7 +26,7 @@ export default function AppointmentsDesktop() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
-  const { data: appointments, isLoading } = useProjectAppointments(currentProject?.id || null);
+  const { data: appointments, isLoading, error, refetch } = useProjectAppointments(currentProject?.id || null);
   const updateAppointment = useUpdateAppointment();
 
   // Get upcoming appointments (future or today)
@@ -84,6 +87,23 @@ export default function AppointmentsDesktop() {
       toast.error('Error al confirmar la cita');
     }
   };
+
+  if (error) {
+    return (
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Citas y Reuniones</h1>
+          <p className="text-muted-foreground">Gestiona tus citas con el equipo</p>
+        </div>
+        <ClientErrorState
+          title="Error al cargar citas"
+          description="No pudimos obtener tus citas. Verifica tu conexión e intenta nuevamente."
+          onRetry={() => refetch()}
+          icon={CalendarIcon}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">

@@ -220,10 +220,53 @@ export function ClientEmptyState({
 }) {
   return (
     <div className="text-center py-12 px-4 animate-fade-in">
-      <Icon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+      <div className="inline-block p-4 rounded-full bg-muted/50 mb-4">
+        <Icon className="h-12 w-12 text-muted-foreground" />
+      </div>
       <h3 className="text-lg font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground max-w-md mx-auto mb-6">{description}</p>
       {action}
+    </div>
+  );
+}
+
+// Error State Component with Recovery
+export function ClientErrorState({
+  title = "Algo salió mal",
+  description = "No pudimos cargar la información. Por favor, intenta nuevamente.",
+  onRetry,
+  icon: Icon,
+}: {
+  title?: string;
+  description?: string;
+  onRetry?: () => void;
+  icon?: React.ComponentType<{ className?: string }>;
+}) {
+  const DefaultIcon = () => (
+    <svg className="h-12 w-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const ErrorIcon = Icon || DefaultIcon;
+
+  return (
+    <div className="text-center py-12 px-4 animate-fade-in">
+      <div className="inline-block p-4 rounded-full bg-destructive/10 mb-4">
+        <ErrorIcon className="h-12 w-12 text-destructive" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground max-w-md mx-auto mb-6">{description}</p>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Reintentar
+        </button>
+      )}
     </div>
   );
 }

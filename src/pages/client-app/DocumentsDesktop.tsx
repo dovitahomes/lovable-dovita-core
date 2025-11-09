@@ -18,7 +18,8 @@ import {
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientDocuments } from '@/hooks/client-app/useClientData';
-import { ClientEmptyState, ClientLoadingState } from '@/components/client-app/ClientSkeletons';
+import { ClientEmptyState, ClientLoadingState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 import {
   Table,
   TableBody,
@@ -32,6 +33,7 @@ type DocumentCategory = 'all' | 'cliente' | 'proyecto' | 'legal' | 'diseno' | 'c
 
 export default function DocumentsDesktop() {
   const { currentProject } = useProject();
+  const { handleError } = useClientError();
   const [selectedDocument, setSelectedDocument] = useState<{
     name: string;
     type: string;
@@ -43,7 +45,7 @@ export default function DocumentsDesktop() {
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
 
   // Fetch documents using unified hook
-  const { data: allDocuments = [], isLoading } = useClientDocuments(currentProject?.id || null);
+  const { data: allDocuments = [], isLoading, error, refetch } = useClientDocuments(currentProject?.id || null);
 
   // Filter and search documents
   const filteredDocuments = useMemo(() => {
@@ -155,6 +157,23 @@ export default function DocumentsDesktop() {
     }
     return <File className="h-4 w-4 text-gray-600" />;
   };
+
+  if (error) {
+    return (
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Documentos</h1>
+          <p className="text-muted-foreground">Todos los documentos de tu proyecto</p>
+        </div>
+        <ClientErrorState
+          title="Error al cargar documentos"
+          description="No pudimos obtener tus documentos. Verifica tu conexión e intenta nuevamente."
+          onRetry={() => refetch()}
+          icon={FileText}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">

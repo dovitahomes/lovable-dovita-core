@@ -9,6 +9,8 @@ import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useProjectAppointments, useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
 import { Plus, Clock, User, Calendar as CalendarIcon, CheckCircle2, X } from 'lucide-react';
+import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 import { format, isSameDay, isFuture, isToday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatDateTime } from '@/lib/datetime';
@@ -16,6 +18,7 @@ import { toast } from 'sonner';
 
 export default function Appointments() {
   const { currentProject } = useProject();
+  const { handleError } = useClientError();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
@@ -23,7 +26,7 @@ export default function Appointments() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   
-  const { data: appointments, isLoading } = useProjectAppointments(currentProject?.id || null);
+  const { data: appointments, isLoading, error, refetch } = useProjectAppointments(currentProject?.id || null);
   const deleteAppointment = useDeleteAppointment();
   const updateAppointment = useUpdateAppointment();
 
@@ -89,6 +92,27 @@ export default function Appointments() {
       toast.error('Error al confirmar la cita');
     }
   };
+
+  if (error) {
+    return (
+      <div className="h-full flex flex-col pb-[130px]">
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">Citas con el Equipo</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Agenda y gestiona tus reuniones con el equipo de proyecto
+            </p>
+          </div>
+          <ClientErrorState
+            title="Error al cargar citas"
+            description="No pudimos obtener tus citas. Verifica tu conexión e intenta nuevamente."
+            onRetry={() => refetch()}
+            icon={CalendarIcon}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">

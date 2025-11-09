@@ -19,12 +19,14 @@ import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientDocuments } from '@/hooks/client-app/useClientData';
 import type { Document } from '@/lib/client-app/client-data';
-import { DocumentsListSkeleton, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
+import { DocumentsListSkeleton, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 
 type DocumentCategory = 'all' | 'cliente' | 'proyecto' | 'legal' | 'diseno' | 'construccion' | 'contractual' | 'presupuesto';
 
 export default function Documents() {
   const { currentProject } = useProject();
+  const { handleError } = useClientError();
   const [selectedDocument, setSelectedDocument] = useState<{
     name: string;
     type: string;
@@ -36,7 +38,7 @@ export default function Documents() {
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
 
   // Fetch documents using unified hook
-  const { data: allDocuments = [], isLoading } = useClientDocuments(currentProject?.id || null);
+  const { data: allDocuments = [], isLoading, error, refetch } = useClientDocuments(currentProject?.id || null);
 
   // Filter and search documents
   const filteredDocuments = useMemo(() => {
@@ -147,6 +149,27 @@ export default function Documents() {
     }
     return <File className="h-5 w-5 text-gray-600" />;
   };
+
+  if (error) {
+    return (
+      <div className="h-full overflow-y-auto pb-[130px]">
+        <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4">
+          <h1 className="text-2xl font-bold mb-1">Documentos</h1>
+          <p className="text-sm text-white/90">
+            Accede a todos los documentos de tu proyecto
+          </p>
+        </div>
+        <div className="px-4">
+          <ClientErrorState
+            title="Error al cargar documentos"
+            description="No pudimos obtener tus documentos. Verifica tu conexión e intenta nuevamente."
+            onRetry={() => refetch()}
+            icon={FileText}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full overflow-y-auto pb-[130px]">

@@ -13,18 +13,20 @@ import { useAuth } from '@/app/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PhotosGridSkeletonDesktop, ClientLoadingState } from '@/components/client-app/ClientSkeletons';
+import { PhotosGridSkeletonDesktop, ClientLoadingState, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 
 
 export default function PhotosDesktop() {
   const { currentProject } = useProject();
   const { user } = useAuth();
+  const { handleError } = useClientError();
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   
   // Fetch photos using unified hook
-  const { data: photos = [], isLoading } = useProjectPhotos(currentProject?.id || null);
+  const { data: photos = [], isLoading, error, refetch } = useProjectPhotos(currentProject?.id || null);
 
   // Check user role - only staff can upload
   const [isStaff, setIsStaff] = useState(false);
@@ -47,24 +49,33 @@ export default function PhotosDesktop() {
   if (!shouldShowConstructionPhotos(currentProject)) {
     return (
       <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2 flex items-center justify-center">
-        <Card className="max-w-2xl p-12">
-          <div className="text-center space-y-6">
-            <ImageIcon className="h-20 w-20 mx-auto text-muted-foreground" />
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Fase de Diseño en Curso</h1>
-              <p className="text-muted-foreground text-lg">
-                Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción
-              </p>
-            </div>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos. 
-              Una vez que el proyecto pase a la fase de construcción, aquí podrás ver el progreso fotográfico de tu obra.
-            </p>
+        <ClientEmptyState
+          icon={ImageIcon}
+          title="Fase de Diseño en Curso"
+          description="Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción. Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos."
+          action={
             <Button size="lg" onClick={() => navigate('/client/documents')}>
               Ver Documentos de Diseño
             </Button>
-          </div>
-        </Card>
+          }
+        />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Galería de Fotos</h1>
+          <p className="text-muted-foreground">Explora el progreso visual de tu proyecto</p>
+        </div>
+        <ClientErrorState
+          title="Error al cargar fotos"
+          description="No pudimos obtener las fotos de tu proyecto. Verifica tu conexión e intenta nuevamente."
+          onRetry={() => refetch()}
+          icon={ImageIcon}
+        />
       </div>
     );
   }

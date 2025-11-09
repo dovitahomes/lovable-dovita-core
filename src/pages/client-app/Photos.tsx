@@ -14,19 +14,21 @@ import PhotoViewer from '@/components/client-app/PhotoViewer';
 import { CameraCapture } from '@/components/construction/CameraCapture';
 import { useAuth } from '@/app/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { PhotosGridSkeleton, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
+import { PhotosGridSkeleton, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 
 
 export default function Photos() {
   const { currentProject } = useProject();
   const { user } = useAuth();
+  const { handleError } = useClientError();
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
   const [cameraOpen, setCameraOpen] = useState(false);
 
   // Fetch photos using unified hook
-  const { data: projectPhotos = [], isLoading } = useProjectPhotos(currentProject?.id || null);
+  const { data: projectPhotos = [], isLoading, error, refetch } = useProjectPhotos(currentProject?.id || null);
 
   // Check user role - only staff can upload
   const [isStaff, setIsStaff] = useState(false);
@@ -48,26 +50,62 @@ export default function Photos() {
   // Check if should show construction photos
   if (!shouldShowConstructionPhotos(currentProject)) {
     return (
-      <div className="h-full overflow-y-auto p-4">
+      <div className="h-full overflow-y-auto p-4 pb-[130px]">
         <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4 rounded-lg">
           <h1 className="text-2xl font-bold mb-1">Fotos de Avance</h1>
           <p className="text-sm text-white/90">
             Las fotos de construcción estarán disponibles próximamente
           </p>
         </div>
-        <Card className="p-8">
-          <div className="text-center space-y-4">
-            <ImageIcon className="h-16 w-16 mx-auto text-muted-foreground" />
-            <h3 className="text-lg font-semibold">Fase de Diseño en Curso</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción. 
-              Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos.
-            </p>
+        <ClientEmptyState
+          icon={ImageIcon}
+          title="Fase de Diseño en Curso"
+          description="Las fotos de avance de obra estarán disponibles cuando inicie la fase de construcción. Por ahora puedes revisar los renders y documentos de diseño en la sección de Documentos."
+          action={
             <Button onClick={() => navigate('/client/documents')}>
               Ver Documentos de Diseño
             </Button>
-          </div>
-        </Card>
+          }
+        />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="h-full overflow-y-auto pb-[130px]">
+        <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4">
+          <h1 className="text-2xl font-bold mb-1">Fotos de Avance</h1>
+          <p className="text-sm text-white/90">
+            Visualiza el progreso de tu proyecto
+          </p>
+        </div>
+        <div className="px-4">
+          <ClientErrorState
+            title="Error al cargar fotos"
+            description="No pudimos obtener las fotos de tu proyecto. Verifica tu conexión e intenta nuevamente."
+            onRetry={() => refetch()}
+            icon={ImageIcon}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="h-full overflow-y-auto pb-[130px]">
+        <div className="bg-gradient-to-br from-primary to-primary/80 text-white px-4 py-6 mb-4">
+          <h1 className="text-2xl font-bold mb-1">Fotos de Avance</h1>
+          <p className="text-sm text-white/90">
+            Visualiza el progreso de tu proyecto
+          </p>
+        </div>
+        <div className="px-4">
+          <PhotosGridSkeleton />
+        </div>
       </div>
     );
   }

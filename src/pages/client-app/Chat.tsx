@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Users, Info } from 'lucide-react';
+import { Users, Info, MessageSquare } from 'lucide-react';
+import { ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 import ChatHeader from '@/components/client-app/ChatHeader';
 import ChatMessage from '@/components/client-app/ChatMessage';
 import ChatInput from '@/components/client-app/ChatInput';
@@ -181,7 +182,14 @@ export default function Chat() {
           </div>
 
           {/* Messages grouped by date */}
-          {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
+          {Object.keys(groupedMessages).length === 0 ? (
+            <ClientEmptyState
+              icon={MessageSquare}
+              title="No hay mensajes"
+              description="Inicia una conversación con tu equipo enviando un mensaje."
+            />
+          ) : (
+          Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
             <div key={dateKey}>
               {/* Date Separator */}
               <div className="flex items-center justify-center my-4">
@@ -197,7 +205,8 @@ export default function Chat() {
                 <ChatMessage key={message.id} message={message} clientAvatar={clientAvatar} />
               ))}
             </div>
-          ))}
+          ))
+          )}
 
           {/* Typing Indicator */}
           {isTyping && (

@@ -12,21 +12,42 @@ import { Calendar, MapPin, Video, Clock, User, FileText, MessageCircle, Image as
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
-import { ClientLoadingState } from '@/components/client-app/ClientSkeletons';
+import { ClientLoadingState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 
 export default function Dashboard() {
   const { currentProject } = useProject();
+  const { handleError } = useClientError();
   const project = currentProject;
   const navigate = useNavigate();
   const [currentRenderIndex, setCurrentRenderIndex] = useState(0);
 
   // Fetch data using unified hooks (auto-switch between mock/real)
-  const { data: photos = [] } = useClientPhotos(project?.id || null);
-  const { data: ministrations = [] } = useClientMinistrations(project?.id || null);
+  const { data: photos = [], error: photosError, refetch: refetchPhotos } = useClientPhotos(project?.id || null);
+  const { data: ministrations = [], error: ministrationsError, refetch: refetchMinistrations } = useClientMinistrations(project?.id || null);
+  
+  const hasError = photosError || ministrationsError;
+  const handleRetry = () => {
+    refetchPhotos();
+    refetchMinistrations();
+  };
   
   // Early return if no project
   if (!project) {
     return <ClientLoadingState message="Cargando proyecto..." />;
+  }
+
+  // Error state
+  if (hasError) {
+    return (
+      <div className="h-full flex items-center justify-center pb-[130px]">
+        <ClientErrorState
+          title="Error al cargar el tablero"
+          description="No pudimos cargar algunos datos de tu proyecto. Verifica tu conexión e intenta nuevamente."
+          onRetry={handleRetry}
+        />
+      </div>
+    );
   }
   
   // Get current hero image (prioriza diseños recientes > renders > heroImage)

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle, Clock } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, CalendarDays } from 'lucide-react';
+import { ClientEmptyState } from '@/components/client-app/ClientSkeletons';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 
 export default function Schedule() {
@@ -25,6 +26,13 @@ export default function Schedule() {
           </p>
         </div>
 
+      {phases.length === 0 ? (
+        <ClientEmptyState
+          icon={CalendarDays}
+          title="No hay fases disponibles"
+          description="El cronograma de tu proyecto aparecerá aquí cuando el equipo lo configure."
+        />
+      ) : (
       <div className="relative space-y-4">
         {/* Timeline line */}
         <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-border" />
@@ -88,6 +96,7 @@ export default function Schedule() {
           );
         })}
       </div>
+      )}
       </div>
     </div>
   );

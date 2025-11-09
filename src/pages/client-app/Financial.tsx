@@ -10,21 +10,42 @@ import { CheckCircle2, Clock, Calendar, AlertCircle, DollarSign, TrendingUp, Fil
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { isInDesignPhase } from '@/lib/project-utils';
-import { PaymentCardSkeleton, ClientLoadingState, ClientEmptyState } from '@/components/client-app/ClientSkeletons';
+import { PaymentCardSkeleton, ClientLoadingState, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
+import { useClientError } from '@/hooks/client-app/useClientError';
 
 type FilterStatus = 'all' | 'paid' | 'pending' | 'future';
 
 export default function Financial() {
   const { currentProject } = useProject();
+  const { handleError } = useClientError();
   const project = currentProject;
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   
   // Fetch data using unified hooks
-  const { data: ministrations = [], isLoading: loadingMinistrations } = useClientMinistrations(project?.id || null);
-  const { data: financialSummary } = useClientFinancialSummary(project?.id || null);
+  const { data: ministrations = [], isLoading: loadingMinistrations, error: ministrationsError, refetch: refetchMinistrations } = useClientMinistrations(project?.id || null);
+  const { data: financialSummary, error: financialError, refetch: refetchFinancial } = useClientFinancialSummary(project?.id || null);
+  
+  const hasError = ministrationsError || financialError;
+  const handleRetry = () => {
+    refetchMinistrations();
+    refetchFinancial();
+  };
   
   if (!project) {
     return <ClientLoadingState message="Cargando datos financieros..." />;
+  }
+
+  if (hasError) {
+    return (
+      <div className="h-full flex items-center justify-center pb-[130px]">
+        <ClientErrorState
+          title="Error al cargar información financiera"
+          description="No pudimos obtener los datos financieros. Verifica tu conexión e intenta nuevamente."
+          onRetry={handleRetry}
+          icon={DollarSign}
+        />
+      </div>
+    );
   }
 
   const inDesignPhase = isInDesignPhase(project);
