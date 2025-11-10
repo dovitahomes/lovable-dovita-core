@@ -39,6 +39,7 @@ const ProyectoDetalle = lazy(() => import("./pages/ProyectoDetalle"));
 const ProyectoEquipo = lazy(() => import("./pages/ProyectoEquipo"));
 const ProyectoChat = lazy(() => import("./pages/ProyectoChat"));
 const ProyectoCalendario = lazy(() => import("./pages/ProyectoCalendario"));
+const MisChats = lazy(() => import("./pages/MisChats"));
 const Leads = lazy(() => import("./pages/Leads"));
 const Accounts = lazy(() => import("./pages/crm/Accounts"));
 const Contacts = lazy(() => import("./pages/crm/Contacts"));
@@ -107,6 +108,15 @@ const InternalLayout = () => {
                 {/* DASHBOARD                                    */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.DASHBOARD} element={<Dashboard />} />
+                
+                {/* ============================================ */}
+                {/* MI ÁREA (COLABORADORES)                     */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.MIS_CHATS} element={
+                  <ProtectedRoute moduleName="proyectos">
+                    <Suspense fallback={<TableSkeleton />}><MisChats /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
                 {/* ============================================ */}
                 {/* HERRAMIENTAS ADMINISTRATIVAS                */}

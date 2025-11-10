@@ -70,6 +70,10 @@ export const BACKOFFICE_ROUTES = {
   // Vista especial
   VER_COMO_CLIENTE: '/ver-como-cliente',
   
+  // Mi Área (Colaboradores)
+  MI_CALENDARIO: '/mi-calendario',
+  MIS_CHATS: '/mis-chats',
+  
   // CRM
   LEADS: '/leads',
   ACCOUNTS: '/crm/accounts',

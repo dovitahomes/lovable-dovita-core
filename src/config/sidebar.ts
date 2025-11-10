@@ -22,6 +22,8 @@ import {
   ShieldCheck,
   ListTree,
   Eye,
+  MessageSquare,
+  CalendarDays,
 } from "lucide-react";
 import { BACKOFFICE_ROUTES } from "./routes";
 
@@ -53,6 +55,18 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: BACKOFFICE_ROUTES.DASHBOARD, 
         icon: LayoutDashboard, 
         moduleName: "dashboard" 
+      },
+      { 
+        title: "Mi Calendario", 
+        url: BACKOFFICE_ROUTES.MI_CALENDARIO, 
+        icon: CalendarDays, 
+        moduleName: "proyectos" 
+      },
+      { 
+        title: "Mis Chats", 
+        url: BACKOFFICE_ROUTES.MIS_CHATS, 
+        icon: MessageSquare, 
+        moduleName: "proyectos" 
       },
     ],
   },

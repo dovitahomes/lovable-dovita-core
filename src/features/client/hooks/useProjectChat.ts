@@ -26,11 +26,31 @@ export default function useProjectChat(projectId: string | null) {
     setError(null);
 
     try {
-      const { data, error: loadError } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No autenticado');
+
+      // Obtener configuración de historial del participante
+      const { data: participant } = await supabase
+        .from('project_chat_participants')
+        .select('show_history_from')
+        .eq('project_id', projectId)
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      // Construir query de mensajes
+      let query = supabase
         .from('project_messages')
         .select('id, sender_id, message, created_at')
         .eq('project_id', projectId)
         .order('created_at', { ascending: true });
+
+      // Si el participante tiene restricción de historial, aplicarla
+      if (participant?.show_history_from) {
+        query = query.gte('created_at', participant.show_history_from);
+      }
+
+      const { data, error: loadError } = await query;
 
       if (loadError) {
         throw new Error(`No se pudieron cargar los mensajes: ${loadError.message}`);

@@ -9,6 +9,7 @@ import { Loader2, Send, AlertCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import ProjectChatParticipants from "./ProjectChatParticipants";
 
 interface ProjectChatTabProps {
   projectId: string;
@@ -66,7 +67,9 @@ export default function ProjectChatTab({ projectId }: ProjectChatTabProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Chat del Proyecto</h3>
       
-      <Card className="p-0 h-[600px] flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <Card className="p-0 h-[600px] flex flex-col">
         <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
           {loading ? (
             <div className="flex justify-center p-8">
@@ -126,6 +129,12 @@ export default function ProjectChatTab({ projectId }: ProjectChatTabProps) {
           </div>
         </div>
       </Card>
+        </div>
+        
+        <div className="lg:col-span-1">
+          <ProjectChatParticipants projectId={projectId} />
+        </div>
+      </div>
     </div>
   );
 }

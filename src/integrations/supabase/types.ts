@@ -2839,6 +2839,82 @@ export type Database = {
           },
         ]
       }
+      project_chat_participants: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          joined_at: string
+          participant_type: string
+          project_id: string
+          show_history_from: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          joined_at?: string
+          participant_type: string
+          project_id: string
+          show_history_from?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          joined_at?: string
+          participant_type?: string
+          project_id?: string
+          show_history_from?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_chat_participants_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_chat_participants_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_chat_participants_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_chat_participants_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_chat_participants_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_chat_participants_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       project_collaborators: {
         Row: {
           created_at: string
@@ -3315,6 +3391,7 @@ export type Database = {
           created_by: string | null
           id: string
           notas: string | null
+          sales_advisor_id: string | null
           status: Database["public"]["Enums"]["project_status"]
           sucursal_id: string | null
           terreno_m2: number | null
@@ -3327,6 +3404,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notas?: string | null
+          sales_advisor_id?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           sucursal_id?: string | null
           terreno_m2?: number | null
@@ -3339,6 +3417,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notas?: string | null
+          sales_advisor_id?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           sucursal_id?: string | null
           terreno_m2?: number | null
@@ -5211,12 +5290,20 @@ export type Database = {
         }[]
       }
       get_user_project_ids: { Args: { p_user_id: string }; Returns: string[] }
+      grant_full_chat_history: {
+        Args: { p_project_id: string; p_user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: { p_role_name: string; p_user_id: string }
         Returns: boolean
       }
       is_client_user: { Args: never; Returns: boolean }
       is_collaborator: { Args: never; Returns: boolean }
+      remove_from_chat: {
+        Args: { p_project_id: string; p_user_id: string }
+        Returns: undefined
+      }
       save_price_history: {
         Args: {
           precio_param: number
