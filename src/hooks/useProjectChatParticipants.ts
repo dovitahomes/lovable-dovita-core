@@ -10,6 +10,8 @@ export interface ChatParticipant {
   joined_at: string;
   show_history_from: string | null;
   is_active: boolean;
+  message_count?: number;
+  last_message_at?: string | null;
   profiles?: {
     id: string;
     full_name: string;
@@ -43,9 +45,41 @@ export function useProjectChatParticipants(projectId: string) {
       
       const profileMap = new Map(profiles?.map(p => [p.id, p]));
       
+      // Fetch message counts and last message time for each participant
+      const messageCounts = await Promise.all(
+        userIds.map(async (userId) => {
+          const { count } = await supabase
+            .from('project_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('project_id', projectId)
+            .eq('sender_id', userId);
+          
+          const { data: lastMessage } = await supabase
+            .from('project_messages')
+            .select('created_at')
+            .eq('project_id', projectId)
+            .eq('sender_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          return {
+            userId,
+            count: count || 0,
+            lastMessageAt: lastMessage?.created_at || null
+          };
+        })
+      );
+      
+      const messageCountMap = new Map(
+        messageCounts.map(m => [m.userId, { count: m.count, lastMessageAt: m.lastMessageAt }])
+      );
+      
       return data.map(p => ({
         ...p,
         profiles: profileMap.get(p.user_id),
+        message_count: messageCountMap.get(p.user_id)?.count || 0,
+        last_message_at: messageCountMap.get(p.user_id)?.lastMessageAt || null,
       })) as ChatParticipant[];
     },
     enabled: !!projectId,
