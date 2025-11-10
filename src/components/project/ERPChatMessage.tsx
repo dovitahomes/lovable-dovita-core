@@ -1,7 +1,8 @@
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, CheckCheck, FileIcon, Pencil } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Check, CheckCheck, FileIcon, Pencil, FileText, Image as ImageIcon, File, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ERPChatMessageProps {
@@ -40,16 +41,58 @@ export default function ERPChatMessage({ message, currentUserId }: ERPChatMessag
     return format(new Date(timestamp), 'HH:mm', { locale: es });
   };
 
+  const formatRelativeTime = (timestamp: string) => {
+    try {
+      return formatDistanceToNow(new Date(timestamp), { 
+        addSuffix: true, 
+        locale: es 
+      });
+    } catch {
+      return formatTime(timestamp);
+    }
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
+    if (type.includes('pdf')) return <FileText className="h-4 w-4" />;
+    if (type.includes('document') || type.includes('word')) return <FileText className="h-4 w-4" />;
+    return <File className="h-4 w-4" />;
+  };
+
+  const isImageFile = (type: string) => type.startsWith('image/');
+
   const renderStatus = () => {
     if (!isOwnMessage) return null;
     
-    if (message.status === 'read') {
-      return <CheckCheck className="h-3 w-3 text-blue-500" />;
-    } else if (message.status === 'delivered') {
-      return <CheckCheck className="h-3 w-3 text-muted-foreground" />;
-    } else {
-      return <Check className="h-3 w-3 text-muted-foreground" />;
-    }
+    const statusConfig = {
+      read: { 
+        icon: <CheckCheck className="h-3.5 w-3.5 text-blue-500" />,
+        tooltip: "Visto"
+      },
+      delivered: { 
+        icon: <CheckCheck className="h-3.5 w-3.5 text-muted-foreground" />,
+        tooltip: "Entregado"
+      },
+      sent: { 
+        icon: <Check className="h-3.5 w-3.5 text-muted-foreground" />,
+        tooltip: "Enviado"
+      }
+    };
+
+    const config = statusConfig[message.status];
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">{config.icon}</span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            {config.tooltip}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   };
 
   return (
@@ -81,55 +124,117 @@ export default function ERPChatMessage({ message, currentUserId }: ERPChatMessag
 
         {/* Message content */}
         <div className={cn(
-          "rounded-2xl px-4 py-2.5 break-words",
+          "rounded-2xl px-4 py-2.5 break-words shadow-sm",
           isOwnMessage 
-            ? "bg-primary text-primary-foreground rounded-tr-sm" 
-            : "bg-muted text-foreground rounded-tl-sm"
+            ? "bg-blue-500 text-white rounded-tr-sm" 
+            : "bg-gray-100 dark:bg-gray-800 text-foreground rounded-tl-sm"
         )}>
-          <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+          {message.message && (
+            <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+          )}
           
           {/* Attachments */}
           {message.attachments && message.attachments.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {message.attachments.map((att, idx) => (
-                <a
-                  key={idx}
-                  href={att.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "flex items-center gap-2 p-2 rounded-lg transition-colors text-xs",
-                    isOwnMessage 
-                      ? "bg-primary-foreground/10 hover:bg-primary-foreground/20" 
-                      : "bg-background hover:bg-muted"
-                  )}
-                >
-                  <FileIcon className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate flex-1">{att.name}</span>
-                  <span className="text-[10px] opacity-70">
-                    {(att.size / 1024).toFixed(1)} KB
-                  </span>
-                </a>
-              ))}
+            <div className={cn("space-y-2", message.message && "mt-3")}>
+              {message.attachments.map((att, idx) => {
+                const isImage = isImageFile(att.type);
+                
+                return isImage ? (
+                  // Image thumbnail preview
+                  <a
+                    key={idx}
+                    href={att.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group relative rounded-lg overflow-hidden transition-all hover:shadow-lg"
+                  >
+                    <img 
+                      src={att.url} 
+                      alt={att.name}
+                      className="w-full max-w-xs rounded-lg transition-transform group-hover:scale-[1.02]"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <Download className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                    </div>
+                  </a>
+                ) : (
+                  // File attachment card
+                  <a
+                    key={idx}
+                    href={att.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg transition-all text-xs group",
+                      "hover:shadow-md",
+                      isOwnMessage 
+                        ? "bg-white/20 hover:bg-white/30 text-white" 
+                        : "bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    )}
+                  >
+                    <div className={cn(
+                      "p-2 rounded-lg flex-shrink-0",
+                      isOwnMessage 
+                        ? "bg-white/20" 
+                        : "bg-primary/10 text-primary"
+                    )}>
+                      {getFileIcon(att.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{att.name}</p>
+                      <p className={cn(
+                        "text-[10px] mt-0.5",
+                        isOwnMessage ? "text-white/70" : "text-muted-foreground"
+                      )}>
+                        {(att.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    <Download className={cn(
+                      "h-4 w-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity",
+                      isOwnMessage ? "text-white" : "text-primary"
+                    )} />
+                  </a>
+                );
+              })}
             </div>
           )}
         </div>
 
         {/* Metadata: time, status, edited */}
         <div className={cn(
-          "flex items-center gap-1 mt-1 px-1",
+          "flex items-center gap-1.5 mt-1 px-1",
           isOwnMessage ? "flex-row-reverse" : "flex-row"
         )}>
-          <span className="text-[10px] text-muted-foreground">
-            {formatTime(message.created_at)}
-          </span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[10px] text-muted-foreground cursor-help">
+                  {formatRelativeTime(message.created_at)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                {format(new Date(message.created_at), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           {message.is_edited && (
             <>
               <span className="text-[10px] text-muted-foreground">•</span>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                <Pencil className="h-2.5 w-2.5" />
-                Editado
-              </span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 cursor-help">
+                      <Pencil className="h-2.5 w-2.5" />
+                      Editado
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {message.edited_at && format(new Date(message.edited_at), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </>
           )}
           {renderStatus()}
