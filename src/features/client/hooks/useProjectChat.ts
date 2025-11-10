@@ -4,9 +4,21 @@ import { useIsMounted } from "@/hooks/useIsMounted";
 
 export interface ChatMessage {
   id: string;
+  project_id: string;
   sender_id: string;
   message: string;
+  attachments: Array<{ name: string; url: string; size: number; type: string }>;
+  status: 'sent' | 'delivered' | 'read';
+  is_edited: boolean;
+  edited_at: string | null;
+  replied_to_id: string | null;
   created_at: string;
+  sender: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url: string | null;
+  };
 }
 
 export default function useProjectChat(projectId: string | null) {
@@ -38,10 +50,27 @@ export default function useProjectChat(projectId: string | null) {
         .eq('is_active', true)
         .maybeSingle();
 
-      // Construir query de mensajes
-      let query = supabase
+      // Construir query de mensajes con información completa del sender
+      let query: any = supabase
         .from('project_messages')
-        .select('id, sender_id, message, created_at')
+        .select(`
+          id,
+          project_id,
+          sender_id,
+          message,
+          attachments,
+          status,
+          is_edited,
+          edited_at,
+          replied_to_id,
+          created_at,
+          sender:profiles!project_messages_sender_id_fkey(
+            id,
+            full_name,
+            email,
+            avatar_url
+          )
+        `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: true });
 
@@ -57,7 +86,13 @@ export default function useProjectChat(projectId: string | null) {
       }
 
       if (isMounted.current) {
-        setMessages(data || []);
+        // Transform data to ensure sender is an object
+        const transformedData = (data || []).map((msg: any) => ({
+          ...msg,
+          sender: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender,
+          attachments: msg.attachments || []
+        }));
+        setMessages(transformedData);
       }
     } catch (err) {
       if (isMounted.current) {
@@ -70,7 +105,10 @@ export default function useProjectChat(projectId: string | null) {
     }
   }, [projectId, isMounted]);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (
+    text: string, 
+    attachments?: Array<{ name: string; url: string; size: number; type: string }>
+  ) => {
     if (!projectId || !text.trim()) return;
 
     setSending(true);
@@ -83,12 +121,14 @@ export default function useProjectChat(projectId: string | null) {
         throw new Error('No estás autenticado');
       }
 
-      const { error: insertError } = await supabase
-        .from('project_messages')
+      const { error: insertError } = await (supabase
+        .from('project_messages') as any)
         .insert({
           project_id: projectId,
           sender_id: user.id,
           message: text.trim(),
+          attachments: attachments || [],
+          status: 'sent'
         });
 
       if (insertError) {
@@ -127,9 +167,40 @@ export default function useProjectChat(projectId: string | null) {
           table: 'project_messages',
           filter: `project_id=eq.${projectId}`,
         },
-        (payload) => {
+        async (payload) => {
           if (isMounted.current) {
-            setMessages(prev => [...prev, payload.new as ChatMessage]);
+            // Fetch complete message with sender info
+            const { data } = await (supabase
+              .from('project_messages') as any)
+              .select(`
+                id,
+                project_id,
+                sender_id,
+                message,
+                attachments,
+                status,
+                is_edited,
+                edited_at,
+                replied_to_id,
+                created_at,
+                sender:profiles!project_messages_sender_id_fkey(
+                  id,
+                  full_name,
+                  email,
+                  avatar_url
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (data) {
+              const transformedMsg = {
+                ...data,
+                sender: Array.isArray(data.sender) ? data.sender[0] : data.sender,
+                attachments: data.attachments || []
+              };
+              setMessages(prev => [...prev, transformedMsg as ChatMessage]);
+            }
           }
         }
       )

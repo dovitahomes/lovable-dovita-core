@@ -6,19 +6,21 @@ import ChatHeader from '@/components/client-app/ChatHeader';
 import ChatMessage from '@/components/client-app/ChatMessage';
 import ChatInput from '@/components/client-app/ChatInput';
 import AvatarCustomizationDialog from '@/components/client-app/AvatarCustomizationDialog';
-import { mockChatMessages } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
+import { useProjectChat } from '@/features/client/hooks';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Chat() {
   const { currentProject } = useProject();
   const { isPreviewMode } = useDataSource();
-  const [messages, setMessages] = useState(() => 
-    mockChatMessages.filter(msg => msg.projectId === currentProject?.id)
-  );
+  
+  // Use real backend hook
+  const { messages: backendMessages, loading, error, sending, sendMessage: sendBackendMessage } = useProjectChat(currentProject?.id || null);
+  
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [clientAvatar, setClientAvatar] = useState<{ type: "preset" | "custom"; value: string } | null>(() => {
@@ -28,21 +30,40 @@ export default function Chat() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setCurrentUserId(data.user.id);
+    });
+  }, []);
 
   const handleSaveAvatar = (avatar: { type: "preset" | "custom"; value: string }) => {
     setClientAvatar(avatar);
     localStorage.setItem("clientAvatar", JSON.stringify(avatar));
   };
 
-
-  // Update messages when project changes
-  useEffect(() => {
-    setMessages(mockChatMessages.filter(msg => msg.projectId === currentProject?.id));
-  }, [currentProject?.id]);
+  // Transform backend messages to match Client App format
+  const messages = backendMessages.map(msg => ({
+    id: parseInt(msg.id.split('-')[0], 16), // Convert UUID to number for compatibility
+    projectId: msg.project_id,
+    content: msg.message,
+    attachments: msg.attachments,
+    timestamp: msg.created_at,
+    isClient: msg.sender_id === currentUserId,
+    status: msg.status,
+    sender: msg.sender_id !== currentUserId ? {
+      id: msg.sender.id,
+      name: msg.sender.full_name || msg.sender.email,
+      avatar: msg.sender.avatar_url || '',
+      role: 'Equipo' // Generic role for team members
+    } : undefined
+  }));
 
   // Smart auto-scroll: only scroll if user is near bottom
   useEffect(() => {
-    if (shouldAutoScrollRef.current) {
+    if (shouldAutoScrollRef.current && messages.length > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
@@ -62,63 +83,23 @@ export default function Chat() {
     return () => scrollArea.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSendMessage = (content: string, attachments?: File[]) => {
-    const newMessage = {
-      id: messages.length + 1,
-      projectId: currentProject?.id || '',
-      content,
-      attachments: attachments?.map(f => ({ name: f.name, size: f.size, type: f.type })),
-      timestamp: new Date().toISOString(),
-      isClient: true,
-      status: 'sent' as const
-    } as any;
+  const handleSendMessage = async (content: string, attachments?: File[]) => {
+    try {
+      // TODO: Upload attachments to storage if needed
+      const attachmentUrls = attachments?.map(f => ({
+        name: f.name,
+        url: '', // Will be populated after upload
+        size: f.size,
+        type: f.type
+      })) || [];
 
-    setMessages([...messages, newMessage]);
-    shouldAutoScrollRef.current = true; // Force scroll on send
-    
-    // Simulate typing indicator
-    setTimeout(() => {
-      setIsTyping(true);
-    }, 500);
-
-    // Simulate message delivery
-    setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, status: 'delivered' as const }
-            : msg
-        )
-      );
-    }, 1000);
-
-    // Simulate team response with typing
-    setTimeout(() => {
-      setIsTyping(false);
-      const teamResponse = {
-        id: messages.length + 2,
-        projectId: currentProject?.id || '',
-        content: '¡Mensaje recibido! Nos pondremos en contacto contigo pronto.',
-        timestamp: new Date().toISOString(),
-        isClient: false,
-        sender: currentProject?.team[0]
-      } as any;
-      
-      setMessages(prev => [...prev, teamResponse]);
-      
-      // Mark original message as read
-      setTimeout(() => {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === newMessage.id 
-              ? { ...msg, status: 'read' as const }
-              : msg
-          )
-        );
-      }, 1000);
-    }, 2500);
-
-    toast.success('Mensaje enviado');
+      await sendBackendMessage(content, attachmentUrls);
+      shouldAutoScrollRef.current = true; // Force scroll on send
+      toast.success('Mensaje enviado');
+    } catch (err) {
+      toast.error('Error al enviar mensaje');
+      console.error('Error sending message:', err);
+    }
   };
 
   // Group messages by date

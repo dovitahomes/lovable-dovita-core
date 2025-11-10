@@ -11,8 +11,10 @@ export interface ChatParticipant {
   show_history_from: string | null;
   is_active: boolean;
   profiles?: {
+    id: string;
     full_name: string;
     email: string;
+    avatar_url: string | null;
   };
 }
 
@@ -36,7 +38,7 @@ export function useProjectChatParticipants(projectId: string) {
       
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, email')
+        .select('id, full_name, email, avatar_url')
         .in('id', userIds);
       
       const profileMap = new Map(profiles?.map(p => [p.id, p]));
