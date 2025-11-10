@@ -129,7 +129,7 @@ export default function ProyectoDetalle() {
             <MessageSquare className="h-4 w-4" />
             Chat
           </Button>
-          <Button variant="outline" onClick={() => navigate(generateRoute.proyectoCalendario(id!))} className="gap-2">
+          <Button variant="outline" onClick={() => navigate(`/mi-calendario?project=${id}`)} className="gap-2">
             <CalendarDays className="h-4 w-4" />
             Calendario
           </Button>
@@ -253,9 +253,16 @@ export default function ProyectoDetalle() {
             <MessageSquare className="h-4 w-4" />
             Chat
           </TabsTrigger>
-          <TabsTrigger value="citas" className="gap-2">
+          <TabsTrigger 
+            value="citas" 
+            className="gap-2"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/mi-calendario?project=${id}`);
+            }}
+          >
             <Calendar className="h-4 w-4" />
-            Citas
+            Calendario
           </TabsTrigger>
           <TabsTrigger value="detalles">Detalles</TabsTrigger>
         </TabsList>
