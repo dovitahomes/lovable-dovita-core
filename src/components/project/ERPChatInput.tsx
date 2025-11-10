@@ -21,9 +21,9 @@ export default function ERPChatInput({ onSendMessage, disabled }: ERPChatInputPr
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <ImageIcon className="h-4 w-4 text-blue-500" />;
-    if (type.includes('pdf')) return <FileText className="h-4 w-4 text-red-500" />;
-    if (type.includes('document') || type.includes('word')) return <FileText className="h-4 w-4 text-blue-600" />;
+    if (type.startsWith('image/')) return <ImageIcon className="h-4 w-4 text-primary" />;
+    if (type.includes('pdf')) return <FileText className="h-4 w-4 text-destructive" />;
+    if (type.includes('document') || type.includes('word')) return <FileText className="h-4 w-4 text-primary" />;
     return <File className="h-4 w-4 text-muted-foreground" />;
   };
 
@@ -193,14 +193,15 @@ export default function ERPChatInput({ onSendMessage, disabled }: ERPChatInputPr
           onChange={handleAttachmentChange}
         />
         
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabled || isSending}
-          className="flex-shrink-0 hover:bg-accent"
-        >
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled || isSending}
+            className="flex-shrink-0 hover:bg-accent focus-ring"
+            aria-label="Adjuntar archivo"
+          >
           <Paperclip className="h-5 w-5" />
         </Button>
 
@@ -222,9 +223,10 @@ export default function ERPChatInput({ onSendMessage, disabled }: ERPChatInputPr
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-1 bottom-1 h-8 w-8 hover:bg-accent"
+            className="absolute right-1 bottom-1 h-8 w-8 hover:bg-accent focus-ring"
             disabled={disabled || isSending}
             onClick={() => toast.info('Selector de emoji próximamente')}
+            aria-label="Agregar emoji"
           >
             <Smile className="h-4 w-4 text-muted-foreground" />
           </Button>
@@ -237,9 +239,11 @@ export default function ERPChatInput({ onSendMessage, disabled }: ERPChatInputPr
           disabled={disabled || isSending || (!message.trim() && attachments.length === 0)}
           className={cn(
             "flex-shrink-0 transition-all duration-200",
-            "bg-blue-500 hover:bg-blue-600 text-white",
-            "disabled:opacity-50 disabled:cursor-not-allowed"
+            "bg-primary hover:bg-primary-hover text-primary-foreground",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "focus-ring"
           )}
+          aria-label="Enviar mensaje"
         >
           {isSending ? (
             <Loader2 className="h-5 w-5 animate-spin" />

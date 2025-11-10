@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Crown, Users as UsersIcon, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, MessageSquare, Crown, Users as UsersIcon, Send, ArrowDown } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +26,8 @@ export default function MisChats() {
   const { data: chats, isLoading: chatsLoading } = useMyProjectChats();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(projectIdFromUrl || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -60,7 +63,7 @@ export default function MisChats() {
     }
   }, [messages]);
 
-  // Track scroll position
+  // Track scroll position and show/hide scroll button
   useEffect(() => {
     const scrollArea = scrollAreaRef.current;
     if (!scrollArea) return;
@@ -69,11 +72,26 @@ export default function MisChats() {
       const { scrollTop, scrollHeight, clientHeight } = scrollArea;
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
       shouldAutoScrollRef.current = isNearBottom;
+      setShowScrollButton(!isNearBottom && messages.length > 5);
     };
 
     scrollArea.addEventListener('scroll', handleScroll);
     return () => scrollArea.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [messages.length]);
+
+  // Show scroll button when new messages arrive and user is not at bottom
+  useEffect(() => {
+    if (messages.length > previousMessageCount && !shouldAutoScrollRef.current) {
+      setShowScrollButton(true);
+    }
+    setPreviousMessageCount(messages.length);
+  }, [messages.length]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShowScrollButton(false);
+    shouldAutoScrollRef.current = true;
+  };
 
   const handleSendMessage = async (
     text: string, 
@@ -127,7 +145,7 @@ export default function MisChats() {
   const selectedChat = chats?.find(c => c.project_id === selectedProjectId);
 
   return (
-    <div className="container mx-auto p-4 h-[calc(100vh-4rem)]">
+    <div className="container mx-auto p-4 h-[calc(100vh-4rem)]" role="main" aria-label="Mensajes de proyectos">
       <div className="mb-6 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-transparent rounded-lg -z-10" />
         <h1 className="text-3xl font-bold tracking-tight">Mis Chats</h1>
@@ -136,9 +154,9 @@ export default function MisChats() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100%-5rem)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100%-5rem)]" role="region" aria-label="Área de chat">
         {/* Lista de Chats */}
-        <Card className="col-span-1 lg:col-span-3 flex flex-col overflow-hidden">
+        <Card className="col-span-1 lg:col-span-3 flex flex-col overflow-hidden animate-slide-in-right" role="navigation" aria-label="Lista de proyectos">
           <div className="p-4 border-b">
             <h2 className="font-semibold text-lg">Proyectos</h2>
             <p className="text-sm text-muted-foreground">
@@ -146,7 +164,7 @@ export default function MisChats() {
             </p>
           </div>
 
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1" aria-label="Proyectos con chats">
             {chatsLoading ? (
               <div className="p-3 space-y-2">
                 {[1, 2, 3, 4].map((i) => (
@@ -183,8 +201,11 @@ export default function MisChats() {
                         w-full p-4 text-left transition-all duration-200
                         border-b border-border/50 last:border-0
                         hover:bg-accent/50
-                        ${isSelected ? 'bg-accent/30 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}
+                        focus-ring
+                        ${isSelected ? 'bg-accent/30 border-l-4 border-l-primary animate-slide-in-right' : 'border-l-4 border-l-transparent'}
                       `}
+                      aria-label={`Chat del proyecto ${chat.projects.clients.name}`}
+                      aria-current={isSelected ? 'page' : undefined}
                     >
                       <div className="flex items-start gap-3">
                         <div className="relative flex-shrink-0">
@@ -248,7 +269,7 @@ export default function MisChats() {
         </Card>
 
         {/* Panel de Chat */}
-        <Card className="col-span-1 lg:col-span-6 flex flex-col overflow-hidden">
+        <Card className="col-span-1 lg:col-span-6 flex flex-col overflow-hidden animate-fade-in" role="region" aria-label="Área de mensajes">
           {!selectedProjectId ? (
             <div className="flex-1 flex items-center justify-center text-muted-foreground animate-fade-in">
               <div className="text-center px-4">
@@ -271,8 +292,9 @@ export default function MisChats() {
               />
 
               {/* Messages Area */}
-              <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-4">
-                {messagesLoading ? (
+              <div className="relative flex-1 overflow-hidden">
+                <ScrollArea ref={scrollAreaRef} className="h-full px-4 py-4" aria-live="polite" aria-atomic="false">
+                  {messagesLoading ? (
                   <div className="space-y-3 animate-fade-in">
                     {[1, 2, 3, 4, 5].map((i) => {
                       const isSelf = i % 3 === 0;
@@ -338,9 +360,9 @@ export default function MisChats() {
                 ) : (
                   <div>
                     {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
-                      <div key={dateKey}>
+                      <div key={dateKey} className="animate-fade-in">
                         {/* Date Separator */}
-                        <div className="flex items-center justify-center my-4">
+                        <div className="flex items-center justify-center my-4" role="separator" aria-label={getDateLabel(dateKey)}>
                           <div className="bg-muted px-3 py-1 rounded-full">
                             <span className="text-xs font-medium text-muted-foreground">
                               {getDateLabel(dateKey)}
@@ -362,6 +384,25 @@ export default function MisChats() {
                   </div>
                 )}
               </ScrollArea>
+
+              {/* Scroll to Bottom Button */}
+              {showScrollButton && (
+                <Button
+                  onClick={scrollToBottom}
+                  size="icon"
+                  className={cn(
+                    "absolute bottom-24 right-6 rounded-full shadow-lg z-10",
+                    "bg-primary hover:bg-primary-hover text-primary-foreground",
+                    "animate-slide-in-up hover:scale-110 transition-transform",
+                    "focus-ring"
+                  )}
+                  aria-label="Desplazarse al final del chat"
+                >
+                  <ArrowDown className="h-5 w-5" />
+                  <span className="sr-only">Nuevos mensajes</span>
+                </Button>
+              )}
+            </div>
           
               {/* Input Area */}
               <ERPChatInput 
@@ -373,7 +414,7 @@ export default function MisChats() {
         </Card>
 
         {/* Panel de Participantes */}
-        <div className="hidden lg:block lg:col-span-3">
+        <div className="hidden lg:block lg:col-span-3 animate-slide-in-right" role="complementary" aria-label="Participantes del chat">
           {selectedProjectId ? (
             <ProjectChatParticipants projectId={selectedProjectId} />
           ) : (

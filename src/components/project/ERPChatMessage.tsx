@@ -66,7 +66,7 @@ export default function ERPChatMessage({ message, currentUserId }: ERPChatMessag
     
     const statusConfig = {
       read: { 
-        icon: <CheckCheck className="h-3.5 w-3.5 text-blue-500" />,
+        icon: <CheckCheck className="h-3.5 w-3.5 text-primary" />,
         tooltip: "Visto"
       },
       delivered: { 
@@ -124,10 +124,10 @@ export default function ERPChatMessage({ message, currentUserId }: ERPChatMessag
 
         {/* Message content */}
         <div className={cn(
-          "rounded-2xl px-4 py-2.5 break-words shadow-sm",
+          "rounded-2xl px-4 py-2.5 break-words shadow-sm transition-colors",
           isOwnMessage 
-            ? "bg-blue-500 text-white rounded-tr-sm" 
-            : "bg-gray-100 dark:bg-gray-800 text-foreground rounded-tl-sm"
+            ? "bg-[hsl(var(--primary))] text-white rounded-tr-sm" 
+            : "bg-muted text-foreground rounded-tl-sm"
         )}>
           {message.message && (
             <p className="text-sm whitespace-pre-wrap">{message.message}</p>
