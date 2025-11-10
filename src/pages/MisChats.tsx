@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare, Crown, Users as UsersIcon, Send, ArrowDown } from "lucide-react";
+import { Loader2, MessageSquare, Crown, Users as UsersIcon, Send, ArrowDown, ChevronLeft } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,6 +28,7 @@ export default function MisChats() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,6 +55,12 @@ export default function MisChats() {
   const handleProjectSelect = (projectId: string) => {
     setSelectedProjectId(projectId);
     setSearchParams({ project: projectId });
+    setShowChatOnMobile(true); // Switch to chat view on mobile
+  };
+
+  // Back to list on mobile
+  const handleBackToList = () => {
+    setShowChatOnMobile(false);
   };
 
   // Smart auto-scroll: only if user is near bottom
@@ -156,7 +163,10 @@ export default function MisChats() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100%-5rem)]" role="region" aria-label="Área de chat">
         {/* Lista de Chats */}
-        <Card className="col-span-1 lg:col-span-3 flex flex-col overflow-hidden animate-slide-in-right" role="navigation" aria-label="Lista de proyectos">
+        <Card className={cn(
+          "col-span-1 lg:col-span-3 flex flex-col overflow-hidden animate-slide-in-right",
+          showChatOnMobile && "hidden lg:flex"
+        )} role="navigation" aria-label="Lista de proyectos">
           <div className="p-4 border-b">
             <h2 className="font-semibold text-lg">Proyectos</h2>
             <p className="text-sm text-muted-foreground">
@@ -209,10 +219,13 @@ export default function MisChats() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="relative flex-shrink-0">
-                          <Avatar className={`
-                            h-10 w-10 transition-all
-                            ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
-                          `}>
+                          <Avatar className={cn(
+                            "h-10 w-10 transition-all",
+                            isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                            !isSelected && chat.participant_type === 'sales_advisor' && "ring-2 ring-amber-500/30",
+                            !isSelected && chat.participant_type === 'client' && "ring-2 ring-blue-500/30",
+                            !isSelected && chat.participant_type === 'collaborator' && "ring-2 ring-purple-500/30"
+                          )}>
                             <AvatarFallback className={`
                               font-semibold text-sm
                               ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}
@@ -269,7 +282,10 @@ export default function MisChats() {
         </Card>
 
         {/* Panel de Chat */}
-        <Card className="col-span-1 lg:col-span-6 flex flex-col overflow-hidden animate-fade-in" role="region" aria-label="Área de mensajes">
+        <Card className={cn(
+          "col-span-1 lg:col-span-6 flex flex-col overflow-hidden animate-fade-in",
+          !showChatOnMobile && selectedProjectId && "hidden lg:flex"
+        )} role="region" aria-label="Área de mensajes">
           {!selectedProjectId ? (
             <div className="flex-1 flex items-center justify-center text-muted-foreground animate-fade-in">
               <div className="text-center px-4">
@@ -284,12 +300,25 @@ export default function MisChats() {
             </div>
           ) : (
             <>
-              {/* Header */}
-              <ERPChatHeader 
-                projectId={selectedProjectId}
-                projectName={selectedChat?.projects.clients.name || 'Chat del Proyecto'}
-                participants={participants.filter(p => p.profiles) as any}
-              />
+              {/* Header with Back Button on Mobile */}
+              <div className="flex items-center gap-2 border-b">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBackToList}
+                  className="lg:hidden ml-2 focus-ring"
+                  aria-label="Volver a lista de proyectos"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <div className="flex-1">
+                  <ERPChatHeader 
+                    projectId={selectedProjectId}
+                    projectName={selectedChat?.projects.clients.name || 'Chat del Proyecto'}
+                    participants={participants.filter(p => p.profiles) as any}
+                  />
+                </div>
+              </div>
 
               {/* Messages Area */}
               <div className="relative flex-1 overflow-hidden">
@@ -414,7 +443,10 @@ export default function MisChats() {
         </Card>
 
         {/* Panel de Participantes */}
-        <div className="hidden lg:block lg:col-span-3 animate-slide-in-right" role="complementary" aria-label="Participantes del chat">
+        <div className={cn(
+          "lg:col-span-3 animate-slide-in-right",
+          showChatOnMobile ? "hidden lg:block" : "hidden lg:block"
+        )} role="complementary" aria-label="Participantes del chat">
           {selectedProjectId ? (
             <ProjectChatParticipants projectId={selectedProjectId} />
           ) : (
