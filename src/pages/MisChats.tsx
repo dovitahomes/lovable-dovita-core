@@ -1,40 +1,101 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMyProjectChats } from "@/hooks/useMyProjectChats";
 import useProjectChat from "@/features/client/hooks/useProjectChat";
+import { useProjectChatParticipants } from "@/hooks/useProjectChatParticipants";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, MessageSquare, Crown, Users as UsersIcon } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, MessageSquare, Crown, Users as UsersIcon } from "lucide-react";
+import { format, isToday, isYesterday } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 import ProjectChatParticipants from "@/components/project/ProjectChatParticipants";
+import ERPChatHeader from "@/components/project/ERPChatHeader";
+import ERPChatMessage from "@/components/project/ERPChatMessage";
+import ERPChatInput from "@/components/project/ERPChatInput";
 
 export default function MisChats() {
   const { data: chats, isLoading: chatsLoading } = useMyProjectChats();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
 
   const { messages, loading: messagesLoading, sending, sendMessage } = useProjectChat(selectedProjectId);
+  const { data: participants = [] } = useProjectChatParticipants(selectedProjectId || '');
 
-  const handleSend = async () => {
-    if (!newMessage.trim() || !selectedProjectId) return;
-    
+  // Get current user ID
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setCurrentUserId(data.user.id);
+    });
+  }, []);
+
+  // Smart auto-scroll: only if user is near bottom
+  useEffect(() => {
+    if (shouldAutoScrollRef.current && messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  // Track scroll position
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (!scrollArea) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollArea;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      shouldAutoScrollRef.current = isNearBottom;
+    };
+
+    scrollArea.addEventListener('scroll', handleScroll);
+    return () => scrollArea.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleSendMessage = async (
+    text: string, 
+    attachments?: Array<{ name: string; url: string; size: number; type: string }>
+  ) => {
     try {
-      await sendMessage(newMessage);
-      setNewMessage("");
+      await sendMessage(text, attachments);
+      shouldAutoScrollRef.current = true; // Force scroll on send
     } catch (err) {
       console.error("Error sending message:", err);
+      throw err;
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+  // Group messages by date
+  const groupMessagesByDate = () => {
+    const groups: { [key: string]: typeof messages } = {};
+    
+    messages.forEach(message => {
+      const messageDate = new Date(message.created_at);
+      const dateKey = format(messageDate, 'yyyy-MM-dd');
+      
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(message);
+    });
+    
+    return groups;
+  };
+
+  const getDateLabel = (dateString: string) => {
+    const date = new Date(dateString);
+    
+    if (isToday(date)) {
+      return 'Hoy';
+    } else if (isYesterday(date)) {
+      return 'Ayer';
+    } else {
+      return format(date, "d 'de' MMMM", { locale: es });
     }
   };
 
@@ -43,6 +104,9 @@ export default function MisChats() {
     if (type === 'client') return null;
     return <UsersIcon className="h-3 w-3 text-muted-foreground" />;
   };
+
+  const groupedMessages = groupMessagesByDate();
+  const selectedChat = chats?.find(c => c.project_id === selectedProjectId);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -128,7 +192,7 @@ export default function MisChats() {
         </Card>
 
         {/* Panel de Chat */}
-        <Card className="lg:col-span-6 p-0 flex flex-col">
+        <Card className="lg:col-span-6 p-0 flex flex-col h-[calc(100vh-200px)]">
           {!selectedProjectId ? (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
@@ -138,58 +202,59 @@ export default function MisChats() {
             </div>
           ) : (
             <>
-              <ScrollArea className="flex-1 p-4">
+              {/* Header */}
+              <ERPChatHeader 
+                projectName={selectedChat?.projects.clients.name || 'Chat del Proyecto'}
+                participants={participants.filter(p => p.profiles) as any}
+              />
+
+              {/* Messages Area */}
+              <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-4">
                 {messagesLoading ? (
                   <div className="flex justify-center p-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center p-8 text-muted-foreground">
-                    No hay mensajes aún. Inicia la conversación.
+                  <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+                    <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <h4 className="font-medium text-muted-foreground mb-2">No hay mensajes</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Inicia la conversación con tu equipo enviando un mensaje.
+                    </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {messages.map((msg) => (
-                      <div key={msg.id} className="flex flex-col space-y-1">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-medium text-sm">Usuario</span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(msg.created_at), "dd MMM, HH:mm", { locale: es })}
-                          </span>
+                  <div>
+                    {Object.entries(groupedMessages).map(([dateKey, dateMessages]) => (
+                      <div key={dateKey}>
+                        {/* Date Separator */}
+                        <div className="flex items-center justify-center my-4">
+                          <div className="bg-muted px-3 py-1 rounded-full">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {getDateLabel(dateKey)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                          <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        </div>
+
+                        {/* Messages for this date */}
+                        {dateMessages.map((message) => (
+                          <ERPChatMessage 
+                            key={message.id} 
+                            message={message}
+                            currentUserId={currentUserId}
+                          />
+                        ))}
                       </div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </div>
                 )}
               </ScrollArea>
-              
-              <div className="border-t p-4">
-                <div className="flex gap-2">
-                  <Textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Escribe un mensaje..."
-                    className="min-h-[60px] resize-none"
-                    disabled={sending}
-                  />
-                  <Button
-                    onClick={handleSend}
-                    disabled={!newMessage.trim() || sending}
-                    size="icon"
-                    className="h-[60px] w-[60px]"
-                  >
-                    {sending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
+          
+              {/* Input Area */}
+              <ERPChatInput 
+                onSendMessage={handleSendMessage}
+                disabled={sending || messagesLoading}
+              />
             </>
           )}
         </Card>
