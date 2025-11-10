@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { WishlistForm } from "@/components/WishlistForm";
 import { ProjectChat } from "@/components/chat/ProjectChat";
 import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
@@ -13,13 +15,18 @@ import { ProjectDocumentsTab } from "@/components/project/ProjectDocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
 import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
 import { useChecklistProgress } from "@/hooks/useChecklistProgress";
-import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays, Camera, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, User, HardHat, MessageSquare, Calendar, FileText, PenTool, Users, CalendarDays, Camera, CheckCircle2, Pencil, Check, X, Loader2 } from "lucide-react";
 import { generateRoute } from "@/config/routes";
+import { toast } from "sonner";
 
 export default function ProyectoDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const role = 'admin'; // Temporarily hardcoded - will be restored in Prompt 2
+  const queryClient = useQueryClient();
+  
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
   const { data: project, isLoading, refetch } = useQuery({
     queryKey: ['project', id],
@@ -48,6 +55,53 @@ export default function ProyectoDetalle() {
   });
 
   const { data: checklistProgress } = useChecklistProgress(id || null);
+
+  // Sincronizar editedName con project.project_name
+  useEffect(() => {
+    if (project?.project_name) {
+      setEditedName(project.project_name);
+    }
+  }, [project?.project_name]);
+
+  const updateProjectName = useMutation({
+    mutationFn: async (newName: string) => {
+      const { error } = await supabase
+        .from('projects')
+        .update({ project_name: newName })
+        .eq('id', id!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setIsEditingName(false);
+      toast.success("Nombre del proyecto actualizado");
+    },
+    onError: (error: any) => {
+      toast.error("Error al actualizar: " + error.message);
+    }
+  });
+
+  const handleSaveName = () => {
+    if (!editedName.trim()) {
+      toast.error("El nombre no puede estar vacío");
+      return;
+    }
+    updateProjectName.mutate(editedName);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedName(project?.project_name || "");
+    setIsEditingName(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveName();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
 
   if (isLoading) {
     return <div className="container mx-auto p-6">Cargando...</div>;
@@ -240,6 +294,64 @@ export default function ProyectoDetalle() {
               <CardTitle>Información del Proyecto</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Nombre del Proyecto Editable */}
+              <div className="pb-4 border-b">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium text-sm text-muted-foreground">Nombre del Proyecto:</span>
+                </div>
+                
+                {!isEditingName ? (
+                  <div className="flex items-center gap-2 group">
+                    <span className="text-lg font-semibold">
+                      {project.project_name || "Sin nombre"}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setIsEditingName(true)}
+                    >
+                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Nombre del proyecto"
+                      className="max-w-md"
+                      autoFocus
+                      disabled={updateProjectName.isPending}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                      onClick={handleSaveName}
+                      disabled={updateProjectName.isPending}
+                    >
+                      {updateProjectName.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                      onClick={handleCancelEdit}
+                      disabled={updateProjectName.isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Grid existente de Estado y Fecha */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="font-medium">Estado:</span>
@@ -250,6 +362,8 @@ export default function ProyectoDetalle() {
                   <span className="ml-2">{new Date(project.created_at).toLocaleDateString('es-MX')}</span>
                 </div>
               </div>
+              
+              {/* Notas existentes */}
               {project.notas && (
                 <div>
                   <span className="font-medium">Notas:</span>
