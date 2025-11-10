@@ -32,5 +32,8 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
+// Re-export everything from @testing-library/react
 export * from '@testing-library/react';
+
+// Export custom render and utilities
 export { customRender as render, screen, waitFor };
