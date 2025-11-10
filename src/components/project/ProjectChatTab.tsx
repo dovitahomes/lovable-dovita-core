@@ -132,6 +132,7 @@ export default function ProjectChatTab({ projectId }: ProjectChatTabProps) {
           <Card className="p-0 h-[600px] flex flex-col overflow-hidden">
             {/* Header */}
             <ERPChatHeader 
+              projectId={projectId}
               projectName={`Proyecto ${projectId.slice(0, 8)}...`}
               participants={participants.filter(p => p.profiles) as any}
               onViewParticipants={() => setShowParticipants(!showParticipants)}

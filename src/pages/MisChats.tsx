@@ -255,6 +255,7 @@ export default function MisChats() {
             <>
               {/* Header */}
               <ERPChatHeader 
+                projectId={selectedProjectId}
                 projectName={selectedChat?.projects.clients.name || 'Chat del Proyecto'}
                 participants={participants.filter(p => p.profiles) as any}
               />
