@@ -9,6 +9,7 @@ import AvatarCustomizationDialog from '@/components/client-app/AvatarCustomizati
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useDataSource } from '@/contexts/client-app/DataSourceContext';
 import { useProjectChat } from '@/features/client/hooks';
+import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -20,6 +21,9 @@ export default function Chat() {
   
   // Use real backend hook
   const { messages: backendMessages, loading, error, sending, sendMessage: sendBackendMessage } = useProjectChat(currentProject?.id || null);
+  
+  // Escuchar notificaciones en tiempo real de cambios en citas
+  useEventNotifications(currentProject?.id);
   
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientMinistrations, useClientFinancialSummary } from '@/hooks/client-app/useClientData';
+import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { CheckCircle2, Clock, Calendar, AlertCircle, DollarSign, TrendingUp, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -24,6 +25,9 @@ export default function Financial() {
   // Fetch data using unified hooks
   const { data: ministrations = [], isLoading: loadingMinistrations, error: ministrationsError, refetch: refetchMinistrations } = useClientMinistrations(project?.id || null);
   const { data: financialSummary, error: financialError, refetch: refetchFinancial } = useClientFinancialSummary(project?.id || null);
+  
+  // Escuchar notificaciones en tiempo real de cambios en citas
+  useEventNotifications(project?.id);
   
   const hasError = ministrationsError || financialError;
   const handleRetry = () => {

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { mockAppointments } from '@/lib/client-app/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientPhotos, useClientMinistrations } from '@/hooks/client-app/useClientData';
+import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { isInDesignPhase } from '@/lib/project-utils';
 import { getProjectHeroImage } from '@/lib/client-app/dataAdapters';
 import { Calendar, MapPin, Video, Clock, User, FileText, MessageCircle, Image as ImageIcon } from 'lucide-react';
@@ -25,6 +26,9 @@ export default function Dashboard() {
   // Fetch data using unified hooks (auto-switch between mock/real)
   const { data: photos = [], error: photosError, refetch: refetchPhotos } = useClientPhotos(project?.id || null);
   const { data: ministrations = [], error: ministrationsError, refetch: refetchMinistrations } = useClientMinistrations(project?.id || null);
+  
+  // Escuchar notificaciones en tiempo real de cambios en citas
+  useEventNotifications(project?.id);
   
   const hasError = photosError || ministrationsError;
   const handleRetry = () => {

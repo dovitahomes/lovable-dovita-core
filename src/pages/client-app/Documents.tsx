@@ -18,6 +18,7 @@ import {
 import DocumentViewer from '@/components/client-app/DocumentViewer';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useClientDocuments } from '@/hooks/client-app/useClientData';
+import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import type { Document } from '@/lib/client-app/client-data';
 import { DocumentsListSkeleton, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
@@ -39,6 +40,9 @@ export default function Documents() {
 
   // Fetch documents using unified hook
   const { data: allDocuments = [], isLoading, error, refetch } = useClientDocuments(currentProject?.id || null);
+  
+  // Escuchar notificaciones en tiempo real de cambios en citas
+  useEventNotifications(currentProject?.id);
 
   // Filter and search documents
   const filteredDocuments = useMemo(() => {

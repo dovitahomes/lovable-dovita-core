@@ -8,6 +8,7 @@ import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useProjectAppointments, useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
+import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { Plus, Clock, User, Calendar as CalendarIcon, X } from 'lucide-react';
 import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
@@ -29,6 +30,9 @@ export default function Appointments() {
   const { data: appointments, isLoading, error, refetch } = useProjectAppointments(currentProject?.id || null);
   const deleteAppointment = useDeleteAppointment();
   const updateAppointment = useUpdateAppointment();
+  
+  // Escuchar notificaciones en tiempo real de cambios en citas
+  useEventNotifications(currentProject?.id);
 
   // Get upcoming appointments (future or today)
   const upcomingAppointments = (appointments || [])
