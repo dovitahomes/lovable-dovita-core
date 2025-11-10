@@ -247,7 +247,7 @@ export function ClientOverview({ projectId, clientName }: ClientOverviewProps) {
           <div className="space-y-2">
             {events.map((event) => (
               <div
-                key={event.id}
+                 key={event.id}
                 className="flex gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200"
               >
                 <div className="flex-shrink-0">
@@ -268,9 +268,9 @@ export function ClientOverview({ projectId, clientName }: ClientOverviewProps) {
                       minute: "2-digit",
                     })}
                   </p>
-                  {event.notes && (
+                  {event.description && (
                     <p className="text-xs text-slate-500 mt-1 line-clamp-1">
-                      {event.notes}
+                      {event.description}
                     </p>
                   )}
                 </div>

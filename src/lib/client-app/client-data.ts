@@ -782,7 +782,7 @@ export async function getProjectAppointments(projectId: string) {
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Team'
         },
         location: event.location || 'Por definir',
-        notes: event.notes || event.description || '',
+        notes: event.description || '',
         isVirtual: false
       };
     });

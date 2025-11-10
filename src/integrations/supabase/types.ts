@@ -3188,6 +3188,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           end_time: string
+          event_type: string | null
           id: string
           location: string | null
           notes: string | null
@@ -3196,12 +3197,14 @@ export type Database = {
           status: string
           title: string
           visibilidad: string | null
+          visibility: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           description?: string | null
           end_time: string
+          event_type?: string | null
           id?: string
           location?: string | null
           notes?: string | null
@@ -3210,12 +3213,14 @@ export type Database = {
           status?: string
           title: string
           visibilidad?: string | null
+          visibility?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
           description?: string | null
           end_time?: string
+          event_type?: string | null
           id?: string
           location?: string | null
           notes?: string | null
@@ -3224,6 +3229,7 @@ export type Database = {
           status?: string
           title?: string
           visibilidad?: string | null
+          visibility?: string | null
         }
         Relationships: [
           {
@@ -4762,14 +4768,14 @@ export type Database = {
           created_by_name: string | null
           description: string | null
           end_time: string | null
+          event_type: string | null
           id: string | null
           location: string | null
-          notes: string | null
           project_id: string | null
           start_time: string | null
           status: string | null
           title: string | null
-          visibilidad: string | null
+          visibility: string | null
         }
         Relationships: [
           {

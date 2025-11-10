@@ -1,0 +1,165 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface CalendarFilters {
+  projectId?: string;
+  clientId?: string;
+  eventType?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export function useMyCalendarEvents(filters?: CalendarFilters) {
+  return useQuery({
+    queryKey: ['my-calendar-events', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('project_events')
+        .select(`
+          *,
+          projects!inner (
+            id,
+            project_name,
+            client_id,
+            clients (name)
+          ),
+          profiles!created_by (full_name, email)
+        `)
+        .order('start_time', { ascending: true });
+      
+      // Filtrar por proyectos donde el usuario es participante
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+      
+      // Filtrar solo proyectos donde soy colaborador (via project_collaborators)
+      // Los admins ven todos los proyectos
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role_name')
+        .eq('user_id', user.id);
+      
+      const isAdmin = userRoles?.some(r => r.role_name === 'admin');
+      
+      if (!isAdmin) {
+        const { data: myProjects } = await supabase
+          .from('project_collaborators')
+          .select('project_id')
+          .eq('user_id', user.id);
+        
+        const projectIds = myProjects?.map(p => p.project_id) || [];
+        if (projectIds.length > 0) {
+          query = query.in('project_id', projectIds);
+        } else {
+          // Si no tiene proyectos asignados, no mostrar nada
+          return [];
+        }
+      }
+      
+      if (filters?.projectId) {
+        query = query.eq('project_id', filters.projectId);
+      }
+      
+      if (filters?.clientId) {
+        query = query.eq('projects.client_id', filters.clientId);
+      }
+      
+      if (filters?.eventType) {
+        query = query.eq('event_type', filters.eventType);
+      }
+      
+      if (filters?.startDate && filters?.endDate) {
+        query = query
+          .gte('start_time', filters.startDate)
+          .lte('end_time', filters.endDate);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 2, // 2 minutos
+    refetchInterval: 1000 * 30, // Refetch cada 30 segundos
+  });
+}
+
+// Hook para crear un nuevo evento
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (eventData: {
+      project_id: string;
+      title: string;
+      description?: string;
+      start_time: string;
+      end_time: string;
+      event_type: string;
+      visibility: 'client' | 'team';
+      location?: string;
+      status?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+      
+      const { data, error } = await supabase
+        .from('project_events')
+        .insert({
+          ...eventData,
+          created_by: user.id,
+          status: eventData.status || 'propuesta',
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['project-events'] });
+    },
+  });
+}
+
+// Hook para actualizar un evento
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: any) => {
+      const { data, error } = await supabase
+        .from('project_events')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['project-events'] });
+    },
+  });
+}
+
+// Hook para eliminar un evento
+export function useDeleteEvent() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (eventId: string) => {
+      const { error } = await supabase
+        .from('project_events')
+        .delete()
+        .eq('id', eventId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['project-events'] });
+    },
+  });
+}

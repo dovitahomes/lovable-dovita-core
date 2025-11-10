@@ -9,7 +9,7 @@ export function useClientUpcomingEvents(projectId: string | null) {
 
       const { data, error } = await supabase
         .from("v_client_events")
-        .select("id, title, start_time, end_time, notes")
+        .select("id, title, start_time, end_time, description")
         .eq("project_id", projectId)
         .gte("start_time", new Date().toISOString())
         .order("start_time", { ascending: true })
