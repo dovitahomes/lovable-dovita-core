@@ -4,11 +4,10 @@ import { useMyProjectChats } from "@/hooks/useMyProjectChats";
 import useProjectChat from "@/features/client/hooks/useProjectChat";
 import { useProjectChatParticipants } from "@/hooks/useProjectChatParticipants";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Crown, Users as UsersIcon } from "lucide-react";
+import { Loader2, MessageSquare, Crown, Users as UsersIcon, Send } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +16,7 @@ import ProjectChatParticipants from "@/components/project/ProjectChatParticipant
 import ERPChatHeader from "@/components/project/ERPChatHeader";
 import ERPChatMessage from "@/components/project/ERPChatMessage";
 import ERPChatInput from "@/components/project/ERPChatInput";
+import { cn } from "@/lib/utils";
 
 export default function MisChats() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -150,19 +150,24 @@ export default function MisChats() {
             {chatsLoading ? (
               <div className="p-3 space-y-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-center gap-3 p-3">
-                    <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+                  <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
+                    <Skeleton className="h-10 w-10 rounded-full flex-shrink-0 bg-gradient-to-r from-muted via-muted/50 to-muted" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
+                      <Skeleton className="h-4 w-3/4 bg-gradient-to-r from-muted via-muted/50 to-muted" />
+                      <Skeleton className="h-3 w-1/2 bg-gradient-to-r from-muted via-muted/50 to-muted" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : chats?.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No tienes chats disponibles</p>
+              <div className="p-12 text-center animate-fade-in">
+                <div className="inline-block p-4 rounded-full bg-muted/50 mb-4">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No tienes chats disponibles</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Los chats aparecerán aquí cuando seas asignado a un proyecto.
+                </p>
               </div>
             ) : (
               <div>
@@ -245,10 +250,15 @@ export default function MisChats() {
         {/* Panel de Chat */}
         <Card className="col-span-1 lg:col-span-6 flex flex-col overflow-hidden">
           {!selectedProjectId ? (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p>Selecciona un chat para comenzar</p>
+            <div className="flex-1 flex items-center justify-center text-muted-foreground animate-fade-in">
+              <div className="text-center px-4">
+                <div className="inline-block p-6 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 mb-4">
+                  <MessageSquare className="h-16 w-16 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">👋 Selecciona una conversación</h3>
+                <p className="text-muted-foreground max-w-sm mx-auto">
+                  Elige un proyecto de la lista para ver y enviar mensajes al equipo.
+                </p>
               </div>
             </div>
           ) : (
@@ -263,16 +273,67 @@ export default function MisChats() {
               {/* Messages Area */}
               <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-4">
                 {messagesLoading ? (
-                  <div className="flex justify-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <div className="space-y-3 animate-fade-in">
+                    {[1, 2, 3, 4, 5].map((i) => {
+                      const isSelf = i % 3 === 0;
+                      return (
+                        <div
+                          key={i}
+                          className={cn(
+                            "flex animate-pulse",
+                            isSelf ? "justify-end" : "justify-start"
+                          )}
+                        >
+                          <div className="max-w-[70%] space-y-1">
+                            <Skeleton 
+                              className={cn(
+                                "h-16 rounded-2xl",
+                                isSelf ? "w-48 bg-gradient-to-r from-blue-500/20 via-blue-500/10 to-blue-500/20" : "w-56 bg-gradient-to-r from-muted via-muted/50 to-muted"
+                              )}
+                            />
+                            <Skeleton className="h-2 w-16 bg-gradient-to-r from-muted via-muted/50 to-muted" />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-center h-full">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                    <h4 className="font-medium text-muted-foreground mb-2">No hay mensajes</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Inicia la conversación con tu equipo enviando un mensaje.
-                    </p>
+                  <div className="h-full flex flex-col items-center justify-center animate-fade-in">
+                    {/* Team Info Banner */}
+                    {participants.length > 0 && (
+                      <div className="bg-muted/50 rounded-xl p-4 mb-8 max-w-md w-full">
+                        <div className="flex items-center justify-center gap-2 text-sm font-medium text-foreground mb-3">
+                          <UsersIcon className="h-4 w-4 text-primary" />
+                          <span>Equipo del proyecto</span>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2 text-xs">
+                          {participants.map((participant, index) => (
+                            <div key={participant.id} className="flex items-center gap-1.5">
+                              <span className="text-muted-foreground">
+                                {participant.profiles?.full_name || participant.profiles?.email}
+                              </span>
+                              {participant.participant_type === 'sales_advisor' && (
+                                <Crown className="h-3 w-3 text-amber-500" />
+                              )}
+                              {index < participants.length - 1 && (
+                                <span className="text-muted-foreground/50">•</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Empty State */}
+                    <div className="text-center">
+                      <div className="inline-block p-4 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 mb-4">
+                        <Send className="h-12 w-12 text-primary" />
+                      </div>
+                      <h4 className="text-lg font-semibold mb-2">No hay mensajes aún</h4>
+                      <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">
+                        Sé el primero en iniciar la conversación con el equipo del proyecto.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div>
