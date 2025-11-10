@@ -51,7 +51,7 @@ export function WeekView({
 
   return (
     <Card className="overflow-auto">
-      <div className="grid grid-cols-8 border-b bg-muted/30 sticky top-[88px] z-10">
+      <div className="grid grid-cols-8 border-b bg-muted/30 sticky top-0 z-0">
         <div className="border-r p-2 text-center text-xs font-medium sm:text-sm">Hora</div>
         {weekDays.map((day) => (
           <div
