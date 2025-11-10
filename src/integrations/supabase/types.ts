@@ -2381,6 +2381,38 @@ export type Database = {
           },
         ]
       }
+      message_read_receipts: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_read_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "project_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -3240,25 +3272,40 @@ export type Database = {
       }
       project_messages: {
         Row: {
+          attachments: Json | null
           created_at: string
+          edited_at: string | null
           id: string
+          is_edited: boolean | null
           message: string
           project_id: string
+          replied_to_id: string | null
           sender_id: string
+          status: string | null
         }
         Insert: {
+          attachments?: Json | null
           created_at?: string
+          edited_at?: string | null
           id?: string
+          is_edited?: boolean | null
           message: string
           project_id: string
+          replied_to_id?: string | null
           sender_id: string
+          status?: string | null
         }
         Update: {
+          attachments?: Json | null
           created_at?: string
+          edited_at?: string | null
           id?: string
+          is_edited?: boolean | null
           message?: string
           project_id?: string
+          replied_to_id?: string | null
           sender_id?: string
+          status?: string | null
         }
         Relationships: [
           {
@@ -3302,6 +3349,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_messages_replied_to_id_fkey"
+            columns: ["replied_to_id"]
+            isOneToOne: false
+            referencedRelation: "project_messages"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -5289,6 +5343,10 @@ export type Database = {
           qty_requested: number
         }[]
       }
+      get_unread_message_count: {
+        Args: { p_project_id: string }
+        Returns: number
+      }
       get_user_project_ids: { Args: { p_user_id: string }; Returns: string[] }
       grant_full_chat_history: {
         Args: { p_project_id: string; p_user_id: string }
@@ -5300,6 +5358,10 @@ export type Database = {
       }
       is_client_user: { Args: never; Returns: boolean }
       is_collaborator: { Args: never; Returns: boolean }
+      mark_message_as_read: {
+        Args: { p_message_id: string }
+        Returns: undefined
+      }
       remove_from_chat: {
         Args: { p_project_id: string; p_user_id: string }
         Returns: undefined
