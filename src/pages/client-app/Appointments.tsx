@@ -8,7 +8,7 @@ import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useProjectAppointments, useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
-import { Plus, Clock, User, Calendar as CalendarIcon, CheckCircle2, X } from 'lucide-react';
+import { Plus, Clock, User, Calendar as CalendarIcon, X } from 'lucide-react';
 import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
 import { format, isSameDay, isFuture, isToday, parseISO } from 'date-fns';
@@ -75,21 +75,6 @@ export default function Appointments() {
       setSelectedAppointment(null);
     } catch (error) {
       toast.error('Error al cancelar la cita');
-    }
-  };
-
-  const confirmAppointment = async () => {
-    if (!selectedAppointment) return;
-    
-    try {
-      await updateAppointment.mutateAsync({
-        id: selectedAppointment.id,
-        status: 'confirmada'
-      });
-      toast.success('Cita confirmada exitosamente');
-      setDetailsDialogOpen(false);
-    } catch (error) {
-      toast.error('Error al confirmar la cita');
     }
   };
 
@@ -220,14 +205,18 @@ export default function Appointments() {
                         </p>
                       </div>
                       <Badge className={
-                        appointment.status === 'confirmada' 
+                        appointment.status === 'aceptada' 
                           ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                          : appointment.status === 'cancelada'
+                          : appointment.status === 'rechazada'
                           ? 'bg-red-100 text-red-700 hover:bg-red-100'
-                          : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                          : appointment.status === 'cancelada'
+                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-100'
+                          : 'bg-blue-100 text-blue-700 hover:bg-blue-100'
                       }>
-                        {appointment.status === 'confirmada' ? 'Confirmada' : 
-                         appointment.status === 'cancelada' ? 'Cancelada' : 'Pendiente'}
+                        {appointment.status === 'aceptada' ? 'Confirmada' : 
+                         appointment.status === 'rechazada' ? 'Rechazada' :
+                         appointment.status === 'cancelada' ? 'Cancelada' : 
+                         'Pendiente de Confirmación'}
                       </Badge>
                     </div>
 
@@ -322,11 +311,14 @@ export default function Appointments() {
                             <h3 className="font-semibold">{appointment.title}</h3>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <Badge className={
-                                appointment.status === 'confirmada' 
+                                appointment.status === 'aceptada' 
                                   ? 'text-xs bg-green-100 text-green-700 hover:bg-green-100'
-                                  : 'text-xs bg-amber-100 text-amber-700 hover:bg-amber-100'
+                                  : appointment.status === 'rechazada'
+                                  ? 'text-xs bg-red-100 text-red-700 hover:bg-red-100'
+                                  : 'text-xs bg-blue-100 text-blue-700 hover:bg-blue-100'
                               }>
-                                {appointment.status === 'confirmada' ? 'Confirmada' : 'Pendiente'}
+                                {appointment.status === 'aceptada' ? 'Confirmada' : 
+                                 appointment.status === 'rechazada' ? 'Rechazada' : 'Pendiente'}
                               </Badge>
                               <span className="text-xs text-muted-foreground">
                                 {formatDateTime(appointment.start_time, "d 'de' MMMM, yyyy")}
@@ -385,14 +377,18 @@ export default function Appointments() {
                     </div>
                   </div>
                   <Badge className={
-                    selectedAppointment.status === 'confirmada' 
+                    selectedAppointment.status === 'aceptada' 
                       ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                      : selectedAppointment.status === 'cancelada'
+                      : selectedAppointment.status === 'rechazada'
                       ? 'bg-red-100 text-red-700 hover:bg-red-100'
-                      : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                      : selectedAppointment.status === 'cancelada'
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-100'
+                      : 'bg-blue-100 text-blue-700 hover:bg-blue-100'
                   }>
-                    {selectedAppointment.status === 'confirmada' ? 'Confirmada' : 
-                     selectedAppointment.status === 'cancelada' ? 'Cancelada' : 'Pendiente'}
+                    {selectedAppointment.status === 'aceptada' ? 'Confirmada' : 
+                     selectedAppointment.status === 'rechazada' ? 'Rechazada' :
+                     selectedAppointment.status === 'cancelada' ? 'Cancelada' : 
+                     'Pendiente de Confirmación'}
                   </Badge>
                 </div>
 
@@ -414,23 +410,33 @@ export default function Appointments() {
                 )}
               </div>
 
-              <DialogFooter className="gap-2">
+              <DialogFooter className="flex-col sm:flex-row gap-2">
                 {selectedAppointment.status === 'propuesta' && (
-                  <Button onClick={confirmAppointment} className="bg-green-600 hover:bg-green-700">
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Confirmar Cita
-                  </Button>
+                  <div className="w-full p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                    <p className="font-medium">⏳ Solicitud pendiente</p>
+                    <p className="text-xs mt-1">El equipo revisará tu solicitud y te confirmará el horario pronto.</p>
+                  </div>
+                )}
+                {selectedAppointment.status === 'rechazada' && (
+                  <div className="w-full p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                    <p className="font-medium">❌ Solicitud no disponible</p>
+                    <p className="text-xs mt-1">Este horario no está disponible. Por favor solicita otra fecha.</p>
+                  </div>
                 )}
                 {selectedAppointment.status !== 'cancelada' && isFuture(parseISO(selectedAppointment.start_time)) && (
-                  <Button variant="destructive" onClick={() => {
-                    setDetailsDialogOpen(false);
-                    handleCancelAppointment(selectedAppointment);
-                  }}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setDetailsDialogOpen(false);
+                      handleCancelAppointment(selectedAppointment);
+                    }}
+                    className="w-full sm:flex-1"
+                  >
                     <X className="h-4 w-4 mr-2" />
                     Cancelar Cita
                   </Button>
                 )}
-                <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDetailsDialogOpen(false)} className="w-full sm:flex-1">
                   Cerrar
                 </Button>
               </DialogFooter>

@@ -12,9 +12,12 @@ import { appointmentTypes } from '@/lib/client-data';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/app/auth/AuthProvider';
 
 interface Appointment {
   id: number;
@@ -50,6 +53,9 @@ export default function AppointmentModal({
   mode = 'create'
 }: AppointmentModalProps) {
   const { currentProject } = useProject();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
   const [appointmentType, setAppointmentType] = useState<string>(appointment?.type || '');
   const [teamMemberId, setTeamMemberId] = useState<string>(appointment?.teamMember.id?.toString() || '');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
@@ -58,6 +64,53 @@ export default function AppointmentModal({
   const [selectedTime, setSelectedTime] = useState<string>(appointment?.time || '');
   const [notes, setNotes] = useState(appointment?.notes || '');
   const [isVirtual, setIsVirtual] = useState(appointment?.isVirtual || false);
+
+  // Mutation para crear solicitud de cita
+  const createAppointmentMutation = useMutation({
+    mutationFn: async (eventData: {
+      project_id: string;
+      title: string;
+      description: string | null;
+      start_time: string;
+      end_time: string;
+      event_type: string;
+      visibility: string;
+      status: string;
+      location: string | null;
+      created_by: string;
+    }) => {
+      const { error } = await supabase
+        .from('project_events')
+        .insert(eventData);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['client-upcoming-events'] });
+      queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
+      
+      toast.success('Solicitud de cita enviada', {
+        description: 'Tu solicitud ha sido registrada. El equipo te confirmará pronto.'
+      });
+      
+      // Reset form
+      setAppointmentType('');
+      setTeamMemberId('');
+      setSelectedDate(undefined);
+      setSelectedTime('');
+      setNotes('');
+      setIsVirtual(false);
+      
+      onOpenChange(false);
+      onAppointmentCreated?.();
+    },
+    onError: (error: Error) => {
+      toast.error('Error al solicitar cita', {
+        description: error.message || 'No se pudo enviar tu solicitud. Intenta nuevamente.'
+      });
+    }
+  });
 
   // Update form when appointment changes (for edit mode)
   useEffect(() => {
@@ -86,27 +139,43 @@ export default function AppointmentModal({
       return;
     }
 
-    // Mock creation/update
-    if (mode === 'edit') {
-      toast.success('Cita actualizada exitosamente', {
-        description: `Los cambios en tu cita de ${appointmentType} han sido guardados.`
-      });
-    } else {
-      toast.success('Cita agendada exitosamente', {
-        description: `Tu cita para ${appointmentType} ha sido registrada. Recibirás una confirmación pronto.`
-      });
+    if (!currentProject?.id || !user?.id) {
+      toast.error('No se pudo obtener información del proyecto o usuario');
+      return;
     }
 
-    // Reset form
-    setAppointmentType('');
-    setTeamMemberId('');
-    setSelectedDate(undefined);
-    setSelectedTime('');
-    setNotes('');
-    setIsVirtual(false);
+    // Construir fecha y hora de inicio
+    const [hours, minutes] = selectedTime.split(':');
+    const startDateTime = new Date(selectedDate);
+    startDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-    onOpenChange(false);
-    onAppointmentCreated?.();
+    // Calcular fecha y hora de fin (1 hora por defecto)
+    const endDateTime = new Date(startDateTime);
+    endDateTime.setHours(endDateTime.getHours() + 1);
+
+    // Mapear tipo de cita a event_type
+    const eventTypeMap: Record<string, string> = {
+      'Revisión de Diseño': 'review',
+      'Visita a Obra': 'site_visit',
+      'Reunión de Avance': 'meeting',
+      'Presentación de Propuesta': 'review',
+      'Entrega de Documentos': 'other',
+    };
+
+    const eventData = {
+      project_id: currentProject.id,
+      title: `Solicitud: ${appointmentType}`,
+      description: notes || null,
+      start_time: startDateTime.toISOString(),
+      end_time: endDateTime.toISOString(),
+      event_type: eventTypeMap[appointmentType] || 'meeting',
+      visibility: 'client',
+      status: 'propuesta',
+      location: isVirtual ? 'Virtual' : null,
+      created_by: user.id,
+    };
+
+    createAppointmentMutation.mutate(eventData);
   };
 
   return (
@@ -220,11 +289,26 @@ export default function AppointmentModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            disabled={createAppointmentMutation.isPending}
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} className="bg-secondary hover:bg-secondary/90 text-primary">
-            {mode === 'edit' ? 'Guardar Cambios' : 'Agendar Cita'}
+          <Button 
+            onClick={handleSubmit} 
+            className="bg-secondary hover:bg-secondary/90 text-primary"
+            disabled={createAppointmentMutation.isPending}
+          >
+            {createAppointmentMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              mode === 'edit' ? 'Guardar Cambios' : 'Solicitar Cita'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
