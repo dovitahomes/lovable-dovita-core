@@ -22,6 +22,7 @@ interface ProjectCardProps {
     id: string;
     status: string;
     client_id: string;
+    project_name?: string;
     terreno_m2?: number;
     ubicacion_json?: any;
     created_at: string;
@@ -41,18 +42,18 @@ const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secon
 export function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
 
-  // Obtener nombre del cliente
-  const { data: client } = useQuery({
-    queryKey: ['client', project.client_id],
+  // Obtener nombre del cliente y project_name si no viene en props
+  const { data: projectData } = useQuery({
+    queryKey: ['project-basic', project.id],
     queryFn: async () => {
       const { data } = await supabase
-        .from('clients')
-        .select('name')
-        .eq('id', project.client_id)
+        .from('projects')
+        .select('project_name, clients(name)')
+        .eq('id', project.id)
         .single();
       return data;
     },
-    enabled: !!project.client_id,
+    enabled: !!project.id,
   });
 
   // Obtener salud del proyecto
@@ -141,8 +142,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
         {/* Title and client */}
         <div className="mb-3">
           <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-            {client?.name || 'Proyecto sin nombre'}
+            {project.project_name || projectData?.project_name || projectData?.clients?.name || 'Proyecto sin nombre'}
           </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Cliente: {projectData?.clients?.name || 'N/A'}
+          </p>
           {project.ubicacion_json?.address && (
             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
               <MapPin className="h-3 w-3" />

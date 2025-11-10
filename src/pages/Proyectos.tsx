@@ -26,6 +26,7 @@ export default function Proyectos() {
   const [filterStatus, setFilterStatus] = useState("");
   const [viewMode, setViewMode] = useState<'cards' | 'table'>(isMobile ? 'cards' : 'cards'); // Default cards
   const [formData, setFormData] = useState({
+    project_name: "",
     client_id: "",
     sucursal_id: "",
     status: "activo" as "activo" | "cerrado" | "archivado",
@@ -113,6 +114,7 @@ export default function Proyectos() {
     e.preventDefault();
     
     const data = {
+      project_name: formData.project_name || null,
       client_id: formData.client_id,
       sucursal_id: formData.sucursal_id === "none" ? null : formData.sucursal_id,
       status: formData.status,
@@ -129,7 +131,7 @@ export default function Proyectos() {
   };
 
   const resetForm = () => {
-    setFormData({ client_id: "", sucursal_id: "", status: "activo", terreno_m2: "", ubicacion_data: "", notas: "" });
+    setFormData({ project_name: "", client_id: "", sucursal_id: "", status: "activo", terreno_m2: "", ubicacion_data: "", notas: "" });
     setEditingProject(null);
     setOpen(false);
   };
@@ -137,6 +139,7 @@ export default function Proyectos() {
   const handleEdit = (project: any) => {
     setEditingProject(project);
     setFormData({
+      project_name: project.project_name || "",
       client_id: project.client_id,
       sucursal_id: project.sucursal_id || "",
       status: project.status,
@@ -192,6 +195,20 @@ export default function Proyectos() {
               <DialogTitle>{editingProject ? 'Editar' : 'Crear'} Proyecto</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="project_name">Nombre del Proyecto</Label>
+                <Input
+                  id="project_name"
+                  type="text"
+                  value={formData.project_name}
+                  onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
+                  placeholder="Ej: Casa en la Colina, Residencia Familiar García"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Nombre descriptivo para identificar el proyecto
+                </p>
+              </div>
               <div>
                 <Label>Cliente</Label>
                 <Select value={formData.client_id} onValueChange={(value) => setFormData({ ...formData, client_id: value })} required>
@@ -331,6 +348,7 @@ export default function Proyectos() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Nombre del Proyecto</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Sucursal</TableHead>
                   <TableHead>Estado</TableHead>
@@ -341,6 +359,9 @@ export default function Proyectos() {
               <TableBody>
                 {projects.map((project) => (
                   <TableRow key={project.id}>
+                    <TableCell className="font-medium">
+                      {project.project_name || 'Sin nombre'}
+                    </TableCell>
                     <TableCell>{project.clients?.name}</TableCell>
                     <TableCell>{project.sucursales?.nombre || '-'}</TableCell>
                     <TableCell>{getStatusBadge(project.status)}</TableCell>

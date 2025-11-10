@@ -20,7 +20,7 @@ export function transformProjectToUI(
   return {
     id: project.project_id,
     clientName: project.client_name || 'Cliente',
-    name: `Casa ${project.client_name || 'Cliente'}`,
+    name: project.project_name || `Casa ${project.client_name || 'Cliente'}`,
     location: project.ubicacion_json?.direccion || project.ubicacion_json?.ciudad || 'Sin ubicación',
     progress: summary?.progress_percent || 0,
     currentPhase: determineCurrentPhase(summary?.progress_percent || 0, project.project_status),

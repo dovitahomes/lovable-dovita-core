@@ -3445,6 +3445,7 @@ export type Database = {
           created_by: string | null
           id: string
           notas: string | null
+          project_name: string | null
           sales_advisor_id: string | null
           status: Database["public"]["Enums"]["project_status"]
           sucursal_id: string | null
@@ -3458,6 +3459,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notas?: string | null
+          project_name?: string | null
           sales_advisor_id?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           sucursal_id?: string | null
@@ -3471,6 +3473,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notas?: string | null
+          project_name?: string | null
           sales_advisor_id?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           sucursal_id?: string | null

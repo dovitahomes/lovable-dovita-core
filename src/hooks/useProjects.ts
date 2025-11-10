@@ -17,7 +17,7 @@ export function useProjectsList({ search = "", status = "" }: { search?: string;
       }
       
       if (search) {
-        query = query.or(`clients.name.ilike.%${search}%`);
+        query = query.or(`clients.name.ilike.%${search}%,project_name.ilike.%${search}%`);
       }
       
       const { data, error } = await query;
