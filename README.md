@@ -155,7 +155,41 @@ Elimina **todos** los registros etiquetados como mock, en orden seguro (hijos �
 
 ---
 
-## Testing
+## 🧪 Testing
+
+### Unit & Integration Tests
+
+El proyecto utiliza **Vitest** + **@testing-library/react** + **jest-axe** para tests automatizados.
+
+**Ejecutar tests:**
+
+```bash
+npm run test
+```
+
+**Tests en modo watch:**
+
+```bash
+npm run test:watch
+```
+
+**Coverage report:**
+
+```bash
+npm run test:coverage
+```
+
+**Tests UI (interactivo):**
+
+```bash
+npm run test:ui
+```
+
+**Estructura de tests:**
+- `src/components/client-app/__tests__/` - Tests unitarios de componentes
+- `src/pages/client-app/__tests__/` - Tests de integración de páginas
+- Tests de accesibilidad con `jest-axe` en todos los componentes
+- Objetivo: **80% de cobertura** mínima
 
 ### Smoke Tests Automatizados
 
