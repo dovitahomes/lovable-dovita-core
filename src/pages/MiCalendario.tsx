@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { useMyCalendarEvents, useUpdateEvent } from "@/hooks/useMyCalendarEvents";
+import { useCollaboratorEventNotifications } from "@/hooks/useCollaboratorEventNotifications";
 import { EventFiltersEnhanced } from "@/components/calendar/EventFiltersEnhanced";
 import { EventDetailsPanel } from "@/components/calendar/EventDetailsPanel";
 import { CreateEventDialog } from "@/components/calendar/CreateEventDialog";
@@ -68,6 +69,9 @@ export default function MiCalendario() {
     clientId,
     eventType,
   });
+  
+  // Notificaciones en tiempo real para colaboradores (FASE 3: Paso 3)
+  useCollaboratorEventNotifications(projectId || null);
   
   // Transformar eventos al formato EventManager (FASE 1)
   const events = useMemo(() => {

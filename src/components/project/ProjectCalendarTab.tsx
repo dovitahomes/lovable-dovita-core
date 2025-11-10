@@ -8,6 +8,7 @@ import { format, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useProjectEvents } from '@/hooks/useProjectEvents';
 import { useUpdateEvent } from '@/hooks/useMyCalendarEvents';
+import { useCollaboratorEventNotifications } from '@/hooks/useCollaboratorEventNotifications';
 import { Calendar } from '@/components/ui/calendar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -45,6 +46,9 @@ export function ProjectCalendarTab({ projectId }: ProjectCalendarTabProps) {
   
   const { data: events = [], isLoading } = useProjectEvents(projectId);
   const updateEvent = useUpdateEvent();
+  
+  // Notificaciones en tiempo real para colaboradores
+  useCollaboratorEventNotifications(projectId);
   
   // Filter events
   const filteredEvents = useMemo(() => {

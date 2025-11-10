@@ -9,7 +9,8 @@ import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { useProject } from '@/contexts/client-app/ProjectContext';
 import { useProjectAppointments, useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
 import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
-import { Plus, Clock, User, Calendar as CalendarIcon, X } from 'lucide-react';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { Plus, Clock, User, Calendar as CalendarIcon, X, Check } from 'lucide-react';
 import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
 import { format, isSameDay, isFuture, isToday, parseISO } from 'date-fns';
@@ -20,6 +21,7 @@ import { toast } from 'sonner';
 export default function Appointments() {
   const { currentProject } = useProject();
   const { handleError } = useClientError();
+  const { user } = useAuthSession();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [upcomingDialogOpen, setUpcomingDialogOpen] = useState(false);
@@ -64,6 +66,30 @@ export default function Appointments() {
   const handleCancelAppointment = (appointment: any) => {
     setSelectedAppointment(appointment);
     setCancelDialogOpen(true);
+  };
+
+  const handleAcceptAppointment = async (appointment: any) => {
+    try {
+      await updateAppointment.mutateAsync({
+        id: appointment.id,
+        status: 'aceptada'
+      });
+      toast.success('✅ Cita aceptada exitosamente');
+    } catch (error) {
+      toast.error('Error al aceptar la cita');
+    }
+  };
+
+  const handleRejectAppointment = async (appointment: any) => {
+    try {
+      await updateAppointment.mutateAsync({
+        id: appointment.id,
+        status: 'rechazada'
+      });
+      toast.success('Cita rechazada');
+    } catch (error) {
+      toast.error('Error al rechazar la cita');
+    }
   };
 
   const confirmCancel = async () => {
@@ -246,7 +272,43 @@ export default function Appointments() {
                       >
                         Ver Detalles
                       </Button>
-                      {appointment.status !== 'cancelada' && isFuture(startDate) && (
+                      
+                      {/* Botones de acción según quien creó la cita y su estado */}
+                      {appointment.status === 'propuesta' && isFuture(startDate) && (
+                        appointment.created_by === user?.id ? (
+                          // Cliente cancelando su propia solicitud
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCancelAppointment(appointment)}
+                          >
+                            Cancelar Solicitud
+                          </Button>
+                        ) : (
+                          // Cliente aceptando/rechazando propuesta de colaborador
+                          <>
+                            <Button 
+                              variant="default" 
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 text-white gap-1"
+                              onClick={() => handleAcceptAppointment(appointment)}
+                            >
+                              <Check className="h-3 w-3" />
+                              Aceptar
+                            </Button>
+                            <Button 
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRejectAppointment(appointment)}
+                            >
+                              Rechazar
+                            </Button>
+                          </>
+                        )
+                      )}
+                      
+                      {/* Cancelar citas ya aceptadas (solo propias) */}
+                      {appointment.status === 'aceptada' && appointment.created_by === user?.id && isFuture(startDate) && (
                         <Button 
                           variant="ghost" 
                           size="sm" 
