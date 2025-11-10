@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 interface CalendarFilters {
   projectId?: string;
@@ -10,6 +11,30 @@ interface CalendarFilters {
 }
 
 export function useMyCalendarEvents(filters?: CalendarFilters) {
+  const queryClient = useQueryClient();
+  
+  // Realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('calendar-events-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'project_events',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+  
   return useQuery({
     queryKey: ['my-calendar-events', filters],
     queryFn: async () => {
@@ -22,8 +47,7 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
             project_name,
             client_id,
             clients (name)
-          ),
-          profiles!created_by (full_name, email)
+          )
         `)
         .order('start_time', { ascending: true });
       
@@ -78,7 +102,7 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
       return data || [];
     },
     staleTime: 1000 * 60 * 2, // 2 minutos
-    refetchInterval: 1000 * 30, // Refetch cada 30 segundos
+    refetchInterval: false, // No refetch automático, usamos realtime
   });
 }
 

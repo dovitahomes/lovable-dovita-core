@@ -40,6 +40,7 @@ const ProyectoEquipo = lazy(() => import("./pages/ProyectoEquipo"));
 const ProyectoChat = lazy(() => import("./pages/ProyectoChat"));
 const ProyectoCalendario = lazy(() => import("./pages/ProyectoCalendario"));
 const MisChats = lazy(() => import("./pages/MisChats"));
+const MiCalendario = lazy(() => import("./pages/MiCalendario"));
 const Leads = lazy(() => import("./pages/Leads"));
 const Accounts = lazy(() => import("./pages/crm/Accounts"));
 const Contacts = lazy(() => import("./pages/crm/Contacts"));
@@ -112,6 +113,11 @@ const InternalLayout = () => {
                 {/* ============================================ */}
                 {/* MI ÁREA (COLABORADORES)                     */}
                 {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.MI_CALENDARIO} element={
+                  <ProtectedRoute moduleName="proyectos">
+                    <Suspense fallback={<TableSkeleton />}><MiCalendario /></Suspense>
+                  </ProtectedRoute>
+                } />
                 <Route path={BACKOFFICE_ROUTES.MIS_CHATS} element={
                   <ProtectedRoute moduleName="proyectos">
                     <Suspense fallback={<TableSkeleton />}><MisChats /></Suspense>

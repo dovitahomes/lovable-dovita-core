@@ -12,7 +12,7 @@ interface Event {
   start_time: string;
   end_time: string;
   event_type: string;
-  visibility: 'client' | 'team';
+  visibility: string; // Cambiar a string para aceptar cualquier valor de BD
   status: string;
   location?: string;
   projects?: {
@@ -23,7 +23,7 @@ interface Event {
   };
   profiles?: {
     full_name: string;
-  };
+  } | null;
 }
 
 interface EventsListProps {
