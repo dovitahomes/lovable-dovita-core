@@ -96,9 +96,17 @@ export default function MisChats() {
                           </p>
                           {getParticipantTypeIcon(chat.participant_type)}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Proyecto {chat.projects.status}
-                        </p>
+                        
+                        {chat.last_message_preview ? (
+                          <p className="text-xs text-muted-foreground truncate">
+                            <span className="font-medium">{chat.last_message_sender}:</span> {chat.last_message_preview}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">
+                            Sin mensajes aún
+                          </p>
+                        )}
+                        
                         {chat.last_message_at && (
                           <p className="text-xs text-muted-foreground">
                             {format(new Date(chat.last_message_at), "dd MMM HH:mm", { locale: es })}
@@ -106,8 +114,8 @@ export default function MisChats() {
                         )}
                       </div>
 
-                      {chat.unread_count && chat.unread_count > 0 && (
-                        <Badge variant="destructive" className="ml-auto">
+                      {chat.unread_count > 0 && (
+                        <Badge variant="destructive" className="ml-auto shrink-0">
                           {chat.unread_count}
                         </Badge>
                       )}

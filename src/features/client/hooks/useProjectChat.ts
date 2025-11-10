@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMounted } from "@/hooks/useIsMounted";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface ChatMessage {
   id: string;
@@ -27,6 +28,7 @@ export default function useProjectChat(projectId: string | null) {
   const [error, setError] = useState<Error | null>(null);
   const [sending, setSending] = useState(false);
   const isMounted = useIsMounted();
+  const queryClient = useQueryClient();
 
   const loadMessages = useCallback(async () => {
     if (!projectId) {
@@ -152,6 +154,29 @@ export default function useProjectChat(projectId: string | null) {
   useEffect(() => {
     loadMessages();
   }, [loadMessages]);
+
+  // Mark messages as read when viewing the chat
+  useEffect(() => {
+    const markAsRead = async () => {
+      if (!projectId) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Mark all messages in this project as read for this user
+      await (supabase.rpc as any)('mark_message_as_read', {
+        p_project_id: projectId,
+        p_user_id: user.id
+      });
+
+      // Invalidate my-project-chats query to update unread counters
+      queryClient.invalidateQueries({ queryKey: ['my-project-chats'] });
+    };
+
+    // Mark as read after a short delay to ensure messages are loaded
+    const timer = setTimeout(markAsRead, 500);
+    return () => clearTimeout(timer);
+  }, [projectId, messages.length, queryClient]);
 
   // Set up realtime subscription
   useEffect(() => {
