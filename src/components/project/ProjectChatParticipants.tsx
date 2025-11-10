@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useProjectChatParticipants, useGrantFullChatHistory, useRemoveFromChat } from "@/hooks/useProjectChatParticipants";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -5,6 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Users, Crown, UserCheck, UserMinus, History, MessageSquare, Clock, UserPlus } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -18,6 +29,29 @@ export default function ProjectChatParticipants({ projectId }: ProjectChatPartic
   const { data: participants, isLoading } = useProjectChatParticipants(projectId);
   const grantHistory = useGrantFullChatHistory();
   const removeFromChat = useRemoveFromChat();
+
+  const [confirmGrantHistory, setConfirmGrantHistory] = useState<{ userId: string; name: string } | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState<{ userId: string; name: string } | null>(null);
+
+  const handleGrantHistory = () => {
+    if (confirmGrantHistory) {
+      grantHistory.mutate({
+        projectId,
+        userId: confirmGrantHistory.userId
+      });
+      setConfirmGrantHistory(null);
+    }
+  };
+
+  const handleRemove = () => {
+    if (confirmRemove) {
+      removeFromChat.mutate({
+        projectId,
+        userId: confirmRemove.userId
+      });
+      setConfirmRemove(null);
+    }
+  };
 
   const getParticipantIcon = (type: string) => {
     switch (type) {
@@ -171,54 +205,34 @@ export default function ProjectChatParticipants({ projectId }: ProjectChatPartic
 
                     {/* Actions (visible on hover or always for mobile) */}
                     {participant.participant_type === 'collaborator' && (
-                      <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <TooltipProvider>
-                          {participant.show_history_from && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 px-2 text-xs"
-                                  onClick={() => grantHistory.mutate({ 
-                                    projectId, 
-                                    userId: participant.user_id 
-                                  })}
-                                >
-                                  <History className="h-3 w-3 mr-1" />
-                                  Acceso total
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="text-xs">
-                                Dar acceso a todo el historial
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-xs text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                                onClick={() => {
-                                  if (confirm(`¿Remover a ${participant.profiles?.full_name} del chat?`)) {
-                                    removeFromChat.mutate({ 
-                                      projectId, 
-                                      userId: participant.user_id 
-                                    });
-                                  }
-                                }}
-                              >
-                                <UserMinus className="h-3 w-3 mr-1" />
-                                Remover
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-xs">
-                              Remover del chat
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                      <div className="flex flex-col gap-1.5 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {participant.show_history_from && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs w-full justify-center"
+                            onClick={() => setConfirmGrantHistory({
+                              userId: participant.user_id,
+                              name: participant.profiles?.full_name || 'Usuario'
+                            })}
+                          >
+                            <History className="h-3.5 w-3.5 mr-1.5" />
+                            Otorgar acceso total
+                          </Button>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-xs w-full justify-center text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => setConfirmRemove({
+                            userId: participant.user_id,
+                            name: participant.profiles?.full_name || 'Usuario'
+                          })}
+                        >
+                          <UserMinus className="h-3.5 w-3.5 mr-1.5" />
+                          Remover del chat
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -245,6 +259,46 @@ export default function ProjectChatParticipants({ projectId }: ProjectChatPartic
           Agregar participante
         </Button>
       </div>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={!!confirmGrantHistory} onOpenChange={() => setConfirmGrantHistory(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Otorgar acceso total al historial?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmGrantHistory?.name} podrá ver todos los mensajes desde el inicio del chat.
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleGrantHistory}>
+              Otorgar acceso
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmRemove} onOpenChange={() => setConfirmRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Remover del chat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se removerá a {confirmRemove?.name} de este chat.
+              No podrá ver ni enviar mensajes. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemove}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sí, remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
