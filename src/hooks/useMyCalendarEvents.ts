@@ -164,6 +164,8 @@ export function useUpdateEvent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
       queryClient.invalidateQueries({ queryKey: ['project-events'] });
+      queryClient.invalidateQueries({ queryKey: ['client-upcoming-events'] });
+      queryClient.invalidateQueries({ queryKey: ['project-appointments'] });
     },
   });
 }
@@ -184,6 +186,8 @@ export function useDeleteEvent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
       queryClient.invalidateQueries({ queryKey: ['project-events'] });
+      queryClient.invalidateQueries({ queryKey: ['client-upcoming-events'] });
+      queryClient.invalidateQueries({ queryKey: ['project-appointments'] });
     },
   });
 }
