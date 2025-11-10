@@ -1,346 +1,346 @@
-import { useState } from 'react';
-import { useProjectEvents, useCreateEvent, useUpdateEventStatus, useDeleteEvent } from '@/hooks/useProjectEvents';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Calendar } from '@/components/ui/calendar';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Trash2 } from 'lucide-react';
-import { format, addMonths, subMonths, isSameDay } from 'date-fns';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar as CalendarIcon, Clock, MapPin, User, CheckCircle, XCircle, AlertCircle, Filter } from 'lucide-react';
+import { format, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useProjectEvents } from '@/hooks/useProjectEvents';
+import { useUpdateEvent } from '@/hooks/useMyCalendarEvents';
+import { Calendar } from '@/components/ui/calendar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 interface ProjectCalendarTabProps {
   projectId: string;
 }
 
-const statusColors = {
-  propuesta: 'bg-amber-500',
-  aceptada: 'bg-green-500',
-  rechazada: 'bg-red-500',
-  cancelada: 'bg-gray-500',
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  meeting: 'Reunión',
+  site_visit: 'Visita de obra',
+  review: 'Revisión',
+  deadline: 'Fecha límite',
+  other: 'Otro',
 };
 
-const statusLabels = {
+const STATUS_LABELS: Record<string, string> = {
   propuesta: 'Propuesta',
   aceptada: 'Aceptada',
   rechazada: 'Rechazada',
   cancelada: 'Cancelada',
 };
 
-export default function ProjectCalendarTab({ projectId }: ProjectCalendarTabProps) {
-  const { data: events, isLoading } = useProjectEvents(projectId);
-  const createEvent = useCreateEvent();
-  const updateStatus = useUpdateEventStatus();
-  const deleteEvent = useDeleteEvent();
-  
+const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  propuesta: "secondary",
+  aceptada: "default",
+  rechazada: "destructive",
+  cancelada: "outline",
+};
+
+export function ProjectCalendarTab({ projectId }: ProjectCalendarTabProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    start_time: '',
-    end_time: '',
-    status: 'propuesta' as const,
-    visibilidad: 'cliente' as const,
-  });
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   
-  const handlePreviousMonth = () => {
-    setCurrentMonth(prev => subMonths(prev, 1));
-  };
+  const { data: events = [], isLoading } = useProjectEvents(projectId);
+  const updateEvent = useUpdateEvent();
   
-  const handleNextMonth = () => {
-    setCurrentMonth(prev => addMonths(prev, 1));
-  };
-  
-  const handleCreateEvent = async () => {
-    if (!formData.title || !formData.start_time || !formData.end_time) {
-      return;
+  // Filter events
+  const filteredEvents = useMemo(() => {
+    let filtered = events;
+    
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(e => e.status === statusFilter);
     }
     
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(e => (e as any).event_type === typeFilter);
+    }
     
-    await createEvent.mutateAsync({
-      project_id: projectId,
-      created_by: user.id,
-      title: formData.title,
-      description: formData.description || null,
-      start_time: formData.start_time,
-      end_time: formData.end_time,
-      status: formData.status,
-    });
-    
-    setDialogOpen(false);
-    setFormData({
-      title: '',
-      description: '',
-      location: '',
-      start_time: '',
-      end_time: '',
-      status: 'propuesta',
-      visibilidad: 'cliente',
-    });
+    return filtered;
+  }, [events, statusFilter, typeFilter]);
+  
+  // Events for selected date
+  const eventsForSelectedDate = useMemo(() => {
+    if (!selectedDate) return [];
+    return filteredEvents.filter(e => isSameDay(parseISO(e.start_time), selectedDate));
+  }, [filteredEvents, selectedDate]);
+  
+  // Dates with events for calendar highlighting
+  const datesWithEvents = useMemo(() => {
+    return filteredEvents.map(e => startOfDay(parseISO(e.start_time)));
+  }, [filteredEvents]);
+  
+  const handleStatusChange = async (eventId: string, newStatus: string) => {
+    try {
+      await updateEvent.mutateAsync({ id: eventId, status: newStatus });
+    } catch (error: any) {
+      toast.error("Error al actualizar estado");
+    }
   };
-  
-  // Get all dates that have events
-  const eventDates = events?.map(evt => new Date(evt.start_time)) || [];
-  
-  // Filter events for selected date
-  const eventsForSelectedDate = selectedDate
-    ? events?.filter(evt => isSameDay(new Date(evt.start_time), selectedDate)) || []
-    : [];
-  
-  // Sort events by start time
-  const sortedEvents = [...eventsForSelectedDate].sort((a, b) => {
-    return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
-  });
   
   if (isLoading) {
     return (
-      <div className="flex justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="space-y-4">
+        <Skeleton className="h-[400px] w-full" />
+        <Skeleton className="h-[200px] w-full" />
       </div>
     );
   }
   
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Calendario de Citas</h3>
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Nueva Cita
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Crear Nueva Cita</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <Label>Título</Label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Ej: Revisión de avance"
-                />
-              </div>
-              
-              <div>
-                <Label>Descripción</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Detalles de la cita"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label>Ubicación</Label>
-                <Input
-                  value={formData.location || ''}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Lugar de la cita"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Fecha y hora inicio</Label>
-                  <Input
-                    type="datetime-local"
-                    value={formData.start_time}
-                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                  />
-                </div>
-                
-                <div>
-                  <Label>Fecha y hora fin</Label>
-                  <Input
-                    type="datetime-local"
-                    value={formData.end_time}
-                    onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label>Estado</Label>
-                <Select value={formData.status} onValueChange={(v: any) => setFormData({ ...formData, status: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="propuesta">Propuesta</SelectItem>
-                    <SelectItem value="aceptada">Aceptada</SelectItem>
-                    <SelectItem value="rechazada">Rechazada</SelectItem>
-                    <SelectItem value="cancelada">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleCreateEvent}
-                disabled={!formData.title || !formData.start_time || !formData.end_time || createEvent.isPending}
-              >
-                {createEvent.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Crear'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-      
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Calendar */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left column: Calendar & Filters */}
+      <div className="space-y-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handlePreviousMonth}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                
-                <h2 className="text-lg font-semibold capitalize">
-                  {format(currentMonth, 'MMMM yyyy', { locale: es })}
-                </h2>
-                
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleNextMonth}
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </div>
-              
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                locale={es}
-                month={currentMonth}
-                onMonthChange={setCurrentMonth}
-                className="rounded-lg"
-                modifiers={{
-                  hasEvent: eventDates,
-                }}
-                modifiersClassNames={{
-                  hasEvent: 'has-appointment',
-                }}
-              />
-            </div>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5" />
+              Calendario
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              locale={es}
+              className="rounded-md border"
+              modifiers={{
+                hasEvent: datesWithEvents,
+              }}
+              modifiersClassNames={{
+                hasEvent: 'bg-primary/10 font-bold',
+              }}
+            />
           </CardContent>
         </Card>
         
-        {/* Events List */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">
-            {selectedDate ? (
-              <>Citas del {format(selectedDate, "d 'de' MMMM", { locale: es })}</>
-            ) : (
-              'Todas las Citas'
-            )}
-          </h3>
-          
-          {sortedEvents.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                No hay citas programadas para este día
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {sortedEvents.map((event) => (
-                <Card key={event.id}>
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{event.title}</h4>
-                          <Badge className={`${statusColors[event.status]} mt-1`}>
-                            {statusLabels[event.status]}
-                          </Badge>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteEvent.mutate({ id: event.id, projectId })}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                      
-                      {event.description && (
-                        <p className="text-sm text-muted-foreground">{event.description}</p>
-                      )}
-                      
-                      <div className="space-y-1 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>
-                            {format(new Date(event.start_time), "HH:mm")} - {format(new Date(event.end_time), "HH:mm")}
-                          </span>
-                        </div>
-                        
-                        {event.created_by_name && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <User className="h-4 w-4" />
-                            <span>Creado por: {event.created_by_name}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateStatus.mutate({ id: event.id, status: 'aceptada', projectId })}
-                          disabled={event.status === 'aceptada'}
-                        >
-                          Aceptar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateStatus.mutate({ id: event.id, status: 'rechazada', projectId })}
-                          disabled={event.status === 'rechazada'}
-                        >
-                          Rechazar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateStatus.mutate({ id: event.id, status: 'cancelada', projectId })}
-                          disabled={event.status === 'cancelada'}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filtros
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Status Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Estado</label>
+              <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="all" className="text-xs">Todos</TabsTrigger>
+                  <TabsTrigger value="propuesta" className="text-xs">Propuestas</TabsTrigger>
+                </TabsList>
+                <TabsList className="grid w-full grid-cols-2 mt-2">
+                  <TabsTrigger value="aceptada" className="text-xs">Aceptadas</TabsTrigger>
+                  <TabsTrigger value="rechazada" className="text-xs">Rechazadas</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-          )}
-        </div>
+            
+            {/* Type Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tipo</label>
+              <Tabs value={typeFilter} onValueChange={setTypeFilter}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="all" className="text-xs">Todos</TabsTrigger>
+                  <TabsTrigger value="meeting" className="text-xs">Reuniones</TabsTrigger>
+                </TabsList>
+                <TabsList className="grid w-full grid-cols-2 mt-2">
+                  <TabsTrigger value="site_visit" className="text-xs">Visitas</TabsTrigger>
+                  <TabsTrigger value="review" className="text-xs">Revisiones</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            
+            {/* Summary */}
+            <div className="pt-2 border-t space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total eventos:</span>
+                <span className="font-medium">{filteredEvents.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Aceptadas:</span>
+                <span className="font-medium text-green-600">
+                  {filteredEvents.filter(e => e.status === 'aceptada').length}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Pendientes:</span>
+                <span className="font-medium text-orange-600">
+                  {filteredEvents.filter(e => e.status === 'propuesta').length}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Middle & Right columns: Events timeline */}
+      <div className="lg:col-span-2 space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              {selectedDate 
+                ? `Eventos del ${format(selectedDate, "d 'de' MMMM, yyyy", { locale: es })}`
+                : 'Selecciona una fecha'
+              }
+            </CardTitle>
+            {eventsForSelectedDate.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {eventsForSelectedDate.length} evento{eventsForSelectedDate.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </CardHeader>
+          <CardContent>
+            {eventsForSelectedDate.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No hay eventos para esta fecha</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {eventsForSelectedDate
+                  .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+                  .map(event => {
+                    const eventAny = event as any;
+                    return (
+                      <Card key={event.id} className="overflow-hidden">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 space-y-2">
+                              {/* Title & Badges */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="font-semibold text-base">{event.title}</h3>
+                                <Badge variant={STATUS_VARIANTS[event.status] || "secondary"}>
+                                  {STATUS_LABELS[event.status] || event.status}
+                                </Badge>
+                                {eventAny.event_type && (
+                                  <Badge variant="outline">
+                                    {EVENT_TYPE_LABELS[eventAny.event_type] || eventAny.event_type}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {/* Description */}
+                              {event.description && (
+                                <p className="text-sm text-muted-foreground">
+                                  {event.description}
+                                </p>
+                              )}
+                              
+                              {/* Metadata */}
+                              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  {format(parseISO(event.start_time), "HH:mm")} - {format(parseISO(event.end_time), "HH:mm")}
+                                </div>
+                                {eventAny.location && (
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-4 w-4" />
+                                    {eventAny.location}
+                                  </div>
+                                )}
+                                {event.created_by_name && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="h-4 w-4" />
+                                    {event.created_by_name}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Actions for proposals */}
+                              {event.status === 'propuesta' && (
+                                <div className="flex gap-2 pt-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStatusChange(event.id, 'aceptada')}
+                                    disabled={updateEvent.isPending}
+                                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                  >
+                                    <CheckCircle className="h-3 w-3" />
+                                    Aceptar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStatusChange(event.id, 'rechazada')}
+                                    disabled={updateEvent.isPending}
+                                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <XCircle className="h-3 w-3" />
+                                    Rechazar
+                                  </Button>
+                                </div>
+                              )}
+                              
+                              {/* Actions for accepted */}
+                              {event.status === 'aceptada' && (
+                                <div className="flex gap-2 pt-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStatusChange(event.id, 'cancelada')}
+                                    disabled={updateEvent.isPending}
+                                    className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                  >
+                                    <AlertCircle className="h-3 w-3" />
+                                    Cancelar
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        {/* All events summary */}
+        {filteredEvents.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Próximos eventos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {filteredEvents
+                  .filter(e => new Date(e.start_time) >= new Date())
+                  .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+                  .slice(0, 5)
+                  .map(event => (
+                    <div
+                      key={event.id}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
+                      onClick={() => setSelectedDate(parseISO(event.start_time))}
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{event.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(parseISO(event.start_time), "d MMM, HH:mm", { locale: es })}
+                        </p>
+                      </div>
+                      <Badge variant={STATUS_VARIANTS[event.status] || "secondary"} className="text-xs">
+                        {STATUS_LABELS[event.status]}
+                      </Badge>
+                    </div>
+                  ))}
+                {filteredEvents.filter(e => new Date(e.start_time) >= new Date()).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No hay eventos próximos
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

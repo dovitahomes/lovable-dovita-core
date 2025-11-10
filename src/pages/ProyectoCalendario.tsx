@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import ProjectCalendarTab from "@/components/project/ProjectCalendarTab";
+import { ProjectCalendarTab } from "@/components/project/ProjectCalendarTab";
 import { generateRoute } from "@/config/routes";
 
 export default function ProyectoCalendario() {

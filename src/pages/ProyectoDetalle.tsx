@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { WishlistForm } from "@/components/WishlistForm";
 import { ProjectChat } from "@/components/chat/ProjectChat";
-import { ProjectCalendar } from "@/components/calendar/ProjectCalendar";
+import { ProjectCalendarTab } from "@/components/project/ProjectCalendarTab";
 import { ProjectDocumentsTab } from "@/components/project/ProjectDocumentsTab";
 import { DesignTab } from "@/components/design/DesignTab";
 import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
@@ -292,7 +292,7 @@ export default function ProyectoDetalle() {
         
         
         <TabsContent value="citas" className="mt-6">
-          <ProjectCalendar projectId={id!} />
+          <ProjectCalendarTab projectId={id!} />
         </TabsContent>
         
         <TabsContent value="detalles" className="mt-6">
