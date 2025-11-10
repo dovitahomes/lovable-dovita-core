@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useMyProjectChats } from "@/hooks/useMyProjectChats";
 import useProjectChat from "@/features/client/hooks/useProjectChat";
 import { useProjectChatParticipants } from "@/hooks/useProjectChatParticipants";
@@ -17,8 +18,11 @@ import ERPChatMessage from "@/components/project/ERPChatMessage";
 import ERPChatInput from "@/components/project/ERPChatInput";
 
 export default function MisChats() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const projectIdFromUrl = searchParams.get('project');
+  
   const { data: chats, isLoading: chatsLoading } = useMyProjectChats();
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(projectIdFromUrl || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -34,6 +38,19 @@ export default function MisChats() {
       if (data.user) setCurrentUserId(data.user.id);
     });
   }, []);
+
+  // Auto-select project from URL parameter
+  useEffect(() => {
+    if (projectIdFromUrl && projectIdFromUrl !== selectedProjectId) {
+      setSelectedProjectId(projectIdFromUrl);
+    }
+  }, [projectIdFromUrl]);
+
+  // Update URL when project selection changes
+  const handleProjectSelect = (projectId: string) => {
+    setSelectedProjectId(projectId);
+    setSearchParams({ project: projectId });
+  };
 
   // Smart auto-scroll: only if user is near bottom
   useEffect(() => {
@@ -141,7 +158,7 @@ export default function MisChats() {
                 {chats?.map((chat) => (
                   <button
                     key={chat.project_id}
-                    onClick={() => setSelectedProjectId(chat.project_id)}
+                    onClick={() => handleProjectSelect(chat.project_id)}
                     className={`w-full p-3 rounded-lg text-left hover:bg-muted transition-colors ${
                       selectedProjectId === chat.project_id ? 'bg-muted' : ''
                     }`}

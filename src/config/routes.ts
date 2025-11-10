@@ -183,10 +183,13 @@ export const generateRoute = {
   // Proyectos
   proyectoDetalle: (id: string) => `/proyectos/${id}`,
   proyectoEquipo: (id: string) => `/proyectos/${id}/equipo`,
-  proyectoChat: (id: string) => `/proyectos/${id}/chat`,
+  proyectoChat: (id: string) => `/proyectos/${id}/chat`, // Legacy - redirige a Mis Chats
   proyectoCalendario: (id: string) => `/proyectos/${id}/calendario`,
   construccionDetalle: (id: string) => `/construccion/${id}`,
   construccionCronograma: (projectId: string) => `/construccion/proyectos/${projectId}/cronograma`,
+  
+  // Chat centralizado
+  misChatsWithProject: (projectId: string) => `/mis-chats?project=${projectId}`,
   
   // Presupuestos
   presupuestoParametrico: (id: string) => `/presupuestos/${id}`,

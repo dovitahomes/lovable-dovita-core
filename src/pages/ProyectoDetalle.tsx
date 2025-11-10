@@ -71,7 +71,7 @@ export default function ProyectoDetalle() {
             <Users className="h-4 w-4" />
             Equipo
           </Button>
-          <Button variant="outline" onClick={() => navigate(generateRoute.proyectoChat(id!))} className="gap-2">
+          <Button variant="outline" onClick={() => navigate(`/mis-chats?project=${id}`)} className="gap-2">
             <MessageSquare className="h-4 w-4" />
             Chat
           </Button>
@@ -188,7 +188,14 @@ export default function ProyectoDetalle() {
             Diseño
           </TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
-          <TabsTrigger value="chat" className="gap-2">
+          <TabsTrigger 
+            value="chat" 
+            className="gap-2"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/mis-chats?project=${id}`);
+            }}
+          >
             <MessageSquare className="h-4 w-4" />
             Chat
           </TabsTrigger>
@@ -222,9 +229,6 @@ export default function ProyectoDetalle() {
           />
         </TabsContent>
         
-        <TabsContent value="chat" className="mt-6">
-          <ProjectChat projectId={id!} />
-        </TabsContent>
         
         <TabsContent value="citas" className="mt-6">
           <ProjectCalendar projectId={id!} />

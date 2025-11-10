@@ -44,6 +44,10 @@ export function useTypedNavigate() {
     toBackofficeDashboard: () => navigate(BACKOFFICE_ROUTES.DASHBOARD),
     toVerComoCliente: () => navigate(BACKOFFICE_ROUTES.VER_COMO_CLIENTE),
     
+    // Mi Área
+    toMisChats: () => navigate(BACKOFFICE_ROUTES.MIS_CHATS),
+    toMisChatsWithProject: (projectId: string) => navigate(generateRoute.misChatsWithProject(projectId)),
+    
     // CRM
     toLeads: () => navigate(BACKOFFICE_ROUTES.LEADS),
     toClientes: () => navigate(BACKOFFICE_ROUTES.CLIENTES),
