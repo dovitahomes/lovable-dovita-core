@@ -13,6 +13,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 const DOCUMENT_CATEGORIES = [
   { value: 'contrato', label: 'Contrato' },
@@ -80,6 +81,20 @@ export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
       userId,
       filePath: path,
     });
+    
+    // Log admin access to employee document
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && user.id !== userId) {
+        // @ts-ignore - RPC function added in migration, types will be regenerated on next deploy
+        await supabase.rpc('log_user_document_access', {
+          p_document_id: deleteDialog.document.id,
+          p_action: 'delete'
+        });
+      }
+    } catch (error) {
+      console.error('Error logging document access:', error);
+    }
     
     setDeleteDialog({ open: false, document: null });
   };
@@ -206,7 +221,23 @@ export function UserDocumentsTab({ userId }: UserDocumentsTabProps) {
                 <Button
                   variant="ghost"
                   size={isMobile ? "default" : "sm"}
-                  onClick={() => window.open(doc.file_url, '_blank')}
+                  onClick={async () => {
+                    window.open(doc.file_url, '_blank');
+                    
+                    // Log admin access to employee document
+                    try {
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (user && user.id !== userId) {
+                        // @ts-ignore - RPC function added in migration, types will be regenerated on next deploy
+                        await supabase.rpc('log_user_document_access', {
+                          p_document_id: doc.id,
+                          p_action: 'download'
+                        });
+                      }
+                    } catch (error) {
+                      console.error('Error logging document access:', error);
+                    }
+                  }}
                   className={cn(isMobile && "flex-1")}
                 >
                   <Download className="w-4 h-4 mr-2" />
