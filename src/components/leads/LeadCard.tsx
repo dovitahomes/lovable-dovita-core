@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { UserPlus, Mail, Phone, MapPin, Eye, Clock, CalendarClock, AlertCircle } from "lucide-react";
+import { UserPlus, Mail, Phone, MapPin, Eye, Clock, CalendarClock, AlertCircle, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -11,6 +11,7 @@ import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { useTasks } from "@/hooks/crm/useTasks";
 import { LeadQuickActions } from "./LeadQuickActions";
 import { CreateFollowUpDialog } from "./CreateFollowUpDialog";
+import { ActivityTimeline } from "./ActivityTimeline";
 import { cn } from "@/lib/utils";
 
 interface LeadCardProps {
@@ -22,6 +23,7 @@ interface LeadCardProps {
 export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
   const navigate = useNavigate();
   const [followUpOpen, setFollowUpOpen] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(false);
   const canConvert = ['nuevo', 'contactado', 'calificado'].includes(lead.status);
   const isConverted = lead.status === 'convertido';
   
@@ -176,7 +178,7 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
           )}
 
           {/* Quick Actions */}
-          <div className="flex items-center justify-between gap-2 pt-2 border-t">
+          <div className="flex items-center gap-2 pt-2 border-t">
             <LeadQuickActions leadId={lead.id} />
             <Button
               size="sm"
@@ -185,10 +187,21 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
                 e.stopPropagation();
                 setFollowUpOpen(true);
               }}
-              className="text-xs h-7 px-2"
+              className="text-xs h-7 px-2 flex-1"
             >
               <CalendarClock className="h-3 w-3 mr-1" />
               Recordatorio
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                setTimelineOpen(true);
+              }}
+              className="text-xs h-7 px-2"
+            >
+              <History className="h-3 w-3" />
             </Button>
           </div>
           
@@ -226,6 +239,13 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
       <CreateFollowUpDialog
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}
+        leadId={lead.id}
+        leadName={lead.nombre_completo}
+      />
+
+      <ActivityTimeline
+        open={timelineOpen}
+        onOpenChange={setTimelineOpen}
         leadId={lead.id}
         leadName={lead.nombre_completo}
       />

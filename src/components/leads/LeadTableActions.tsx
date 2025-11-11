@@ -4,6 +4,7 @@ import { Eye, Pencil, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LeadQuickActions } from "./LeadQuickActions";
 import { CreateFollowUpDialog } from "./CreateFollowUpDialog";
+import { ActivityTimeline } from "./ActivityTimeline";
 import {
   Tooltip,
   TooltipContent,
@@ -14,12 +15,12 @@ import {
 interface LeadTableActionsProps {
   lead: any;
   onEdit?: () => void;
-  onViewTimeline?: () => void;
 }
 
-export function LeadTableActions({ lead, onEdit, onViewTimeline }: LeadTableActionsProps) {
+export function LeadTableActions({ lead, onEdit }: LeadTableActionsProps) {
   const navigate = useNavigate();
   const [followUpOpen, setFollowUpOpen] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(false);
 
   return (
     <>
@@ -44,25 +45,23 @@ export function LeadTableActions({ lead, onEdit, onViewTimeline }: LeadTableActi
           </Tooltip>
         </TooltipProvider>
 
-        {onViewTimeline && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={onViewTimeline}
-                  className="h-8 w-8 p-0"
-                >
-                  <History className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Ver historial</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setTimelineOpen(true)}
+                className="h-8 w-8 p-0"
+              >
+                <History className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Ver historial</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         {lead.client_id && (
           <TooltipProvider>
@@ -88,6 +87,13 @@ export function LeadTableActions({ lead, onEdit, onViewTimeline }: LeadTableActi
       <CreateFollowUpDialog
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}
+        leadId={lead.id}
+        leadName={lead.nombre_completo}
+      />
+
+      <ActivityTimeline
+        open={timelineOpen}
+        onOpenChange={setTimelineOpen}
         leadId={lead.id}
         leadName={lead.nombre_completo}
       />
