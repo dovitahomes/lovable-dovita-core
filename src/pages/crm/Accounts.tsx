@@ -154,12 +154,12 @@ export default function Accounts() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar cuentas..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={selectedType} onValueChange={setSelectedType}>
+        <Select value={selectedType || "all"} onValueChange={(v) => setSelectedType(v === "all" ? "" : v)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             {ACCOUNT_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
           </SelectContent>
         </Select>
