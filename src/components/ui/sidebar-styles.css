@@ -1,14 +1,14 @@
 /* Sidebar theme-specific styles - Override CSS variables */
 
-/* Dark sidebar theme - Custom background #02275b */
+/* Dark sidebar theme - Custom background #021c41 */
 [data-sidebar-theme="dark"] {
-  --sidebar-background: 215 96% 18% !important;
-  background-color: hsl(215 96% 18%) !important;
+  --sidebar-background: 215 94% 13% !important;
+  background-color: hsl(215 94% 13%) !important;
 }
 
 /* Force background color for dark sidebar */
 [data-sidebar-theme="dark"] .bg-sidebar {
-  background-color: hsl(215 96% 18%) !important;
+  background-color: hsl(215 94% 13%) !important;
 }
 
 /* Light sidebar theme */
