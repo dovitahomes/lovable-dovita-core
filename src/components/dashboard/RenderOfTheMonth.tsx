@@ -37,7 +37,7 @@ export function RenderOfTheMonth() {
   if (isLoading) {
     return (
       <Card className="overflow-hidden">
-        <Skeleton className="h-80 w-full" />
+        <Skeleton className="h-48 w-full" />
       </Card>
     );
   }
@@ -45,12 +45,12 @@ export function RenderOfTheMonth() {
   if (!render) {
     return (
       <Card className="overflow-hidden bg-muted">
-        <CardContent className="flex flex-col items-center justify-center h-80 p-6 text-center">
-          <ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground">
+        <CardContent className="flex flex-col items-center justify-center h-48 p-6 text-center">
+          <ImageIcon className="h-12 w-12 text-muted-foreground mb-3" />
+          <h3 className="text-base font-semibold text-muted-foreground">
             No hay render del mes
           </h3>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             El administrador aún no ha configurado el render destacado para este mes
           </p>
         </CardContent>
@@ -64,7 +64,7 @@ export function RenderOfTheMonth() {
         className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow group"
         onClick={() => setIsDialogOpen(true)}
       >
-        <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+        <div className="relative aspect-[21/9] overflow-hidden bg-muted">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -77,17 +77,17 @@ export function RenderOfTheMonth() {
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-block px-3 py-1 bg-primary/90 text-primary-foreground text-xs font-semibold rounded-full">
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-block px-2 py-0.5 bg-primary/90 text-primary-foreground text-xs font-semibold rounded-full">
                 🎨 RENDER DEL MES
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+            <h2 className="text-xl md:text-2xl font-bold mb-1">
               {render.titulo}
             </h2>
             {render.autor && (
-              <p className="text-sm md:text-base text-white/90">
+              <p className="text-xs md:text-sm text-white/90">
                 Por: {render.autor}
               </p>
             )}
