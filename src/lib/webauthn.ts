@@ -26,9 +26,25 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 }
 
 /**
+ * Check if we're running in an iframe (like Lovable preview)
+ */
+function isInIframe(): boolean {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+}
+
+/**
  * Check if WebAuthn is supported in the current browser
  */
 export function isWebAuthnSupported(): boolean {
+  // WebAuthn no funciona en iframes por políticas de seguridad
+  if (isInIframe()) {
+    return false;
+  }
+  
   return (
     typeof window !== 'undefined' &&
     window.PublicKeyCredential !== undefined &&

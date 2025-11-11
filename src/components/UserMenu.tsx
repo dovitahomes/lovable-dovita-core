@@ -88,7 +88,7 @@ export function UserMenu() {
           </DropdownMenuItem>
           {!isSupported && (
             <p className="px-2 py-1 text-xs text-muted-foreground">
-              Tu navegador no soporta biométricos
+              Los biométricos solo funcionan en producción o localhost, no en el preview de Lovable
             </p>
           )}
           <DropdownMenuSeparator />
