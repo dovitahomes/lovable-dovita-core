@@ -36,3 +36,36 @@
 [data-sidebar-theme="light"] .text-sidebar-foreground {
   color: hsl(222 47% 11%) !important;
 }
+
+/* Smooth transitions for theme changes */
+[data-sidebar="sidebar"],
+[data-sidebar="sidebar"] * {
+  transition: 
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Faster transitions for interactive elements */
+[data-sidebar="sidebar"] button,
+[data-sidebar="sidebar"] a,
+[data-sidebar="sidebar"] [role="button"] {
+  transition: 
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth color transitions for icons */
+[data-sidebar="sidebar"] .lucide {
+  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Theme container transitions */
+[data-sidebar-theme="light"],
+[data-sidebar-theme="dark"] {
+  transition: 
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

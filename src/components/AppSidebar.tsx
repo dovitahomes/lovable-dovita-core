@@ -200,9 +200,9 @@ export function AppSidebar() {
                 }
               >
                 {sidebarTheme === "dark" ? (
-                  <Sun className="h-4 w-4" />
+                  <Sun className="h-4 w-4 transition-transform duration-300 hover:rotate-12" />
                 ) : (
-                  <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                  <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600 transition-transform duration-300 hover:-rotate-12" : "h-4 w-4 transition-transform duration-300 hover:-rotate-12"} />
                 )}
                 {(isMobile || state !== "collapsed") && <span>Sidebar {sidebarTheme === "dark" ? "Claro" : "Oscuro"}</span>}
               </SidebarMenuButton>
