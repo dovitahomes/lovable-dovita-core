@@ -69,3 +69,54 @@
     background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ========================================
+   MOBILE SIDEBAR FADE-IN/OUT ANIMATIONS
+   (ERP ONLY - No afecta Client App)
+   ======================================== */
+
+/* Keyframe for fade-in when opening mobile sidebar */
+@keyframes sidebar-mobile-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Keyframe for fade-out when closing mobile sidebar */
+@keyframes sidebar-mobile-fade-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+/* Apply fade-in animation to mobile sidebar (ERP only) */
+[data-mobile="true"][data-sidebar="sidebar"] {
+  animation: sidebar-mobile-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Smooth transitions for mobile sidebar interactions */
+[data-mobile="true"][data-sidebar="sidebar"] {
+  transition: 
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure child elements also transition smoothly in mobile */
+[data-mobile="true"][data-sidebar="sidebar"] > * {
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apply fade-out animation when closing (if state attribute exists) */
+[data-mobile="true"][data-sidebar="sidebar"][data-state="closed"] {
+  animation: sidebar-mobile-fade-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
