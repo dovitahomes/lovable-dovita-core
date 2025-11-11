@@ -43,10 +43,7 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
     }
 
     return () => {
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
-        setBlobUrl(null);
-      }
+      setBlobUrl(null);
     };
   }, [open, manual]);
 
@@ -66,9 +63,16 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
 
       const mimeType = data.type || getMimeType(manual.file_type);
       const blob = new Blob([data], { type: mimeType });
-      const url = URL.createObjectURL(blob);
       
-      setBlobUrl(url);
+      // Convert blob to data URL to avoid Chrome CSP blocking
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBlobUrl(reader.result as string);
+      };
+      reader.onerror = () => {
+        setError('Error al procesar el documento');
+      };
+      reader.readAsDataURL(blob);
     } catch (err) {
       console.error('Error loading document:', err);
       setError('Error al cargar el documento');
@@ -89,10 +93,7 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
   };
 
   const handleClose = () => {
-    if (blobUrl) {
-      URL.revokeObjectURL(blobUrl);
-      setBlobUrl(null);
-    }
+    setBlobUrl(null);
     setError(null);
     onOpenChange(false);
   };
