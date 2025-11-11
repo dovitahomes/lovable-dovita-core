@@ -92,6 +92,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: Users, 
         moduleName: "clientes" 
       },
+      { 
+        title: "Ver como cliente", 
+        url: BACKOFFICE_ROUTES.VER_COMO_CLIENTE, 
+        icon: Eye, 
+        moduleName: "crm" 
+      },
     ],
   },
   {
@@ -191,12 +197,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "contenido_corporativo" 
       },
       { 
-        title: "Contenido Corporativo", 
-        url: BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO, 
-        icon: Building2, 
-        moduleName: "contenido_corporativo" 
-      },
-      { 
         title: "Sucursales", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES, 
         icon: MapPin, 
@@ -225,12 +225,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS, 
         icon: FileText, 
         moduleName: "centro_reglas" 
-      },
-      { 
-        title: "Ver como cliente", 
-        url: BACKOFFICE_ROUTES.VER_COMO_CLIENTE, 
-        icon: Eye, 
-        moduleName: "herramientas" 
       },
     ],
   },

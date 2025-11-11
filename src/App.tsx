@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
+import { RequireAdmin } from "@/routes/guards";
 import { queryClient } from "@/lib/queryConfig";
 import { TabsSkeleton, TableSkeleton, PageHeaderSkeleton } from "@/components/common/Skeletons";
 import { DemoGuard } from "@/auth/DemoGuard";
@@ -123,37 +124,49 @@ const InternalLayout = () => {
                 } />
                 
                 {/* ============================================ */}
-                {/* HERRAMIENTAS ADMINISTRATIVAS                */}
+                {/* HERRAMIENTAS ADMINISTRATIVAS - SOLO ADMINS */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} element={
-                  <ProtectedRoute moduleName="contenido_corporativo">
-                    <Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>
-                  </ProtectedRoute>
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="contenido_corporativo">
+                      <Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES} element={
-                  <ProtectedRoute moduleName="sucursales">
-                    <Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>
-                  </ProtectedRoute>
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="sucursales">
+                      <Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ALIANZAS} element={
-                  <ProtectedRoute moduleName="herramientas">
-                    <Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>
-                  </ProtectedRoute>
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="herramientas">
+                      <Suspense fallback={<TableSkeleton />}><Alianzas /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS} element={
-                  <ProtectedRoute moduleName="usuarios">
-                    <Suspense fallback={<TableSkeleton />}><GestionUsuarios /></Suspense>
-                  </ProtectedRoute>
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="usuarios">
+                      <Suspense fallback={<TableSkeleton />}><GestionUsuarios /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_ACCESOS} element={
-                  <ProtectedRoute moduleName="accesos">
-                    <Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>
-                  </ProtectedRoute>
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="accesos">
+                      <Suspense fallback={<TableSkeleton />}><Accesos /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS} element={
-                  <ProtectedRoute moduleName="centro_reglas">
-                    <Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>
-                  </ProtectedRoute>
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="centro_reglas">
+                      <Suspense fallback={<TableSkeleton />}><Reglas /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS} element={
                   <ProtectedRoute moduleName="usuarios">
@@ -181,9 +194,13 @@ const InternalLayout = () => {
                 <Route path={BACKOFFICE_ROUTES.ERP_BUDGET_DETAIL} element={<Suspense fallback={<TableSkeleton />}><BudgetEditor /></Suspense>} />
                 
                 {/* ============================================ */}
-                {/* METRICS                                     */}
+                {/* METRICS - SOLO ADMINS                       */}
                 {/* ============================================ */}
-                <Route path={BACKOFFICE_ROUTES.METRICS} element={<Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.METRICS} element={
+                  <RequireAdmin>
+                    <Suspense fallback={<TableSkeleton />}><Metrics /></Suspense>
+                  </RequireAdmin>
+                } />
                 
                 {/* Legacy redirect: old usuarios route */}
                 <Route path={LEGACY_ROUTES.USUARIOS_OLD} element={<Navigate to={BACKOFFICE_ROUTES.HERRAMIENTAS_GESTION_USUARIOS} replace />} />
