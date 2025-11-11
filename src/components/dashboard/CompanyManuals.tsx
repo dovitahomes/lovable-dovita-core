@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ManualViewer } from "@/components/ManualViewer";
 import {
   Select,
   SelectContent,
@@ -79,6 +80,12 @@ export function CompanyManuals() {
   const [selectedCategory, setSelectedCategory] = useState("todos");
   const [currentPage, setCurrentPage] = useState(1);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedManual, setSelectedManual] = useState<{
+    file_path: string;
+    titulo: string;
+    file_type: string;
+  } | null>(null);
   
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
   
@@ -119,26 +126,10 @@ export function CompanyManuals() {
     }
   };
 
-  const handleView = async (filePath: string) => {
-    try {
-      const { data, error } = await supabase
-        .storage
-        .from('documentos')
-        .download(filePath);
-
-      if (error) throw error;
-
-      // Crear URL del blob y abrirla en nueva pestaña
-      const blob = new Blob([data], { type: data.type });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      
-      // Liberar el objeto URL después de un delay
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (error) {
-      console.error("Error viewing file:", error);
-      toast.error("Error al abrir archivo");
-    }
+  const handleView = (filePath: string, titulo: string) => {
+    const fileType = filePath.split('.').pop() || 'pdf';
+    setSelectedManual({ file_path: filePath, titulo, file_type: fileType });
+    setViewerOpen(true);
   };
 
   // Paginación
@@ -243,7 +234,7 @@ export function CompanyManuals() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleView(manual.file_path)}
+                    onClick={() => handleView(manual.file_path, manual.titulo)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Ver
@@ -305,6 +296,12 @@ export function CompanyManuals() {
           </p>
         )}
       </CardContent>
+
+      <ManualViewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        manual={selectedManual}
+      />
     </Card>
   );
 }
