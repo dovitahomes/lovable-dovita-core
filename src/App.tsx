@@ -63,6 +63,7 @@ const Comisiones = lazy(() => import("./pages/Comisiones"));
 const VerComoCliente = lazy(() => import("./pages/VerComoCliente"));
 
 // Admin tools (lazy loaded)
+const Tareas = lazy(() => import("./pages/herramientas/Tareas"));
 const ContenidoCorporativo = lazy(() => import("./pages/herramientas/ContenidoCorporativo"));
 const Sucursales = lazy(() => import("./pages/herramientas/Sucursales"));
 const Alianzas = lazy(() => import("./pages/herramientas/Alianzas"));
@@ -308,6 +309,11 @@ const InternalLayout = () => {
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.CONTABILIDAD} element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.COMISIONES} element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* HERRAMIENTAS - TAREAS                       */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_TAREAS} element={<Suspense fallback={<TableSkeleton />}><Tareas /></Suspense>} />
                 
                 {/* ============================================ */}
                 {/* VER COMO CLIENTE (Preview Mode)             */}

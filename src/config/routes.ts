@@ -116,6 +116,7 @@ export const BACKOFFICE_ROUTES = {
   COMISIONES: '/comisiones',
   
   // Herramientas Administrativas
+  HERRAMIENTAS_TAREAS: '/herramientas/tareas',
   HERRAMIENTAS_CONTENIDO: '/herramientas/contenido-corporativo',
   HERRAMIENTAS_SUCURSALES: '/herramientas/sucursales',
   HERRAMIENTAS_ALIANZAS: '/herramientas/alianzas',

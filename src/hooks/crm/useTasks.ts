@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 
 export type TaskStatus = 'pendiente' | 'en_progreso' | 'completada' | 'cancelada';
-export type TaskPriority = 'baja' | 'media' | 'alta' | 'urgente';
-export type TaskRelatedType = 'lead' | 'account' | 'contact' | 'opportunity';
+export type TaskPriority = 'baja' | 'media' | 'alta';
+export type TaskRelatedType = 'lead' | 'account' | 'contact' | 'opportunity' | 'project';
 
 export interface Task {
   id: string;
@@ -66,7 +66,7 @@ export function useTasks(
   });
 }
 
-export function useTaskById(id: string | null) {
+export function useTaskById(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['task', id],
     queryFn: async () => {
@@ -79,7 +79,7 @@ export function useTaskById(id: string | null) {
       if (error) throw error;
       return data as Task;
     },
-    enabled: !!id,
+    enabled: options?.enabled !== undefined ? options.enabled : !!id,
   });
 }
 
@@ -115,23 +115,25 @@ export function useUpdateTask() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Task> }) => {
-      const updateData = { ...data };
+    mutationFn: async (data: Partial<Task> & { id: string }) => {
+      const { id, ...updateData } = data;
+      const finalData = { ...updateData };
       
       // If marking as completed, set completed_at
       if (data.status === 'completada' && !data.completed_at) {
-        updateData.completed_at = new Date().toISOString();
+        finalData.completed_at = new Date().toISOString();
       }
       
       const { error } = await supabase
         .from('tasks')
-        .update(updateData)
+        .update(finalData)
         .eq('id', id);
       
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task'] });
       toast.success("Tarea actualizada exitosamente");
     },
     onError: (error: any) => {
