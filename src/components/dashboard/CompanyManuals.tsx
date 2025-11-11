@@ -127,9 +127,15 @@ export function CompanyManuals() {
 
       if (error) throw error;
 
-      // Construir URL completa con HTTPS para conexión segura
-      const fullUrl = `https://bkthkotzicohjizmcmsa.supabase.co/storage/v1${data.signedUrl}`;
-      window.open(fullUrl, '_blank');
+      // Verificación defensiva: manejar URLs relativas y absolutas
+      let finalUrl: string;
+      if (data.signedUrl.startsWith('http://') || data.signedUrl.startsWith('https://')) {
+        finalUrl = data.signedUrl;
+      } else {
+        finalUrl = `https://bkthkotzicohjizmcmsa.supabase.co/storage/v1${data.signedUrl}`;
+      }
+      
+      window.open(finalUrl, '_blank');
     } catch (error) {
       console.error('Error al visualizar manual:', error);
       toast.error('Error al visualizar el manual');
