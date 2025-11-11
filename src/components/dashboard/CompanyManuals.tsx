@@ -121,25 +121,14 @@ export function CompanyManuals() {
 
   const handleView = async (filePath: string, titulo: string) => {
     try {
-      toast.info('Abriendo documento...');
-      
-      // Descargar el archivo desde Supabase
       const { data, error } = await supabase.storage
         .from('documentos')
-        .download(filePath);
+        .createSignedUrl(filePath, 3600);
 
       if (error) throw error;
 
-      // Crear blob URL y abrir en nuevo tab
-      const url = URL.createObjectURL(data);
-      const newWindow = window.open(url, '_blank');
-      
-      if (!newWindow) {
-        toast.error('Por favor permite pop-ups para visualizar documentos');
-      }
-
-      // Limpiar blob URL después de un momento
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      // Abrir en nueva pestaña
+      window.open(data.signedUrl, '_blank');
     } catch (error) {
       console.error('Error al visualizar manual:', error);
       toast.error('Error al visualizar el manual');
