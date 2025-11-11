@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogIn, Mail } from "lucide-react";
+import { LogIn, Mail, Fingerprint } from "lucide-react";
 import { z } from "zod";
 import { bootstrapUserAfterLogin } from "@/lib/auth/bootstrap";
+import { isWebAuthnSupported, authenticateWithBiometric } from "@/lib/webauthn";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -22,6 +23,43 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+
+  const biometricSupported = isWebAuthnSupported();
+
+  const handleBiometricLogin = async () => {
+    setIsLoading(true);
+    try {
+      const result = await authenticateWithBiometric();
+      
+      if (!result.success || !result.userId) {
+        throw new Error('Autenticación biométrica cancelada o fallida');
+      }
+
+      // Create session with the user ID
+      const { error } = await supabase.auth.admin.getUserById(result.userId);
+      if (error) throw error;
+
+      // Bootstrap user
+      console.log('[biometric-login] Calling bootstrap...');
+      const bootstrapOk = await bootstrapUserAfterLogin();
+      if (!bootstrapOk) {
+        console.warn('[biometric-login] Bootstrap falló, pero permitir navegación');
+      }
+
+      // Invalidar cache de permisos
+      const { queryClient } = await import('@/lib/queryConfig');
+      await queryClient.invalidateQueries({ queryKey: ['user-module-permissions'] });
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      toast.success('Inicio de sesión exitoso');
+      navigate('/', { replace: true });
+    } catch (error: any) {
+      console.error('[biometric-login] Error:', error);
+      toast.error(error.message || 'Error al iniciar sesión con biométricos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,6 +231,19 @@ const Login = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Procesando..." : isMagicLink ? "Enviar enlace de acceso" : "Iniciar Sesión"}
             </Button>
+
+            {biometricSupported && !isMagicLink && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleBiometricLogin}
+                disabled={isLoading}
+              >
+                <Fingerprint className="mr-2 h-4 w-4" />
+                Iniciar con Biométricos
+              </Button>
+            )}
 
             <div className="space-y-2">
               <Button

@@ -19,6 +19,7 @@ import { AuthProvider } from "@/app/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { PUBLIC_ROUTES, BACKOFFICE_ROUTES, LEGACY_ROUTES } from "@/config/routes";
+import { UserMenu } from "@/components/UserMenu";
 
 // Client App imports
 import ClientAppWrapper from "@/layouts/ClientAppWrapper";
@@ -87,19 +88,18 @@ const InternalLayout = () => {
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <div className="flex items-center gap-2">
-                
-                
-              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              title={theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
-            >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                title={theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
+              >
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              <UserMenu />
+            </div>
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4">
             <Suspense fallback={<PageHeaderSkeleton />}>
