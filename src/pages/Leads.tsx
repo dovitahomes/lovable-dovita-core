@@ -327,9 +327,13 @@ export default function Leads() {
           )}
         </>
       ) : (
-        <div className="flex-1 overflow-auto">
-          <LeadsTableView search={search} filters={filters} />
-        </div>
+         <div className="flex-1 overflow-auto">
+           <LeadsTableView 
+             search={search} 
+             filters={filters}
+             onOpenDetails={handleOpenDetails}
+           />
+         </div>
       )}
 
         </TabsContent>

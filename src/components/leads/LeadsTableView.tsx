@@ -17,7 +17,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Mail, Phone, ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Mail, Phone, ArrowUpDown, ArrowUp, ArrowDown, Loader2, User, Clock, Home, DollarSign, Calendar, Edit, Download, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { useAllLeads } from "@/hooks/useAllLeads";
@@ -25,13 +32,17 @@ import { StatusBadge } from "./StatusBadge";
 import { LeadTableActions } from "./LeadTableActions";
 import { LeadFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { LeadTableCardMobile } from "./LeadTableCardMobile";
 
 interface LeadsTableViewProps {
   search: string;
   filters: LeadFilters;
+  onOpenDetails?: (leadId: string) => void;
 }
 
-export function LeadsTableView({ search, filters }: LeadsTableViewProps) {
+export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableViewProps) {
+  const isMobile = useIsMobile();
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<string>("updated_at");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -100,9 +111,85 @@ export function LeadsTableView({ search, filters }: LeadsTableViewProps) {
 
   return (
     <div className="space-y-4">
-      <div className="border rounded-lg">
-        <div className="overflow-x-auto">
-          <Table>
+      {/* Mobile Sorting Selector */}
+      {isMobile && (
+        <div className="flex items-center gap-2">
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Ordenar por..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="nombre_completo">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Nombre
+                </div>
+              </SelectItem>
+              <SelectItem value="updated_at">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Más recientes
+                </div>
+              </SelectItem>
+              <SelectItem value="terreno_m2">
+                <div className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Terreno (m²)
+                </div>
+              </SelectItem>
+              <SelectItem value="presupuesto_referencia">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Presupuesto
+                </div>
+              </SelectItem>
+              <SelectItem value="last_activity">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Último contacto
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          >
+            {sortOrder === 'asc' ? (
+              <ArrowUp className="h-4 w-4" />
+            ) : (
+              <ArrowDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* Mobile Cards View */}
+      {isMobile ? (
+        <div className="space-y-3">
+          {leads.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No se encontraron leads
+            </div>
+          ) : (
+            leads.map((lead) => (
+              <LeadTableCardMobile
+                key={lead.id}
+                lead={lead}
+                selected={selectedLeads.includes(lead.id)}
+                onSelect={(checked) => handleSelectLead(lead.id, checked)}
+                onOpenDetails={onOpenDetails || (() => {})}
+              />
+            ))
+          )}
+        </div>
+      ) : (
+        /* Desktop Table View */
+        <div className="border rounded-lg">
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[50px]">
@@ -270,6 +357,7 @@ export function LeadsTableView({ search, filters }: LeadsTableViewProps) {
           </Table>
         </div>
       </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -307,25 +395,34 @@ export function LeadsTableView({ search, filters }: LeadsTableViewProps) {
 
       {/* Bulk Actions Bar */}
       {selectedLeads.length > 0 && (
-        <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-lg shadow-lg p-4 animate-slide-in-up z-50">
-          <div className="flex items-center gap-4">
+        <div className={cn(
+          "fixed bottom-6 bg-primary text-primary-foreground rounded-lg shadow-lg p-4 animate-slide-in-up z-50",
+          isMobile ? "left-4 right-4" : "right-6"
+        )}>
+          <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium">
-              {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} seleccionado{selectedLeads.length > 1 ? 's' : ''}
+              {selectedLeads.length} {isMobile ? '' : 'lead'}{selectedLeads.length > 1 ? 's' : ''}{isMobile ? ' ✓' : ' seleccionado'}
             </p>
             <div className="flex gap-2">
-              <Button size="sm" variant="secondary">
-                Cambiar Estado
-              </Button>
-              <Button size="sm" variant="secondary">
-                Exportar
+              <Button 
+                size={isMobile ? "sm" : "default"} 
+                variant="secondary"
+              >
+                {isMobile ? <Edit className="h-4 w-4" /> : 'Cambiar Estado'}
               </Button>
               <Button 
-                size="sm" 
+                size={isMobile ? "sm" : "default"} 
+                variant="secondary"
+              >
+                {isMobile ? <Download className="h-4 w-4" /> : 'Exportar'}
+              </Button>
+              <Button 
+                size={isMobile ? "sm" : "default"} 
                 variant="ghost"
                 onClick={() => setSelectedLeads([])}
                 className="hover:bg-primary-foreground/10"
               >
-                Cancelar
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
