@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,7 @@ export default function RendersManagement() {
   const [editingRender, setEditingRender] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
 
   const [formData, setFormData] = useState({
     mes_ano: new Date().toISOString().slice(0, 7),
@@ -176,6 +177,25 @@ export default function RendersManagement() {
     );
   });
 
+  useEffect(() => {
+    if (filteredRenders) {
+      filteredRenders.forEach(async (render) => {
+        if (render.imagen_path) {
+          try {
+            const { url } = await getSignedUrl({
+              bucket: 'documentos',
+              path: render.imagen_path,
+              expiresInSeconds: 3600
+            });
+            setImageUrls(prev => ({ ...prev, [render.id]: url }));
+          } catch (error) {
+            console.error('Error loading image:', error);
+          }
+        }
+      });
+    }
+  }, [filteredRenders]);
+
   if (isLoading) {
     return (
       <Card>
@@ -232,7 +252,15 @@ export default function RendersManagement() {
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div className="w-16 h-16 rounded bg-muted flex items-center justify-center overflow-hidden">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      {imageUrls[render.id] ? (
+                        <img
+                          src={imageUrls[render.id]}
+                          alt={render.titulo}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -362,7 +390,7 @@ export default function RendersManagement() {
                     <SelectValue placeholder="Seleccionar proyecto" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ninguno</SelectItem>
+                    <SelectItem value="ninguno">Ninguno</SelectItem>
                     {projects?.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.project_name || project.clients?.name || 'Sin nombre'}

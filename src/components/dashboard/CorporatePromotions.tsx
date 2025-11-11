@@ -24,7 +24,7 @@ export function CorporatePromotions() {
       promotions.forEach((promo) => {
         if (promo.imagen_path) {
           const { data } = supabase.storage
-            .from('documents')
+            .from('documentos')
             .getPublicUrl(promo.imagen_path);
           setImageUrls((prev) => ({ ...prev, [promo.id]: data.publicUrl }));
         }

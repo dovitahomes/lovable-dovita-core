@@ -59,7 +59,7 @@ const ROLES = ["admin", "colaborador", "cliente"];
 
 export default function ManualsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("todas");
   const { data: manuals, isLoading } = useCompanyManuals(categoryFilter, searchTerm);
   const createMutation = useCreateCompanyManual();
   const updateMutation = useUpdateCompanyManual();
@@ -297,7 +297,7 @@ export default function ManualsManagement() {
                 <SelectValue placeholder="Filtrar por categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas las categorías</SelectItem>
+                <SelectItem value="todas">Todas las categorías</SelectItem>
                 {CATEGORIAS.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}

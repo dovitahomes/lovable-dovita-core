@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ import {
   useUpdateCorporatePromotion,
   useDeleteCorporatePromotion,
 } from "@/hooks/useCorporatePromotions";
-import { uploadToBucket } from "@/lib/storage-helpers";
+import { uploadToBucket, getSignedUrl } from "@/lib/storage-helpers";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Trash2, Edit2, Plus, Search, Calendar } from "lucide-react";
@@ -55,6 +55,7 @@ export default function PromotionsManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
   const [uploading, setUploading] = useState(false);
+  const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -196,6 +197,25 @@ export default function PromotionsManagement() {
     return matchesSearch && matchesStatus;
   });
 
+  useEffect(() => {
+    if (filteredPromotions) {
+      filteredPromotions.forEach(async (promo) => {
+        if (promo.imagen_path) {
+          try {
+            const { url } = await getSignedUrl({
+              bucket: 'documentos',
+              path: promo.imagen_path,
+              expiresInSeconds: 3600
+            });
+            setImageUrls(prev => ({ ...prev, [promo.id]: url }));
+          } catch (error) {
+            console.error('Error loading image:', error);
+          }
+        }
+      });
+    }
+  }, [filteredPromotions]);
+
   if (isLoading) {
     return (
       <Card>
@@ -266,7 +286,15 @@ export default function PromotionsManagement() {
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <div className="w-16 h-16 rounded bg-muted flex items-center justify-center overflow-hidden">
-                        <Sparkles className="h-8 w-8 text-muted-foreground" />
+                        {imageUrls[promotion.id] ? (
+                          <img
+                            src={imageUrls[promotion.id]}
+                            alt={promotion.titulo}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Sparkles className="h-8 w-8 text-muted-foreground" />
+                        )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">

@@ -23,7 +23,7 @@ export function useCompanyManuals(categoria?: string, searchTerm?: string) {
         .select('*')
         .order('updated_at', { ascending: false });
       
-      if (categoria && categoria !== 'todos') {
+      if (categoria && categoria !== 'todas') {
         query = query.eq('categoria', categoria);
       }
       
