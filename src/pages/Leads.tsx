@@ -3,12 +3,13 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Plus, Search, AlertCircle, Clock, CheckCircle2, LayoutGrid, Table as TableIcon } from "lucide-react";
 import { LeadDialog } from "@/components/forms/LeadDialog";
 import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
 import { ConvertLeadToOpportunityDialog } from "@/components/crm/ConvertLeadToOpportunityDialog";
 import { KanbanColumn } from "@/components/leads/KanbanColumn";
 import { LeadCard } from "@/components/leads/LeadCard";
+import { LeadsTableView } from "@/components/leads/LeadsTableView";
 import { useLeadsByStatus, useUpdateLeadStatus, type LeadStatus } from "@/hooks/useLeads";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const COLUMNS: { status: LeadStatus; title: string }[] = [
 
 export default function Leads() {
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [createOpen, setCreateOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
   const [convertToOppOpen, setConvertToOppOpen] = useState(false);
@@ -117,9 +119,31 @@ export default function Leads() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">Leads</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 border rounded-lg p-1">
+            <Button
+              size="sm"
+              variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+              onClick={() => setViewMode('kanban')}
+              className="h-8 px-3"
+            >
+              <LayoutGrid className="h-4 w-4 mr-2" />
+              Kanban
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              onClick={() => setViewMode('table')}
+              className="h-8 px-3"
+            >
+              <TableIcon className="h-4 w-4 mr-2" />
+              Tabla
+            </Button>
+          </div>
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
+          </Button>
+        </div>
       </div>
 
       {/* Alerts Panel */}
@@ -190,29 +214,35 @@ export default function Leads() {
         />
       </div>
 
-      {/* Kanban Board */}
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex-1 overflow-x-auto pb-4">
-          <div className="flex gap-4 h-full min-w-max">
-            {COLUMNS.map(({ status, title }) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                title={title}
-                leads={columnQueries[status].data || []}
-                isLoading={columnQueries[status].isLoading}
-                onConvert={handleConvert}
-              />
-            ))}
+      {/* View Content */}
+      {viewMode === 'kanban' ? (
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="flex-1 overflow-x-auto pb-4">
+            <div className="flex gap-4 h-full min-w-max">
+              {COLUMNS.map(({ status, title }) => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  title={title}
+                  leads={columnQueries[status].data || []}
+                  isLoading={columnQueries[status].isLoading}
+                  onConvert={handleConvert}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <DragOverlay>
-          {activeDragLead ? (
-            <LeadCard lead={activeDragLead} onConvert={() => {}} isDragging />
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay>
+            {activeDragLead ? (
+              <LeadCard lead={activeDragLead} onConvert={() => {}} isDragging />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      ) : (
+        <div className="flex-1 overflow-auto">
+          <LeadsTableView search={search} />
+        </div>
+      )}
 
       {/* Dialogs */}
       <LeadDialog open={createOpen} onOpenChange={setCreateOpen} />
