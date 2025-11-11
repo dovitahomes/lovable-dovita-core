@@ -23,13 +23,15 @@ import { es } from "date-fns/locale";
 import { useAllLeads } from "@/hooks/useAllLeads";
 import { StatusBadge } from "./StatusBadge";
 import { LeadTableActions } from "./LeadTableActions";
+import { LeadFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
 
 interface LeadsTableViewProps {
   search: string;
+  filters: LeadFilters;
 }
 
-export function LeadsTableView({ search }: LeadsTableViewProps) {
+export function LeadsTableView({ search, filters }: LeadsTableViewProps) {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<string>("updated_at");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -41,6 +43,7 @@ export function LeadsTableView({ search }: LeadsTableViewProps) {
     pageSize: 20,
     sortBy,
     sortOrder,
+    filters,
   });
 
   const leads = data?.data || [];

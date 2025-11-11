@@ -10,8 +10,10 @@ import { ConvertLeadToOpportunityDialog } from "@/components/crm/ConvertLeadToOp
 import { KanbanColumn } from "@/components/leads/KanbanColumn";
 import { LeadCard } from "@/components/leads/LeadCard";
 import { LeadsTableView } from "@/components/leads/LeadsTableView";
+import { LeadFiltersComponent } from "@/components/leads/LeadFilters";
 import { useLeadsByStatus, useUpdateLeadStatus, type LeadStatus } from "@/hooks/useLeads";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
+import { LeadFilters, getEmptyFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
 
 const COLUMNS: { status: LeadStatus; title: string }[] = [
@@ -25,6 +27,7 @@ const COLUMNS: { status: LeadStatus; title: string }[] = [
 export default function Leads() {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
+  const [filters, setFilters] = useState<LeadFilters>(getEmptyFilters());
   const [createOpen, setCreateOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
   const [convertToOppOpen, setConvertToOppOpen] = useState(false);
@@ -33,12 +36,12 @@ export default function Leads() {
 
   const updateStatusMutation = useUpdateLeadStatus();
 
-  // Fetch leads for each column
-  const nuevoQuery = useLeadsByStatus("nuevo", search);
-  const contactadoQuery = useLeadsByStatus("contactado", search);
-  const calificadoQuery = useLeadsByStatus("calificado", search);
-  const convertidoQuery = useLeadsByStatus("convertido", search);
-  const perdidoQuery = useLeadsByStatus("perdido", search);
+  // Fetch leads for each column with filters
+  const nuevoQuery = useLeadsByStatus("nuevo", search, filters);
+  const contactadoQuery = useLeadsByStatus("contactado", search, filters);
+  const calificadoQuery = useLeadsByStatus("calificado", search, filters);
+  const convertidoQuery = useLeadsByStatus("convertido", search, filters);
+  const perdidoQuery = useLeadsByStatus("perdido", search, filters);
 
   const columnQueries = {
     nuevo: nuevoQuery,
@@ -47,6 +50,15 @@ export default function Leads() {
     convertido: convertidoQuery,
     perdido: perdidoQuery,
   };
+
+  // Calculate total leads for filters counter
+  const totalLeads = useMemo(() => {
+    return (nuevoQuery.data?.length || 0) +
+      (contactadoQuery.data?.length || 0) +
+      (calificadoQuery.data?.length || 0) +
+      (convertidoQuery.data?.length || 0) +
+      (perdidoQuery.data?.length || 0);
+  }, [nuevoQuery.data, contactadoQuery.data, calificadoQuery.data, convertidoQuery.data, perdidoQuery.data]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -203,14 +215,22 @@ export default function Leads() {
         </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nombre, email o teléfono..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nombre, email o teléfono..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <LeadFiltersComponent
+          filters={filters}
+          onFiltersChange={setFilters}
+          totalLeads={totalLeads}
+          filteredLeads={totalLeads}
         />
       </div>
 
@@ -240,7 +260,7 @@ export default function Leads() {
         </DndContext>
       ) : (
         <div className="flex-1 overflow-auto">
-          <LeadsTableView search={search} />
+          <LeadsTableView search={search} filters={filters} />
         </div>
       )}
 

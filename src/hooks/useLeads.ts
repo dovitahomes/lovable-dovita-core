@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
+import { LeadFilters } from "@/lib/leadFilters";
 
 export type LeadStatus = "nuevo" | "contactado" | "calificado" | "convertido" | "perdido";
 
-export function useLeadsByStatus(status: LeadStatus, search: string = "") {
+export function useLeadsByStatus(status: LeadStatus, search: string = "", filters?: LeadFilters) {
   return useQuery({
-    queryKey: ['leads', status, search],
+    queryKey: ['leads', status, search, filters],
     queryFn: async () => {
       let query = supabase
         .from('leads')
@@ -17,6 +18,34 @@ export function useLeadsByStatus(status: LeadStatus, search: string = "") {
       
       if (search) {
         query = query.or(`nombre_completo.ilike.%${search}%,email.ilike.%${search}%,telefono.ilike.%${search}%`);
+      }
+
+      // Apply filters
+      if (filters) {
+        if (filters.presupuesto_min) {
+          query = query.gte('presupuesto_referencia', filters.presupuesto_min);
+        }
+        if (filters.presupuesto_max) {
+          query = query.lte('presupuesto_referencia', filters.presupuesto_max);
+        }
+        if (filters.fecha_desde) {
+          query = query.gte('created_at', filters.fecha_desde.toISOString());
+        }
+        if (filters.fecha_hasta) {
+          query = query.lte('created_at', filters.fecha_hasta.toISOString());
+        }
+        if (filters.sucursal_id) {
+          query = query.eq('sucursal_id', filters.sucursal_id);
+        }
+        if (filters.terreno_min) {
+          query = query.gte('terreno_m2', filters.terreno_min);
+        }
+        if (filters.terreno_max) {
+          query = query.lte('terreno_m2', filters.terreno_max);
+        }
+        if (filters.origenes && filters.origenes.length > 0) {
+          query = query.overlaps('origen_lead', filters.origenes);
+        }
       }
       
       const { data, error } = await query;
