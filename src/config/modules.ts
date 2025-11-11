@@ -8,6 +8,7 @@ export const MODULES = [
 
   // CRM
   { key: 'leads', path: '/leads', label: 'Leads', group: 'CRM' },
+  { key: 'crm', path: '/crm', label: 'CRM', group: 'CRM' },
   { key: 'clientes', path: '/clientes', label: 'Clientes', group: 'CRM' },
 
   // Proyectos
