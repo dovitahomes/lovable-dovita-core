@@ -1,10 +1,10 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { useFeaturedRender } from "@/hooks/useFeaturedRender";
-import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageIcon } from "lucide-react";
+import { getSignedUrl } from "@/lib/storage-helpers";
 
 export function RenderOfTheMonth() {
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -13,12 +13,25 @@ export function RenderOfTheMonth() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (render?.imagen_path) {
-      const { data } = supabase.storage
-        .from('documentos')
-        .getPublicUrl(render.imagen_path);
-      setImageUrl(data.publicUrl);
-    }
+    const loadImage = async () => {
+      if (render?.imagen_path) {
+        try {
+          const { url } = await getSignedUrl({
+            bucket: 'documentos',
+            path: render.imagen_path,
+            expiresInSeconds: 3600
+          });
+          setImageUrl(url);
+        } catch (error) {
+          console.error('Error loading render image:', error);
+          setImageUrl(null);
+        }
+      } else {
+        setImageUrl(null);
+      }
+    };
+    
+    loadImage();
   }, [render]);
 
   if (isLoading) {
