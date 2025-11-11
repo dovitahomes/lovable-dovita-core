@@ -183,7 +183,9 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
               </TabsContent>
 
               <TabsContent value="tasks" className="m-0">
-                <TaskList relatedToType="lead" relatedToId={lead.id} />
+                <div className="text-sm text-muted-foreground">
+                  Funcionalidad de tareas disponible próximamente
+                </div>
               </TabsContent>
 
               <TabsContent value="notes" className="m-0">
