@@ -22,7 +22,9 @@ const Dashboard = () => {
           .single();
         
         if (profile?.full_name) {
-          setUserName(profile.full_name);
+          // Extraer solo el primer nombre
+          const firstName = profile.full_name.split(' ')[0];
+          setUserName(firstName);
         }
       }
     };
@@ -34,13 +36,13 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2 mb-8">
-        {/* Dovita Hub - Discreto */}
-        <p className="text-sm font-medium text-muted-foreground">
+        {/* Dovita Hub - Discreto pero legible */}
+        <p className="text-base font-medium text-muted-foreground">
           Dovita Hub
         </p>
         
-        {/* Bienvenida Prominente con Gradient Azul → Naranja en el nombre */}
-        <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+        {/* Bienvenida con Gradient Azul → Naranja en el nombre */}
+        <h1 className="text-3xl md:text-4xl font-bold leading-tight">
           <span className="text-foreground">Bienvenido </span>
           <span className="bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
             {userName || "Usuario"}
