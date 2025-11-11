@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCorporatePromotions } from "@/hooks/useCorporatePromotions";
-import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getSignedUrl } from "@/lib/storage-helpers";
 import {
   Dialog,
   DialogContent,
@@ -21,12 +21,18 @@ export function CorporatePromotions() {
 
   useEffect(() => {
     if (promotions) {
-      promotions.forEach((promo) => {
+      promotions.forEach(async (promo) => {
         if (promo.imagen_path) {
-          const { data } = supabase.storage
-            .from('documentos')
-            .getPublicUrl(promo.imagen_path);
-          setImageUrls((prev) => ({ ...prev, [promo.id]: data.publicUrl }));
+          try {
+            const { url } = await getSignedUrl({
+              bucket: 'documentos',
+              path: promo.imagen_path,
+              expiresInSeconds: 3600
+            });
+            setImageUrls((prev) => ({ ...prev, [promo.id]: url }));
+          } catch (error) {
+            console.error('Error loading promotion image:', error);
+          }
         }
       });
     }

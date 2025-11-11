@@ -62,7 +62,7 @@ export default function RendersManagement() {
     mes_ano: new Date().toISOString().slice(0, 7),
     titulo: "",
     autor: "",
-    proyecto_id: "",
+    proyecto_id: null,
     caption: "",
     imagen_path: "",
     active: true,
@@ -71,26 +71,26 @@ export default function RendersManagement() {
   const handleOpenDialog = (render?: any) => {
     if (render) {
       setEditingRender(render);
-      setFormData({
-        mes_ano: render.mes_ano,
-        titulo: render.titulo,
-        autor: render.autor || "",
-        proyecto_id: render.proyecto_id || "",
-        caption: render.caption || "",
-        imagen_path: render.imagen_path,
-        active: render.active,
-      });
+    setFormData({
+      mes_ano: render.mes_ano,
+      titulo: render.titulo,
+      autor: render.autor || "",
+      proyecto_id: render.proyecto_id || null,
+      caption: render.caption || "",
+      imagen_path: render.imagen_path,
+      active: render.active,
+    });
     } else {
       setEditingRender(null);
-      setFormData({
-        mes_ano: new Date().toISOString().slice(0, 7),
-        titulo: "",
-        autor: "",
-        proyecto_id: "",
-        caption: "",
-        imagen_path: "",
-        active: true,
-      });
+    setFormData({
+      mes_ano: new Date().toISOString().slice(0, 7),
+      titulo: "",
+      autor: "",
+      proyecto_id: null,
+      caption: "",
+      imagen_path: "",
+      active: true,
+    });
     }
     setDialogOpen(true);
   };
@@ -139,13 +139,23 @@ export default function RendersManagement() {
     }
 
     try {
+      // Sanitizar datos antes de enviar
+      const sanitizedData = {
+        ...formData,
+        proyecto_id: formData.proyecto_id === "ninguno" || formData.proyecto_id === "" 
+          ? null 
+          : formData.proyecto_id,
+        autor: formData.autor.trim() || null,
+        caption: formData.caption.trim() || null,
+      };
+
       if (editingRender) {
         await updateMutation.mutateAsync({
           id: editingRender.id,
-          updates: formData,
+          updates: sanitizedData,
         });
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(sanitizedData);
       }
       setDialogOpen(false);
       setEditingRender(null);
@@ -383,8 +393,11 @@ export default function RendersManagement() {
               <div className="space-y-2">
                 <Label htmlFor="proyecto_id">Proyecto (Opcional)</Label>
                 <Select
-                  value={formData.proyecto_id}
-                  onValueChange={(value) => setFormData({ ...formData, proyecto_id: value })}
+                  value={formData.proyecto_id || "ninguno"}
+                  onValueChange={(value) => setFormData({ 
+                    ...formData, 
+                    proyecto_id: value === "ninguno" ? null : value 
+                  })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar proyecto" />
