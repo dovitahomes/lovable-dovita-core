@@ -215,8 +215,17 @@ const Manuales = () => {
 
       if (error) throw error;
 
-      const SUPABASE_URL = "https://bkthkotzicohjizmcmsa.supabase.co";
-      const fullUrl = `${SUPABASE_URL}/storage/v1${data.signedUrl}`;
+      // Verificar si signedUrl ya es absoluta o relativa
+      let fullUrl: string;
+      if (data.signedUrl.startsWith('http://') || data.signedUrl.startsWith('https://')) {
+        // Ya es URL absoluta, usar tal cual
+        fullUrl = data.signedUrl;
+      } else {
+        // Es URL relativa, construir URL completa
+        const SUPABASE_URL = "https://bkthkotzicohjizmcmsa.supabase.co";
+        fullUrl = `${SUPABASE_URL}/storage/v1${data.signedUrl}`;
+      }
+
       window.open(fullUrl, '_blank');
     } catch (error) {
       toast.error("Error al abrir archivo");
