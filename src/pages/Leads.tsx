@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, AlertCircle, Clock, CheckCircle2, LayoutGrid, Table as TableIcon } from "lucide-react";
+import { Plus, Search, AlertCircle, Clock, CheckCircle2, LayoutGrid, Table as TableIcon, Download, Upload, FileDown } from "lucide-react";
 import { LeadDialog } from "@/components/forms/LeadDialog";
 import { KanbanColumn } from "@/components/leads/KanbanColumn";
 import { LeadCard } from "@/components/leads/LeadCard";
@@ -12,10 +12,14 @@ import { LeadsTableView } from "@/components/leads/LeadsTableView";
 import { LeadFiltersComponent } from "@/components/leads/LeadFilters";
 import { LeadsDashboard } from "@/components/leads/LeadsDashboard";
 import { LeadsForecasting } from "@/components/leads/LeadsForecasting";
+import { ImportLeadsDialog } from "@/components/crm/ImportLeadsDialog";
+import { ExportLeadsDialog } from "@/components/crm/ExportLeadsDialog";
+import { downloadLeadsTemplate } from "@/utils/exports/leadsExport";
 import { useLeadsByStatus, useUpdateLeadStatus, type LeadStatus } from "@/hooks/useLeads";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { LeadFilters, getEmptyFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const COLUMNS: { status: LeadStatus; title: string; color: string }[] = [
   { status: "nuevo", title: "Nuevo", color: "bg-gray-500" },
@@ -29,12 +33,15 @@ const COLUMNS: { status: LeadStatus; title: string; color: string }[] = [
 ];
 
 export default function Leads() {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<'pipeline' | 'dashboard' | 'forecast'>('pipeline');
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [filters, setFilters] = useState<LeadFilters>(getEmptyFilters());
   const [createOpen, setCreateOpen] = useState(false);
   const [activeDragLead, setActiveDragLead] = useState<any>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const updateStatusMutation = useUpdateLeadStatus();
 
@@ -140,9 +147,38 @@ export default function Leads() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">Leads & Oportunidades</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size={isMobile ? "icon" : "default"}
+            onClick={() => downloadLeadsTemplate()}
+            className="gap-2"
+          >
+            <FileDown className="h-4 w-4" />
+            {!isMobile && "Plantilla"}
+          </Button>
+          <Button
+            variant="outline"
+            size={isMobile ? "icon" : "default"}
+            onClick={() => setShowImportDialog(true)}
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            {!isMobile && "Importar"}
+          </Button>
+          <Button
+            variant="outline"
+            size={isMobile ? "icon" : "default"}
+            onClick={() => setShowExportDialog(true)}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            {!isMobile && "Exportar"}
+          </Button>
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
@@ -283,6 +319,27 @@ export default function Leads() {
 
       {/* Dialogs */}
       <LeadDialog open={createOpen} onOpenChange={setCreateOpen} />
+      
+      <ImportLeadsDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
+      
+      <ExportLeadsDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        leads={[
+          ...(nuevoQuery.data || []),
+          ...(contactadoQuery.data || []),
+          ...(calificadoQuery.data || []),
+          ...(propuestaQuery.data || []),
+          ...(negociacionQuery.data || []),
+          ...(ganadoQuery.data || []),
+          ...(convertidoQuery.data || []),
+          ...(perdidoQuery.data || []),
+        ]}
+        totalCount={totalLeads}
+      />
     </div>
   );
 }
