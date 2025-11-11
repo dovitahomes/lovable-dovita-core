@@ -64,7 +64,7 @@ export function RenderOfTheMonth() {
         className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow group"
         onClick={() => setIsDialogOpen(true)}
       >
-        <div className="relative aspect-[21/9] overflow-hidden bg-muted">
+        <div className="relative aspect-[24/9] overflow-hidden bg-muted">
           {imageUrl ? (
             <img
               src={imageUrl}
