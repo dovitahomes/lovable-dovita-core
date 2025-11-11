@@ -2237,19 +2237,25 @@ export type Database = {
       }
       leads: {
         Row: {
+          account_id: string | null
+          amount: number | null
           client_id: string | null
+          closed_date: string | null
+          contact_id: string | null
           contacto_json: Json | null
           created_at: string
           created_by: string | null
           direccion: string | null
           email: string | null
           estado: string | null
+          expected_close_date: string | null
           id: string
           nombre_completo: string | null
           notas: string | null
           origen: string | null
           origen_lead: string[] | null
           presupuesto_referencia: number | null
+          probability: number | null
           status: Database["public"]["Enums"]["lead_status"]
           sucursal_id: string | null
           telefono: string | null
@@ -2258,19 +2264,25 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_id?: string | null
+          amount?: number | null
           client_id?: string | null
+          closed_date?: string | null
+          contact_id?: string | null
           contacto_json?: Json | null
           created_at?: string
           created_by?: string | null
           direccion?: string | null
           email?: string | null
           estado?: string | null
+          expected_close_date?: string | null
           id?: string
           nombre_completo?: string | null
           notas?: string | null
           origen?: string | null
           origen_lead?: string[] | null
           presupuesto_referencia?: number | null
+          probability?: number | null
           status?: Database["public"]["Enums"]["lead_status"]
           sucursal_id?: string | null
           telefono?: string | null
@@ -2279,19 +2291,25 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_id?: string | null
+          amount?: number | null
           client_id?: string | null
+          closed_date?: string | null
+          contact_id?: string | null
           contacto_json?: Json | null
           created_at?: string
           created_by?: string | null
           direccion?: string | null
           email?: string | null
           estado?: string | null
+          expected_close_date?: string | null
           id?: string
           nombre_completo?: string | null
           notas?: string | null
           origen?: string | null
           origen_lead?: string[] | null
           presupuesto_referencia?: number | null
+          probability?: number | null
           status?: Database["public"]["Enums"]["lead_status"]
           sucursal_id?: string | null
           telefono?: string | null
@@ -2301,10 +2319,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "leads_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "leads_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
           {
@@ -5424,6 +5456,9 @@ export type Database = {
         | "calificado"
         | "convertido"
         | "perdido"
+        | "propuesta"
+        | "negociacion"
+        | "ganado"
       node_type: "departamento" | "mayor" | "partida" | "subpartida"
       payment_method: "PUE" | "PPD"
       person_type: "fisica" | "moral"
@@ -5573,6 +5608,9 @@ export const Constants = {
         "calificado",
         "convertido",
         "perdido",
+        "propuesta",
+        "negociacion",
+        "ganado",
       ],
       node_type: ["departamento", "mayor", "partida", "subpartida"],
       payment_method: ["PUE", "PPD"],

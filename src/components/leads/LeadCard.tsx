@@ -24,8 +24,9 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
   const navigate = useNavigate();
   const [followUpOpen, setFollowUpOpen] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
-  const canConvert = ['nuevo', 'contactado', 'calificado'].includes(lead.status);
+  const canConvert = ['nuevo', 'contactado', 'calificado', 'propuesta', 'negociacion'].includes(lead.status);
   const isConverted = lead.status === 'convertido';
+  const isWon = lead.status === 'ganado';
   
   // Fetch activities and tasks for this lead
   const { data: activities } = useCrmActivities('lead', lead.id);
@@ -165,7 +166,17 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
             </div>
           )}
           
-          {lead.presupuesto_referencia && (
+          {/* Opportunity Fields */}
+          {lead.amount && (
+            <div className="pt-2 border-t space-y-1">
+              <Badge variant="secondary" className="font-mono text-xs">
+                💰 {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(lead.amount)}
+              </Badge>
+              {lead.probability && <Badge variant="outline" className="ml-1 text-xs">{lead.probability}%</Badge>}
+            </div>
+          )}
+
+          {lead.presupuesto_referencia && !lead.amount && (
             <div className="pt-2 border-t">
               <Badge variant="secondary" className="font-mono text-xs">
                 {new Intl.NumberFormat('es-MX', { 

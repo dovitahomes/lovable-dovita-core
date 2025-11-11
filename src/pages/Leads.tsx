@@ -3,34 +3,39 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, AlertCircle, Clock, CheckCircle2, LayoutGrid, Table as TableIcon } from "lucide-react";
 import { LeadDialog } from "@/components/forms/LeadDialog";
 import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
-import { ConvertLeadToOpportunityDialog } from "@/components/crm/ConvertLeadToOpportunityDialog";
 import { KanbanColumn } from "@/components/leads/KanbanColumn";
 import { LeadCard } from "@/components/leads/LeadCard";
 import { LeadsTableView } from "@/components/leads/LeadsTableView";
 import { LeadFiltersComponent } from "@/components/leads/LeadFilters";
+import { LeadsDashboard } from "@/components/leads/LeadsDashboard";
+import { LeadsForecasting } from "@/components/leads/LeadsForecasting";
 import { useLeadsByStatus, useUpdateLeadStatus, type LeadStatus } from "@/hooks/useLeads";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { LeadFilters, getEmptyFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
 
-const COLUMNS: { status: LeadStatus; title: string }[] = [
-  { status: "nuevo", title: "Nuevo" },
-  { status: "contactado", title: "Contactado" },
-  { status: "calificado", title: "Calificado" },
-  { status: "convertido", title: "Convertido" },
-  { status: "perdido", title: "Perdido" },
+const COLUMNS: { status: LeadStatus; title: string; color: string }[] = [
+  { status: "nuevo", title: "Nuevo", color: "bg-gray-500" },
+  { status: "contactado", title: "Contactado", color: "bg-blue-500" },
+  { status: "calificado", title: "Calificado", color: "bg-yellow-500" },
+  { status: "propuesta", title: "Propuesta", color: "bg-purple-500" },
+  { status: "negociacion", title: "Negociación", color: "bg-orange-500" },
+  { status: "ganado", title: "Ganado", color: "bg-green-500" },
+  { status: "convertido", title: "Convertido", color: "bg-teal-500" },
+  { status: "perdido", title: "Perdido", color: "bg-red-500" },
 ];
 
 export default function Leads() {
   const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<'pipeline' | 'dashboard' | 'forecast'>('pipeline');
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [filters, setFilters] = useState<LeadFilters>(getEmptyFilters());
   const [createOpen, setCreateOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
-  const [convertToOppOpen, setConvertToOppOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [activeDragLead, setActiveDragLead] = useState<any>(null);
 
@@ -40,13 +45,19 @@ export default function Leads() {
   const nuevoQuery = useLeadsByStatus("nuevo", search, filters);
   const contactadoQuery = useLeadsByStatus("contactado", search, filters);
   const calificadoQuery = useLeadsByStatus("calificado", search, filters);
+  const propuestaQuery = useLeadsByStatus("propuesta", search, filters);
+  const negociacionQuery = useLeadsByStatus("negociacion", search, filters);
+  const ganadoQuery = useLeadsByStatus("ganado", search, filters);
   const convertidoQuery = useLeadsByStatus("convertido", search, filters);
   const perdidoQuery = useLeadsByStatus("perdido", search, filters);
 
-  const columnQueries = {
+  const columnQueries: Record<LeadStatus, any> = {
     nuevo: nuevoQuery,
     contactado: contactadoQuery,
     calificado: calificadoQuery,
+    propuesta: propuestaQuery,
+    negociacion: negociacionQuery,
+    ganado: ganadoQuery,
     convertido: convertidoQuery,
     perdido: perdidoQuery,
   };
@@ -56,9 +67,12 @@ export default function Leads() {
     return (nuevoQuery.data?.length || 0) +
       (contactadoQuery.data?.length || 0) +
       (calificadoQuery.data?.length || 0) +
+      (propuestaQuery.data?.length || 0) +
+      (negociacionQuery.data?.length || 0) +
+      (ganadoQuery.data?.length || 0) +
       (convertidoQuery.data?.length || 0) +
       (perdidoQuery.data?.length || 0);
-  }, [nuevoQuery.data, contactadoQuery.data, calificadoQuery.data, convertidoQuery.data, perdidoQuery.data]);
+  }, [nuevoQuery.data, contactadoQuery.data, calificadoQuery.data, propuestaQuery.data, negociacionQuery.data, ganadoQuery.data, convertidoQuery.data, perdidoQuery.data]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -66,6 +80,9 @@ export default function Leads() {
       ...(nuevoQuery.data || []),
       ...(contactadoQuery.data || []),
       ...(calificadoQuery.data || []),
+      ...(propuestaQuery.data || []),
+      ...(negociacionQuery.data || []),
+      ...(ganadoQuery.data || []),
       ...(convertidoQuery.data || []),
       ...(perdidoQuery.data || []),
     ];
@@ -130,33 +147,30 @@ export default function Leads() {
     <div className="h-full flex flex-col p-4 md:p-6 space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Leads</h1>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 border rounded-lg p-1">
-            <Button
-              size="sm"
-              variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-              onClick={() => setViewMode('kanban')}
-              className="h-8 px-3"
-            >
-              <LayoutGrid className="h-4 w-4 mr-2" />
-              Kanban
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              onClick={() => setViewMode('table')}
-              className="h-8 px-3"
-            >
-              <TableIcon className="h-4 w-4 mr-2" />
-              Tabla
-            </Button>
-          </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
-          </Button>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-bold">Leads & Oportunidades</h1>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Nuevo Lead
+        </Button>
       </div>
+
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
+        <TabsList>
+          <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="forecast">Forecast</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pipeline" className="flex-1 flex flex-col space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 border rounded-lg p-1">
+              <Button size="sm" variant={viewMode === 'kanban' ? 'default' : 'ghost'} onClick={() => setViewMode('kanban')} className="h-8 px-3">
+                <LayoutGrid className="h-4 w-4 mr-2" />Kanban
+              </Button>
+              <Button size="sm" variant={viewMode === 'table' ? 'default' : 'ghost'} onClick={() => setViewMode('table')} className="h-8 px-3">
+                <TableIcon className="h-4 w-4 mr-2" />Tabla
+              </Button>
+            </div>
+          </div>
 
       {/* Alerts Panel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -264,22 +278,21 @@ export default function Leads() {
         </div>
       )}
 
+        </TabsContent>
+
+        <TabsContent value="dashboard" className="flex-1">
+          <LeadsDashboard />
+        </TabsContent>
+
+        <TabsContent value="forecast" className="flex-1">
+          <LeadsForecasting />
+        </TabsContent>
+      </Tabs>
+
       {/* Dialogs */}
       <LeadDialog open={createOpen} onOpenChange={setCreateOpen} />
-      
       {selectedLead && (
-        <>
-          <ConvertLeadDialog
-            open={convertOpen}
-            onOpenChange={setConvertOpen}
-            lead={selectedLead}
-          />
-          <ConvertLeadToOpportunityDialog
-            open={convertToOppOpen}
-            onOpenChange={setConvertToOppOpen}
-            lead={selectedLead}
-          />
-        </>
+        <ConvertLeadDialog open={convertOpen} onOpenChange={setConvertOpen} lead={selectedLead} />
       )}
     </div>
   );

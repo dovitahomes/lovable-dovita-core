@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { LeadFilters } from "@/lib/leadFilters";
 
-export type LeadStatus = "nuevo" | "contactado" | "calificado" | "convertido" | "perdido";
+export type LeadStatus = "nuevo" | "contactado" | "calificado" | "propuesta" | "negociacion" | "ganado" | "convertido" | "perdido";
 
 export function useLeadsByStatus(status: LeadStatus, search: string = "", filters?: LeadFilters) {
   return useQuery({

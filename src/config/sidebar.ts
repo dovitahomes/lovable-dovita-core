@@ -93,12 +93,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "crm" 
       },
       { 
-        title: "Oportunidades", 
-        url: BACKOFFICE_ROUTES.OPPORTUNITIES, 
-        icon: Briefcase, 
-        moduleName: "crm" 
-      },
-      { 
         title: "Tareas", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_TAREAS, 
         icon: CheckSquare, 

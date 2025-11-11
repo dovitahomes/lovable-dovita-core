@@ -15,10 +15,13 @@ interface KanbanColumnProps {
 }
 
 const statusColors: Record<LeadStatus, string> = {
-  nuevo: "bg-blue-500",
-  contactado: "bg-yellow-500",
-  calificado: "bg-green-500",
-  convertido: "bg-purple-500",
+  nuevo: "bg-gray-500",
+  contactado: "bg-blue-500",
+  calificado: "bg-yellow-500",
+  propuesta: "bg-purple-500",
+  negociacion: "bg-orange-500",
+  ganado: "bg-green-500",
+  convertido: "bg-teal-500",
   perdido: "bg-red-500"
 };
 

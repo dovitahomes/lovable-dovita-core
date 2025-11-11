@@ -12,6 +12,11 @@ export const leadSchema = z.object({
   notas: z.string().max(1000).optional(),
   sucursal_id: z.string().uuid().nullable().optional(),
   origen_lead: z.array(z.string()).optional(),
+  amount: z.number().positive("Debe ser positivo").optional(),
+  probability: z.number().min(0).max(100).optional(),
+  expected_close_date: z.string().optional(),
+  account_id: z.string().uuid().nullable().optional(),
+  contact_id: z.string().uuid().nullable().optional(),
 });
 
 export type LeadFormData = z.infer<typeof leadSchema>;
@@ -34,6 +39,11 @@ export function useCreateLead() {
           notas: validated.notas || null,
           sucursal_id: validated.sucursal_id || null,
           origen_lead: validated.origen_lead || null,
+          amount: validated.amount || null,
+          probability: validated.probability || null,
+          expected_close_date: validated.expected_close_date || null,
+          account_id: validated.account_id || null,
+          contact_id: validated.contact_id || null,
           status: "nuevo",
         })
         .select()
