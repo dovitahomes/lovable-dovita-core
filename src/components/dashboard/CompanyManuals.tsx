@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ManualViewer } from "@/components/ManualViewer";
 import {
   Select,
   SelectContent,
@@ -80,12 +79,6 @@ export function CompanyManuals() {
   const [selectedCategory, setSelectedCategory] = useState("todos");
   const [currentPage, setCurrentPage] = useState(1);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [viewerOpen, setViewerOpen] = useState(false);
-  const [selectedManual, setSelectedManual] = useState<{
-    file_path: string;
-    titulo: string;
-    file_type: string;
-  } | null>(null);
   
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
   
@@ -126,10 +119,31 @@ export function CompanyManuals() {
     }
   };
 
-  const handleView = (filePath: string, titulo: string) => {
-    const fileType = filePath.split('.').pop() || 'pdf';
-    setSelectedManual({ file_path: filePath, titulo, file_type: fileType });
-    setViewerOpen(true);
+  const handleView = async (filePath: string, titulo: string) => {
+    try {
+      toast.info('Abriendo documento...');
+      
+      // Descargar el archivo desde Supabase
+      const { data, error } = await supabase.storage
+        .from('documentos')
+        .download(filePath);
+
+      if (error) throw error;
+
+      // Crear blob URL y abrir en nuevo tab
+      const url = URL.createObjectURL(data);
+      const newWindow = window.open(url, '_blank');
+      
+      if (!newWindow) {
+        toast.error('Por favor permite pop-ups para visualizar documentos');
+      }
+
+      // Limpiar blob URL después de un momento
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      console.error('Error al visualizar manual:', error);
+      toast.error('Error al visualizar el manual');
+    }
   };
 
   // Paginación
@@ -296,12 +310,6 @@ export function CompanyManuals() {
           </p>
         )}
       </CardContent>
-
-      <ManualViewer
-        open={viewerOpen}
-        onOpenChange={setViewerOpen}
-        manual={selectedManual}
-      />
     </Card>
   );
 }
