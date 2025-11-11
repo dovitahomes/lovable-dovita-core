@@ -93,7 +93,7 @@ export function CompanyManuals() {
       
       const { data, error } = await supabase
         .storage
-        .from('documents')
+        .from('documentos')
         .createSignedUrl(filePath, 60);
 
       if (error) throw error;
@@ -123,7 +123,7 @@ export function CompanyManuals() {
     try {
       const { data, error } = await supabase
         .storage
-        .from('documents')
+        .from('documentos')
         .createSignedUrl(filePath, 60);
 
       if (error) throw error;

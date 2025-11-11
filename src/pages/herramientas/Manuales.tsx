@@ -136,7 +136,7 @@ const Manuales = () => {
         const fileExt = formData.file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
-          .from('documents')
+          .from('documentos')
           .upload(`company-manuals/${fileName}`, formData.file);
 
         if (uploadError) throw uploadError;
@@ -146,7 +146,7 @@ const Manuales = () => {
         // Delete old file if editing
         if (editingManual?.file_path) {
           await supabase.storage
-            .from('documents')
+            .from('documentos')
             .remove([editingManual.file_path]);
         }
       }
@@ -210,7 +210,7 @@ const Manuales = () => {
     try {
       const { data, error } = await supabase
         .storage
-        .from('documents')
+        .from('documentos')
         .createSignedUrl(filePath, 60);
 
       if (error) throw error;
@@ -224,7 +224,7 @@ const Manuales = () => {
     try {
       const { data, error } = await supabase
         .storage
-        .from('documents')
+        .from('documentos')
         .createSignedUrl(filePath, 60);
 
       if (error) throw error;
