@@ -13,14 +13,17 @@ import { useAccounts } from "@/hooks/crm/useAccounts";
 import { useContacts } from "@/hooks/crm/useContacts";
 import { useUnits } from "@/hooks/crm/useUnits";
 import { OpportunityKanban, STAGE_CONFIG } from "@/components/crm/OpportunityKanban";
+import { OpportunitiesDashboard } from "@/components/opportunities/OpportunitiesDashboard";
+import { OpportunityForecasting } from "@/components/opportunities/OpportunityForecasting";
 import { AttachmentsTab } from "@/components/crm/AttachmentsTab";
-import { Plus, Search, LayoutGrid, List, DollarSign, Building2, User, Calendar, Trash2, Link as LinkIcon, X } from "lucide-react";
+import { Plus, Search, LayoutGrid, List, DollarSign, Building2, User, Calendar, Trash2, Link as LinkIcon, X, BarChart3, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/datetime";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function Opportunities() {
   const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<'pipeline' | 'dashboard' | 'forecast'>('pipeline');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [selectedStage, setSelectedStage] = useState<OpportunityStage | "">("");
   const [selectedOpp, setSelectedOpp] = useState<any>(null);
@@ -143,9 +146,6 @@ export default function Opportunities() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Oportunidades</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'kanban' ? 'list' : 'kanban')}>
-            {viewMode === 'kanban' ? <List className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
-          </Button>
           <Dialog open={formOpen} onOpenChange={(open) => { setFormOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" />Nueva Oportunidad</Button>
@@ -188,20 +188,20 @@ export default function Opportunities() {
                   </div>
                   <div>
                     <Label>Cuenta</Label>
-                    <Select value={formData.account_id} onValueChange={(v) => setFormData({...formData, account_id: v})}>
+                    <Select value={formData.account_id || "none"} onValueChange={(v) => setFormData({...formData, account_id: v === "none" ? "" : v})}>
                       <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Ninguna</SelectItem>
+                        <SelectItem value="none">Ninguna</SelectItem>
                         {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Label>Contacto</Label>
-                    <Select value={formData.contact_id} onValueChange={(v) => setFormData({...formData, contact_id: v})}>
+                    <Select value={formData.contact_id || "none"} onValueChange={(v) => setFormData({...formData, contact_id: v === "none" ? "" : v})}>
                       <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Ninguno</SelectItem>
+                        <SelectItem value="none">Ninguno</SelectItem>
                         {contacts.map(c => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -221,61 +221,91 @@ export default function Opportunities() {
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar oportunidades..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-        </div>
-        {viewMode === 'list' && (
-          <Select value={selectedStage} onValueChange={(v) => setSelectedStage(v as OpportunityStage | "")}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Todas las etapas" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
-              {Object.entries(STAGE_CONFIG).map(([key, config]) => (
-                <SelectItem key={key} value={key}>{config.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="pipeline" className="flex items-center gap-2">
+            <LayoutGrid className="h-4 w-4" />
+            Pipeline
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="forecast" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Forecast
+          </TabsTrigger>
+        </TabsList>
 
-      {viewMode === 'kanban' ? (
-        <OpportunityKanban
-          opportunities={opportunities}
-          isLoading={isLoading}
-          onOpportunityClick={(opp) => { setSelectedOpp(opp); setDetailOpen(true); }}
-          onStageChange={handleStageChange}
-        />
-      ) : (
-        <div className="space-y-2">
-          {isLoading ? (
-            Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-20" />)
-          ) : opportunities.length === 0 ? (
-            <Card className="p-8 text-center text-muted-foreground">Sin oportunidades</Card>
+        <TabsContent value="pipeline" className="flex-1 flex flex-col space-y-4">
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Buscar oportunidades..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'kanban' ? 'list' : 'kanban')}>
+              {viewMode === 'kanban' ? <List className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
+            </Button>
+            {viewMode === 'list' && (
+              <Select value={selectedStage || "all"} onValueChange={(v) => setSelectedStage(v === "all" ? "" : v as OpportunityStage)}>
+                <SelectTrigger className="w-[200px]"><SelectValue placeholder="Todas las etapas" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {Object.entries(STAGE_CONFIG).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          {viewMode === 'kanban' ? (
+            <OpportunityKanban
+              opportunities={opportunities}
+              isLoading={isLoading}
+              onOpportunityClick={(opp) => { setSelectedOpp(opp); setDetailOpen(true); }}
+              onStageChange={handleStageChange}
+            />
           ) : (
-            opportunities.map(opp => (
-              <Card key={opp.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedOpp(opp); setDetailOpen(true); }}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{opp.name}</h3>
-                        <Badge variant="outline">{opp.folio}</Badge>
-                        <Badge>{STAGE_CONFIG[opp.stage as OpportunityStage].label}</Badge>
+            <div className="space-y-2">
+              {isLoading ? (
+                Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-20" />)
+              ) : opportunities.length === 0 ? (
+                <Card className="p-8 text-center text-muted-foreground">Sin oportunidades</Card>
+              ) : (
+                opportunities.map(opp => (
+                  <Card key={opp.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setSelectedOpp(opp); setDetailOpen(true); }}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{opp.name}</h3>
+                            <Badge variant="outline">{opp.folio}</Badge>
+                            <Badge>{STAGE_CONFIG[opp.stage as OpportunityStage].label}</Badge>
+                          </div>
+                          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                            {opp.accounts?.name && <span><Building2 className="h-3 w-3 inline mr-1" />{opp.accounts.name}</span>}
+                            {opp.amount && <span className="text-primary font-semibold"><DollarSign className="h-3 w-3 inline" />{new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(opp.amount)}</span>}
+                            <span>{opp.probability}%</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        {opp.accounts?.name && <span><Building2 className="h-3 w-3 inline mr-1" />{opp.accounts.name}</span>}
-                        {opp.amount && <span className="text-primary font-semibold"><DollarSign className="h-3 w-3 inline" />{new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(opp.amount)}</span>}
-                        <span>{opp.probability}%</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
           )}
-        </div>
-      )}
+        </TabsContent>
+
+        <TabsContent value="dashboard" className="flex-1">
+          <OpportunitiesDashboard />
+        </TabsContent>
+
+        <TabsContent value="forecast" className="flex-1">
+          <OpportunityForecasting />
+        </TabsContent>
+      </Tabs>
 
       {/* Detail Dialog */}
       {selectedOpp && (
