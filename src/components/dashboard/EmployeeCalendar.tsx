@@ -77,23 +77,6 @@ export function EmployeeCalendar() {
     return events.map(event => new Date(event.start_time));
   }, [events]);
 
-  // Función para obtener dots de colores por event_type
-  const getEventDotsForDate = (date: Date) => {
-    const eventsOnDate = events.filter(event => {
-      const eventDate = new Date(event.start_time);
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear()
-      );
-    });
-    
-    return eventsOnDate.slice(0, 3).map(event => ({
-      color: EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500",
-      type: event.event_type
-    }));
-  };
-
   // Handler para clic en evento
   const handleEventClick = (event: any) => {
     // Navegar a Mi Calendario con el proyecto y fecha seleccionados
@@ -160,29 +143,16 @@ export function EmployeeCalendar() {
           mode="single"
           selected={selectedDate}
           onSelect={setSelectedDate}
-          size="sm"
-          showMonthYearPickers={true}
-          components={{
-            DayContent: ({ date }) => {
-              const dots = getEventDotsForDate(date);
-              return (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  <span>{date.getDate()}</span>
-                  {dots.length > 0 && (
-                    <div className="absolute bottom-0 flex gap-0.5 justify-center">
-                      {dots.map((dot, i) => (
-                        <div 
-                          key={i} 
-                          className={cn("h-1 w-1 rounded-full", dot.color)} 
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
+          modifiers={{
+            hasEvent: datesWithEvents,
           }}
-          className="rounded-lg border shadow-sm"
+          modifiersStyles={{
+            hasEvent: {
+              fontWeight: "bold",
+              textDecoration: "underline",
+            },
+          }}
+          className="rounded-md border"
         />
 
         {/* Eventos del día seleccionado */}
@@ -192,28 +162,23 @@ export function EmployeeCalendar() {
               Eventos del {selectedDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
             </h4>
             <div className="space-y-2">
-          {eventsOnSelectedDate.length > 0 ? (
-            eventsOnSelectedDate.map((event, index) => (
-              <div 
-                key={event.id} 
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <EventCard
-                  event={event}
-                  onEventClick={handleEventClick}
-                  onDragStart={() => {}}
-                  onDragEnd={() => {}}
-                  variant="compact"
-                  canDrag={false}
-                />
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-6 animate-fade-in">
-              No hay eventos para este día
-            </p>
-          )}
+              {eventsOnSelectedDate.length > 0 ? (
+                eventsOnSelectedDate.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onEventClick={handleEventClick}
+                    onDragStart={() => {}}
+                    onDragEnd={() => {}}
+                    variant="compact"
+                    canDrag={false}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No hay eventos para este día
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -221,29 +186,26 @@ export function EmployeeCalendar() {
         {/* Sección de Próximos Eventos */}
         {upcomingEvents.length > 0 && (
           <div className="space-y-2 pt-4 border-t mt-4">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase">
               Próximos eventos
             </h4>
             <div className="space-y-1.5">
-              {upcomingEvents.map((event, index) => (
+              {upcomingEvents.map(event => (
                 <button
                   key={event.id}
                   onClick={() => handleEventClick(event)}
-                  className="w-full text-left hover:bg-accent/50 rounded-lg p-2.5 transition-all duration-200 hover:shadow-sm group animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="w-full text-left hover:bg-muted/50 rounded-md p-2 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <div 
                       className={cn(
-                        "h-2.5 w-2.5 rounded-full shrink-0 transition-transform group-hover:scale-125",
+                        "h-2 w-2 rounded-full shrink-0",
                         EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
                       )} 
                     />
-                    <span className="text-xs font-medium truncate flex-1 group-hover:text-primary transition-colors">
-                      {event.title}
-                    </span>
+                    <span className="text-xs font-medium truncate flex-1">{event.title}</span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-1 ml-4">
+                  <div className="text-[10px] text-muted-foreground mt-0.5 ml-4">
                     {formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}
                   </div>
                 </button>
