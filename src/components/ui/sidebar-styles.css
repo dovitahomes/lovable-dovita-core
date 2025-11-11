@@ -140,7 +140,7 @@
    ======================================== */
 
 /* Center icons perfectly when sidebar is collapsed */
-[data-state="collapsed"] [data-sidebar="menu-button"] {
+.group[data-collapsible="icon"] [data-sidebar="menu-button"] {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -149,11 +149,11 @@
 }
 
 /* Ensure icons themselves are centered */
-[data-state="collapsed"] [data-sidebar="menu-button"] svg {
+.group[data-collapsible="icon"] [data-sidebar="menu-button"] svg {
   margin: 0 auto !important;
 }
 
 /* Hide text completely when collapsed to prevent layout shifts */
-[data-state="collapsed"] [data-sidebar="menu-button"] span {
+.group[data-collapsible="icon"] [data-sidebar="menu-button"] span {
   display: none !important;
 }
