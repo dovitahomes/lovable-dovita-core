@@ -211,22 +211,17 @@ const Manuales = () => {
       const { data, error } = await supabase
         .storage
         .from('documentos')
-        .createSignedUrl(filePath, 60);
+        .download(filePath);
 
       if (error) throw error;
 
-      // Verificar si signedUrl ya es absoluta o relativa
-      let fullUrl: string;
-      if (data.signedUrl.startsWith('http://') || data.signedUrl.startsWith('https://')) {
-        // Ya es URL absoluta, usar tal cual
-        fullUrl = data.signedUrl;
-      } else {
-        // Es URL relativa, construir URL completa
-        const SUPABASE_URL = "https://bkthkotzicohjizmcmsa.supabase.co";
-        fullUrl = `${SUPABASE_URL}/storage/v1${data.signedUrl}`;
-      }
-
-      window.open(fullUrl, '_blank');
+      // Crear URL del blob y abrirla en nueva pestaña
+      const blob = new Blob([data], { type: data.type });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // Liberar el objeto URL después de un delay
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
       toast.error("Error al abrir archivo");
     }
