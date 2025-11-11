@@ -4,15 +4,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, Mail, StickyNote, Loader2 } from "lucide-react";
+import { Phone, Mail, StickyNote, Loader2, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { EmailComposerDialog } from "@/components/crm/EmailComposerDialog";
+import { CallLogDialog } from "@/components/crm/CallLogDialog";
+import { ScheduleMeetingDialog } from "@/components/crm/ScheduleMeetingDialog";
 
 interface LeadQuickActionsProps {
   leadId: string;
+  leadName?: string;
+  leadEmail?: string;
+  projectId?: string;
 }
 
-export function LeadQuickActions({ leadId }: LeadQuickActionsProps) {
+export function LeadQuickActions({ leadId, leadName = "", leadEmail = "", projectId }: LeadQuickActionsProps) {
   const [noteOpen, setNoteOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [callOpen, setCallOpen] = useState(false);
+  const [meetingOpen, setMeetingOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
   const queryClient = useQueryClient();
 
@@ -54,17 +63,15 @@ export function LeadQuickActions({ leadId }: LeadQuickActionsProps) {
   });
 
   const handleCall = () => {
-    logActivityMutation.mutate({
-      activityType: 'call_made',
-      description: 'Llamada telefónica realizada'
-    });
+    setCallOpen(true);
   };
 
   const handleEmail = () => {
-    logActivityMutation.mutate({
-      activityType: 'email_sent',
-      description: 'Email enviado'
-    });
+    if (!leadEmail) {
+      toast.error("Este lead no tiene email registrado");
+      return;
+    }
+    setEmailOpen(true);
   };
 
   const handleNoteSubmit = () => {
@@ -85,7 +92,32 @@ export function LeadQuickActions({ leadId }: LeadQuickActionsProps) {
   const isLoading = logActivityMutation.isPending;
 
   return (
-    <div className="flex items-center gap-1">
+    <>
+      <EmailComposerDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        leadId={leadId}
+        leadName={leadName}
+        leadEmail={leadEmail}
+      />
+      
+      <CallLogDialog
+        open={callOpen}
+        onOpenChange={setCallOpen}
+        leadId={leadId}
+        leadName={leadName}
+      />
+      
+      <ScheduleMeetingDialog
+        open={meetingOpen}
+        onOpenChange={setMeetingOpen}
+        leadId={leadId}
+        leadName={leadName}
+        leadEmail={leadEmail}
+        projectId={projectId}
+      />
+      
+      <div className="flex items-center gap-1">
       <Button
         size="sm"
         variant="ghost"
@@ -162,6 +194,16 @@ export function LeadQuickActions({ leadId }: LeadQuickActionsProps) {
           </div>
         </PopoverContent>
       </Popover>
+      
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => setMeetingOpen(true)}
+        className="h-8 w-8 p-0 hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400"
+      >
+        <Calendar className="h-4 w-4" />
+      </Button>
     </div>
+    </>
   );
 }

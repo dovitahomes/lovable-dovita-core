@@ -25,7 +25,11 @@ export function LeadTableActions({ lead, onEdit }: LeadTableActionsProps) {
   return (
     <>
       <div className="flex items-center gap-1">
-        <LeadQuickActions leadId={lead.id} />
+        <LeadQuickActions 
+          leadId={lead.id}
+          leadName={lead.nombre_completo}
+          leadEmail={lead.email}
+        />
         
         <TooltipProvider>
           <Tooltip>

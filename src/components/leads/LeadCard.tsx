@@ -188,9 +188,12 @@ export function LeadCard({ lead, onConvert, isDragging }: LeadCardProps) {
             </div>
           )}
 
-          {/* Quick Actions */}
           <div className="flex items-center gap-2 pt-2 border-t">
-            <LeadQuickActions leadId={lead.id} />
+            <LeadQuickActions 
+              leadId={lead.id}
+              leadName={lead.nombre_completo}
+              leadEmail={lead.email}
+            />
             <Button
               size="sm"
               variant="outline"

@@ -15,6 +15,9 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { detectDuplicates, DuplicateLead } from "@/lib/crm/duplicates";
+import { DuplicatesWarningDialog } from "@/components/crm/DuplicatesWarningDialog";
+import { toast } from "sonner";
 
 interface LeadDialogProps {
   open: boolean;
@@ -38,6 +41,9 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
   });
 
   const [expectedCloseDate, setExpectedCloseDate] = useState<Date | undefined>();
+  const [duplicates, setDuplicates] = useState<DuplicateLead[]>([]);
+  const [showDuplicatesWarning, setShowDuplicatesWarning] = useState(false);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
 
   const { data: sucursales } = useQuery({
     queryKey: ["sucursales"],
@@ -55,9 +61,35 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
   // Mostrar campos de oportunidad cuando el status es propuesta, negociacion o ganado
   const showOpportunityFields = ["propuesta", "negociacion", "ganado"].includes(formData.status || "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Detectar duplicados antes de crear
+    setIsCheckingDuplicates(true);
+    try {
+      const foundDuplicates = await detectDuplicates({
+        nombre_completo: formData.nombre_completo,
+        email: formData.email,
+        telefono: formData.telefono,
+      });
+
+      if (foundDuplicates.length > 0) {
+        setDuplicates(foundDuplicates);
+        setShowDuplicatesWarning(true);
+        setIsCheckingDuplicates(false);
+        return;
+      }
+
+      // No duplicados, crear directamente
+      await createLeadDirectly();
+    } catch (error: any) {
+      console.error('Error checking duplicates:', error);
+      toast.error("Error al verificar duplicados: " + error.message);
+      setIsCheckingDuplicates(false);
+    }
+  };
+
+  const createLeadDirectly = () => {
     const submitData = {
       ...formData,
       expected_close_date: expectedCloseDate ? format(expectedCloseDate, "yyyy-MM-dd") : undefined,
@@ -85,7 +117,23 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <DuplicatesWarningDialog
+        open={showDuplicatesWarning}
+        onOpenChange={setShowDuplicatesWarning}
+        duplicates={duplicates}
+        onProceed={() => {
+          setShowDuplicatesWarning(false);
+          setIsCheckingDuplicates(false);
+          createLeadDirectly();
+        }}
+        onCancel={() => {
+          setShowDuplicatesWarning(false);
+          setIsCheckingDuplicates(false);
+        }}
+      />
+      
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nuevo Lead</DialogTitle>
@@ -265,13 +313,14 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={createLead.isPending}>
-              {createLead.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Crear Lead
+            <Button type="submit" disabled={createLead.isPending || isCheckingDuplicates}>
+              {(createLead.isPending || isCheckingDuplicates) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isCheckingDuplicates ? "Verificando..." : "Crear Lead"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </>
   );
 }
