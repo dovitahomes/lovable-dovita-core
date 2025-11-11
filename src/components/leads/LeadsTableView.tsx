@@ -32,7 +32,7 @@ import { StatusBadge } from "./StatusBadge";
 import { LeadTableActions } from "./LeadTableActions";
 import { LeadFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile, useIsTablet } from "@/hooks/use-mobile";
 import { LeadTableCardMobile } from "./LeadTableCardMobile";
 
 interface LeadsTableViewProps {
@@ -42,7 +42,9 @@ interface LeadsTableViewProps {
 }
 
 export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableViewProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(); // <640px
+  const isTablet = useIsTablet(); // 640px - 1023px
+  const isDesktop = !isMobile && !isTablet; // >=1024px
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<string>("updated_at");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -111,8 +113,8 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
 
   return (
     <div className="space-y-4">
-      {/* Mobile Sorting Selector */}
-      {isMobile && (
+      {/* Mobile/Tablet Sorting Selector */}
+      {(isMobile || isTablet) && (
         <div className="flex items-center gap-2">
           <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
             <SelectTrigger className="flex-1">
@@ -186,18 +188,21 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
           )}
         </div>
       ) : (
-        /* Desktop Table View */
+        /* Tablet/Desktop Table View */
         <div className="border rounded-lg">
           <div className="overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
+                {/* Checkbox - SIEMPRE */}
                 <TableHead className="w-[50px]">
                   <Checkbox
                     checked={selectedLeads.length === leads.length && leads.length > 0}
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>
+                
+                {/* Nombre - SIEMPRE */}
                 <TableHead>
                   <Button
                     variant="ghost"
@@ -208,28 +213,42 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                     <SortIcon column="nombre_completo" />
                   </Button>
                 </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort('terreno_m2')}
-                    className="h-8 px-2 hover:bg-transparent"
-                  >
-                    M² Terreno
-                    <SortIcon column="terreno_m2" />
-                  </Button>
-                </TableHead>
+                
+                {/* M² Terreno - SOLO DESKTOP */}
+                {isDesktop && (
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('terreno_m2')}
+                      className="h-8 px-2 hover:bg-transparent"
+                    >
+                      M² Terreno
+                      <SortIcon column="terreno_m2" />
+                    </Button>
+                  </TableHead>
+                )}
+                
+                {/* Presupuesto - SIEMPRE */}
                 <TableHead>
                   <Button
                     variant="ghost"
                     onClick={() => handleSort('presupuesto_referencia')}
                     className="h-8 px-2 hover:bg-transparent"
                   >
-                    Presupuesto
+                    {isTablet ? 'Presup.' : 'Presupuesto'}
                     <SortIcon column="presupuesto_referencia" />
                   </Button>
                 </TableHead>
-                <TableHead>Email</TableHead>
+                
+                {/* Email - SOLO DESKTOP */}
+                {isDesktop && (
+                  <TableHead>Email</TableHead>
+                )}
+                
+                {/* Teléfono - SIEMPRE */}
                 <TableHead>Teléfono</TableHead>
+                
+                {/* Status - SIEMPRE */}
                 <TableHead>
                   <Button
                     variant="ghost"
@@ -240,23 +259,29 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                     <SortIcon column="status" />
                   </Button>
                 </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort('last_activity')}
-                    className="h-8 px-2 hover:bg-transparent"
-                  >
-                    Último Contacto
-                    <SortIcon column="last_activity" />
-                  </Button>
-                </TableHead>
+                
+                {/* Último Contacto - SOLO DESKTOP */}
+                {isDesktop && (
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('last_activity')}
+                      className="h-8 px-2 hover:bg-transparent"
+                    >
+                      Último Contacto
+                      <SortIcon column="last_activity" />
+                    </Button>
+                  </TableHead>
+                )}
+                
+                {/* Acciones - SIEMPRE */}
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {leads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={isDesktop ? 9 : 6} className="text-center py-8 text-muted-foreground">
                     No se encontraron leads
                   </TableCell>
                 </TableRow>
@@ -269,12 +294,15 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                       selectedLeads.includes(lead.id) && "bg-accent/30"
                     )}
                   >
+                    {/* Checkbox - SIEMPRE */}
                     <TableCell>
                       <Checkbox
                         checked={selectedLeads.includes(lead.id)}
                         onCheckedChange={(checked) => handleSelectLead(lead.id, checked as boolean)}
                       />
                     </TableCell>
+                    
+                    {/* Nombre - SIEMPRE */}
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
@@ -292,13 +320,19 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      {lead.terreno_m2 ? (
-                        <span className="font-mono text-sm">{lead.terreno_m2} m²</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
+                    
+                    {/* M² Terreno - SOLO DESKTOP */}
+                    {isDesktop && (
+                      <TableCell>
+                        {lead.terreno_m2 ? (
+                          <span className="font-mono text-sm">{lead.terreno_m2} m²</span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    
+                    {/* Presupuesto - SIEMPRE */}
                     <TableCell>
                       {lead.presupuesto_referencia ? (
                         <span className="font-mono text-sm">
@@ -312,16 +346,22 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      {lead.email ? (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
-                          <span className="truncate max-w-[200px]">{lead.email}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
+                    
+                    {/* Email - SOLO DESKTOP */}
+                    {isDesktop && (
+                      <TableCell>
+                        {lead.email ? (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="truncate max-w-[200px]">{lead.email}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    
+                    {/* Teléfono - SIEMPRE */}
                     <TableCell>
                       {lead.telefono ? (
                         <div className="flex items-center gap-2 text-sm">
@@ -332,21 +372,29 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
+                    
+                    {/* Status - SIEMPRE */}
                     <TableCell>
                       <StatusBadge status={lead.status} />
                     </TableCell>
-                    <TableCell>
-                      {lead.last_activity ? (
-                        <span className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(lead.last_activity), {
-                            addSuffix: true,
-                            locale: es
-                          })}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">Sin contacto</span>
-                      )}
-                    </TableCell>
+                    
+                    {/* Último Contacto - SOLO DESKTOP */}
+                    {isDesktop && (
+                      <TableCell>
+                        {lead.last_activity ? (
+                          <span className="text-sm text-muted-foreground">
+                            {formatDistanceToNow(new Date(lead.last_activity), {
+                              addSuffix: true,
+                              locale: es
+                            })}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Sin contacto</span>
+                        )}
+                      </TableCell>
+                    )}
+                    
+                    {/* Acciones - SIEMPRE */}
                     <TableCell className="text-right">
                       <LeadTableActions lead={lead} />
                     </TableCell>
@@ -397,27 +445,27 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
       {selectedLeads.length > 0 && (
         <div className={cn(
           "fixed bottom-6 bg-primary text-primary-foreground rounded-lg shadow-lg p-4 animate-slide-in-up z-50",
-          isMobile ? "left-4 right-4" : "right-6"
+          isMobile || isTablet ? "left-4 right-4" : "right-6"
         )}>
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium">
-              {selectedLeads.length} {isMobile ? '' : 'lead'}{selectedLeads.length > 1 ? 's' : ''}{isMobile ? ' ✓' : ' seleccionado'}
+              {selectedLeads.length} {isMobile || isTablet ? '' : 'lead'}{selectedLeads.length > 1 ? 's' : ''}{isMobile || isTablet ? ' ✓' : ' seleccionado'}
             </p>
             <div className="flex gap-2">
               <Button 
-                size={isMobile ? "sm" : "default"} 
+                size={isMobile || isTablet ? "sm" : "default"} 
                 variant="secondary"
               >
-                {isMobile ? <Edit className="h-4 w-4" /> : 'Cambiar Estado'}
+                {isMobile || isTablet ? <Edit className="h-4 w-4" /> : 'Cambiar Estado'}
               </Button>
               <Button 
-                size={isMobile ? "sm" : "default"} 
+                size={isMobile || isTablet ? "sm" : "default"} 
                 variant="secondary"
               >
-                {isMobile ? <Download className="h-4 w-4" /> : 'Exportar'}
+                {isMobile || isTablet ? <Download className="h-4 w-4" /> : 'Exportar'}
               </Button>
               <Button 
-                size={isMobile ? "sm" : "default"} 
+                size={isMobile || isTablet ? "sm" : "default"} 
                 variant="ghost"
                 onClick={() => setSelectedLeads([])}
                 className="hover:bg-primary-foreground/10"
