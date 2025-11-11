@@ -43,6 +43,9 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
     }
 
     return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
       setBlobUrl(null);
     };
   }, [open, manual]);
@@ -63,16 +66,9 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
 
       const mimeType = data.type || getMimeType(manual.file_type);
       const blob = new Blob([data], { type: mimeType });
+      const url = URL.createObjectURL(blob);
       
-      // Convert blob to data URL to avoid Chrome CSP blocking
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBlobUrl(reader.result as string);
-      };
-      reader.onerror = () => {
-        setError('Error al procesar el documento');
-      };
-      reader.readAsDataURL(blob);
+      setBlobUrl(url);
     } catch (err) {
       console.error('Error loading document:', err);
       setError('Error al cargar el documento');
@@ -93,6 +89,9 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
   };
 
   const handleClose = () => {
+    if (blobUrl) {
+      URL.revokeObjectURL(blobUrl);
+    }
     setBlobUrl(null);
     setError(null);
     onOpenChange(false);
@@ -147,9 +146,10 @@ export function ManualViewer({ open, onOpenChange, manual }: ManualViewerProps) 
           {!loading && !error && blobUrl && (
             <>
               {isPDF && (
-                <iframe
+                <embed
                   src={blobUrl}
-                  className="w-full h-full"
+                  type="application/pdf"
+                  className="w-full h-full rounded"
                   title={manual.titulo}
                 />
               )}
