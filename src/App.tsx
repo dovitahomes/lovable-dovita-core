@@ -130,6 +130,14 @@ const InternalLayout = () => {
                     <Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>
                   </ProtectedRoute>
                 } />
+                {/* ============================================ */}
+                {/* HERRAMIENTAS ADMINISTRATIVAS                */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} element={
+                  <ProtectedRoute moduleName="contenido_corporativo">
+                    <Suspense fallback={<TableSkeleton />}><ContenidoCorporativo /></Suspense>
+                  </ProtectedRoute>
+                } />
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES} element={
                   <ProtectedRoute moduleName="sucursales">
                     <Suspense fallback={<TableSkeleton />}><Sucursales /></Suspense>

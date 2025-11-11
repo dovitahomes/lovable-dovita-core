@@ -191,6 +191,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "contenido_corporativo" 
       },
       { 
+        title: "Contenido Corporativo", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO, 
+        icon: Building2, 
+        moduleName: "contenido_corporativo" 
+      },
+      { 
         title: "Sucursales", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_SUCURSALES, 
         icon: MapPin, 
