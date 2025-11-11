@@ -19,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { CreateTaskDialog } from "./CreateTaskDialog";
@@ -158,29 +159,29 @@ export function TaskDetailsPanel({ taskId, onClose }: TaskDetailsPanelProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b space-y-4">
+      <div className="p-6 border-b bg-gradient-to-r from-primary/5 to-primary/10 space-y-4">
         <div className="flex items-start justify-between">
-          <h2 className="text-xl font-semibold pr-8 flex-1 leading-tight">
+          <h2 className="text-xl font-bold pr-8 flex-1 leading-tight">
             {task.subject}
           </h2>
           <Button
             size="icon"
             variant="ghost"
             onClick={onClose}
-            className="shrink-0"
+            className="shrink-0 hover:bg-background/80"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <Badge
             variant="outline"
-            className={PRIORITY_CONFIG[task.priority].color}
+            className={cn("font-semibold", PRIORITY_CONFIG[task.priority].color)}
           >
             {PRIORITY_CONFIG[task.priority].label}
           </Badge>
-          <Badge variant="outline" className={STATUS_CONFIG[task.status].color}>
+          <Badge variant="outline" className={cn("font-semibold", STATUS_CONFIG[task.status].color)}>
             {STATUS_CONFIG[task.status].label}
           </Badge>
         </div>
@@ -281,20 +282,21 @@ export function TaskDetailsPanel({ taskId, onClose }: TaskDetailsPanelProps) {
       </div>
 
       {/* Actions */}
-      <div className="p-6 border-t space-y-2">
+      <div className="p-6 border-t bg-muted/30 space-y-2">
         <Button
-          variant="outline"
-          className="w-full justify-start"
+          variant="default"
+          size="lg"
+          className="w-full justify-start gap-2"
           onClick={handleToggleComplete}
         >
           {task.status === 'completada' ? (
             <>
-              <Circle className="h-4 w-4 mr-2" />
+              <Circle className="h-5 w-5" />
               Marcar como Pendiente
             </>
           ) : (
             <>
-              <CheckCircle2 className="h-4 w-4 mr-2" />
+              <CheckCircle2 className="h-5 w-5" />
               Marcar como Completada
             </>
           )}
@@ -302,19 +304,21 @@ export function TaskDetailsPanel({ taskId, onClose }: TaskDetailsPanelProps) {
 
         <Button
           variant="outline"
-          className="w-full justify-start"
+          size="lg"
+          className="w-full justify-start gap-2"
           onClick={() => setEditOpen(true)}
         >
-          <Pencil className="h-4 w-4 mr-2" />
+          <Pencil className="h-5 w-5" />
           Editar Tarea
         </Button>
 
         <Button
           variant="outline"
-          className="w-full justify-start text-destructive hover:text-destructive"
+          size="lg"
+          className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => setDeleteOpen(true)}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <Trash2 className="h-5 w-5" />
           Eliminar Tarea
         </Button>
       </div>

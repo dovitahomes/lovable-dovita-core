@@ -68,55 +68,95 @@ export default function Tareas() {
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-        <div className="flex flex-col gap-4 p-6">
+      <div className="border-b bg-gradient-to-r from-primary/5 to-primary/10 sticky top-0 z-10">
+        <div className="p-6 space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Tareas</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {filteredTasks.length} {filteredTasks.length === 1 ? 'tarea' : 'tareas'}
-                {activeFiltersCount > 0 && ` (${activeFiltersCount} ${activeFiltersCount === 1 ? 'filtro' : 'filtros'} activo${activeFiltersCount === 1 ? '' : 's'})`}
+                Gestiona y organiza todas tus tareas del CRM
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* View Toggle */}
-              <div className="flex items-center rounded-lg border bg-background p-1">
-                <Button
-                  size="sm"
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  onClick={() => setViewMode('list')}
-                  className="h-8"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-                  onClick={() => setViewMode('kanban')}
-                  className="h-8"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </div>
+            <Button onClick={() => setCreateOpen(true)} size="lg" className="gap-2">
+              <Plus className="h-5 w-5" />
+              Nueva Tarea
+            </Button>
+          </div>
 
-              <Button onClick={() => setCreateOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Tarea
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-background rounded-lg border p-4 space-y-1">
+              <p className="text-xs text-muted-foreground font-medium">Total</p>
+              <p className="text-2xl font-bold">{filteredTasks.length}</p>
+            </div>
+            <div className="bg-background rounded-lg border p-4 space-y-1">
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Vencidas</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {filteredTasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completada').length}
+              </p>
+            </div>
+            <div className="bg-background rounded-lg border p-4 space-y-1">
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Hoy</p>
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {filteredTasks.filter(t => t.due_date && new Date(t.due_date).toDateString() === new Date().toDateString()).length}
+              </p>
+            </div>
+            <div className="bg-background rounded-lg border p-4 space-y-1">
+              <p className="text-xs text-green-600 dark:text-green-400 font-medium">Completadas</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {filteredTasks.filter(t => t.status === 'completada').length}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* Search */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar tareas..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex items-center rounded-lg border bg-background p-1">
+              <Button
+                size="sm"
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                onClick={() => setViewMode('list')}
+                className="h-8 gap-2"
+              >
+                <List className="h-4 w-4" />
+                <span className="hidden sm:inline">Lista</span>
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+                onClick={() => setViewMode('kanban')}
+                className="h-8 gap-2"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden sm:inline">Kanban</span>
               </Button>
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar tareas..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          {/* Active Filters Summary */}
+          {activeFiltersCount > 0 && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">
+                {filteredTasks.length} resultado{filteredTasks.length !== 1 ? 's' : ''} encontrado{filteredTasks.length !== 1 ? 's' : ''}
+              </span>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-primary font-medium">
+                {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} activo{activeFiltersCount !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

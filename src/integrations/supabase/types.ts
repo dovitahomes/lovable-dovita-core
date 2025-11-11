@@ -3790,6 +3790,7 @@ export type Database = {
           status: string | null
           subject: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           assigned_to?: string | null
@@ -3805,6 +3806,7 @@ export type Database = {
           status?: string | null
           subject: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           assigned_to?: string | null
@@ -3820,6 +3822,7 @@ export type Database = {
           status?: string | null
           subject?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }

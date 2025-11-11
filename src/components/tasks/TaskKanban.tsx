@@ -29,17 +29,17 @@ interface TaskKanbanProps {
   onSelectTask: (id: string) => void;
 }
 
-const COLUMNS: { id: TaskStatus; label: string; color: string }[] = [
-  { id: 'pendiente', label: 'Pendiente', color: 'border-t-blue-500' },
-  { id: 'en_progreso', label: 'En Progreso', color: 'border-t-yellow-500' },
-  { id: 'completada', label: 'Completada', color: 'border-t-green-500' },
-  { id: 'cancelada', label: 'Cancelada', color: 'border-t-gray-500' },
+const COLUMNS: { id: TaskStatus; label: string; color: string; gradient: string }[] = [
+  { id: 'pendiente', label: 'Pendiente', color: 'border-t-blue-500', gradient: 'from-blue-500/10 to-blue-500/5' },
+  { id: 'en_progreso', label: 'En Progreso', color: 'border-t-yellow-500', gradient: 'from-yellow-500/10 to-yellow-500/5' },
+  { id: 'completada', label: 'Completada', color: 'border-t-green-500', gradient: 'from-green-500/10 to-green-500/5' },
+  { id: 'cancelada', label: 'Cancelada', color: 'border-t-gray-500', gradient: 'from-gray-500/10 to-gray-500/5' },
 ];
 
 const PRIORITY_CONFIG = {
-  baja: { label: 'Baja', color: 'bg-blue-500/10 text-blue-700 dark:text-blue-400' },
-  media: { label: 'Media', color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' },
-  alta: { label: 'Alta', color: 'bg-red-500/10 text-red-700 dark:text-red-400' },
+  baja: { label: 'Baja', color: 'bg-blue-500/10 text-blue-700 dark:text-blue-400', icon: '🟢' },
+  media: { label: 'Media', color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400', icon: '🟡' },
+  alta: { label: 'Alta', color: 'bg-red-500/10 text-red-700 dark:text-red-400', icon: '🔴' },
 };
 
 function SortableTaskCard({ task, onClick, isSelected }: { 
@@ -115,50 +115,45 @@ function SortableTaskCard({ task, onClick, isSelected }: {
       {...attributes}
       {...listeners}
       className={cn(
-        "p-3 cursor-grab active:cursor-grabbing transition-all hover:shadow-md",
-        isSelected && "ring-2 ring-primary"
+        "p-4 cursor-grab active:cursor-grabbing transition-all hover:shadow-lg animate-fade-in",
+        isSelected && "ring-2 ring-primary bg-accent/50"
       )}
       onClick={onClick}
     >
-      <div className="space-y-2">
-        <div className="flex items-start justify-between gap-2">
+      <div className="space-y-3">
+        <div className="flex items-start gap-2">
+          <span className="text-base shrink-0">{PRIORITY_CONFIG[task.priority].icon}</span>
           <h4 className="font-semibold text-sm line-clamp-2 flex-1">
             {task.subject}
           </h4>
-          <Badge
-            variant="outline"
-            className={cn("shrink-0", PRIORITY_CONFIG[task.priority].color)}
-          >
-            {PRIORITY_CONFIG[task.priority].label}
-          </Badge>
         </div>
 
         {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className="text-xs text-muted-foreground line-clamp-2 pl-6">
             {task.description}
           </p>
         )}
 
-        <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap pl-6">
           {task.due_date && (
-            <div className="flex items-center gap-1">
-              <CalendarClock className="h-3.5 w-3.5" />
-              <span>
+            <div className="flex items-center gap-1.5">
+              <CalendarClock className="h-4 w-4" />
+              <span className="font-medium">
                 {format(parseISO(task.due_date), "d MMM", { locale: es })}
               </span>
             </div>
           )}
 
           {relatedName && RelatedIcon && (
-            <div className="flex items-center gap-1">
-              <RelatedIcon className="h-3.5 w-3.5" />
-              <span className="truncate max-w-[120px]">{relatedName}</span>
+            <div className="flex items-center gap-1.5">
+              <RelatedIcon className="h-4 w-4" />
+              <span className="truncate max-w-[100px] font-medium">{relatedName}</span>
             </div>
           )}
 
           {task.assigned_to && (
-            <Avatar className="h-5 w-5">
-              <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+            <Avatar className="h-6 w-6 border-2 border-background">
+              <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
                 AS
               </AvatarFallback>
             </Avatar>
@@ -231,12 +226,13 @@ export function TaskKanban({ tasks, selectedTaskId, onSelectTask }: TaskKanbanPr
           {COLUMNS.map(column => (
             <div key={column.id} className="flex flex-col h-full">
               <div className={cn(
-                "rounded-t-lg border-t-4 bg-muted/50 p-4 mb-4",
-                column.color
+                "rounded-t-lg border-t-4 bg-gradient-to-br p-4 mb-4 shadow-sm",
+                column.color,
+                column.gradient
               )}>
-                <h3 className="font-semibold text-sm flex items-center justify-between">
-                  {column.label}
-                  <Badge variant="secondary">
+                <h3 className="font-semibold flex items-center justify-between">
+                  <span>{column.label}</span>
+                  <Badge variant="secondary" className="animate-pulse">
                     {tasksByStatus[column.id].length}
                   </Badge>
                 </h3>
@@ -247,7 +243,7 @@ export function TaskKanban({ tasks, selectedTaskId, onSelectTask }: TaskKanbanPr
                 items={tasksByStatus[column.id].map(t => t.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="space-y-3 min-h-[200px]">
+                <div className="space-y-3 min-h-[400px]">
                   {tasksByStatus[column.id].map(task => (
                     <SortableTaskCard
                       key={task.id}
@@ -258,8 +254,11 @@ export function TaskKanban({ tasks, selectedTaskId, onSelectTask }: TaskKanbanPr
                   ))}
 
                   {tasksByStatus[column.id].length === 0 && (
-                    <div className="text-center py-8 text-sm text-muted-foreground">
-                      No hay tareas
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="rounded-full bg-muted p-4 mb-3">
+                        <CalendarClock className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Sin tareas</p>
                     </div>
                   )}
                 </div>

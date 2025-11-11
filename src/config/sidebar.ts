@@ -99,6 +99,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "crm" 
       },
       { 
+        title: "Tareas", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_TAREAS, 
+        icon: CheckSquare, 
+        moduleName: "crm" 
+      },
+      { 
         title: "Clientes", 
         url: BACKOFFICE_ROUTES.CLIENTES, 
         icon: Users, 
@@ -190,12 +196,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
     label: "Gestión",
     items: [
-      { 
-        title: "Tareas", 
-        url: BACKOFFICE_ROUTES.HERRAMIENTAS_TAREAS, 
-        icon: CheckSquare, 
-        moduleName: "herramientas" 
-      },
       { 
         title: "Métricas", 
         url: BACKOFFICE_ROUTES.METRICS, 
