@@ -15,7 +15,7 @@ export function RenderOfTheMonth() {
   useEffect(() => {
     if (render?.imagen_path) {
       const { data } = supabase.storage
-        .from('project_photos')
+        .from('documentos')
         .getPublicUrl(render.imagen_path);
       setImageUrl(data.publicUrl);
     }

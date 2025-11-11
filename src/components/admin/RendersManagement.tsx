@@ -103,8 +103,8 @@ export default function RendersManagement() {
     try {
       const { path } = await uploadToBucket({
         file,
-        bucket: 'project_photos',
-        filename: `renders/render-${Date.now()}.${file.name.split('.').pop()}`,
+        bucket: 'documentos',
+        filename: `corporate/renders/render-${Date.now()}.${file.name.split('.').pop()}`,
       });
 
       setFormData({ ...formData, imagen_path: path });
