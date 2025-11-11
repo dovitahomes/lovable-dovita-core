@@ -190,34 +190,36 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={toggleSidebarTheme} asChild>
-                  <div className={
-                    sidebarTheme === "light"
-                      ? "cursor-pointer text-gray-700 hover:bg-gray-100"
-                      : "cursor-pointer hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                  }>
-                    {sidebarTheme === "dark" ? (
-                      <Sun className="h-4 w-4" />
-                    ) : (
-                      <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-                    )}
-                    {(isMobile || state !== "collapsed") && <span>Sidebar {sidebarTheme === "dark" ? "Claro" : "Oscuro"}</span>}
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout} asChild>
-                  <div className={
-                    sidebarTheme === "light"
-                      ? "cursor-pointer text-gray-700 hover:bg-gray-100"
-                      : "cursor-pointer hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                  }>
-                    <LogOut className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-                    {(isMobile || state !== "collapsed") && <span>Cerrar Sesión</span>}
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={toggleSidebarTheme}
+                className={
+                  sidebarTheme === "light"
+                    ? "text-gray-700 hover:bg-gray-100"
+                    : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                }
+              >
+                {sidebarTheme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                )}
+                {(isMobile || state !== "collapsed") && <span>Sidebar {sidebarTheme === "dark" ? "Claro" : "Oscuro"}</span>}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={handleLogout}
+                className={
+                  sidebarTheme === "light"
+                    ? "text-gray-700 hover:bg-gray-100"
+                    : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                }
+              >
+                <LogOut className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                {(isMobile || state !== "collapsed") && <span>Cerrar Sesión</span>}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
