@@ -128,7 +128,9 @@ export function CompanyManuals() {
 
       if (error) throw error;
 
-      window.open(data.signedUrl, '_blank');
+      const SUPABASE_URL = "https://bkthkotzicohjizmcmsa.supabase.co";
+      const fullUrl = `${SUPABASE_URL}/storage/v1${data.signedUrl}`;
+      window.open(fullUrl, '_blank');
     } catch (error) {
       console.error("Error viewing file:", error);
       toast.error("Error al abrir archivo");
