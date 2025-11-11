@@ -218,6 +218,22 @@ All colors MUST be HSL.
   }
 }
 
+/* Animaciones para calendario y eventos del Dashboard */
+@keyframes fadeInCalendar {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-month-transition {
+  transition: opacity 0.15s ease-in-out;
+}
+
 @layer components {
   .brand-gradient {
     background-image: linear-gradient(90deg, var(--dovita-primary), var(--dovita-primary-2), var(--dovita-primary-3));
