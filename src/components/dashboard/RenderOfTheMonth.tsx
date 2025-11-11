@@ -37,7 +37,7 @@ export function RenderOfTheMonth() {
   if (isLoading) {
     return (
       <Card className="overflow-hidden">
-        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-40 w-full" />
       </Card>
     );
   }
@@ -45,7 +45,7 @@ export function RenderOfTheMonth() {
   if (!render) {
     return (
       <Card className="overflow-hidden bg-muted">
-        <CardContent className="flex flex-col items-center justify-center h-48 p-6 text-center">
+        <CardContent className="flex flex-col items-center justify-center h-40 p-6 text-center">
           <ImageIcon className="h-12 w-12 text-muted-foreground mb-3" />
           <h3 className="text-base font-semibold text-muted-foreground">
             No hay render del mes
@@ -64,7 +64,7 @@ export function RenderOfTheMonth() {
         className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow group"
         onClick={() => setIsDialogOpen(true)}
       >
-        <div className="relative aspect-[24/9] overflow-hidden bg-muted">
+        <div className="relative aspect-[32/9] overflow-hidden bg-muted">
           {imageUrl ? (
             <img
               src={imageUrl}
