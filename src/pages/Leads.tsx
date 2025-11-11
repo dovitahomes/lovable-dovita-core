@@ -1,25 +1,28 @@
 import { useState, useMemo } from "react";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, AlertCircle, Clock, CheckCircle2, LayoutGrid, Table as TableIcon, Download, Upload, FileDown } from "lucide-react";
 import { LeadDialog } from "@/components/forms/LeadDialog";
-import { KanbanColumn } from "@/components/leads/KanbanColumn";
-import { LeadCard } from "@/components/leads/LeadCard";
 import { LeadsTableView } from "@/components/leads/LeadsTableView";
 import { LeadFiltersComponent } from "@/components/leads/LeadFilters";
 import { LeadsDashboard } from "@/components/leads/LeadsDashboard";
 import { LeadsForecasting } from "@/components/leads/LeadsForecasting";
 import { ImportLeadsDialog } from "@/components/crm/ImportLeadsDialog";
 import { ExportLeadsDialog } from "@/components/crm/ExportLeadsDialog";
+import { LeadsKanbanDesktop } from "@/components/leads/LeadsKanbanDesktop";
+import { LeadsKanbanTablet } from "@/components/leads/LeadsKanbanTablet";
+import { LeadsKanbanMobile } from "@/components/leads/LeadsKanbanMobile";
+import { LeadDetailsDialog } from "@/components/leads/LeadDetailsDialog";
 import { downloadLeadsTemplate } from "@/utils/exports/leadsExport";
 import { useLeadsByStatus, useUpdateLeadStatus, type LeadStatus } from "@/hooks/useLeads";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { LeadFilters, getEmptyFilters } from "@/lib/leadFilters";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 const COLUMNS: { status: LeadStatus; title: string; color: string }[] = [
   { status: "nuevo", title: "Nuevo", color: "bg-gray-500" },
@@ -34,6 +37,7 @@ const COLUMNS: { status: LeadStatus; title: string; color: string }[] = [
 
 export default function Leads() {
   const isMobile = useIsMobile();
+  const isTablet = useMediaQuery('(min-width: 640px) and (max-width: 767px)');
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<'pipeline' | 'dashboard' | 'forecast'>('pipeline');
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
@@ -42,6 +46,7 @@ export default function Leads() {
   const [activeDragLead, setActiveDragLead] = useState<any>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
 
   const updateStatusMutation = useUpdateLeadStatus();
 
@@ -77,6 +82,25 @@ export default function Leads() {
       (convertidoQuery.data?.length || 0) +
       (perdidoQuery.data?.length || 0);
   }, [nuevoQuery.data, contactadoQuery.data, calificadoQuery.data, propuestaQuery.data, negociacionQuery.data, ganadoQuery.data, convertidoQuery.data, perdidoQuery.data]);
+
+  const handleOpenDetails = (leadId: string) => {
+    setSelectedLeadId(leadId);
+  };
+
+  const selectedLead = useMemo(() => {
+    if (!selectedLeadId) return null;
+    const allLeads = [
+      ...(nuevoQuery.data || []),
+      ...(contactadoQuery.data || []),
+      ...(calificadoQuery.data || []),
+      ...(propuestaQuery.data || []),
+      ...(negociacionQuery.data || []),
+      ...(ganadoQuery.data || []),
+      ...(convertidoQuery.data || []),
+      ...(perdidoQuery.data || []),
+    ];
+    return allLeads.find(l => l.id === selectedLeadId) || null;
+  }, [selectedLeadId, nuevoQuery.data, contactadoQuery.data, calificadoQuery.data, propuestaQuery.data, negociacionQuery.data, ganadoQuery.data, convertidoQuery.data, perdidoQuery.data]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -278,28 +302,30 @@ export default function Leads() {
 
       {/* View Content */}
       {viewMode === 'kanban' ? (
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="flex-1 overflow-x-auto pb-4">
-            <div className="flex gap-4 h-full min-w-max">
-              {COLUMNS.map(({ status, title }) => (
-                <KanbanColumn
-                  key={status}
-                  status={status}
-                  title={title}
-                  leads={columnQueries[status].data || []}
-                  isLoading={columnQueries[status].isLoading}
-                  onConvert={() => {}}
-                />
-              ))}
-            </div>
-          </div>
-
-          <DragOverlay>
-            {activeDragLead ? (
-              <LeadCard lead={activeDragLead} onConvert={() => {}} isDragging />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+        <>
+          {isMobile ? (
+            <LeadsKanbanMobile
+              columns={COLUMNS}
+              columnQueries={columnQueries}
+              onOpenDetails={handleOpenDetails}
+            />
+          ) : isTablet ? (
+            <LeadsKanbanTablet
+              columns={COLUMNS}
+              columnQueries={columnQueries}
+              onOpenDetails={handleOpenDetails}
+            />
+          ) : (
+            <LeadsKanbanDesktop
+              columns={COLUMNS}
+              columnQueries={columnQueries}
+              onDragEnd={handleDragEnd}
+              onOpenDetails={handleOpenDetails}
+              activeDragLead={activeDragLead}
+              onDragStart={handleDragStart}
+            />
+          )}
+        </>
       ) : (
         <div className="flex-1 overflow-auto">
           <LeadsTableView search={search} filters={filters} />
@@ -319,6 +345,13 @@ export default function Leads() {
 
       {/* Dialogs */}
       <LeadDialog open={createOpen} onOpenChange={setCreateOpen} />
+      
+      <LeadDetailsDialog
+        lead={selectedLead}
+        open={!!selectedLead}
+        onOpenChange={(open) => !open && setSelectedLeadId(null)}
+        onConvert={() => {/* lógica de conversión */}}
+      />
       
       <ImportLeadsDialog
         open={showImportDialog}

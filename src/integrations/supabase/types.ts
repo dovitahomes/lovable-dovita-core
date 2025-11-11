@@ -2275,6 +2275,7 @@ export type Database = {
           terreno_m2: number | null
           ubicacion_terreno_json: Json | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           amount?: number | null
@@ -2300,6 +2301,7 @@ export type Database = {
           terreno_m2?: number | null
           ubicacion_terreno_json?: Json | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           amount?: number | null
@@ -2325,6 +2327,7 @@ export type Database = {
           terreno_m2?: number | null
           ubicacion_terreno_json?: Json | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
