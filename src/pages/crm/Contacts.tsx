@@ -107,10 +107,10 @@ export default function Contacts() {
                 <div><Label>Puesto</Label><Input value={formData.job_title} onChange={(e) => setFormData({...formData, job_title: e.target.value})} /></div>
                 <div className="col-span-2">
                   <Label>Cuenta Asociada</Label>
-                  <Select value={formData.account_id} onValueChange={(v) => setFormData({...formData, account_id: v})}>
+                  <Select value={formData.account_id || "none"} onValueChange={(v) => setFormData({...formData, account_id: v === "none" ? "" : v})}>
                     <SelectTrigger><SelectValue placeholder="Sin cuenta" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sin cuenta</SelectItem>
+                      <SelectItem value="none">Sin cuenta</SelectItem>
                       {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -131,10 +131,10 @@ export default function Contacts() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar contactos..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+        <Select value={selectedAccountId || "all"} onValueChange={(v) => setSelectedAccountId(v === "all" ? "" : v)}>
           <SelectTrigger className="w-[200px]"><SelectValue placeholder="Todas las cuentas" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
             {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
           </SelectContent>
         </Select>
