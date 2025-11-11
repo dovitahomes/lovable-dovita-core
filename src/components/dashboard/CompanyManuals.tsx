@@ -127,8 +127,9 @@ export function CompanyManuals() {
 
       if (error) throw error;
 
-      // Abrir en nueva pestaña
-      window.open(data.signedUrl, '_blank');
+      // Construir URL completa con HTTPS para conexión segura
+      const fullUrl = `https://bkthkotzicohjizmcmsa.supabase.co/storage/v1${data.signedUrl}`;
+      window.open(fullUrl, '_blank');
     } catch (error) {
       console.error('Error al visualizar manual:', error);
       toast.error('Error al visualizar el manual');
