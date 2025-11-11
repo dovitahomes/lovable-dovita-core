@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, MapPin, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { MapPreview } from "./MapPreview";
 
 interface ConstructionPhotosTabProps {
   projectId: string;
@@ -268,11 +269,14 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
                 <p className="text-sm">{selectedPhoto.descripcion}</p>
               )}
               {selectedPhoto.latitude && selectedPhoto.longitude && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>
-                    {selectedPhoto.latitude.toFixed(6)}, {selectedPhoto.longitude.toFixed(6)}
-                  </span>
+                <div className="mt-4">
+                  <Label className="text-sm font-medium mb-2 block">Ubicación de la Foto</Label>
+                  <MapPreview 
+                    latitude={selectedPhoto.latitude}
+                    longitude={selectedPhoto.longitude}
+                    description={selectedPhoto.descripcion}
+                    height="300px"
+                  />
                 </div>
               )}
               <p className="text-xs text-muted-foreground">

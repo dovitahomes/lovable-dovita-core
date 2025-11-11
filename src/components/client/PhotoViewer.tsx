@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { MapPreview } from "@/components/construction/MapPreview";
 
 interface Photo {
   id: string;
@@ -139,7 +140,19 @@ export function PhotoViewer({ photos, initialIndex, isOpen, onClose }: PhotoView
               <p className="text-sm font-medium">{currentPhoto.descripcion}</p>
             )}
             
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            {currentPhoto.latitude && currentPhoto.longitude && (
+              <div className="mt-3">
+                <MapPreview 
+                  latitude={currentPhoto.latitude}
+                  longitude={currentPhoto.longitude}
+                  description={currentPhoto.descripcion || undefined}
+                  height="250px"
+                  className="rounded-lg overflow-hidden"
+                />
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
               <span>
                 {format(new Date(currentPhoto.fecha_foto), "d 'de' MMMM, yyyy", { locale: es })}
               </span>
@@ -147,15 +160,6 @@ export function PhotoViewer({ photos, initialIndex, isOpen, onClose }: PhotoView
                 {currentIndex + 1} / {photos.length}
               </span>
             </div>
-
-            {(currentPhoto.latitude || currentPhoto.longitude) && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" aria-hidden="true" />
-                <span>
-                  {currentPhoto.latitude?.toFixed(6)}, {currentPhoto.longitude?.toFixed(6)}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </DialogContent>
