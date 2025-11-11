@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      accounts: {
+      _deprecated_accounts: {
         Row: {
           account_type: string | null
           billing_address_json: Json | null
@@ -75,6 +75,65 @@ export type Database = {
             columns: ["sucursal_id"]
             isOneToOne: false
             referencedRelation: "sucursales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      _deprecated_contacts: {
+        Row: {
+          account_id: string | null
+          birthdate: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          first_name: string
+          id: string
+          job_title: string | null
+          last_name: string
+          mobile: string | null
+          notes: string | null
+          owner_id: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          birthdate?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          job_title?: string | null
+          last_name: string
+          mobile?: string | null
+          notes?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          birthdate?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          job_title?: string | null
+          last_name?: string
+          mobile?: string | null
+          notes?: string | null
+          owner_id?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "_deprecated_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -729,39 +788,54 @@ export type Database = {
       clients: {
         Row: {
           address_json: Json | null
+          billing_address_json: Json | null
           created_at: string
           created_by: string | null
           email: string | null
           fiscal_json: Json | null
           id: string
+          industry: string | null
           name: string
           person_type: Database["public"]["Enums"]["person_type"]
           phone: string | null
+          shipping_address_json: Json | null
+          tax_id: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           address_json?: Json | null
+          billing_address_json?: Json | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           fiscal_json?: Json | null
           id?: string
+          industry?: string | null
           name: string
           person_type: Database["public"]["Enums"]["person_type"]
           phone?: string | null
+          shipping_address_json?: Json | null
+          tax_id?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           address_json?: Json | null
+          billing_address_json?: Json | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           fiscal_json?: Json | null
           id?: string
+          industry?: string | null
           name?: string
           person_type?: Database["public"]["Enums"]["person_type"]
           phone?: string | null
+          shipping_address_json?: Json | null
+          tax_id?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -1106,65 +1180,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      contacts: {
-        Row: {
-          account_id: string | null
-          birthdate: string | null
-          created_at: string
-          created_by: string | null
-          email: string | null
-          first_name: string
-          id: string
-          job_title: string | null
-          last_name: string
-          mobile: string | null
-          notes: string | null
-          owner_id: string | null
-          phone: string | null
-          updated_at: string
-        }
-        Insert: {
-          account_id?: string | null
-          birthdate?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          first_name: string
-          id?: string
-          job_title?: string | null
-          last_name: string
-          mobile?: string | null
-          notes?: string | null
-          owner_id?: string | null
-          phone?: string | null
-          updated_at?: string
-        }
-        Update: {
-          account_id?: string | null
-          birthdate?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          first_name?: string
-          id?: string
-          job_title?: string | null
-          last_name?: string
-          mobile?: string | null
-          notes?: string | null
-          owner_id?: string | null
-          phone?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       contenido_corporativo: {
         Row: {
@@ -2237,11 +2252,9 @@ export type Database = {
       }
       leads: {
         Row: {
-          account_id: string | null
           amount: number | null
           client_id: string | null
           closed_date: string | null
-          contact_id: string | null
           contacto_json: Json | null
           created_at: string
           created_by: string | null
@@ -2264,11 +2277,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          account_id?: string | null
           amount?: number | null
           client_id?: string | null
           closed_date?: string | null
-          contact_id?: string | null
           contacto_json?: Json | null
           created_at?: string
           created_by?: string | null
@@ -2291,11 +2302,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          account_id?: string | null
           amount?: number | null
           client_id?: string | null
           closed_date?: string | null
-          contact_id?: string | null
           contacto_json?: Json | null
           created_at?: string
           created_by?: string | null
@@ -2319,24 +2328,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "leads_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "leads_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "leads_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
           {
@@ -2560,14 +2555,14 @@ export type Database = {
             foreignKeyName: "opportunities_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "_deprecated_accounts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "opportunities_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
-            referencedRelation: "contacts"
+            referencedRelation: "_deprecated_contacts"
             referencedColumns: ["id"]
           },
         ]

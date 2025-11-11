@@ -3,8 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
   useLeadsPipelineMetrics,
-  useLeadsPipelineDistribution,
+  useLeadsStageDistribution,
   useTopLeads,
+  type LeadsStageDistribution,
 } from "@/hooks/crm/useLeadsAnalytics";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, DollarSign, Target, Clock } from "lucide-react";
@@ -20,12 +21,12 @@ const STAGE_CONFIG: { [key: string]: { label: string; color: string } } = {
 
 export function LeadsDashboard() {
   const { data: metrics, isLoading: metricsLoading } = useLeadsPipelineMetrics();
-  const { data: distribution, isLoading: distributionLoading } = useLeadsPipelineDistribution();
+  const { data: distribution, isLoading: distributionLoading } = useLeadsStageDistribution();
   const { data: topLeads, isLoading: topLeadsLoading } = useTopLeads(10);
 
   // Format distribution data for chart
   const chartData = distribution
-    ? Object.entries(distribution).map(([stage, data]) => ({
+    ? Object.entries(distribution as LeadsStageDistribution).map(([stage, data]) => ({
         stage: STAGE_CONFIG[stage]?.label || stage,
         count: data.count,
         value: data.totalValue,
@@ -215,7 +216,7 @@ export function LeadsDashboard() {
                     <tr key={lead.id} className="border-b hover:bg-muted/50">
                       <td className="p-2 text-sm font-medium">{lead.nombre_completo}</td>
                       <td className="p-2 text-sm text-muted-foreground">
-                        {lead.accounts?.name || "—"}
+                        —
                       </td>
                       <td className="p-2 text-sm font-mono text-right">
                         {new Intl.NumberFormat("es-MX", {

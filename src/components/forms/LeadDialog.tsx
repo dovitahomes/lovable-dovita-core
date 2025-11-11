@@ -35,8 +35,6 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
     amount: undefined,
     probability: undefined,
     expected_close_date: undefined,
-    account_id: null,
-    contact_id: null,
   });
 
   const [expectedCloseDate, setExpectedCloseDate] = useState<Date | undefined>();
@@ -49,30 +47,6 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
         .select("*")
         .eq("activa", true)
         .order("nombre");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: accounts } = useQuery({
-    queryKey: ["accounts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("accounts")
-        .select("id, name")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: contacts } = useQuery({
-    queryKey: ["contacts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("contacts")
-        .select("id, first_name, last_name")
-        .order("last_name");
       if (error) throw error;
       return data;
     },
@@ -104,8 +78,6 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
           amount: undefined,
           probability: undefined,
           expected_close_date: undefined,
-          account_id: null,
-          contact_id: null,
         });
         setExpectedCloseDate(undefined);
       },
@@ -275,48 +247,6 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
                     />
                   </PopoverContent>
                 </Popover>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Cuenta (Empresa)</Label>
-                  <Select
-                    value={formData.account_id || "none"}
-                    onValueChange={(v) => setFormData({ ...formData, account_id: v === "none" ? null : v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar cuenta" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin cuenta</SelectItem>
-                      {accounts?.map((acc) => (
-                        <SelectItem key={acc.id} value={acc.id}>
-                          {acc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Contacto</Label>
-                  <Select
-                    value={formData.contact_id || "none"}
-                    onValueChange={(v) => setFormData({ ...formData, contact_id: v === "none" ? null : v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar contacto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin contacto</SelectItem>
-                      {contacts?.map((contact) => (
-                        <SelectItem key={contact.id} value={contact.id}>
-                          {contact.first_name} {contact.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
             </>
           )}

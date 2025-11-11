@@ -76,8 +76,6 @@ export const BACKOFFICE_ROUTES = {
   
   // CRM
   LEADS: '/leads',
-  ACCOUNTS: '/crm/accounts',
-  CONTACTS: '/crm/contacts',
   CLIENTES: '/clientes',
   CLIENTE_DETALLE: '/clientes/:id',
 
@@ -141,8 +139,10 @@ export const BACKOFFICE_ROUTES = {
 // Estas rutas redirigen a las nuevas
 // ============================================
 export const LEGACY_ROUTES = {
-  // CRM legacy - Opportunities consolidado en Leads
+  // CRM legacy - Opportunities, Accounts, Contacts consolidados en Leads
   OPPORTUNITIES: '/crm/opportunities',
+  ACCOUNTS: '/crm/accounts',
+  CONTACTS: '/crm/contacts',
   
   // Gantt legacy
   CRONOGRAMA: '/cronograma',
@@ -179,8 +179,6 @@ export const LEGACY_ROUTES = {
 export const generateRoute = {
   // Clientes y CRM
   clienteDetalle: (id: string) => `/clientes/${id}`,
-  accountDetail: (id: string) => `/crm/accounts/${id}`,
-  contactDetail: (id: string) => `/crm/contacts/${id}`,
 
   // Proyectos
   proyectoDetalle: (id: string) => `/proyectos/${id}`,

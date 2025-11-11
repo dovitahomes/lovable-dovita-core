@@ -42,8 +42,6 @@ const ProyectoCalendario = lazy(() => import("./pages/ProyectoCalendario"));
 const MisChats = lazy(() => import("./pages/MisChats"));
 const MiCalendario = lazy(() => import("./pages/MiCalendario"));
 const Leads = lazy(() => import("./pages/Leads"));
-const Accounts = lazy(() => import("./pages/crm/Accounts"));
-const Contacts = lazy(() => import("./pages/crm/Contacts"));
 const Diseno = lazy(() => import("./pages/Diseno"));
 const Presupuestos = lazy(() => import("./pages/Presupuestos"));
 const PresupuestoParametrico = lazy(() => import("./pages/PresupuestoParametrico"));
@@ -194,18 +192,11 @@ const InternalLayout = () => {
                 {/* CRM - LEADS Y CLIENTES                      */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.LEADS} element={<Suspense fallback={<TableSkeleton />}><Leads /></Suspense>} />
-                <Route path={BACKOFFICE_ROUTES.ACCOUNTS} element={
-                  <ProtectedRoute moduleName="crm">
-                    <Suspense fallback={<TableSkeleton />}><Accounts /></Suspense>
-                  </ProtectedRoute>
-                } />
-                <Route path={BACKOFFICE_ROUTES.CONTACTS} element={
-                  <ProtectedRoute moduleName="crm">
-                    <Suspense fallback={<TableSkeleton />}><Contacts /></Suspense>
-                  </ProtectedRoute>
-                } />
-                {/* Redirect legacy Opportunities route to Leads */}
+                
+                {/* Legacy redirects - Accounts, Contacts, Opportunities → Leads */}
                 <Route path={LEGACY_ROUTES.OPPORTUNITIES} element={<Navigate to={BACKOFFICE_ROUTES.LEADS} replace />} />
+                <Route path={LEGACY_ROUTES.ACCOUNTS} element={<Navigate to={BACKOFFICE_ROUTES.LEADS} replace />} />
+                <Route path={LEGACY_ROUTES.CONTACTS} element={<Navigate to={BACKOFFICE_ROUTES.LEADS} replace />} />
                 <Route path={BACKOFFICE_ROUTES.CLIENTES} element={
                   <ProtectedRoute moduleName="clientes">
                     <Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>

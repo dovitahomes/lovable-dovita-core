@@ -81,18 +81,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "leads" 
       },
       { 
-        title: "Cuentas", 
-        url: BACKOFFICE_ROUTES.ACCOUNTS, 
-        icon: Building2, 
-        moduleName: "crm" 
-      },
-      { 
-        title: "Contactos", 
-        url: BACKOFFICE_ROUTES.CONTACTS, 
-        icon: UserCircle, 
-        moduleName: "crm" 
-      },
-      { 
         title: "Tareas", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_TAREAS, 
         icon: CheckSquare, 
