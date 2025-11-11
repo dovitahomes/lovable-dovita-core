@@ -5,10 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateLead, type LeadFormData } from "@/hooks/useCreateLead";
+import { useCreateLead, type LeadFormData, type LeadStatus } from "@/hooks/useCreateLead";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface LeadDialogProps {
   open: boolean;
@@ -25,7 +31,15 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
     presupuesto_referencia: undefined,
     notas: "",
     sucursal_id: null,
+    status: "nuevo" as LeadStatus,
+    amount: undefined,
+    probability: undefined,
+    expected_close_date: undefined,
+    account_id: null,
+    contact_id: null,
   });
+
+  const [expectedCloseDate, setExpectedCloseDate] = useState<Date | undefined>();
 
   const { data: sucursales } = useQuery({
     queryKey: ["sucursales"],
@@ -40,9 +54,42 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
     },
   });
 
+  const { data: accounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accounts")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: contacts } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .select("id, first_name, last_name")
+        .order("last_name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Mostrar campos de oportunidad cuando el status es propuesta, negociacion o ganado
+  const showOpportunityFields = ["propuesta", "negociacion", "ganado"].includes(formData.status || "");
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createLead.mutate(formData as LeadFormData, {
+    
+    const submitData = {
+      ...formData,
+      expected_close_date: expectedCloseDate ? format(expectedCloseDate, "yyyy-MM-dd") : undefined,
+    };
+    
+    createLead.mutate(submitData as LeadFormData, {
       onSuccess: () => {
         onOpenChange(false);
         setFormData({
@@ -53,7 +100,14 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
           presupuesto_referencia: undefined,
           notas: "",
           sucursal_id: null,
+          status: "nuevo" as LeadStatus,
+          amount: undefined,
+          probability: undefined,
+          expected_close_date: undefined,
+          account_id: null,
+          contact_id: null,
         });
+        setExpectedCloseDate(undefined);
       },
     });
   };
@@ -121,25 +175,151 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
             </div>
           </div>
 
-          <div>
-            <Label>Sucursal</Label>
-            <Select
-              value={formData.sucursal_id || "none"}
-              onValueChange={(v) => setFormData({ ...formData, sucursal_id: v === "none" ? null : v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar sucursal" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sin sucursal</SelectItem>
-                {sucursales?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Sucursal</Label>
+              <Select
+                value={formData.sucursal_id || "none"}
+                onValueChange={(v) => setFormData({ ...formData, sucursal_id: v === "none" ? null : v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar sucursal" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin sucursal</SelectItem>
+                  {sucursales?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Estado</Label>
+              <Select
+                value={formData.status || "nuevo"}
+                onValueChange={(v) => setFormData({ ...formData, status: v as LeadStatus })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nuevo">Nuevo</SelectItem>
+                  <SelectItem value="contactado">Contactado</SelectItem>
+                  <SelectItem value="calificado">Calificado</SelectItem>
+                  <SelectItem value="propuesta">Propuesta</SelectItem>
+                  <SelectItem value="negociacion">Negociación</SelectItem>
+                  <SelectItem value="ganado">Ganado</SelectItem>
+                  <SelectItem value="perdido">Perdido</SelectItem>
+                  <SelectItem value="convertido">Convertido</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          {showOpportunityFields && (
+            <>
+              <div className="border-t pt-4 mt-2">
+                <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Información de Oportunidad</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Monto Estimado *</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.amount || ""}
+                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || undefined })}
+                    placeholder="1500000"
+                    required={showOpportunityFields}
+                  />
+                </div>
+
+                <div>
+                  <Label>Probabilidad de Cierre (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.probability || ""}
+                    onChange={(e) => setFormData({ ...formData, probability: parseInt(e.target.value) || undefined })}
+                    placeholder="50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Fecha Esperada de Cierre</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !expectedCloseDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {expectedCloseDate ? format(expectedCloseDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={expectedCloseDate}
+                      onSelect={setExpectedCloseDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Cuenta (Empresa)</Label>
+                  <Select
+                    value={formData.account_id || "none"}
+                    onValueChange={(v) => setFormData({ ...formData, account_id: v === "none" ? null : v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar cuenta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin cuenta</SelectItem>
+                      {accounts?.map((acc) => (
+                        <SelectItem key={acc.id} value={acc.id}>
+                          {acc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label>Contacto</Label>
+                  <Select
+                    value={formData.contact_id || "none"}
+                    onValueChange={(v) => setFormData({ ...formData, contact_id: v === "none" ? null : v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar contacto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin contacto</SelectItem>
+                      {contacts?.map((contact) => (
+                        <SelectItem key={contact.id} value={contact.id}>
+                          {contact.first_name} {contact.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
+          )}
 
           <div>
             <Label>Notas</Label>

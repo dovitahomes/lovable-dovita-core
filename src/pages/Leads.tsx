@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, AlertCircle, Clock, CheckCircle2, LayoutGrid, Table as TableIcon } from "lucide-react";
 import { LeadDialog } from "@/components/forms/LeadDialog";
-import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
 import { KanbanColumn } from "@/components/leads/KanbanColumn";
 import { LeadCard } from "@/components/leads/LeadCard";
 import { LeadsTableView } from "@/components/leads/LeadsTableView";
@@ -35,8 +34,6 @@ export default function Leads() {
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [filters, setFilters] = useState<LeadFilters>(getEmptyFilters());
   const [createOpen, setCreateOpen] = useState(false);
-  const [convertOpen, setConvertOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<any>(null);
   const [activeDragLead, setActiveDragLead] = useState<any>(null);
 
   const updateStatusMutation = useUpdateLeadStatus();
@@ -98,11 +95,6 @@ export default function Leads() {
 
     const newStatus = over.id as LeadStatus;
     updateStatusMutation.mutate({ leadId: active.id as string, status: newStatus });
-  };
-
-  const handleConvert = (lead: any) => {
-    setSelectedLead(lead);
-    setConvertOpen(true);
   };
 
   // Get all activities to calculate alerts
@@ -260,7 +252,7 @@ export default function Leads() {
                   title={title}
                   leads={columnQueries[status].data || []}
                   isLoading={columnQueries[status].isLoading}
-                  onConvert={handleConvert}
+                  onConvert={() => {}}
                 />
               ))}
             </div>
@@ -291,9 +283,6 @@ export default function Leads() {
 
       {/* Dialogs */}
       <LeadDialog open={createOpen} onOpenChange={setCreateOpen} />
-      {selectedLead && (
-        <ConvertLeadDialog open={convertOpen} onOpenChange={setConvertOpen} lead={selectedLead} />
-      )}
     </div>
   );
 }

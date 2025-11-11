@@ -44,7 +44,6 @@ const MiCalendario = lazy(() => import("./pages/MiCalendario"));
 const Leads = lazy(() => import("./pages/Leads"));
 const Accounts = lazy(() => import("./pages/crm/Accounts"));
 const Contacts = lazy(() => import("./pages/crm/Contacts"));
-const Opportunities = lazy(() => import("./pages/crm/Opportunities"));
 const Diseno = lazy(() => import("./pages/Diseno"));
 const Presupuestos = lazy(() => import("./pages/Presupuestos"));
 const PresupuestoParametrico = lazy(() => import("./pages/PresupuestoParametrico"));
@@ -205,11 +204,8 @@ const InternalLayout = () => {
                     <Suspense fallback={<TableSkeleton />}><Contacts /></Suspense>
                   </ProtectedRoute>
                 } />
-                <Route path={BACKOFFICE_ROUTES.OPPORTUNITIES} element={
-                  <ProtectedRoute moduleName="crm">
-                    <Suspense fallback={<TableSkeleton />}><Opportunities /></Suspense>
-                  </ProtectedRoute>
-                } />
+                {/* Redirect legacy Opportunities route to Leads */}
+                <Route path={LEGACY_ROUTES.OPPORTUNITIES} element={<Navigate to={BACKOFFICE_ROUTES.LEADS} replace />} />
                 <Route path={BACKOFFICE_ROUTES.CLIENTES} element={
                   <ProtectedRoute moduleName="clientes">
                     <Suspense fallback={<TableSkeleton />}><Clientes /></Suspense>
