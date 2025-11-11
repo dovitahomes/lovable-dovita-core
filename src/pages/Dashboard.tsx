@@ -33,13 +33,19 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-1">
+      <div className="space-y-2 mb-8">
+        {/* Dovita Hub - Discreto */}
+        <p className="text-sm font-medium text-muted-foreground">
           Dovita Hub
-        </h1>
-        <p className="text-muted-foreground">
-          Bienvenido{userName ? `, ${userName}` : ""} - Tu espacio de información y recursos
         </p>
+        
+        {/* Bienvenida Prominente con Gradient Azul → Naranja en el nombre */}
+        <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+          <span className="text-foreground">Bienvenido </span>
+          <span className="bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+            {userName || "Usuario"}
+          </span>
+        </h1>
       </div>
 
       {/* Render del Mes */}
