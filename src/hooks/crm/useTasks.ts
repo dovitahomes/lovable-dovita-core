@@ -23,9 +23,15 @@ export interface Task {
   updated_at: string;
 }
 
-export function useTasks(search: string = "", status?: TaskStatus, assignedTo?: string) {
+export function useTasks(
+  search: string = "", 
+  status?: TaskStatus, 
+  assignedTo?: string,
+  relatedToType?: TaskRelatedType,
+  relatedToId?: string
+) {
   return useQuery({
-    queryKey: ['tasks', search, status, assignedTo],
+    queryKey: ['tasks', search, status, assignedTo, relatedToType, relatedToId],
     queryFn: async () => {
       let query = supabase
         .from('tasks')
@@ -42,6 +48,14 @@ export function useTasks(search: string = "", status?: TaskStatus, assignedTo?: 
       
       if (assignedTo) {
         query = query.eq('assigned_to', assignedTo);
+      }
+
+      if (relatedToType) {
+        query = query.eq('related_to_type', relatedToType);
+      }
+
+      if (relatedToId) {
+        query = query.eq('related_to_id', relatedToId);
       }
       
       const { data, error } = await query;
