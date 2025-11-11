@@ -235,6 +235,26 @@ All colors MUST be HSL.
     @apply sticky top-0 z-40 w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800;
   }
 
+  /* Custom scrollbar para columna de eventos del widget calendario */
+  .events-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .events-scroll::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.2);
+    border-radius: 10px;
+  }
+
+  .events-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+
+  .events-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
+  }
+
   /* Menu Styles */
   .menu {
     display: flex;
