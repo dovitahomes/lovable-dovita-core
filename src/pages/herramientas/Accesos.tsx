@@ -17,6 +17,7 @@ const AVAILABLE_MODULES = [
   
   // CRM
   { id: 'leads', name: 'Leads' },
+  { id: 'crm', name: 'CRM (Tareas y Herramientas)' },
   { id: 'clientes', name: 'Clientes' },
   
   // Proyectos
