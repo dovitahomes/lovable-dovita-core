@@ -15,6 +15,7 @@ import { Plus, Download, Upload, Search, FolderTree, Filter, X } from "lucide-re
 import * as XLSX from 'xlsx';
 import { TUTreeNode } from "@/components/TUTreeNode";
 import { TUStatsCards } from "@/components/tu/TUStatsCards";
+import { TUImportDialog } from "@/components/tu/TUImportDialog";
 
 interface TUNode {
   id: string;
@@ -32,6 +33,7 @@ interface TUNode {
 
 export default function CatalogoTU() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingNode, setEditingNode] = useState<TUNode | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [scopeFilter, setScopeFilter] = useState<'global' | 'sucursal' | 'proyecto'>('global');
@@ -237,81 +239,91 @@ export default function CatalogoTU() {
   };
 
   const handleDownloadTemplate = () => {
-    const template = [
-      {
-        'Código': '01',
-        'Nombre': 'PRELIMINARES',
-        'Tipo': 'departamento',
-        'ID Padre': '',
-        'Unidad': '',
-        'Universal': 'No'
-      },
-      {
-        'Código': '01',
-        'Nombre': 'Limpieza',
-        'Tipo': 'mayor',
-        'ID Padre': '01',
-        'Unidad': '',
-        'Universal': 'No'
-      },
-      {
-        'Código': '01',
-        'Nombre': 'Limpieza de terreno',
-        'Tipo': 'partida',
-        'ID Padre': '01.01',
-        'Unidad': '',
-        'Universal': 'No'
-      },
-      {
-        'Código': '01',
-        'Nombre': 'Desmonte manual',
-        'Tipo': 'subpartida',
-        'ID Padre': '01.01.01',
-        'Unidad': 'm2',
-        'Universal': 'No'
-      }
-    ];
-
-    const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Plantilla");
+
+    // Sheet 1: Departamentos
+    const departamentos = [
+      { 'Código': '01', 'Nombre': 'PRELIMINARES', 'Unidad': '', 'Universal': 'No' },
+      { 'Código': '02', 'Nombre': 'CIMENTACIÓN', 'Unidad': '', 'Universal': 'No' },
+      { 'Código': '03', 'Nombre': 'ESTRUCTURA', 'Unidad': '', 'Universal': 'No' },
+    ];
+    const ws1 = XLSX.utils.json_to_sheet(departamentos);
+    XLSX.utils.book_append_sheet(wb, ws1, "Departamentos");
+
+    // Sheet 2: Mayores
+    const mayores = [
+      { 'Código': '01', 'Código Padre': '01', 'Nombre': 'Limpieza', 'Unidad': '', 'Universal': 'No' },
+      { 'Código': '02', 'Código Padre': '01', 'Nombre': 'Trazo y Nivelación', 'Unidad': '', 'Universal': 'No' },
+      { 'Código': '01', 'Código Padre': '02', 'Nombre': 'Excavación', 'Unidad': '', 'Universal': 'No' },
+    ];
+    const ws2 = XLSX.utils.json_to_sheet(mayores);
+    XLSX.utils.book_append_sheet(wb, ws2, "Mayores");
+
+    // Sheet 3: Partidas
+    const partidas = [
+      { 'Código': '01', 'Código Padre': '01.01', 'Nombre': 'Limpieza de terreno', 'Unidad': '', 'Universal': 'No' },
+      { 'Código': '01', 'Código Padre': '01.02', 'Nombre': 'Trazo con cal', 'Unidad': '', 'Universal': 'No' },
+      { 'Código': '01', 'Código Padre': '02.01', 'Nombre': 'Excavación manual', 'Unidad': '', 'Universal': 'No' },
+    ];
+    const ws3 = XLSX.utils.json_to_sheet(partidas);
+    XLSX.utils.book_append_sheet(wb, ws3, "Partidas");
+
+    // Sheet 4: Subpartidas
+    const subpartidas = [
+      { 'Código': '01', 'Código Padre': '01.01.01', 'Nombre': 'Desmonte manual', 'Unidad': 'm2', 'Universal': 'No' },
+      { 'Código': '02', 'Código Padre': '01.01.01', 'Nombre': 'Limpieza con maquinaria', 'Unidad': 'm2', 'Universal': 'No' },
+      { 'Código': '01', 'Código Padre': '01.02.01', 'Nombre': 'Trazo con equipo topográfico', 'Unidad': 'm', 'Universal': 'No' },
+    ];
+    const ws4 = XLSX.utils.json_to_sheet(subpartidas);
+    XLSX.utils.book_append_sheet(wb, ws4, "Subpartidas");
+
     XLSX.writeFile(wb, "plantilla-catalogo-tu.xlsx");
-    toast.success("Plantilla descargada");
+    toast.success("Plantilla descargada con 4 sheets");
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    setImportDialogOpen(true);
+  };
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const data = new Uint8Array(event.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-        // Process and import nodes
-        for (const row of jsonData as any[]) {
-          await supabase.from('tu_nodes').insert({
-            code: row['Código'],
-            name: row['Nombre'],
-            type: row['Tipo'],
-            unit_default: row['Unidad'] || null,
-            is_universal: row['Universal'] === 'Sí',
-            project_scope: scopeFilter,
-            scope_id: null,
-            order_index: 0
-          });
+  const handleConfirmImport = async (rows: any[]) => {
+    try {
+      for (const row of rows) {
+        // Build parent_id by finding parent by codigo
+        let parent_id = null;
+        
+        if (row.parent_codigo) {
+          const { data: parentNodes } = await supabase
+            .from('tu_nodes')
+            .select('id')
+            .eq('code', row.parent_codigo)
+            .eq('project_scope', scopeFilter)
+            .limit(1);
+          
+          if (parentNodes && parentNodes.length > 0) {
+            parent_id = parentNodes[0].id;
+          }
         }
 
-        queryClient.invalidateQueries({ queryKey: ['tu_nodes'] });
-        toast.success("Catálogo importado exitosamente");
-      } catch (error: any) {
-        toast.error("Error al importar: " + error.message);
+        await supabase.from('tu_nodes').insert({
+          code: row.codigo,
+          name: row.nombre,
+          type: row.tipo,
+          unit_default: row.unidad || null,
+          is_universal: false,
+          project_scope: scopeFilter,
+          scope_id: null,
+          parent_id,
+          order_index: 0
+        });
       }
-    };
-    reader.readAsArrayBuffer(file);
+
+      queryClient.invalidateQueries({ queryKey: ['tu_nodes'] });
+      queryClient.invalidateQueries({ queryKey: ['tu-stats'] });
+      toast.success(`${rows.length} nodos importados exitosamente`);
+    } catch (error: any) {
+      toast.error("Error al importar: " + error.message);
+      throw error;
+    }
   };
 
   const toggleNode = (nodeId: string) => {
@@ -356,20 +368,14 @@ export default function CatalogoTU() {
             <Download className="h-4 w-4 mr-2" /> 
             <span className="hidden sm:inline">Plantilla</span>
           </Button>
-          <label className="flex-1 sm:flex-none">
-            <Button variant="outline" asChild className="w-full">
-              <span>
-                <Upload className="h-4 w-4 mr-2" /> 
-                <span className="hidden sm:inline">Importar</span>
-              </span>
-            </Button>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleImport}
-              className="hidden"
-            />
-          </label>
+          <Button
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="flex-1 sm:flex-none"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Importar</span>
+          </Button>
           <Button 
             variant="outline" 
             onClick={handleExport}
@@ -577,6 +583,14 @@ export default function CatalogoTU() {
           )}
         </CardContent>
       </Card>
+
+      {/* Import Dialog */}
+      <TUImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleConfirmImport}
+        scopeFilter={scopeFilter}
+      />
     </div>
   );
 }
