@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedUrl, deleteFromBucket } from "@/lib/storage-helpers";
@@ -11,10 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Upload, MapPin, Eye, Trash2 } from "lucide-react";
+import { Upload, MapPin, Eye, Trash2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { MapPreview } from "./MapPreview";
 import { PHOTO_CATEGORIES, getCategoryLabel, getCategoryIcon } from "@/lib/constants/photo-categories";
+import { PhotoFilters, PhotoFiltersState } from "./PhotoFilters";
+import { PhotoWeekGroup } from "./PhotoWeekGroup";
+import { groupPhotosByWeek } from "@/lib/helpers/photo-grouping";
 
 interface ConstructionPhotosTabProps {
   projectId: string;
@@ -31,6 +34,13 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [filters, setFilters] = useState<PhotoFiltersState>({
+    searchText: '',
+    stageId: null,
+    categoria: null,
+    dateFrom: null,
+    dateTo: null,
+  });
   
   const uploadMutation = useConstructionPhotosUpload();
 
@@ -153,6 +163,42 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
     }
   };
 
+  // Apply filters
+  const filteredPhotos = useMemo(() => {
+    return photos.filter(photo => {
+      // Search text filter
+      if (filters.searchText && !photo.descripcion?.toLowerCase().includes(filters.searchText.toLowerCase())) {
+        return false;
+      }
+
+      // Stage filter
+      if (filters.stageId && photo.stage_id !== filters.stageId) {
+        return false;
+      }
+
+      // Category filter
+      if (filters.categoria && photo.categoria !== filters.categoria) {
+        return false;
+      }
+
+      // Date range filter
+      const photoDate = new Date(photo.fecha_foto);
+      if (filters.dateFrom && photoDate < new Date(filters.dateFrom)) {
+        return false;
+      }
+      if (filters.dateTo && photoDate > new Date(filters.dateTo)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [photos, filters]);
+
+  // Group photos by week
+  const photoGroups = useMemo(() => {
+    return groupPhotosByWeek(filteredPhotos);
+  }, [filteredPhotos]);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -266,14 +312,41 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
 
       <Card>
         <CardHeader>
-          <CardTitle>Galería de Fotografías</CardTitle>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Galería de Fotografías ({filteredPhotos.length} de {photos.length})
+              </CardTitle>
+            </div>
+            
+            {/* Filters */}
+            <PhotoFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              stages={stages}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {photos.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No hay fotografías aún</p>
+            <div className="text-center py-12">
+              <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No hay fotografías aún. Sube la primera foto.</p>
+            </div>
+          ) : filteredPhotos.length === 0 ? (
+            <div className="text-center py-12">
+              <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                No se encontraron fotografías con los filtros aplicados.
+              </p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {photos.map((photo) => {
+            <div className="space-y-8">
+              {photoGroups.map((group, idx) => (
+                <PhotoWeekGroup key={idx} group={group}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {group.photos.map((photo) => {
                 const CategoryIcon = getCategoryIcon(photo.categoria);
                 return (
                   <div key={photo.id} className="relative group">
@@ -324,8 +397,11 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
                       {new Date(photo.fecha_foto).toLocaleDateString('es-MX')}
                     </p>
                   </div>
-                );
-              })}
+                      );
+                    })}
+                  </div>
+                </PhotoWeekGroup>
+              ))}
             </div>
           )}
         </CardContent>
