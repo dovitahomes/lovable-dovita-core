@@ -1,3 +1,10 @@
+// ============================================
+// DEPRECATED: Use BudgetVersionTimeline instead
+// ============================================
+// This file is kept for backward compatibility only.
+// New implementations should use:
+// import { BudgetVersionTimeline } from "@/components/budgets/BudgetVersionTimeline";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

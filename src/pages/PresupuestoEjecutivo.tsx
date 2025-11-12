@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { BudgetItemRow } from "@/components/BudgetItemRow";
 import { BudgetItemDialog } from "@/components/BudgetItemDialog";
-import { BudgetVersionHistory } from "@/components/BudgetVersionHistory";
+import { BudgetVersionTimeline } from "@/components/budgets/BudgetVersionTimeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as XLSX from 'xlsx';
 
@@ -493,7 +493,7 @@ export default function PresupuestoEjecutivo() {
 
         {!isNew && projectId && (
           <TabsContent value="history">
-            <BudgetVersionHistory 
+            <BudgetVersionTimeline 
               projectId={projectId} 
               currentBudgetId={id}
             />
