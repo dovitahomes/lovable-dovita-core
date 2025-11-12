@@ -367,6 +367,7 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
                   variant="outline"
                   onClick={() => saveMutation.mutate({ publish: false })}
                   disabled={saveMutation.isPending || hasValidationErrors()}
+                  title={hasValidationErrors() ? "Completa todos los campos requeridos" : ""}
                 >
                   {saveMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -379,6 +380,7 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
                   type="button"
                   onClick={() => saveMutation.mutate({ publish: true })}
                   disabled={saveMutation.isPending || hasValidationErrors()}
+                  title={hasValidationErrors() ? "Completa todos los campos requeridos" : ""}
                 >
                   {saveMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
