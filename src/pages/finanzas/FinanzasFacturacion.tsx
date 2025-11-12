@@ -7,6 +7,7 @@ import { InvoicesGrid } from "@/components/finance/invoicing/InvoicesGrid";
 import { InvoiceUploadDialog } from "@/components/finance/invoicing/InvoiceUploadDialog";
 import { ReconciliationKanban } from "@/components/finance/invoicing/ReconciliationKanban";
 import { PaymentBatchesTab } from "@/components/finance/PaymentBatchesTab";
+import { PaymentBatchBuilder } from "@/components/finance/invoicing/PaymentBatchBuilder";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function FinanzasFacturacion() {
@@ -56,6 +57,7 @@ export default function FinanzasFacturacion() {
           <TabsTrigger value="invoices">Facturas</TabsTrigger>
           <TabsTrigger value="reconciliation">Conciliación</TabsTrigger>
           <TabsTrigger value="batches">Lotes de Pago</TabsTrigger>
+          <TabsTrigger value="builder">Crear Lote</TabsTrigger>
         </TabsList>
 
         <TabsContent value="invoices" className="mt-6">
@@ -68,6 +70,10 @@ export default function FinanzasFacturacion() {
 
         <TabsContent value="batches" className="mt-6">
           <PaymentBatchesTab />
+        </TabsContent>
+
+        <TabsContent value="builder" className="mt-6">
+          <PaymentBatchBuilder />
         </TabsContent>
       </Tabs>
 

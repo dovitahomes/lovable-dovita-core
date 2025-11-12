@@ -31,6 +31,28 @@ export function ReconciliationKanban() {
     })
   );
 
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const activeTransaction = reconciliation?.find(r => r.transaction_id === active.id);
+    if (!activeTransaction) return;
+
+    // Si arrastramos a la columna de "conciliadas" y hay una factura disponible
+    if (over.id === 'reconciled' && activeTransaction.invoice_id && !activeTransaction.reconciled) {
+      reconcileMutation.mutate({
+        transactionId: activeTransaction.transaction_id,
+        invoiceId: activeTransaction.invoice_id,
+      });
+    }
+  };
+
   const columns: ReconciliationColumn[] = [
     {
       id: 'unreconciled',
@@ -106,7 +128,12 @@ export function ReconciliationKanban() {
         </div>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter}>
+      <DndContext 
+        sensors={sensors} 
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {columns.map((column, index) => {
             const items = getColumnData(column.id);
@@ -127,7 +154,7 @@ export function ReconciliationKanban() {
                   </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="p-4">
+                <CardContent className="p-4" id={column.id}>
                   <SortableContext items={items.map(i => i.transaction_id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto">
                       {items.map((item) => (
