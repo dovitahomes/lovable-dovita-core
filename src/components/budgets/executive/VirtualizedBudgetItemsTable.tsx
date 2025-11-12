@@ -1,4 +1,4 @@
-import { useRef, memo } from "react";
+import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   Table,
@@ -23,153 +23,7 @@ interface VirtualizedBudgetItemsTableProps {
   onRemoveItem: (index: number) => void;
 }
 
-const ItemRow = memo(
-  ({
-    item,
-    globalIndex,
-    onUpdate,
-    onRemove,
-    calculateItemTotal,
-    formatCurrency,
-  }: {
-    item: ExecutiveBudgetItem;
-    globalIndex: number;
-    onUpdate: (index: number, field: keyof ExecutiveBudgetItem, value: any) => void;
-    onRemove: (index: number) => void;
-    calculateItemTotal: (item: ExecutiveBudgetItem) => number;
-    formatCurrency: (value: number) => string;
-  }) => {
-    const total = calculateItemTotal(item);
-
-    return (
-      <TableRow className="hover:bg-muted/50">
-        {/* Descripción */}
-        <TableCell className="min-w-[200px]">
-          <Input
-            placeholder="Descripción del item"
-            value={item.descripcion}
-            onChange={(e) => onUpdate(globalIndex, 'descripcion', e.target.value)}
-            className="text-sm h-8"
-          />
-        </TableCell>
-
-        {/* Unidad */}
-        <TableCell className="min-w-[100px]">
-          <Input
-            placeholder="Unidad"
-            value={item.unidad}
-            onChange={(e) => onUpdate(globalIndex, 'unidad', e.target.value)}
-            className="text-sm h-8"
-          />
-        </TableCell>
-
-        {/* Cantidad Real */}
-        <TableCell className="min-w-[90px]">
-          <Input
-            type="number"
-            placeholder="0.00"
-            value={item.cant_real}
-            onChange={(e) => onUpdate(globalIndex, 'cant_real', parseFloat(e.target.value) || 0)}
-            className="text-sm h-8 text-right"
-            min="0"
-            step="0.01"
-          />
-        </TableCell>
-
-        {/* Desperdicio % */}
-        <TableCell className="min-w-[80px]">
-          <Input
-            type="number"
-            placeholder="0"
-            value={item.desperdicio_pct}
-            onChange={(e) => onUpdate(globalIndex, 'desperdicio_pct', parseFloat(e.target.value) || 0)}
-            className="text-sm h-8 text-right"
-            min="0"
-            step="0.1"
-          />
-        </TableCell>
-
-        {/* Cantidad Necesaria (Calculada) */}
-        <TableCell className="min-w-[100px] text-right">
-          <span className="text-sm text-muted-foreground font-mono">
-            {(item.cant_real * (1 + item.desperdicio_pct / 100)).toFixed(2)}
-          </span>
-        </TableCell>
-
-        {/* Costo Unitario */}
-        <TableCell className="min-w-[120px]">
-          <Input
-            type="number"
-            placeholder="0.00"
-            value={item.costo_unit}
-            onChange={(e) => onUpdate(globalIndex, 'costo_unit', parseFloat(e.target.value) || 0)}
-            className="text-sm h-8 text-right"
-            min="0"
-            step="0.01"
-          />
-        </TableCell>
-
-        {/* Honorarios % */}
-        <TableCell className="min-w-[80px]">
-          <Input
-            type="number"
-            placeholder="0"
-            value={item.honorarios_pct}
-            onChange={(e) => onUpdate(globalIndex, 'honorarios_pct', parseFloat(e.target.value) || 0)}
-            className="text-sm h-8 text-right"
-            min="0"
-            step="0.1"
-          />
-        </TableCell>
-
-        {/* Precio Unitario (Calculado) */}
-        <TableCell className="min-w-[120px] text-right">
-          <span className="text-sm font-medium font-mono">
-            ${(item.costo_unit * (1 + item.honorarios_pct / 100)).toFixed(2)}
-          </span>
-        </TableCell>
-
-        {/* Proveedor */}
-        <TableCell className="min-w-[100px]">
-          <Input
-            placeholder="Prov"
-            value={item.proveedor_alias}
-            onChange={(e) => onUpdate(globalIndex, 'proveedor_alias', e.target.value)}
-            className="text-sm h-8"
-            maxLength={6}
-          />
-        </TableCell>
-
-        {/* Total */}
-        <TableCell className="min-w-[120px] text-right sticky right-10 bg-background">
-          <span className={cn(
-            "text-sm font-bold font-mono",
-            total > 0 ? "text-primary" : "text-muted-foreground"
-          )}>
-            {formatCurrency(total)}
-          </span>
-        </TableCell>
-
-        {/* Actions */}
-        <TableCell className="w-[60px] sticky right-0 bg-background">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onRemove(globalIndex)}
-            className="h-8 w-8 p-0"
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </TableCell>
-      </TableRow>
-    );
-  }
-);
-
-ItemRow.displayName = "ItemRow";
-
-export const VirtualizedBudgetItemsTable = memo(
-  ({
+export function VirtualizedBudgetItemsTable({
     subpartida,
     items,
     allItems,
@@ -257,17 +111,136 @@ export const VirtualizedBudgetItemsTable = memo(
               {virtualItems.map((virtualRow) => {
                 const item = items[virtualRow.index];
                 const globalIndex = allItems.findIndex(i => i === item);
+                const total = calculateItemTotal(item);
 
                 return (
-                  <ItemRow
+                  <TableRow
                     key={virtualRow.key}
-                    item={item}
-                    globalIndex={globalIndex}
-                    onUpdate={onUpdateItem}
-                    onRemove={onRemoveItem}
-                    calculateItemTotal={calculateItemTotal}
-                    formatCurrency={formatCurrency}
-                  />
+                    data-index={virtualRow.index}
+                    className="hover:bg-muted/50 absolute top-0 left-0 w-full"
+                    style={{
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    {/* Descripción */}
+                    <TableCell className="min-w-[200px]">
+                      <Input
+                        placeholder="Descripción del item"
+                        value={item.descripcion}
+                        onChange={(e) => onUpdateItem(globalIndex, 'descripcion', e.target.value)}
+                        className="text-sm h-8"
+                      />
+                    </TableCell>
+
+                    {/* Unidad */}
+                    <TableCell className="min-w-[100px]">
+                      <Input
+                        placeholder="Unidad"
+                        value={item.unidad}
+                        onChange={(e) => onUpdateItem(globalIndex, 'unidad', e.target.value)}
+                        className="text-sm h-8"
+                      />
+                    </TableCell>
+
+                    {/* Cantidad Real */}
+                    <TableCell className="min-w-[90px]">
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={item.cant_real}
+                        onChange={(e) => onUpdateItem(globalIndex, 'cant_real', parseFloat(e.target.value) || 0)}
+                        className="text-sm h-8 text-right"
+                        min="0"
+                        step="0.01"
+                      />
+                    </TableCell>
+
+                    {/* Desperdicio % */}
+                    <TableCell className="min-w-[80px]">
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={item.desperdicio_pct}
+                        onChange={(e) => onUpdateItem(globalIndex, 'desperdicio_pct', parseFloat(e.target.value) || 0)}
+                        className="text-sm h-8 text-right"
+                        min="0"
+                        step="0.1"
+                      />
+                    </TableCell>
+
+                    {/* Cantidad Necesaria (Calculada) */}
+                    <TableCell className="min-w-[100px] text-right">
+                      <span className="text-sm text-muted-foreground font-mono">
+                        {(item.cant_real * (1 + item.desperdicio_pct / 100)).toFixed(2)}
+                      </span>
+                    </TableCell>
+
+                    {/* Costo Unitario */}
+                    <TableCell className="min-w-[120px]">
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={item.costo_unit}
+                        onChange={(e) => onUpdateItem(globalIndex, 'costo_unit', parseFloat(e.target.value) || 0)}
+                        className="text-sm h-8 text-right"
+                        min="0"
+                        step="0.01"
+                      />
+                    </TableCell>
+
+                    {/* Honorarios % */}
+                    <TableCell className="min-w-[80px]">
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={item.honorarios_pct}
+                        onChange={(e) => onUpdateItem(globalIndex, 'honorarios_pct', parseFloat(e.target.value) || 0)}
+                        className="text-sm h-8 text-right"
+                        min="0"
+                        step="0.1"
+                      />
+                    </TableCell>
+
+                    {/* Precio Unitario (Calculado) */}
+                    <TableCell className="min-w-[120px] text-right">
+                      <span className="text-sm font-medium font-mono">
+                        ${(item.costo_unit * (1 + item.honorarios_pct / 100)).toFixed(2)}
+                      </span>
+                    </TableCell>
+
+                    {/* Proveedor */}
+                    <TableCell className="min-w-[100px]">
+                      <Input
+                        placeholder="Prov"
+                        value={item.proveedor_alias}
+                        onChange={(e) => onUpdateItem(globalIndex, 'proveedor_alias', e.target.value)}
+                        className="text-sm h-8"
+                        maxLength={6}
+                      />
+                    </TableCell>
+
+                    {/* Total */}
+                    <TableCell className="min-w-[120px] text-right sticky right-10 bg-background">
+                      <span className={cn(
+                        "text-sm font-bold font-mono",
+                        total > 0 ? "text-primary" : "text-muted-foreground"
+                      )}>
+                        {formatCurrency(total)}
+                      </span>
+                    </TableCell>
+
+                    {/* Actions */}
+                    <TableCell className="w-[60px] sticky right-0 bg-background">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onRemoveItem(globalIndex)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </TableBody>
@@ -275,7 +248,5 @@ export const VirtualizedBudgetItemsTable = memo(
         </div>
       </div>
     );
-  }
-);
+}
 
-VirtualizedBudgetItemsTable.displayName = "VirtualizedBudgetItemsTable";
