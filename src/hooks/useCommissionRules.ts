@@ -10,6 +10,7 @@ export interface CommissionRule {
   percent: number;
   applies_on: 'cierre' | 'pago';
   active: boolean;
+  alianza_id: string | null;
   created_at: string;
   updated_at: string;
 }

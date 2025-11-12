@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle, Globe, Building2 } from "lucide-react";
 import { useCommissionRules, useUpsertCommissionRule, useDeleteCommissionRule } from "@/hooks/useCommissionRules";
+import { useActiveAlianzas } from "@/hooks/useAlianzas";
+import { getRuleScopeDescription } from "@/lib/commissions/matchCommissionRule";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface RuleFormData {
@@ -20,13 +22,15 @@ interface RuleFormData {
   percent: number;
   applies_on: 'cierre' | 'pago';
   active: boolean;
+  alianza_id: string | null;
 }
 
 export function CommissionRulesTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<RuleFormData | null>(null);
-  
+
   const { data: rules, isLoading } = useCommissionRules();
+  const { data: alianzas } = useActiveAlianzas();
   const upsertMutation = useUpsertCommissionRule();
   const deleteMutation = useDeleteCommissionRule();
 
@@ -37,6 +41,7 @@ export function CommissionRulesTab() {
     percent: 0,
     applies_on: "cierre",
     active: true,
+    alianza_id: null,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -59,6 +64,7 @@ export function CommissionRulesTab() {
       percent: rule.percent,
       applies_on: rule.applies_on,
       active: rule.active,
+      alianza_id: rule.alianza_id,
     });
     setIsDialogOpen(true);
   };
@@ -77,6 +83,7 @@ export function CommissionRulesTab() {
       percent: 0,
       applies_on: "cierre",
       active: true,
+      alianza_id: null,
     });
     setEditingRule(null);
   };
@@ -109,7 +116,7 @@ export function CommissionRulesTab() {
                 Nueva Regla
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>
                   {editingRule ? "Editar Regla" : "Nueva Regla de Comisión"}
@@ -126,52 +133,95 @@ export function CommissionRulesTab() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="project_type">Tipo de Proyecto</Label>
-                  <Input
-                    id="project_type"
-                    value={formData.project_type}
-                    onChange={(e) => setFormData({ ...formData, project_type: e.target.value })}
-                    placeholder="Ej: Residencial"
-                  />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="project_type">Tipo de Proyecto</Label>
+                    <Input
+                      id="project_type"
+                      value={formData.project_type}
+                      onChange={(e) => setFormData({ ...formData, project_type: e.target.value })}
+                      placeholder="Ej: arquitectura"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="product">Producto</Label>
+                    <Input
+                      id="product"
+                      value={formData.product}
+                      onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+                      placeholder="Ej: casa-habitacion"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="product">Producto</Label>
-                  <Input
-                    id="product"
-                    value={formData.product}
-                    onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-                    placeholder="Ej: Casa habitación"
-                  />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="percent">Porcentaje (%)</Label>
+                    <Input
+                      id="percent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.percent}
+                      onChange={(e) => setFormData({ ...formData, percent: parseFloat(e.target.value) })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="applies_on">Se aplica en</Label>
+                    <Select
+                      value={formData.applies_on}
+                      onValueChange={(value: 'cierre' | 'pago') => setFormData({ ...formData, applies_on: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cierre">Cierre del proyecto</SelectItem>
+                        <SelectItem value="pago">Pago recibido</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
                 <div>
-                  <Label htmlFor="percent">Porcentaje (%)</Label>
-                  <Input
-                    id="percent"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={formData.percent}
-                    onChange={(e) => setFormData({ ...formData, percent: parseFloat(e.target.value) })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="applies_on">Se aplica en</Label>
+                  <Label htmlFor="alianza_id">Aplicar solo a (opcional)</Label>
                   <Select
-                    value={formData.applies_on}
-                    onValueChange={(value: 'cierre' | 'pago') => setFormData({ ...formData, applies_on: value })}
+                    value={formData.alianza_id || "global"}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        alianza_id: value === "global" ? null : value,
+                      })
+                    }
                   >
-                    <SelectTrigger>
-                      <SelectValue />
+                    <SelectTrigger id="alianza_id">
+                      <SelectValue placeholder="Seleccionar alcance" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cierre">Cierre del proyecto</SelectItem>
-                      <SelectItem value="pago">Pago recibido</SelectItem>
+                      <SelectItem value="global">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          Todas las Alianzas (Global)
+                        </div>
+                      </SelectItem>
+                      {alianzas?.map((alianza) => (
+                        <SelectItem key={alianza.id} value={alianza.id}>
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4" />
+                            {alianza.nombre}
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Si seleccionas una alianza específica, esta regla solo aplicará a comisiones de esa alianza.
+                  </p>
                 </div>
+
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="active"
@@ -180,6 +230,7 @@ export function CommissionRulesTab() {
                   />
                   <Label htmlFor="active">Regla activa</Label>
                 </div>
+
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
@@ -198,6 +249,7 @@ export function CommissionRulesTab() {
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
+              <TableHead>Alcance</TableHead>
               <TableHead>Tipo Proyecto</TableHead>
               <TableHead>Producto</TableHead>
               <TableHead>%</TableHead>
@@ -208,54 +260,74 @@ export function CommissionRulesTab() {
           </TableHeader>
           <TableBody>
             {rules && rules.length > 0 ? (
-              rules.map((rule) => (
-                <TableRow key={rule.id}>
-                  <TableCell className="font-medium">{rule.name}</TableCell>
-                  <TableCell>{rule.project_type || "-"}</TableCell>
-                  <TableCell>{rule.product || "-"}</TableCell>
-                  <TableCell>{rule.percent}%</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {rule.applies_on === 'cierre' ? 'Cierre' : 'Pago'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {rule.active ? (
-                      <Badge variant="default" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Activa
+              rules.map((rule) => {
+                const alianzaName = alianzas?.find((a) => a.id === rule.alianza_id)?.nombre;
+                
+                return (
+                  <TableRow key={rule.id}>
+                    <TableCell className="font-medium">{rule.name}</TableCell>
+                    <TableCell>
+                      {rule.alianza_id ? (
+                        <Badge variant="secondary" className="gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {alianzaName || "Alianza específica"}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1">
+                          <Globe className="h-3 w-3" />
+                          Global
+                        </Badge>
+                      )}
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {getRuleScopeDescription(rule)}
+                      </div>
+                    </TableCell>
+                    <TableCell>{rule.project_type || "-"}</TableCell>
+                    <TableCell>{rule.product || "-"}</TableCell>
+                    <TableCell className="font-semibold">{rule.percent}%</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {rule.applies_on === 'cierre' ? 'Cierre' : 'Pago'}
                       </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="gap-1">
-                        <XCircle className="h-3 w-3" />
-                        Inactiva
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(rule)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(rule.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                    <TableCell>
+                      {rule.active ? (
+                        <Badge variant="default" className="gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Activa
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="gap-1">
+                          <XCircle className="h-3 w-3" />
+                          Inactiva
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(rule)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(rule.id)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   No hay reglas de comisión configuradas
                 </TableCell>
               </TableRow>

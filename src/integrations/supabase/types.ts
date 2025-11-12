@@ -876,6 +876,7 @@ export type Database = {
       commission_rules: {
         Row: {
           active: boolean | null
+          alianza_id: string | null
           applies_on: string | null
           created_at: string | null
           id: string
@@ -887,6 +888,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          alianza_id?: string | null
           applies_on?: string | null
           created_at?: string | null
           id?: string
@@ -898,6 +900,7 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          alianza_id?: string | null
           applies_on?: string | null
           created_at?: string | null
           id?: string
@@ -907,7 +910,15 @@ export type Database = {
           project_type?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "commission_rules_alianza_id_fkey"
+            columns: ["alianza_id"]
+            isOneToOne: false
+            referencedRelation: "alianzas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       commissions: {
         Row: {
