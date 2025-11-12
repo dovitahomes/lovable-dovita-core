@@ -21,6 +21,7 @@ import { StepProjectInfo } from "./steps/StepProjectInfo";
 import { StepMayorSelection } from "./steps/StepMayorSelection";
 import { StepPartidaConfig } from "./steps/StepPartidaConfig";
 import { StepPreview } from "./steps/StepPreview";
+import { SaveAsTemplateDialog } from "./SaveAsTemplateDialog";
 
 const budgetSchema = z.object({
   project_id: z.string().min(1, "Proyecto requerido"),
@@ -65,6 +66,7 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedMayores, setSelectedMayores] = useState<Mayor[]>([]);
   const [items, setItems] = useState<BudgetItem[]>([]);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
 
   const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema),
@@ -239,6 +241,17 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
+  const hasValidationErrors = () => {
+    if (!form.getValues().project_id) return true;
+    if (selectedMayores.length === 0) return true;
+    if (items.length === 0) return true;
+    
+    const hasInvalidItems = items.some(
+      (item) => !item.partida_id || !item.costo_unit || item.cant_real <= 0
+    );
+    return hasInvalidItems;
+  };
+
   const handleClose = () => {
     form.reset();
     setCurrentStep(1);
@@ -322,15 +335,29 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
 
         {/* Navigation */}
         <div className="flex justify-between items-center pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1 || saveMutation.isPending}
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Anterior
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1 || saveMutation.isPending}
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Anterior
+            </Button>
+
+            {items.length > 0 && currentStep >= 3 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSaveTemplate(true)}
+                className="text-xs"
+              >
+                💾 Guardar como Template
+              </Button>
+            )}
+          </div>
 
           <div className="flex gap-2">
             {currentStep === STEPS.length ? (
@@ -339,7 +366,8 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
                   type="button"
                   variant="outline"
                   onClick={() => saveMutation.mutate({ publish: false })}
-                  disabled={saveMutation.isPending}
+                  disabled={saveMutation.isPending || hasValidationErrors()}
+                  title={hasValidationErrors() ? "Completa todos los campos requeridos" : ""}
                 >
                   {saveMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -351,7 +379,8 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
                 <Button
                   type="button"
                   onClick={() => saveMutation.mutate({ publish: true })}
-                  disabled={saveMutation.isPending}
+                  disabled={saveMutation.isPending || hasValidationErrors()}
+                  title={hasValidationErrors() ? "Completa todos los campos requeridos" : ""}
                 >
                   {saveMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -369,6 +398,13 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
             )}
           </div>
         </div>
+
+        {/* Save as Template Dialog */}
+        <SaveAsTemplateDialog
+          open={showSaveTemplate}
+          onClose={() => setShowSaveTemplate(false)}
+          items={items}
+        />
       </DialogContent>
     </Dialog>
   );
