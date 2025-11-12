@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { PUBLIC_ROUTES, BACKOFFICE_ROUTES, LEGACY_ROUTES } from "@/config/routes";
 import { UserMenu } from "@/components/UserMenu";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 
 // Client App imports
 import ClientAppWrapper from "@/layouts/ClientAppWrapper";
@@ -80,6 +82,9 @@ const BudgetEditor = lazy(() => import("./pages/erp/BudgetEditor"));
 const InternalLayout = () => {
   const { theme, toggle: toggleTheme } = useTheme();
   
+  // Escuchar notificaciones en tiempo real
+  useRealtimeNotifications();
+  
   return <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
@@ -98,6 +103,7 @@ const InternalLayout = () => {
               >
                 {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
+              <NotificationBell />
               <UserMenu />
             </div>
           </header>
