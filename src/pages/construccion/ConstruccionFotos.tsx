@@ -1,13 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjectById } from "@/hooks/useProjects";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ConstructionPhotosTab } from "@/components/construction/ConstructionPhotosTab";
+import ConstruccionFotosMobile from "./ConstruccionFotosMobile";
 
 export default function ConstruccionFotos() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: project } = useProjectById(id!);
+  const isMobile = useIsMobile();
 
   if (!id) {
     return (
@@ -17,6 +20,12 @@ export default function ConstruccionFotos() {
     );
   }
 
+  // Render mobile version for touch devices
+  if (isMobile) {
+    return <ConstruccionFotosMobile />;
+  }
+
+  // Desktop version
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
