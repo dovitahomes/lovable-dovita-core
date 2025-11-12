@@ -5,14 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, Mail, MapPin, Building, LayoutGrid, UserPlus, Edit } from "lucide-react";
+import { Phone, Mail, MapPin, Building, LayoutGrid, UserPlus, Edit, Loader2, Plus } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { LeadQuickActions } from "./LeadQuickActions";
 import { ActivityTimeline } from "./ActivityTimeline";
+import { ConvertLeadDialog } from "./ConvertLeadDialog";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { useTasks } from "@/hooks/crm/useTasks";
+import { useUpdateLead } from "@/hooks/useLeads";
 import { TaskList } from "@/components/tasks/TaskList";
-import { useMemo, useState } from "react";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
+import { useMemo, useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -27,9 +30,21 @@ interface LeadDetailsDialogProps {
 export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadDetailsDialogProps) {
   const [notes, setNotes] = useState(lead?.notas || '');
   const [timelineOpen, setTimelineOpen] = useState(false);
+  const [showConvertDialog, setShowConvertDialog] = useState(false);
+  const [showCreateTask, setShowCreateTask] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // ✅ CRÍTICO: Hooks DEBEN llamarse ANTES de cualquier early return
   const { data: activities } = useCrmActivities('lead', lead?.id || '');
+  const { data: tasks = [] } = useTasks('', undefined, undefined, 'lead', lead?.id || '');
+  const updateLead = useUpdateLead();
+
+  // Sync notes when lead changes
+  useEffect(() => {
+    if (lead?.notas) {
+      setNotes(lead.notas);
+    }
+  }, [lead?.notas]);
 
   // Calculate urgency
   const urgencyBadge = useMemo(() => {
@@ -63,6 +78,14 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
       currency: 'MXN',
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  const handleSaveNotes = async () => {
+    if (!lead?.id) return;
+    await updateLead.mutateAsync({
+      leadId: lead.id,
+      updates: { notas: notes }
+    });
   };
 
   const InfoField = ({ icon: Icon, label, value }: any) => {
@@ -185,19 +208,37 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
                 )}
               </TabsContent>
 
-              <TabsContent value="tasks" className="m-0">
-                <div className="text-sm text-muted-foreground">
-                  Funcionalidad de tareas disponible próximamente
+              <TabsContent value="tasks" className="m-0 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-semibold">Tareas del Lead</h3>
+                  <Button size="sm" onClick={() => setShowCreateTask(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Nueva Tarea
+                  </Button>
                 </div>
+                <TaskList
+                  tasks={tasks}
+                  selectedTaskId={selectedTaskId}
+                  onSelectTask={setSelectedTaskId}
+                />
               </TabsContent>
 
-              <TabsContent value="notes" className="m-0">
+              <TabsContent value="notes" className="m-0 space-y-4">
                 <Textarea 
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Agregar notas sobre este lead..."
                   className="min-h-[300px]"
                 />
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleSaveNotes}
+                    disabled={updateLead.isPending}
+                  >
+                    {updateLead.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Guardar Notas
+                  </Button>
+                </div>
               </TabsContent>
             </div>
           </Tabs>
@@ -209,8 +250,8 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
                 leadName={lead.nombre_completo}
                 leadEmail={lead.email}
               />
-              {canConvert && onConvert && (
-                <Button onClick={onConvert} size="lg">
+              {canConvert && (
+                <Button onClick={() => setShowConvertDialog(true)} size="lg">
                   <UserPlus className="h-4 w-4 mr-2" />
                   Convertir a Cliente
                 </Button>
@@ -225,6 +266,21 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
         onOpenChange={setTimelineOpen}
         leadId={lead.id}
         leadName={lead.nombre_completo}
+      />
+
+      <ConvertLeadDialog
+        open={showConvertDialog}
+        onOpenChange={setShowConvertDialog}
+        lead={lead}
+      />
+
+      <CreateTaskDialog
+        open={showCreateTask}
+        onOpenChange={setShowCreateTask}
+        defaultRelatedTo={{
+          type: 'lead',
+          id: lead?.id || ''
+        }}
       />
     </>
   );

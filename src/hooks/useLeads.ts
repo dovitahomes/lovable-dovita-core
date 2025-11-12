@@ -77,6 +77,29 @@ export function useUpdateLeadStatus() {
   });
 }
 
+export function useUpdateLead() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ leadId, updates }: { leadId: string; updates: Partial<any> }) => {
+      const { error } = await supabase
+        .from('leads')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', leadId);
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['lead', variables.leadId] });
+      toast.success("Lead actualizado correctamente");
+    },
+    onError: (error: any) => {
+      toast.error("Error al actualizar lead: " + error.message);
+    }
+  });
+}
+
 export function useConvertLead() {
   const queryClient = useQueryClient();
   
