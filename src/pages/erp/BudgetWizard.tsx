@@ -15,6 +15,7 @@ export default function BudgetWizard() {
   const [projectId, setProjectId] = useState("");
   const [type, setType] = useState<"parametrico" | "ejecutivo">("parametrico");
   const [ivaEnabled, setIvaEnabled] = useState(true);
+  const [referenciaAlianzaId, setReferenciaAlianzaId] = useState<string>("");
 
   const { data: projects } = useQuery({
     queryKey: ['projects-active'],
@@ -24,6 +25,19 @@ export default function BudgetWizard() {
         .select('*, clients(name)')
         .eq('status', 'activo')
         .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: alianzas } = useQuery({
+    queryKey: ['alianzas-activas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('alianzas')
+        .select('id, nombre, tipo, comision_porcentaje')
+        .eq('activa', true)
+        .order('nombre');
       if (error) throw error;
       return data;
     }
@@ -42,7 +56,8 @@ export default function BudgetWizard() {
           iva_enabled: ivaEnabled,
           status: 'borrador',
           version: 1,
-          created_by: user.id
+          created_by: user.id,
+          referencia_alianza_id: referenciaAlianzaId || null
         }])
         .select()
         .single();
@@ -116,6 +131,26 @@ export default function BudgetWizard() {
               onCheckedChange={(checked) => setIvaEnabled(checked as boolean)}
             />
             <label className="text-sm">Incluir IVA (16%)</label>
+          </div>
+
+          <div className="space-y-2 border-t pt-4">
+            <Label htmlFor="referencia_alianza">¿Fue referido por alguna alianza?</Label>
+            <Select value={referenciaAlianzaId} onValueChange={setReferenciaAlianzaId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Ninguna" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Ninguna</SelectItem>
+                {alianzas?.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.nombre} ({a.comision_porcentaje}%)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Si seleccionas una alianza, se generará automáticamente una comisión al publicar el presupuesto
+            </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

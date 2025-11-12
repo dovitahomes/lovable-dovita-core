@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Handshake, Plus, Pencil, Trash2 } from "lucide-react";
+import { Handshake, Plus, Pencil, Trash2, DollarSign } from "lucide-react";
+import { AllianceCommissionsTab } from "@/components/alianzas/AllianceCommissionsTab";
 
 interface Alianza {
   id: string;
@@ -31,6 +33,8 @@ const Alianzas = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedAllianceId, setSelectedAllianceId] = useState<string | null>(null);
+  const [selectedAllianceName, setSelectedAllianceName] = useState<string>("");
   const [formData, setFormData] = useState<Omit<Alianza, "id">>({
     nombre: "",
     tipo: "inmobiliaria",
@@ -322,14 +326,32 @@ const Alianzas = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Lista de Alianzas</CardTitle>
-          <CardDescription>
-            {alianzas.length} alianza{alianzas.length !== 1 ? "s" : ""} registrada{alianzas.length !== 1 ? "s" : ""}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
+        <Tabs defaultValue="lista" className="w-full">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Gestión de Alianzas</CardTitle>
+                <CardDescription>
+                  {alianzas.length} alianza{alianzas.length !== 1 ? "s" : ""} registrada{alianzas.length !== 1 ? "s" : ""}
+                </CardDescription>
+              </div>
+              <TabsList>
+                <TabsTrigger value="lista">Lista</TabsTrigger>
+                <TabsTrigger 
+                  value="comisiones" 
+                  disabled={!selectedAllianceId}
+                  className="gap-2"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  Comisiones
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </CardHeader>
+
+          <TabsContent value="lista">
+            <CardContent>
+              <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
@@ -367,6 +389,17 @@ const Alianzas = () => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => {
+                          setSelectedAllianceId(alianza.id);
+                          setSelectedAllianceName(alianza.nombre);
+                        }}
+                        title="Ver comisiones"
+                      >
+                        <DollarSign className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleEdit(alianza)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -384,7 +417,18 @@ const Alianzas = () => {
               )}
             </TableBody>
           </Table>
-        </CardContent>
+            </CardContent>
+          </TabsContent>
+
+          <TabsContent value="comisiones">
+            {selectedAllianceId && selectedAllianceName && (
+              <AllianceCommissionsTab 
+                allianceId={selectedAllianceId}
+                allianceName={selectedAllianceName}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );

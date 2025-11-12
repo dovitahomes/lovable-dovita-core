@@ -622,6 +622,7 @@ export type Database = {
           notas: string | null
           project_id: string
           published_at: string | null
+          referencia_alianza_id: string | null
           shared_with_construction: boolean
           status: Database["public"]["Enums"]["budget_status"]
           template_name: string | null
@@ -639,6 +640,7 @@ export type Database = {
           notas?: string | null
           project_id: string
           published_at?: string | null
+          referencia_alianza_id?: string | null
           shared_with_construction?: boolean
           status?: Database["public"]["Enums"]["budget_status"]
           template_name?: string | null
@@ -656,6 +658,7 @@ export type Database = {
           notas?: string | null
           project_id?: string
           published_at?: string | null
+          referencia_alianza_id?: string | null
           shared_with_construction?: boolean
           status?: Database["public"]["Enums"]["budget_status"]
           template_name?: string | null
@@ -705,6 +708,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "budgets_referencia_alianza_id_fkey"
+            columns: ["referencia_alianza_id"]
+            isOneToOne: false
+            referencedRelation: "alianzas"
+            referencedColumns: ["id"]
           },
         ]
       }
