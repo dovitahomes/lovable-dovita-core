@@ -88,6 +88,38 @@ export default function CatalogoTU() {
     onError: (error: any) => toast.error("Error al actualizar: " + error.message)
   });
 
+  const handleInlineUpdate = async (nodeId: string, data: { code: string; name: string; unit_default: string | null }) => {
+    try {
+      await updateMutation.mutateAsync({ id: nodeId, data });
+    } catch (error) {
+      // Error already handled by mutation
+    }
+  };
+
+  const handleAddChild = async (parentId: string, type: TUNode['type']) => {
+    const parent = nodes?.find(n => n.id === parentId);
+    if (!parent) return;
+
+    const newNodeData = {
+      project_scope: scopeFilter,
+      scope_id: null,
+      type,
+      parent_id: parentId,
+      code: '01', // Default code, user will edit inline
+      name: `Nuevo ${type}`,
+      unit_default: null,
+      is_universal: false,
+      order_index: 0
+    };
+
+    try {
+      await createMutation.mutateAsync(newNodeData);
+      setExpandedNodes(prev => new Set(prev).add(parentId)); // Auto-expand parent
+    } catch (error) {
+      // Error already handled by mutation
+    }
+  };
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('tu_nodes').delete().eq('id', id);
@@ -514,6 +546,8 @@ export default function CatalogoTU() {
                     onToggle={toggleNode}
                     onEdit={handleEdit}
                     onDelete={(id) => deleteMutation.mutate(id)}
+                    onUpdate={handleInlineUpdate}
+                    onAddChild={handleAddChild}
                     level={0}
                   />
                 </div>

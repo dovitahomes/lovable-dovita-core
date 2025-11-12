@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronRight, ChevronDown, Edit, Trash2, GripVertical, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TUNodeInlineEdit } from "@/components/tu/TUNodeInlineEdit";
 
 interface TUNode {
   id: string;
@@ -21,6 +23,8 @@ interface TUTreeNodeProps {
   onToggle: (nodeId: string) => void;
   onEdit: (node: TUNode) => void;
   onDelete: (nodeId: string) => void;
+  onUpdate: (nodeId: string, data: { code: string; name: string; unit_default: string | null }) => void;
+  onAddChild: (parentId: string, type: TUNode['type']) => void;
   level: number;
 }
 
@@ -31,10 +35,28 @@ export function TUTreeNode({
   onToggle,
   onEdit,
   onDelete,
+  onUpdate,
+  onAddChild,
   level
 }: TUTreeNodeProps) {
+  const [isEditingInline, setIsEditingInline] = useState(false);
+  const [showAddChild, setShowAddChild] = useState(false);
+  
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.has(node.id);
+
+  const handleSaveInline = async (data: { code: string; name: string; unit_default: string | null }) => {
+    await onUpdate(node.id, data);
+    setIsEditingInline(false);
+  };
+
+  const getNextChildType = (parentType: TUNode['type']): TUNode['type'] | null => {
+    const hierarchy: TUNode['type'][] = ['departamento', 'mayor', 'partida', 'subpartida'];
+    const currentIndex = hierarchy.indexOf(parentType);
+    return currentIndex < hierarchy.length - 1 ? hierarchy[currentIndex + 1] : null;
+  };
+
+  const canAddChild = getNextChildType(node.type) !== null;
 
   const getFullCode = (currentNode: TUNode): string => {
     const codes: string[] = [];
@@ -96,6 +118,18 @@ export function TUTreeNode({
     return gradients[type as keyof typeof gradients];
   };
 
+  // If editing inline, show edit component
+  if (isEditingInline) {
+    return (
+      <TUNodeInlineEdit
+        node={node}
+        onSave={handleSaveInline}
+        onCancel={() => setIsEditingInline(false)}
+        level={level}
+      />
+    );
+  }
+
   return (
     <div className="animate-fade-in">
       <div
@@ -141,11 +175,29 @@ export function TUTreeNode({
         </div>
 
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+          {canAddChild && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 hover:bg-green-500/10 hover:text-green-600"
+              onClick={() => {
+                const childType = getNextChildType(node.type);
+                if (childType) {
+                  onAddChild(node.id, childType);
+                  if (!isExpanded) onToggle(node.id); // Auto-expand parent
+                }
+              }}
+              title={`Agregar ${getNextChildType(node.type)}`}
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
-            onClick={() => onEdit(node)}
+            onClick={() => setIsEditingInline(true)}
+            title="Editar inline"
           >
             <Edit className="h-3.5 w-3.5" />
           </Button>
@@ -158,6 +210,7 @@ export function TUTreeNode({
                 onDelete(node.id);
               }
             }}
+            title="Eliminar nodo"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -166,17 +219,24 @@ export function TUTreeNode({
 
       {hasChildren && isExpanded && (
         <div>
-          {node.children!.map(child => (
-            <TUTreeNode
+          {node.children!.map((child, index) => (
+            <div 
               key={child.id}
-              node={child}
-              allNodes={allNodes}
-              expandedNodes={expandedNodes}
-              onToggle={onToggle}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              level={level + 1}
-            />
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 30}ms` }}
+            >
+              <TUTreeNode
+                node={child}
+                allNodes={allNodes}
+                expandedNodes={expandedNodes}
+                onToggle={onToggle}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onUpdate={onUpdate}
+                onAddChild={onAddChild}
+                level={level + 1}
+              />
+            </div>
           ))}
         </div>
       )}
