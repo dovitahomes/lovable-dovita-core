@@ -14,10 +14,14 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Calculator, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { BudgetItem, Mayor } from "../ParametricBudgetWizard";
 import { cn } from "@/lib/utils";
+import { PartidaSearch } from "../PartidaSearch";
+import { CostCalculator } from "../CostCalculator";
+import { TemplateSelector } from "../TemplateSelector";
+import { PriceAlert } from "../PriceAlert";
 
 interface StepPartidaConfigProps {
   selectedMayores: Mayor[];
@@ -29,6 +33,10 @@ export function StepPartidaConfig({ selectedMayores, items, onItemsChange }: Ste
   const [expandedMayor, setExpandedMayor] = useState<string | null>(
     selectedMayores.length > 0 ? selectedMayores[0].id : null
   );
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [calculatorItemIndex, setCalculatorItemIndex] = useState<number | null>(null);
+  const [templateMayorId, setTemplateMayorId] = useState<string | null>(null);
 
   const { data: partidas, isLoading } = useQuery({
     queryKey: ['tu_partidas'],
@@ -56,6 +64,52 @@ export function StepPartidaConfig({ selectedMayores, items, onItemsChange }: Ste
       order_index: items.length,
     };
     onItemsChange([...items, newItem]);
+  };
+
+  const handlePartidaSelect = (partida: any, mayorId: string) => {
+    const newItem: BudgetItem = {
+      mayor_id: mayorId,
+      partida_id: partida.id,
+      descripcion: partida.name,
+      unidad: "pieza",
+      cant_real: 1,
+      desperdicio_pct: 0,
+      costo_unit: 0,
+      honorarios_pct: 15,
+      order_index: items.length,
+    };
+    onItemsChange([...items, newItem]);
+    toast.success(`Partida "${partida.name}" agregada`);
+  };
+
+  const handleOpenCalculator = (index: number) => {
+    setCalculatorItemIndex(index);
+    setShowCalculator(true);
+  };
+
+  const handleApplyCalculator = (values: {
+    costo_unit: number;
+    cant_real: number;
+    desperdicio_pct: number;
+    honorarios_pct: number;
+  }) => {
+    if (calculatorItemIndex === null) return;
+    const newItems = [...items];
+    newItems[calculatorItemIndex] = {
+      ...newItems[calculatorItemIndex],
+      ...values,
+    };
+    onItemsChange(newItems);
+    setCalculatorItemIndex(null);
+  };
+
+  const handleOpenTemplateSelector = (mayorId: string) => {
+    setTemplateMayorId(mayorId);
+    setShowTemplateSelector(true);
+  };
+
+  const handleApplyTemplate = (templateItems: BudgetItem[]) => {
+    onItemsChange([...items, ...templateItems]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -159,17 +213,37 @@ export function StepPartidaConfig({ selectedMayores, items, onItemsChange }: Ste
 
                 {isExpanded && (
                   <CardContent className="pt-4 space-y-4">
-                    {/* Add Item Button */}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddItem(mayor.id)}
-                      className="w-full"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar Partida
-                    </Button>
+                    {/* Search and Actions */}
+                    <div className="space-y-3">
+                      <PartidaSearch
+                        partidas={partidas || []}
+                        mayorId={mayor.id}
+                        onSelect={(partida) => handlePartidaSelect(partida, mayor.id)}
+                      />
+
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAddItem(mayor.id)}
+                          className="flex-1"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar Partida
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenTemplateSelector(mayor.id)}
+                          className="flex-1"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Usar Template
+                        </Button>
+                      </div>
+                    </div>
 
                     {/* Items List */}
                     {mayorItems.length === 0 ? (
@@ -238,7 +312,29 @@ export function StepPartidaConfig({ selectedMayores, items, onItemsChange }: Ste
                                 </Button>
                               </div>
 
+                              {/* Price Alert */}
+                              {item.partida_id && item.costo_unit > 0 && (
+                                <PriceAlert
+                                  partidaId={item.partida_id}
+                                  currentPrice={item.costo_unit}
+                                  className="mb-2"
+                                />
+                              )}
+
                               {/* Numeric Fields */}
+                              <div className="flex items-end gap-2 mb-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleOpenCalculator(globalIdx)}
+                                  className="gap-2"
+                                >
+                                  <Calculator className="h-4 w-4" />
+                                  Calculadora
+                                </Button>
+                              </div>
+
                               <div className="grid grid-cols-5 gap-2">
                                 <div className="space-y-1">
                                   <Label className="text-xs">Costo Unit. *</Label>
@@ -328,6 +424,32 @@ export function StepPartidaConfig({ selectedMayores, items, onItemsChange }: Ste
             );
           })}
         </div>
+      )}
+
+      {/* Cost Calculator Modal */}
+      {calculatorItemIndex !== null && (
+        <CostCalculator
+          open={showCalculator}
+          onClose={() => {
+            setShowCalculator(false);
+            setCalculatorItemIndex(null);
+          }}
+          onApply={handleApplyCalculator}
+          initialValues={items[calculatorItemIndex]}
+        />
+      )}
+
+      {/* Template Selector Modal */}
+      {templateMayorId && (
+        <TemplateSelector
+          open={showTemplateSelector}
+          onClose={() => {
+            setShowTemplateSelector(false);
+            setTemplateMayorId(null);
+          }}
+          mayorId={templateMayorId}
+          onApplyTemplate={handleApplyTemplate}
+        />
       )}
     </div>
   );
