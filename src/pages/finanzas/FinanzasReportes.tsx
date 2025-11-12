@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart3, Download, FileSpreadsheet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { ProviderBalanceTab } from "@/components/finance/ProviderBalanceTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   IncomeVsExpensesChart, 
@@ -9,6 +8,7 @@ import {
   BalanceTrendChart, 
   FinancialHeatmap 
 } from "@/components/finance/reports";
+import { ProviderBalancesGrid } from "@/components/finance/provider-balances";
 import { useIncomeVsExpenses, useExpenseDistribution } from "@/hooks/finance/useFinancialReports";
 import { useTreasuryStats } from "@/hooks/finance/useTreasuryStats";
 import { subMonths } from "date-fns";
@@ -221,7 +221,7 @@ export default function FinanzasReportes() {
         </TabsContent>
 
         <TabsContent value="balances" className="mt-6">
-          <ProviderBalanceTab />
+          <ProviderBalancesGrid />
         </TabsContent>
       </Tabs>
     </div>
