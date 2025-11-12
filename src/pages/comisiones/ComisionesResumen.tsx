@@ -8,12 +8,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { BACKOFFICE_ROUTES } from "@/config/routes";
-import { CommissionSummaryTab } from "@/components/commissions/CommissionSummaryTab";
 import { DollarSign } from "lucide-react";
+import { CommissionStatsCards } from "@/components/commissions/CommissionStatsCards";
+import { CommissionGeneratedVsPaidChart } from "@/components/commissions/CommissionGeneratedVsPaidChart";
+import { CommissionDistributionChart } from "@/components/commissions/CommissionDistributionChart";
+import { TopAlliancesChart } from "@/components/commissions/TopAlliancesChart";
+import { CommissionTimeline } from "@/components/commissions/CommissionTimeline";
 
 export default function ComisionesResumen() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden px-4 sm:px-6 py-6">
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -35,15 +39,27 @@ export default function ComisionesResumen() {
           <DollarSign className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Resumen Financiero</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Resumen Financiero</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Vista general de comisiones, pendientes, pagadas y métricas clave
           </p>
         </div>
       </div>
 
-      {/* Content - Reuse existing tab */}
-      <CommissionSummaryTab />
+      {/* Stats Cards */}
+      <CommissionStatsCards />
+
+      {/* Charts Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <CommissionGeneratedVsPaidChart />
+        <CommissionDistributionChart />
+      </div>
+
+      {/* Top Alliances */}
+      <TopAlliancesChart />
+
+      {/* Timeline */}
+      <CommissionTimeline />
     </div>
   );
 }
