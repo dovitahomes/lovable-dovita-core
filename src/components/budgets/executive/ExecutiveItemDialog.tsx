@@ -108,34 +108,34 @@ export function ExecutiveItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-3xl max-h-[95vh] overflow-y-auto p-4 md:p-6">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            {item ? "Editar Item" : "Nuevo Item"} - {subpartidaName}
+          <DialogTitle className="text-base md:text-xl font-bold">
+            {item ? "Editar Item" : "Nuevo Item"} - <span className="text-primary">{subpartidaName}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="basico" className="gap-2">
-              <Package className="h-4 w-4" />
-              Básico
-              {validations.basico && <CheckCircle className="h-3 w-3 text-green-500" />}
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4 md:space-y-6">
+          <TabsList className="grid w-full grid-cols-4 h-auto">
+            <TabsTrigger value="basico" className="gap-1 md:gap-2 flex-col md:flex-row py-2 md:py-3">
+              <Package className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">Básico</span>
+              {validations.basico && <CheckCircle className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />}
             </TabsTrigger>
-            <TabsTrigger value="cantidades" className="gap-2">
-              <Calculator className="h-4 w-4" />
-              Cantidades
-              {validations.cantidades && <CheckCircle className="h-3 w-3 text-green-500" />}
+            <TabsTrigger value="cantidades" className="gap-1 md:gap-2 flex-col md:flex-row py-2 md:py-3">
+              <Calculator className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">Cant.</span>
+              {validations.cantidades && <CheckCircle className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />}
             </TabsTrigger>
-            <TabsTrigger value="costos" className="gap-2">
-              <DollarSign className="h-4 w-4" />
-              Costos
-              {validations.costos && <CheckCircle className="h-3 w-3 text-green-500" />}
+            <TabsTrigger value="costos" className="gap-1 md:gap-2 flex-col md:flex-row py-2 md:py-3">
+              <DollarSign className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">Costos</span>
+              {validations.costos && <CheckCircle className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />}
             </TabsTrigger>
-            <TabsTrigger value="proveedor" className="gap-2">
-              <Building2 className="h-4 w-4" />
-              Proveedor
-              {validations.proveedor && <CheckCircle className="h-3 w-3 text-green-500" />}
+            <TabsTrigger value="proveedor" className="gap-1 md:gap-2 flex-col md:flex-row py-2 md:py-3">
+              <Building2 className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-xs md:text-sm">Prov.</span>
+              {validations.proveedor && <CheckCircle className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />}
             </TabsTrigger>
           </TabsList>
 
@@ -176,15 +176,17 @@ export function ExecutiveItemDialog({
               </Select>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
               <Button
                 onClick={() => setCurrentTab("cantidades")}
                 disabled={!validations.basico}
+                className="w-full sm:w-auto"
               >
-                Siguiente: Cantidades
+                <span className="hidden sm:inline">Siguiente: Cantidades</span>
+                <span className="sm:hidden">Siguiente</span>
               </Button>
             </div>
           </TabsContent>
@@ -249,15 +251,17 @@ export function ExecutiveItemDialog({
               </div>
             </div>
 
-            <div className="flex justify-between gap-2 pt-4">
-              <Button variant="outline" onClick={() => setCurrentTab("basico")}>
+            <div className="flex flex-col sm:flex-row justify-between gap-2 pt-4">
+              <Button variant="outline" onClick={() => setCurrentTab("basico")} className="w-full sm:w-auto">
                 Anterior
               </Button>
               <Button
                 onClick={() => setCurrentTab("costos")}
                 disabled={!validations.cantidades}
+                className="w-full sm:w-auto"
               >
-                Siguiente: Costos
+                <span className="hidden sm:inline">Siguiente: Costos</span>
+                <span className="sm:hidden">Siguiente</span>
               </Button>
             </div>
           </TabsContent>
@@ -334,15 +338,17 @@ export function ExecutiveItemDialog({
               </div>
             </div>
 
-            <div className="flex justify-between gap-2 pt-4">
-              <Button variant="outline" onClick={() => setCurrentTab("cantidades")}>
+            <div className="flex flex-col sm:flex-row justify-between gap-2 pt-4">
+              <Button variant="outline" onClick={() => setCurrentTab("cantidades")} className="w-full sm:w-auto">
                 Anterior
               </Button>
               <Button
                 onClick={() => setCurrentTab("proveedor")}
                 disabled={!validations.costos}
+                className="w-full sm:w-auto"
               >
-                Siguiente: Proveedor
+                <span className="hidden sm:inline">Siguiente: Proveedor</span>
+                <span className="sm:hidden">Siguiente</span>
               </Button>
             </div>
           </TabsContent>
