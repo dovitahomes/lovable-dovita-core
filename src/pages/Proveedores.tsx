@@ -7,12 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { VirtualizedProvidersTable } from "@/components/finance/VirtualizedProvidersTable";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Search, Download, Upload, FileBarChart } from "lucide-react";
+import { Plus, Search, Download, Upload } from "lucide-react";
 import { ProviderDialog } from "@/components/ProviderDialog";
 import { ProviderDetailsDialog } from "@/components/ProviderDetailsDialog";
 import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
+import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
+import { ProviderFilters, FilterType } from "@/components/providers/ProviderFilters";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,23 +48,19 @@ export default function Proveedores() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
-  const [showInactive, setShowInactive] = useState(false);
-  const [filterHasTerms, setFilterHasTerms] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<FilterType[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
   const { data: providers = [], isLoading, error } = useQuery({
-    queryKey: ["providers", showInactive],
+    queryKey: ["providers"],
     queryFn: async () => {
-      let query = supabase.from("providers").select("*");
-
-      if (!showInactive) {
-        query = query.eq("activo", true);
-      }
-
-      const { data, error } = await query.order("name");
+      const { data, error } = await supabase
+        .from("providers")
+        .select("*")
+        .order("name");
 
       if (error) {
         toast.error("Error al cargar proveedores");
@@ -85,9 +82,21 @@ export default function Proveedores() {
       if (!matchesSearch) return false;
     }
 
-    // Has terms filter
-    if (filterHasTerms && !p.terms_json) {
-      return false;
+    // Apply filters
+    if (appliedFilters.length > 0) {
+      // Status filters (mutually exclusive)
+      const hasStatusFilter = appliedFilters.includes("activos") || appliedFilters.includes("inactivos");
+      if (hasStatusFilter) {
+        if (appliedFilters.includes("activos") && !p.activo) return false;
+        if (appliedFilters.includes("inactivos") && p.activo) return false;
+      }
+
+      // Terms filters (mutually exclusive)
+      const hasTermsFilter = appliedFilters.includes("con_terminos") || appliedFilters.includes("sin_terminos");
+      if (hasTermsFilter) {
+        if (appliedFilters.includes("con_terminos") && !p.terms_json) return false;
+        if (appliedFilters.includes("sin_terminos") && p.terms_json) return false;
+      }
     }
 
     return true;
@@ -191,6 +200,10 @@ export default function Proveedores() {
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <ProviderStatsCards />
+
+      {/* Search and Filters */}
       <Card>
         <CardHeader>
           <CardTitle>Buscar y Filtrar</CardTitle>
@@ -205,24 +218,10 @@ export default function Proveedores() {
               className="pl-8"
             />
           </div>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <Switch
-                id="show-inactive"
-                checked={showInactive}
-                onCheckedChange={setShowInactive}
-              />
-              <Label htmlFor="show-inactive">Mostrar inactivos</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                id="has-terms"
-                checked={filterHasTerms}
-                onCheckedChange={setFilterHasTerms}
-              />
-              <Label htmlFor="has-terms">Solo con términos</Label>
-            </div>
-          </div>
+          <ProviderFilters
+            appliedFilters={appliedFilters}
+            onFilterChange={setAppliedFilters}
+          />
         </CardContent>
       </Card>
 
