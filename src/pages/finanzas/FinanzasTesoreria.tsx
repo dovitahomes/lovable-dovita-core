@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { TreasuryStatsCards } from "@/components/finance/treasury/TreasuryStatsCards";
+import { CashFlowChart } from "@/components/finance/treasury/CashFlowChart";
+import { BankAccountsGrid } from "@/components/finance/treasury/BankAccountsGrid";
+import { RecentTransactionsTimeline } from "@/components/finance/treasury/RecentTransactionsTimeline";
 import { BankAccountsTab } from "@/components/finance/BankAccountsTab";
 import { TransactionsTab } from "@/components/finance/TransactionsTab";
 import { BankReconciliationTab } from "@/components/finance/BankReconciliationTab";
@@ -30,32 +34,46 @@ export default function FinanzasTesoreria() {
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">Tesorería</h1>
             <p className="text-sm text-muted-foreground">
-              Gestión de cuentas bancarias, movimientos y conciliación
+              Dashboard de salud financiera y gestión de cuentas
             </p>
           </div>
         </div>
       </div>
 
-      {/* Content Tabs */}
-      <Tabs defaultValue="accounts" className="w-full">
-        <TabsList>
-          <TabsTrigger value="accounts">Cuentas Bancarias</TabsTrigger>
-          <TabsTrigger value="transactions">Movimientos</TabsTrigger>
-          <TabsTrigger value="reconciliation">Conciliación</TabsTrigger>
-        </TabsList>
+      {/* Stats Cards */}
+      <TreasuryStatsCards />
 
-        <TabsContent value="accounts" className="mt-6">
-          <BankAccountsTab />
-        </TabsContent>
+      {/* Cash Flow Chart */}
+      <CashFlowChart />
 
-        <TabsContent value="transactions" className="mt-6">
-          <TransactionsTab />
-        </TabsContent>
+      {/* Bank Accounts Grid & Recent Transactions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <BankAccountsGrid />
+        <RecentTransactionsTimeline />
+      </div>
 
-        <TabsContent value="reconciliation" className="mt-6">
-          <BankReconciliationTab />
-        </TabsContent>
-      </Tabs>
+      {/* Management Tabs */}
+      <div className="pt-6 border-t">
+        <Tabs defaultValue="accounts" className="w-full">
+          <TabsList>
+            <TabsTrigger value="accounts">Gestión de Bancos</TabsTrigger>
+            <TabsTrigger value="transactions">Registrar Movimientos</TabsTrigger>
+            <TabsTrigger value="reconciliation">Conciliar</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="accounts" className="mt-6">
+            <BankAccountsTab />
+          </TabsContent>
+
+          <TabsContent value="transactions" className="mt-6">
+            <TransactionsTab />
+          </TabsContent>
+
+          <TabsContent value="reconciliation" className="mt-6">
+            <BankReconciliationTab />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

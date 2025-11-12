@@ -4,6 +4,8 @@ import { Building2, FileText, BarChart3, Hammer, AlertCircle, ArrowRight } from 
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useTreasuryStats } from "@/hooks/finance/useTreasuryStats";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FinanceModuleCard {
   id: string;
@@ -21,6 +23,16 @@ interface FinanceModuleCard {
 export default function Finanzas() {
   const { canView } = useModuleAccess();
   const navigate = useNavigate();
+  const { data: stats, isLoading: statsLoading } = useTreasuryStats();
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
   if (!canView('finanzas')) {
     return (
@@ -44,9 +56,12 @@ export default function Finanzas() {
       icon: <Building2 className="h-8 w-8" />,
       gradient: 'from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20',
       route: '/finanzas/tesoreria',
-      stats: [
-        { label: 'Cuentas Activas', value: '-' },
-        { label: 'Balance Total', value: '-' }
+      stats: statsLoading ? [
+        { label: 'Cuentas Activas', value: '...' },
+        { label: 'Balance Total', value: '...' }
+      ] : [
+        { label: 'Cuentas Activas', value: `${stats?.activeAccounts || 0}` },
+        { label: 'Balance Total', value: formatCurrency(stats?.totalBalance || 0) }
       ]
     },
     {
@@ -68,9 +83,12 @@ export default function Finanzas() {
       icon: <BarChart3 className="h-8 w-8" />,
       gradient: 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20',
       route: '/finanzas/reportes',
-      stats: [
-        { label: 'Ingresos del Mes', value: '-' },
-        { label: 'Egresos del Mes', value: '-' }
+      stats: statsLoading ? [
+        { label: 'Ingresos del Mes', value: '...' },
+        { label: 'Egresos del Mes', value: '...' }
+      ] : [
+        { label: 'Ingresos del Mes', value: formatCurrency(stats?.monthIncome || 0) },
+        { label: 'Egresos del Mes', value: formatCurrency(stats?.monthExpenses || 0) }
       ]
     },
     {
