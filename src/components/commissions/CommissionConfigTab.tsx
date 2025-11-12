@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { Info } from "lucide-react";
 
 export function CommissionConfigTab() {
   const queryClient = useQueryClient();
-  const [alliancePercent, setAlliancePercent] = useState("5.0");
   const [architecturePercent, setArchitecturePercent] = useState("3.0");
   const [constructionPercent, setConstructionPercent] = useState("2.0");
 
@@ -28,7 +29,6 @@ export function CommissionConfigTab() {
 
   useEffect(() => {
     if (config) {
-      setAlliancePercent(config.alliance_percent.toString());
       setArchitecturePercent(config.collaborator_architecture_percent.toString());
       setConstructionPercent(config.collaborator_construction_percent.toString());
     }
@@ -39,7 +39,6 @@ export function CommissionConfigTab() {
       const { error } = await supabase
         .from("commission_config")
         .update({
-          alliance_percent: parseFloat(alliancePercent),
           collaborator_architecture_percent: parseFloat(architecturePercent),
           collaborator_construction_percent: parseFloat(constructionPercent),
         })
@@ -57,38 +56,26 @@ export function CommissionConfigTab() {
   });
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Comisiones de Alianzas</CardTitle>
-          <CardDescription>
-            Porcentaje aplicado a presupuestos generados por alianzas
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="alliance-percent">Porcentaje (%)</Label>
-            <Input
-              id="alliance-percent"
-              type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              value={alliancePercent}
-              onChange={(e) => setAlliancePercent(e.target.value)}
-            />
-            <p className="text-sm text-muted-foreground">
-              Este porcentaje se aplica sobre el monto total del presupuesto publicado
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Alert informativo sobre comisiones de alianzas */}
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Comisiones de Alianzas:</strong> Cada alianza tiene su propio porcentaje de comisión específico.
+          Gestiona los porcentajes individuales desde{" "}
+          <a href="/herramientas/alianzas" className="underline hover:text-primary">
+            Herramientas → Alianzas
+          </a>
+          .
+        </AlertDescription>
+      </Alert>
 
+      {/* Card de comisiones de colaboradores */}
       <Card>
         <CardHeader>
           <CardTitle>Comisiones de Colaboradores</CardTitle>
           <CardDescription>
-            Porcentajes por tipo de proyecto
+            Porcentajes globales por tipo de proyecto para colaboradores internos
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -103,6 +90,9 @@ export function CommissionConfigTab() {
               value={architecturePercent}
               onChange={(e) => setArchitecturePercent(e.target.value)}
             />
+            <p className="text-sm text-muted-foreground">
+              Porcentaje aplicado a proyectos de arquitectura
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="construction-percent">Proyecto de Construcción (%)</Label>
@@ -115,11 +105,14 @@ export function CommissionConfigTab() {
               value={constructionPercent}
               onChange={(e) => setConstructionPercent(e.target.value)}
             />
+            <p className="text-sm text-muted-foreground">
+              Porcentaje aplicado a proyectos de construcción
+            </p>
           </div>
         </CardContent>
       </Card>
 
-      <div className="md:col-span-2">
+      <div>
         <Button
           onClick={() => updateConfigMutation.mutate()}
           disabled={updateConfigMutation.isPending}

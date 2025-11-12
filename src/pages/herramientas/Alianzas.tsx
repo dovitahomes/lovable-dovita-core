@@ -37,7 +37,7 @@ const Alianzas = () => {
     contacto_nombre: null,
     contacto_email: null,
     contacto_telefono: null,
-    comision_porcentaje: null,
+    comision_porcentaje: 5.0, // Valor por defecto
     fecha_inicio: null,
     fecha_fin: null,
     activa: true,
@@ -65,6 +65,13 @@ const Alianzas = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validar que comision_porcentaje sea obligatorio
+    if (!formData.comision_porcentaje || formData.comision_porcentaje < 0) {
+      toast.error("El porcentaje de comisión es obligatorio y debe ser mayor o igual a 0");
+      setLoading(false);
+      return;
+    }
 
     try {
       if (editingId) {
@@ -135,7 +142,7 @@ const Alianzas = () => {
       contacto_nombre: null,
       contacto_email: null,
       contacto_telefono: null,
-      comision_porcentaje: null,
+      comision_porcentaje: 5.0, // Valor por defecto
       fecha_inicio: null,
       fecha_fin: null,
       activa: true,
@@ -243,16 +250,22 @@ const Alianzas = () => {
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="comision_porcentaje">Comisión (%)</Label>
+                  <Label htmlFor="comision_porcentaje">
+                    Comisión (%) <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="comision_porcentaje"
                     type="number"
                     step="0.01"
                     min="0"
                     max="100"
+                    required
                     value={formData.comision_porcentaje || ""}
-                    onChange={(e) => setFormData({ ...formData, comision_porcentaje: e.target.value ? parseFloat(e.target.value) : null })}
+                    onChange={(e) => setFormData({ ...formData, comision_porcentaje: e.target.value ? parseFloat(e.target.value) : 5.0 })}
                   />
+                  <p className="text-sm text-muted-foreground">
+                    Este % se aplicará automáticamente a presupuestos referidos por esta alianza
+                  </p>
                 </div>
 
                 <div className="space-y-2">

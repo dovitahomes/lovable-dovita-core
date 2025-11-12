@@ -141,7 +141,7 @@ export type Database = {
       alianzas: {
         Row: {
           activa: boolean | null
-          comision_porcentaje: number | null
+          comision_porcentaje: number
           contacto_email: string | null
           contacto_nombre: string | null
           contacto_telefono: string | null
@@ -156,7 +156,7 @@ export type Database = {
         }
         Insert: {
           activa?: boolean | null
-          comision_porcentaje?: number | null
+          comision_porcentaje: number
           contacto_email?: string | null
           contacto_nombre?: string | null
           contacto_telefono?: string | null
@@ -171,7 +171,7 @@ export type Database = {
         }
         Update: {
           activa?: boolean | null
-          comision_porcentaje?: number | null
+          comision_porcentaje?: number
           contacto_email?: string | null
           contacto_nombre?: string | null
           contacto_telefono?: string | null
