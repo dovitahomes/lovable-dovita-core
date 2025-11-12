@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { LoadingError } from "@/components/common/LoadingError";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import { BudgetStatsCards } from "@/components/budgets/BudgetStatsCards";
+import { BudgetCard } from "@/components/budgets/BudgetCard";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
@@ -61,6 +62,24 @@ export default function Presupuestos() {
       : <Badge variant="outline">Ejecutivo</Badge>;
   };
 
+  const handleExportExcel = async (budgetId: string) => {
+    try {
+      await exportBudgetToXLSX(budgetId);
+      toast.success("Excel exportado");
+    } catch (error) {
+      toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
+    }
+  };
+
+  const handleExportPDF = async (budgetId: string) => {
+    try {
+      await exportBudgetToPDF(budgetId);
+      toast.success("PDF exportado");
+    } catch (error) {
+      toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6 max-w-full overflow-x-hidden">
       <div className="flex justify-between items-center">
@@ -80,108 +99,30 @@ export default function Presupuestos() {
       {/* Stats Cards */}
       <BudgetStatsCards />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Presupuestos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LoadingError
-            isLoading={isLoading}
-            error={error}
-            isEmpty={!budgets || budgets.length === 0}
-            emptyMessage="Aún no hay presupuestos"
-            onRetry={() => queryClient.invalidateQueries({ queryKey: ['budgets'] })}
-          />
-          {!isLoading && !error && budgets && budgets.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Proyecto</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Versión</TableHead>
-                  <TableHead>Partidas</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Alertas</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {budgets.map((budget) => (
-                  <TableRow key={budget.budget_id}>
-                    <TableCell className="font-medium">
-                      {budget.project_id ? `Proyecto ${budget.project_id.slice(0,8)}` : '-'}
-                    </TableCell>
-                    <TableCell>{getTypeBadge(budget.type)}</TableCell>
-                    <TableCell>{getStatusBadge(budget.status)}</TableCell>
-                    <TableCell>v{budget.version}</TableCell>
-                    <TableCell>{budget.total_items || 0}</TableCell>
-                    <TableCell>
-                      {new Intl.NumberFormat('es-MX', { 
-                        style: 'currency', 
-                        currency: 'MXN' 
-                      }).format(budget.budget_total || 0)}
-                    </TableCell>
-                    <TableCell>
-                      {budget.alerts_over_5 > 0 ? (
-                        <Badge variant="destructive" className="gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          {budget.alerts_over_5}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(budget.created_at).toLocaleDateString('es-MX')}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/presupuestos/${budget.budget_id}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            try {
-                              await exportBudgetToXLSX(budget.budget_id);
-                              toast.success("Excel exportado");
-                            } catch (error) {
-                              toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
-                            }
-                          }}
-                        >
-                          <FileSpreadsheet className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            try {
-                              await exportBudgetToPDF(budget.budget_id);
-                              toast.success("PDF exportado");
-                            } catch (error) {
-                              toast.error("Error al exportar: " + (error instanceof Error ? error.message : "Error desconocido"));
-                            }
-                          }}
-                        >
-                          <FileDown className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* Budgets Grid */}
+      <div>
+        <LoadingError
+          isLoading={isLoading}
+          error={error}
+          isEmpty={!budgets || budgets.length === 0}
+          emptyMessage="Aún no hay presupuestos"
+          onRetry={() => queryClient.invalidateQueries({ queryKey: ['budgets'] })}
+        />
+        {!isLoading && !error && budgets && budgets.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {budgets.map((budget, index) => (
+              <BudgetCard
+                key={budget.budget_id}
+                budget={budget}
+                onView={(budgetId) => navigate(`/presupuestos/${budgetId}`)}
+                onExportExcel={handleExportExcel}
+                onExportPDF={handleExportPDF}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
