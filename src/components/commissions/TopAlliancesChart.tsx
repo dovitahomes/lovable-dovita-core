@@ -31,8 +31,9 @@ export function TopAlliancesChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} layout="vertical">
+        <div className="h-[250px] sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis 
               type="number"
@@ -65,6 +66,7 @@ export function TopAlliancesChart() {
             />
           </BarChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

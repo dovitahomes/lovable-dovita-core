@@ -109,11 +109,11 @@ export function CommissionTimeline() {
                   </div>
 
                   {/* Quick actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                     <Badge className={statusConfig.color}>
                       {statusConfig.label}
                     </Badge>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="shrink-0">
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>

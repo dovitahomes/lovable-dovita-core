@@ -224,6 +224,7 @@ export default function ComisionesAlianzas() {
           <Button
             variant="outline"
             onClick={() => setSelectedAllianceId(undefined)}
+            className="w-full sm:w-auto"
           >
             Ver Todas
           </Button>
@@ -234,13 +235,13 @@ export default function ComisionesAlianzas() {
       {!selectedAllianceId && (
         <>
           {loadingAlliances ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} className="h-64" />
               ))}
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {alliances?.map((alliance, index) => (
                 <div
                   key={alliance.id}
@@ -270,21 +271,37 @@ export default function ComisionesAlianzas() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={handleExportExcel}>
-                    <FileDown className="h-4 w-4 mr-2" />
-                    Excel
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleExportExcel}
+                    className="w-full sm:w-auto"
+                  >
+                    <FileDown className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Excel</span>
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleExportPDF}>
-                    <FileDown className="h-4 w-4 mr-2" />
-                    PDF
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleExportPDF}
+                    className="w-full sm:w-auto"
+                  >
+                    <FileDown className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">PDF</span>
                   </Button>
                 </div>
               </div>
 
               <TabsList className="grid w-full grid-cols-2 max-w-md mt-4">
-                <TabsTrigger value="comisiones">Comisiones</TabsTrigger>
-                <TabsTrigger value="pagos">Historial de Pagos</TabsTrigger>
+                <TabsTrigger value="comisiones" className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Comisiones</span>
+                  <span className="sm:hidden">Comis</span>
+                </TabsTrigger>
+                <TabsTrigger value="pagos" className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Historial de Pagos</span>
+                  <span className="sm:hidden">Pagos</span>
+                </TabsTrigger>
               </TabsList>
             </CardHeader>
 
@@ -299,17 +316,19 @@ export default function ComisionesAlianzas() {
 
                   {/* Bulk Actions Bar */}
                   {selectedCommissionIds.length > 0 && (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                      <span className="text-sm font-medium">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                      <span className="text-xs sm:text-sm font-medium">
                         {selectedCommissionIds.length} seleccionadas
                       </span>
                       <Button
                         size="sm"
                         onClick={handleBulkMarkAsPaid}
                         disabled={bulkMarkAsPaidMutation.isPending}
+                        className="w-full sm:w-auto"
                       >
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Marcar como Pagadas
+                        <CheckCircle2 className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Marcar como Pagadas</span>
+                        <span className="sm:hidden">Pagar</span>
                       </Button>
                     </div>
                   )}

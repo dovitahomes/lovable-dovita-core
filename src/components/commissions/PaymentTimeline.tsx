@@ -174,8 +174,8 @@ export function PaymentTimeline({ alianzaId }: PaymentTimelineProps) {
                       </Badge>
                     </div>
 
-                    {/* Payment Details */}
-                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground ml-13">
+                     {/* Payment Details */}
+                    <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground ml-0 sm:ml-13">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         {payment.payment_date
@@ -203,9 +203,10 @@ export function PaymentTimeline({ alianzaId }: PaymentTimelineProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => downloadReceipt(payment.receipt_url)}
+                      className="shrink-0"
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      Comprobante
+                      <Download className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Comprobante</span>
                     </Button>
                   )}
                 </div>

@@ -31,8 +31,9 @@ export function CommissionGeneratedVsPaidChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+        <div className="h-[250px] sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis 
               dataKey="month" 
@@ -73,6 +74,7 @@ export function CommissionGeneratedVsPaidChart() {
             />
           </LineChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

@@ -13,7 +13,7 @@ import { Users } from "lucide-react";
 
 export default function ComisionesColaboradores() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden px-4 sm:px-6 py-6">
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -35,8 +35,8 @@ export default function ComisionesColaboradores() {
           <Users className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Comisiones por Colaboradores</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Comisiones por Colaboradores</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Gestiona comisiones del equipo interno por proyectos y ventas
           </p>
         </div>

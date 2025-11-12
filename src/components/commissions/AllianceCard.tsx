@@ -73,7 +73,7 @@ export function AllianceCard({ alliance, onClick }: AllianceCardProps) {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 mt-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <TrendingUp className="h-3 w-3" />

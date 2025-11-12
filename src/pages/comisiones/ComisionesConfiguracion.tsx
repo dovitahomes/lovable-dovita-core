@@ -15,7 +15,7 @@ import { Settings } from "lucide-react";
 
 export default function ComisionesConfiguracion() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden px-4 sm:px-6 py-6">
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -37,8 +37,8 @@ export default function ComisionesConfiguracion() {
           <Settings className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Configuración y Reglas</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Configuración y Reglas</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Gestiona porcentajes, reglas de cálculo y configuración global
           </p>
         </div>
@@ -47,8 +47,14 @@ export default function ComisionesConfiguracion() {
       {/* Tabs - Config and Rules */}
       <Tabs defaultValue="config" className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="config">Configuración Global</TabsTrigger>
-          <TabsTrigger value="rules">Reglas de Cálculo</TabsTrigger>
+          <TabsTrigger value="config" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Configuración Global</span>
+            <span className="sm:hidden">Config</span>
+          </TabsTrigger>
+          <TabsTrigger value="rules" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Reglas de Cálculo</span>
+            <span className="sm:hidden">Reglas</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="config" className="mt-6">

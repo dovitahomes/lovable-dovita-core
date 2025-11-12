@@ -33,8 +33,9 @@ export function CommissionDistributionChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
+        <div className="h-[250px] sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
             <Pie
               data={data}
               cx="50%"
@@ -62,6 +63,7 @@ export function CommissionDistributionChart() {
             <Legend />
           </PieChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
