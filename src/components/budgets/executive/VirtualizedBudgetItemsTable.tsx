@@ -24,13 +24,13 @@ interface VirtualizedBudgetItemsTableProps {
 }
 
 export function VirtualizedBudgetItemsTable({
-    subpartida,
-    items,
-    allItems,
-    onUpdateItem,
-    onRemoveItem,
-  }: VirtualizedBudgetItemsTableProps) => {
-    const parentRef = useRef<HTMLDivElement>(null);
+  subpartida,
+  items,
+  allItems,
+  onUpdateItem,
+  onRemoveItem,
+}: VirtualizedBudgetItemsTableProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
 
     const rowVirtualizer = useVirtualizer({
       count: items.length,
