@@ -35,7 +35,7 @@ export function VirtualizedBudgetItemsTable({
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 48,
+    estimateSize: () => 56,
     overscan: 5,
   });
 
@@ -85,7 +85,7 @@ export function VirtualizedBudgetItemsTable({
         style={{ height: '400px' }}
       >
         <Table>
-          <TableHeader className="sticky top-0 bg-background z-10">
+          <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
             <TableRow>
               <TableHead className="min-w-[200px]">Descripción</TableHead>
               <TableHead className="min-w-[100px]">Unidad</TableHead>
@@ -120,9 +120,9 @@ export function VirtualizedBudgetItemsTable({
                   className="hover:bg-muted/50 absolute top-0 left-0 w-full"
                   style={{
                     transform: `translateY(${virtualRow.start}px)`,
+                    height: '56px',
                   }}
                 >
-                  {/* All TableCell content remains the same, just fix indentation */}
                   {/* Descripción */}
                   <TableCell className="min-w-[200px]">
                     <Input
@@ -250,4 +250,3 @@ export function VirtualizedBudgetItemsTable({
     </div>
   );
 }
-
