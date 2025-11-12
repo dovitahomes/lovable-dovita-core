@@ -13,6 +13,7 @@ interface StatsCardProps {
     color: string;
   };
   className?: string;
+  onClick?: () => void;
 }
 
 export function StatsCard({
@@ -22,14 +23,31 @@ export function StatsCard({
   gradient = "from-primary/10 to-secondary/10",
   badge,
   className,
+  onClick,
 }: StatsCardProps) {
+  const isClickable = !!onClick;
+
   return (
     <Card
+      onClick={onClick}
       className={cn(
-        "group hover:scale-[1.02] transition-all duration-200 hover:shadow-md animate-fade-in",
+        "group hover:scale-[1.02] transition-all duration-200 animate-fade-in",
         `bg-gradient-to-br ${gradient}`,
+        isClickable && "cursor-pointer hover:scale-[1.04] hover:shadow-lg",
         className
       )}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={
+        isClickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
