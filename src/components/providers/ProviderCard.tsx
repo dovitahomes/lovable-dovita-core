@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Receipt, Mail, Phone, Eye, Edit, FileBarChart, Trash2 } from "lucide-react";
+import { Receipt, Mail, Phone, Eye, Edit, FileBarChart, Trash2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Provider {
@@ -130,10 +130,19 @@ export function ProviderCard({
             size="sm"
             variant="ghost"
             onClick={() => onDelete(provider.id)}
-            title="Desactivar"
-            className="h-8 w-8 md:h-6 md:w-6 p-0 text-destructive hover:text-destructive"
+            title={provider.activo ? "Desactivar proveedor" : "Eliminar permanentemente"}
+            className={cn(
+              "h-8 w-8 md:h-6 md:w-6 p-0",
+              provider.activo 
+                ? "text-destructive hover:text-destructive" 
+                : "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            )}
           >
-            <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
+            {provider.activo ? (
+              <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
+            ) : (
+              <AlertTriangle className="h-4 w-4 md:h-3.5 md:w-3.5" />
+            )}
           </Button>
         </div>
       </CardContent>

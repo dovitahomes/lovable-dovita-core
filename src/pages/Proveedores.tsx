@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { toast } from "sonner";
-import { Plus, Search, Download, Upload } from "lucide-react";
+import { Plus, Search, Download, Upload, AlertTriangle } from "lucide-react";
 import { ProviderWizard } from "@/components/providers/ProviderWizard";
 import { ProviderEditForm } from "@/components/providers/ProviderEditForm";
 import { ProviderDetailsDialogModern } from "@/components/providers/ProviderDetailsDialogModern";
@@ -16,6 +16,7 @@ import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
 import { ProviderFilters, FilterType } from "@/components/providers/ProviderFilters";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { ProviderImportDialog } from "@/components/providers/ProviderImportDialog";
+import { useHardDeleteProvider } from "@/hooks/useHardDeleteProvider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,11 +49,12 @@ export default function Proveedores() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
-  const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
+  const [providerToDelete, setProviderToDelete] = useState<{ id: string; isActive: boolean } | null>(null);
   const [appliedFilters, setAppliedFilters] = useState<FilterType[]>([]);
 
   const queryClient = useQueryClient();
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
+  const hardDeleteMutation = useHardDeleteProvider();
 
   const { data: providers = [], isLoading, error } = useQuery({
     queryKey: ["providers"],
@@ -117,13 +119,13 @@ export default function Proveedores() {
     setShowUsageDialog(true);
   };
 
-  const handleDelete = async () => {
+  const handleSoftDelete = async () => {
     if (!providerToDelete) return;
 
     const { error } = await supabase
       .from("providers")
       .update({ activo: false })
-      .eq("id", providerToDelete);
+      .eq("id", providerToDelete.id);
 
     if (error) {
       toast.error("Error al desactivar proveedor");
@@ -136,8 +138,23 @@ export default function Proveedores() {
     setProviderToDelete(null);
   };
 
+  const handleHardDelete = async () => {
+    if (!providerToDelete) return;
+
+    try {
+      await hardDeleteMutation.mutateAsync(providerToDelete.id);
+      setShowDeleteDialog(false);
+      setProviderToDelete(null);
+    } catch (error) {
+      // Error is already handled by the mutation
+    }
+  };
+
   const confirmDelete = (id: string) => {
-    setProviderToDelete(id);
+    const provider = providers.find(p => p.id === id);
+    if (!provider) return;
+    
+    setProviderToDelete({ id, isActive: provider.activo });
     setShowDeleteDialog(true);
   };
 
@@ -284,14 +301,47 @@ export default function Proveedores() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar proveedor?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El proveedor será eliminado permanentemente.
+            <AlertDialogTitle className="flex items-center gap-2">
+              {providerToDelete?.isActive ? (
+                "¿Desactivar proveedor?"
+              ) : (
+                <>
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  ELIMINAR DEFINITIVAMENTE
+                </>
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              {providerToDelete?.isActive ? (
+                <p>
+                  El proveedor será desactivado y no estará disponible para nuevos presupuestos.
+                  Podrás reactivarlo después si lo necesitas.
+                </p>
+              ) : (
+                <>
+                  <p className="font-semibold text-red-600 dark:text-red-400">
+                    ⚠️ Esta acción NO se puede deshacer.
+                  </p>
+                  <p>
+                    El proveedor será borrado permanentemente de la base de datos.
+                    Solo continúa si estás completamente seguro.
+                  </p>
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Eliminar</AlertDialogAction>
+            <AlertDialogAction
+              onClick={providerToDelete?.isActive ? handleSoftDelete : handleHardDelete}
+              className={
+                providerToDelete?.isActive
+                  ? ""
+                  : "bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+              }
+            >
+              {providerToDelete?.isActive ? "Desactivar" : "Eliminar Permanentemente"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
