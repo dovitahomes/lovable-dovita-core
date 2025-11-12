@@ -929,7 +929,11 @@ export type Database = {
           id: string
           notes: string | null
           paid_at: string | null
+          payment_date: string | null
+          payment_method: string | null
+          payment_reference: string | null
           percent: number
+          receipt_url: string | null
           status: Database["public"]["Enums"]["commission_status"]
           sujeto_id: string
           tipo: Database["public"]["Enums"]["commission_type"]
@@ -943,7 +947,11 @@ export type Database = {
           id?: string
           notes?: string | null
           paid_at?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
           percent: number
+          receipt_url?: string | null
           status?: Database["public"]["Enums"]["commission_status"]
           sujeto_id: string
           tipo: Database["public"]["Enums"]["commission_type"]
@@ -957,7 +965,11 @@ export type Database = {
           id?: string
           notes?: string | null
           paid_at?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
           percent?: number
+          receipt_url?: string | null
           status?: Database["public"]["Enums"]["commission_status"]
           sujeto_id?: string
           tipo?: Database["public"]["Enums"]["commission_type"]
