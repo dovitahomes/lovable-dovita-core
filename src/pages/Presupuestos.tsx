@@ -13,12 +13,14 @@ import { useModuleAccess } from "@/hooks/useModuleAccess";
 import { BudgetStatsCards } from "@/components/budgets/BudgetStatsCards";
 import { BudgetCard } from "@/components/budgets/BudgetCard";
 import { BudgetFilters } from "@/components/budgets/BudgetFilters";
+import { ParametricBudgetWizard } from "@/components/budgets/parametric/ParametricBudgetWizard";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { canView, can } = useModuleAccess();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [showParametricWizard, setShowParametricWizard] = useState(false);
   
   // IMPORTANTE: Todos los hooks deben llamarse ANTES de cualquier return condicional
   const { data: budgets, isLoading, error } = useQuery({
@@ -106,7 +108,7 @@ export default function Presupuestos() {
         <h1 className="text-3xl font-bold">Presupuestos</h1>
         {can('presupuestos', 'create') && (
           <div className="flex gap-2">
-            <Button onClick={() => navigate('/presupuestos/wizard/parametrico')}>
+            <Button onClick={() => setShowParametricWizard(true)}>
               <Plus className="h-4 w-4 mr-2" /> Paramétrico
             </Button>
             <Button variant="secondary" onClick={() => navigate('/presupuestos/wizard/ejecutivo')}>
@@ -150,6 +152,15 @@ export default function Presupuestos() {
           </div>
         )}
       </div>
+
+      {/* Parametric Budget Wizard */}
+      <ParametricBudgetWizard
+        open={showParametricWizard}
+        onClose={() => {
+          setShowParametricWizard(false);
+          queryClient.invalidateQueries({ queryKey: ['budgets'] });
+        }}
+      />
     </div>
   );
 }

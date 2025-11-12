@@ -1,3 +1,10 @@
+// ============================================
+// DEPRECATED: Use ParametricBudgetWizard instead
+// ============================================
+// This file is kept for backward compatibility only.
+// New implementations should use:
+// import { ParametricBudgetWizard } from "@/components/budgets/parametric/ParametricBudgetWizard";
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
