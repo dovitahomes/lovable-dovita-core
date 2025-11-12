@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMounted } from "@/hooks/useIsMounted";
 import { useQueryClient } from "@tanstack/react-query";
+import { useClientDataMode } from "@/contexts/client-app/ClientDataModeProvider";
+import { mockChatMessages } from "@/lib/client-app/client-data";
 
 export interface ChatMessage {
   id: string;
@@ -29,10 +31,38 @@ export default function useProjectChat(projectId: string | null) {
   const [sending, setSending] = useState(false);
   const isMounted = useIsMounted();
   const queryClient = useQueryClient();
+  const { useMock } = useClientDataMode();
 
   const loadMessages = useCallback(async () => {
     if (!projectId) {
       setMessages([]);
+      return;
+    }
+
+    // If in mock mode, return mock messages
+    if (useMock) {
+      const mockMsgs = mockChatMessages
+        .filter(msg => msg.projectId === projectId)
+        .map((msg, idx) => ({
+          id: msg.id.toString(),
+          project_id: msg.projectId,
+          sender_id: msg.isClient ? 'client-mock' : 'team-mock',
+          message: msg.content,
+          attachments: [],
+          status: msg.status as 'sent' | 'delivered' | 'read',
+          is_edited: false,
+          edited_at: null,
+          replied_to_id: null,
+          created_at: msg.timestamp,
+          sender: {
+            id: msg.isClient ? 'client-mock' : 'team-mock',
+            full_name: msg.sender?.name || (msg.isClient ? 'Cliente' : 'Equipo'),
+            email: 'mock@example.com',
+            avatar_url: msg.sender?.avatar || null,
+          }
+        }));
+      setMessages(mockMsgs as ChatMessage[]);
+      setLoading(false);
       return;
     }
 
@@ -105,13 +135,37 @@ export default function useProjectChat(projectId: string | null) {
         setLoading(false);
       }
     }
-  }, [projectId, isMounted]);
+  }, [projectId, isMounted, useMock]);
 
   const sendMessage = useCallback(async (
     text: string, 
     attachments?: Array<{ name: string; url: string; size: number; type: string }>
   ) => {
     if (!projectId || !text.trim()) return;
+
+    // If in mock mode, add message locally without Supabase
+    if (useMock) {
+      const newMessage: ChatMessage = {
+        id: `mock-${Date.now()}`,
+        project_id: projectId,
+        sender_id: 'client-mock',
+        message: text.trim(),
+        attachments: attachments || [],
+        status: 'sent',
+        is_edited: false,
+        edited_at: null,
+        replied_to_id: null,
+        created_at: new Date().toISOString(),
+        sender: {
+          id: 'client-mock',
+          full_name: 'Cliente',
+          email: 'mock@example.com',
+          avatar_url: null,
+        }
+      };
+      setMessages(prev => [...prev, newMessage]);
+      return;
+    }
 
     setSending(true);
     setError(null);
@@ -148,7 +202,7 @@ export default function useProjectChat(projectId: string | null) {
         setSending(false);
       }
     }
-  }, [projectId, isMounted]);
+  }, [projectId, isMounted, useMock]);
 
   // Load messages on mount or project change
   useEffect(() => {
@@ -178,9 +232,9 @@ export default function useProjectChat(projectId: string | null) {
     return () => clearTimeout(timer);
   }, [projectId, messages.length, queryClient]);
 
-  // Set up realtime subscription
+  // Set up realtime subscription (only for real data, not mock)
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || useMock) return;
 
     const channel = supabase
       .channel(`pm:${projectId}`)
@@ -234,7 +288,7 @@ export default function useProjectChat(projectId: string | null) {
     return () => {
       channel.unsubscribe();
     };
-  }, [projectId, isMounted]);
+  }, [projectId, isMounted, useMock]);
 
   return {
     messages,

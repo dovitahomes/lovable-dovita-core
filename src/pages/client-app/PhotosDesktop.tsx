@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProject } from "@/contexts/client-app/ProjectContext";
-import { useProjectPhotos } from "@/hooks/useProjectPhotos";
+import { useClientPhotos } from "@/hooks/client-app/useClientData";
 import { shouldShowConstructionPhotos } from "@/lib/project-utils";
 import { Download, Maximize2, Image as ImageIcon, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -25,8 +25,8 @@ export default function PhotosDesktop() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   
-  // Fetch photos using unified hook
-  const { data: photos = [], isLoading, error, refetch } = useProjectPhotos(currentProject?.id || null);
+  // Fetch photos using unified hook that respects mock/real toggle
+  const { data: photos = [], isLoading, error, refetch } = useClientPhotos(currentProject?.id || null);
 
   // Check user role - only staff can upload
   const [isStaff, setIsStaff] = useState(false);
@@ -92,7 +92,7 @@ export default function PhotosDesktop() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${photo.descripcion || 'foto'}-${format(new Date(photo.fecha_foto), 'yyyy-MM-dd')}.jpg`;
+        a.download = `${photo.description || 'foto'}-${format(new Date(photo.date), 'yyyy-MM-dd')}.jpg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -137,18 +137,18 @@ export default function PhotosDesktop() {
             <div className="relative aspect-square">
               <img 
                 src={photo.url} 
-                alt={photo.descripcion || 'Foto'}
+                alt={photo.description || 'Foto'}
                 className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                 <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <div className="absolute top-2 right-2">
-                <Badge>{format(new Date(photo.fecha_foto || new Date()), "d MMM yyyy", { locale: es })}</Badge>
+                <Badge>{format(new Date(photo.date || new Date()), "d MMM yyyy", { locale: es })}</Badge>
               </div>
             </div>
             <div className="p-3">
-              <h3 className="font-medium text-sm line-clamp-1">{photo.descripcion || 'Sin descripción'}</h3>
+              <h3 className="font-medium text-sm line-clamp-1">{photo.description || 'Sin descripción'}</h3>
               <p className="text-xs text-muted-foreground">Construcción</p>
             </div>
           </Card>

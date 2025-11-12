@@ -7,7 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import AppointmentCalendar from '@/components/client-app/AppointmentCalendar';
 import AppointmentModal from '@/components/client-app/AppointmentModal';
 import { useProject } from '@/contexts/client-app/ProjectContext';
-import { useProjectAppointments, useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
+import { useClientAppointments } from '@/hooks/client-app/useClientData';
+import { useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
 import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { Plus, Clock, User, Calendar as CalendarIcon, X, Check } from 'lucide-react';
@@ -29,9 +30,22 @@ export default function Appointments() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   
-  const { data: appointments, isLoading, error, refetch } = useProjectAppointments(currentProject?.id || null);
+  // Use unified hook that respects mock/real toggle
+  const { data: rawAppointments, isLoading, error, refetch } = useClientAppointments(currentProject?.id || null);
   const deleteAppointment = useDeleteAppointment();
   const updateAppointment = useUpdateAppointment();
+  
+  // Transform appointments to expected format
+  const appointments = (rawAppointments || []).map((apt: any) => ({
+    ...apt,
+    start_time: apt.date && apt.time ? `${apt.date}T${apt.time}:00` : new Date().toISOString(),
+    end_time: apt.date && apt.time && apt.duration 
+      ? new Date(new Date(`${apt.date}T${apt.time}:00`).getTime() + apt.duration * 60000).toISOString()
+      : new Date().toISOString(),
+    title: apt.type || 'Cita',
+    description: apt.notes || '',
+    created_by_name: apt.teamMember?.name || 'Equipo',
+  }));
   
   // Escuchar notificaciones en tiempo real de cambios en citas
   useEventNotifications(currentProject?.id);

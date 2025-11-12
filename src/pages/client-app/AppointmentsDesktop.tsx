@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import AppointmentModal from "@/components/client-app/AppointmentModal";
 import { useProject } from "@/contexts/client-app/ProjectContext";
-import { useProjectAppointments, useUpdateAppointment } from '@/hooks/useProjectAppointments';
+import { useClientAppointments } from '@/hooks/client-app/useClientData';
+import { useUpdateAppointment } from '@/hooks/useProjectAppointments';
 import { Plus, Clock, User, Calendar as CalendarIcon, CheckCircle2, X, AlertCircle } from "lucide-react";
 import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
@@ -26,8 +27,21 @@ export default function AppointmentsDesktop() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
-  const { data: appointments, isLoading, error, refetch } = useProjectAppointments(currentProject?.id || null);
+  // Use unified hook that respects mock/real toggle
+  const { data: rawAppointments, isLoading, error, refetch } = useClientAppointments(currentProject?.id || null);
   const updateAppointment = useUpdateAppointment();
+  
+  // Transform appointments to expected format
+  const appointments = (rawAppointments || []).map((apt: any) => ({
+    ...apt,
+    start_time: apt.date && apt.time ? `${apt.date}T${apt.time}:00` : new Date().toISOString(),
+    end_time: apt.date && apt.time && apt.duration 
+      ? new Date(new Date(`${apt.date}T${apt.time}:00`).getTime() + apt.duration * 60000).toISOString()
+      : new Date().toISOString(),
+    title: apt.type || 'Cita',
+    description: apt.notes || '',
+    created_by_name: apt.teamMember?.name || 'Equipo',
+  }));
 
   // Get upcoming appointments (future or today)
   const upcomingAppointments = (appointments || [])

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProject } from '@/contexts/client-app/ProjectContext';
-import { useProjectPhotos } from '@/hooks/useProjectPhotos';
+import { useClientPhotos } from '@/hooks/client-app/useClientData';
 import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { shouldShowConstructionPhotos, isInDesignPhase } from '@/lib/project-utils';
 import { MapPin, Calendar, Image as ImageIcon, Filter, Camera } from 'lucide-react';
@@ -28,10 +28,10 @@ export default function Photos() {
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
   const [cameraOpen, setCameraOpen] = useState(false);
 
-  // Fetch photos using unified hook
+  // Fetch photos using unified hook that respects mock/real toggle
   // Escuchar notificaciones en tiempo real de cambios en citas
   useEventNotifications(currentProject?.id);
-  const { data: projectPhotos = [], isLoading, error, refetch } = useProjectPhotos(currentProject?.id || null);
+  const { data: projectPhotos = [], isLoading, error, refetch } = useClientPhotos(currentProject?.id || null);
 
   // Check user role - only staff can upload
   const [isStaff, setIsStaff] = useState(false);
