@@ -46,7 +46,7 @@ export function ProviderCard({
         "bg-gradient-to-br from-blue-50/50 to-indigo-50/50",
         "dark:from-blue-950/20 dark:to-indigo-950/20",
         "border-border hover:border-primary/20",
-        "animate-fade-in"
+        "animate-fade-in overflow-hidden"
       )}
       style={{
         animationDelay: `${index * 50}ms`,
@@ -78,20 +78,20 @@ export function ProviderCard({
 
       <CardContent className="space-y-2">
         {/* Info Chips */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
           <Receipt className="h-4 w-4 shrink-0" />
           <span className="truncate">{provider.fiscales_json?.rfc || "Sin RFC"}</span>
         </div>
 
         {provider.contacto_json?.email && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
             <Mail className="h-4 w-4 shrink-0" />
             <span className="truncate">{provider.contacto_json.email}</span>
           </div>
         )}
 
         {provider.contacto_json?.telefono && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
             <Phone className="h-4 w-4 shrink-0" />
             <span className="truncate">{provider.contacto_json.telefono}</span>
           </div>

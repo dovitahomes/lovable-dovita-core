@@ -164,7 +164,7 @@ export default function Proveedores() {
 
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6 max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Proveedores</h1>
         <div className="flex gap-2">
@@ -210,7 +210,7 @@ export default function Proveedores() {
 
       {/* Providers Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="h-48 animate-pulse bg-muted" />
           ))}
@@ -234,7 +234,7 @@ export default function Proveedores() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {filteredProviders.map((provider, index) => (
             <ProviderCard
               key={provider.id}
