@@ -6,8 +6,8 @@ import { BudgetItem, Mayor } from '@/components/budgets/parametric/ParametricBud
 
 interface PreviewData {
   formData: {
-    project_id: string;
-    iva_enabled: boolean;
+    project_id?: string;
+    iva_enabled?: boolean;
     notas?: string;
   };
   selectedMayores: Mayor[];
@@ -22,6 +22,10 @@ const calculateItemTotal = (item: BudgetItem) => {
 
 export async function exportParametricPreviewToPDF(previewData: PreviewData) {
   const { formData, selectedMayores, items } = previewData;
+
+  if (!formData.project_id) {
+    throw new Error('Project ID is required');
+  }
 
   // Fetch project info
   const { data: project } = await supabase
@@ -154,6 +158,10 @@ export async function exportParametricPreviewToPDF(previewData: PreviewData) {
 
 export async function exportParametricPreviewToXLSX(previewData: PreviewData) {
   const { formData, selectedMayores, items } = previewData;
+
+  if (!formData.project_id) {
+    throw new Error('Project ID is required');
+  }
 
   // Fetch project info
   const { data: project } = await supabase
