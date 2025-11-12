@@ -14,6 +14,7 @@ import { BudgetStatsCards } from "@/components/budgets/BudgetStatsCards";
 import { BudgetCard } from "@/components/budgets/BudgetCard";
 import { BudgetFilters } from "@/components/budgets/BudgetFilters";
 import { ParametricBudgetWizard } from "@/components/budgets/parametric/ParametricBudgetWizard";
+import { ExecutiveBudgetWizard } from "@/components/budgets/executive/ExecutiveBudgetWizard";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function Presupuestos() {
   const { canView, can } = useModuleAccess();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showParametricWizard, setShowParametricWizard] = useState(false);
+  const [showExecutiveWizard, setShowExecutiveWizard] = useState(false);
   
   // IMPORTANTE: Todos los hooks deben llamarse ANTES de cualquier return condicional
   const { data: budgets, isLoading, error } = useQuery({
@@ -111,7 +113,7 @@ export default function Presupuestos() {
             <Button onClick={() => setShowParametricWizard(true)}>
               <Plus className="h-4 w-4 mr-2" /> Paramétrico
             </Button>
-            <Button variant="secondary" onClick={() => navigate('/presupuestos/wizard/ejecutivo')}>
+            <Button variant="secondary" onClick={() => setShowExecutiveWizard(true)}>
               <Plus className="h-4 w-4 mr-2" /> Ejecutivo
             </Button>
           </div>
@@ -158,6 +160,15 @@ export default function Presupuestos() {
         open={showParametricWizard}
         onClose={() => {
           setShowParametricWizard(false);
+          queryClient.invalidateQueries({ queryKey: ['budgets'] });
+        }}
+      />
+
+      {/* Executive Budget Wizard */}
+      <ExecutiveBudgetWizard
+        open={showExecutiveWizard}
+        onClose={() => {
+          setShowExecutiveWizard(false);
           queryClient.invalidateQueries({ queryKey: ['budgets'] });
         }}
       />
