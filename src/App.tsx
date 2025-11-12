@@ -69,6 +69,10 @@ const FinanzasConstruccion = lazy(() => import("./pages/finanzas/FinanzasConstru
 const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
+const ComisionesResumen = lazy(() => import("./pages/comisiones/ComisionesResumen"));
+const ComisionesAlianzas = lazy(() => import("./pages/comisiones/ComisionesAlianzas"));
+const ComisionesColaboradores = lazy(() => import("./pages/comisiones/ComisionesColaboradores"));
+const ComisionesConfiguracion = lazy(() => import("./pages/comisiones/ComisionesConfiguracion"));
 const VerComoCliente = lazy(() => import("./pages/VerComoCliente"));
 
 // Admin tools (lazy loaded)
@@ -375,6 +379,26 @@ const InternalLayout = () => {
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.CONTABILIDAD} element={<Suspense fallback={<TabsSkeleton />}><Contabilidad /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.COMISIONES} element={<Suspense fallback={<TabsSkeleton />}><Comisiones /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.COMISIONES_RESUMEN} element={
+                  <ProtectedRoute moduleName="comisiones">
+                    <Suspense fallback={<TableSkeleton />}><ComisionesResumen /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.COMISIONES_ALIANZAS} element={
+                  <ProtectedRoute moduleName="comisiones">
+                    <Suspense fallback={<TableSkeleton />}><ComisionesAlianzas /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.COMISIONES_COLABORADORES} element={
+                  <ProtectedRoute moduleName="comisiones">
+                    <Suspense fallback={<TableSkeleton />}><ComisionesColaboradores /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.COMISIONES_CONFIGURACION} element={
+                  <ProtectedRoute moduleName="comisiones">
+                    <Suspense fallback={<TableSkeleton />}><ComisionesConfiguracion /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
                 {/* ============================================ */}
                 {/* HERRAMIENTAS - TAREAS                       */}

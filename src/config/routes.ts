@@ -122,6 +122,10 @@ export const BACKOFFICE_ROUTES = {
   // Contabilidad y Comisiones
   CONTABILIDAD: '/contabilidad',
   COMISIONES: '/comisiones',
+  COMISIONES_RESUMEN: '/comisiones/resumen',
+  COMISIONES_ALIANZAS: '/comisiones/alianzas',
+  COMISIONES_COLABORADORES: '/comisiones/colaboradores',
+  COMISIONES_CONFIGURACION: '/comisiones/configuracion',
   
   // Herramientas Administrativas
   HERRAMIENTAS_TAREAS: '/herramientas/tareas',
