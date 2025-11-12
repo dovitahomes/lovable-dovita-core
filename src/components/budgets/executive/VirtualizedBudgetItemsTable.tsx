@@ -259,27 +259,15 @@ export const VirtualizedBudgetItemsTable = memo(
                 const globalIndex = allItems.findIndex(i => i === item);
 
                 return (
-                  <tr
+                  <ItemRow
                     key={virtualRow.key}
-                    data-index={virtualRow.index}
-                    ref={rowVirtualizer.measureElement}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    <ItemRow
-                      item={item}
-                      globalIndex={globalIndex}
-                      onUpdate={onUpdateItem}
-                      onRemove={onRemoveItem}
-                      calculateItemTotal={calculateItemTotal}
-                      formatCurrency={formatCurrency}
-                    />
-                  </tr>
+                    item={item}
+                    globalIndex={globalIndex}
+                    onUpdate={onUpdateItem}
+                    onRemove={onRemoveItem}
+                    calculateItemTotal={calculateItemTotal}
+                    formatCurrency={formatCurrency}
+                  />
                 );
               })}
             </TableBody>
