@@ -23,11 +23,12 @@ export function SortableLeadCardCompact({ lead, onOpenDetails }: SortableLeadCar
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes}>
       <LeadCardCompact 
         lead={lead} 
         onOpenDetails={onOpenDetails}
         isDragging={isDragging}
+        dragHandleProps={listeners}
       />
     </div>
   );

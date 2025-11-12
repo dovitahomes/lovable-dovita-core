@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Phone, Mail, Clock, Eye, AlertCircle } from "lucide-react";
+import { Phone, Mail, Clock, Eye, AlertCircle, GripVertical } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
@@ -13,9 +13,10 @@ interface LeadCardCompactProps {
   lead: any;
   onOpenDetails: (leadId: string) => void;
   isDragging?: boolean;
+  dragHandleProps?: any;
 }
 
-export function LeadCardCompact({ lead, onOpenDetails, isDragging }: LeadCardCompactProps) {
+export function LeadCardCompact({ lead, onOpenDetails, isDragging, dragHandleProps }: LeadCardCompactProps) {
   const { data: activities } = useCrmActivities('lead', lead.id);
 
   // Calculate days since last contact
@@ -66,15 +67,26 @@ export function LeadCardCompact({ lead, onOpenDetails, isDragging }: LeadCardCom
   return (
     <Card 
       className={cn(
-        "hover:shadow-lg transition-all cursor-pointer group",
+        "hover:shadow-lg transition-all cursor-pointer group relative",
         isDragging && "opacity-50"
       )}
       onClick={() => onOpenDetails(lead.id)}
     >
       <CardContent className="p-2.5 space-y-1.5">
+        {/* Drag Handle (solo visible en desktop Kanban) */}
+        {dragHandleProps && (
+          <div
+            {...dragHandleProps}
+            className="absolute top-1 left-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+        
         {/* Header: Avatar + Nombre + Urgencia */}
         <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6 shrink-0">
+          <Avatar className={cn("h-6 w-6 shrink-0", dragHandleProps && "ml-5")}>
             <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
               {getInitials(lead.nombre_completo)}
             </AvatarFallback>
