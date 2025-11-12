@@ -9,7 +9,7 @@ import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { toast } from "sonner";
 import { Plus, Search, Download, Upload } from "lucide-react";
 import { ProviderDialog } from "@/components/ProviderDialog";
-import { ProviderDetailsDialog } from "@/components/ProviderDetailsDialog";
+import { ProviderDetailsDialogModern } from "@/components/providers/ProviderDetailsDialogModern";
 import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
 import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
 import { ProviderFilters, FilterType } from "@/components/providers/ProviderFilters";
@@ -275,7 +275,7 @@ export default function Proveedores() {
         provider={selectedProvider}
       />
 
-      <ProviderDetailsDialog
+      <ProviderDetailsDialogModern
         open={showDetailsDialog}
         onClose={() => {
           setShowDetailsDialog(false);
