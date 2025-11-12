@@ -12,6 +12,7 @@ import { exportBudgetToPDF } from "@/utils/exports/pdf";
 import { toast } from "sonner";
 import { LoadingError } from "@/components/common/LoadingError";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
+import { BudgetStatsCards } from "@/components/budgets/BudgetStatsCards";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ export default function Presupuestos() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6 max-w-full overflow-x-hidden">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Presupuestos</h1>
         {can('presupuestos', 'create') && (
@@ -75,6 +76,9 @@ export default function Presupuestos() {
           </div>
         )}
       </div>
+
+      {/* Stats Cards */}
+      <BudgetStatsCards />
 
       <Card>
         <CardHeader>
