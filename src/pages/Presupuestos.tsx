@@ -1,12 +1,10 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Plus, Eye, FileSpreadsheet, FileDown, AlertTriangle, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { exportBudgetToXLSX } from "@/utils/exports/excel";
 import { exportBudgetToPDF } from "@/utils/exports/pdf";
 import { toast } from "sonner";
@@ -14,11 +12,13 @@ import { LoadingError } from "@/components/common/LoadingError";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
 import { BudgetStatsCards } from "@/components/budgets/BudgetStatsCards";
 import { BudgetCard } from "@/components/budgets/BudgetCard";
+import { BudgetFilters } from "@/components/budgets/BudgetFilters";
 
 export default function Presupuestos() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { canView, can } = useModuleAccess();
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   
   // IMPORTANTE: Todos los hooks deben llamarse ANTES de cualquier return condicional
   const { data: budgets, isLoading, error } = useQuery({
@@ -34,6 +34,38 @@ export default function Presupuestos() {
     },
     enabled: canView('presupuestos'), // Solo ejecutar query si tiene permisos
   });
+
+  // Apply filters
+  const filteredBudgets = budgets?.filter((budget) => {
+    if (activeFilters.length === 0) return true;
+
+    const matchesStatus = 
+      (activeFilters.includes('publicado') && budget.status === 'publicado') ||
+      (activeFilters.includes('borrador') && budget.status === 'borrador') ||
+      (!activeFilters.includes('publicado') && !activeFilters.includes('borrador'));
+
+    const matchesType = 
+      (activeFilters.includes('parametrico') && budget.type === 'parametrico') ||
+      (activeFilters.includes('ejecutivo') && budget.type === 'ejecutivo') ||
+      (!activeFilters.includes('parametrico') && !activeFilters.includes('ejecutivo'));
+
+    const matchesAlerts = 
+      !activeFilters.includes('con_alertas') || budget.alerts_over_5 > 0;
+
+    return matchesStatus && matchesType && matchesAlerts;
+  });
+
+  const handleFilterToggle = (filter: string) => {
+    setActiveFilters((prev) =>
+      prev.includes(filter)
+        ? prev.filter((f) => f !== filter)
+        : [...prev, filter]
+    );
+  };
+
+  const handleClearFilters = () => {
+    setActiveFilters([]);
+  };
   
   // Guard de seguridad DESPUÉS de todos los hooks
   if (!canView('presupuestos')) {
@@ -49,18 +81,6 @@ export default function Presupuestos() {
       </div>
     );
   }
-
-  const getStatusBadge = (status: string) => {
-    return status === 'publicado' 
-      ? <Badge variant="default">Publicado</Badge>
-      : <Badge variant="secondary">Borrador</Badge>;
-  };
-
-  const getTypeBadge = (type: string) => {
-    return type === 'parametrico'
-      ? <Badge variant="outline">Paramétrico</Badge>
-      : <Badge variant="outline">Ejecutivo</Badge>;
-  };
 
   const handleExportExcel = async (budgetId: string) => {
     try {
@@ -99,18 +119,25 @@ export default function Presupuestos() {
       {/* Stats Cards */}
       <BudgetStatsCards />
 
+      {/* Filters */}
+      <BudgetFilters
+        activeFilters={activeFilters}
+        onFilterToggle={handleFilterToggle}
+        onClearAll={handleClearFilters}
+      />
+
       {/* Budgets Grid */}
       <div>
         <LoadingError
           isLoading={isLoading}
           error={error}
-          isEmpty={!budgets || budgets.length === 0}
-          emptyMessage="Aún no hay presupuestos"
+          isEmpty={!filteredBudgets || filteredBudgets.length === 0}
+          emptyMessage={activeFilters.length > 0 ? "No hay presupuestos que coincidan con los filtros" : "Aún no hay presupuestos"}
           onRetry={() => queryClient.invalidateQueries({ queryKey: ['budgets'] })}
         />
-        {!isLoading && !error && budgets && budgets.length > 0 && (
+        {!isLoading && !error && filteredBudgets && filteredBudgets.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {budgets.map((budget, index) => (
+            {filteredBudgets.map((budget, index) => (
               <BudgetCard
                 key={budget.budget_id}
                 budget={budget}
