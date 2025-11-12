@@ -239,6 +239,17 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
+  const hasValidationErrors = () => {
+    if (!form.getValues().project_id) return true;
+    if (selectedMayores.length === 0) return true;
+    if (items.length === 0) return true;
+    
+    const hasInvalidItems = items.some(
+      (item) => !item.partida_id || !item.costo_unit || item.cant_real <= 0
+    );
+    return hasInvalidItems;
+  };
+
   const handleClose = () => {
     form.reset();
     setCurrentStep(1);
@@ -339,7 +350,7 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
                   type="button"
                   variant="outline"
                   onClick={() => saveMutation.mutate({ publish: false })}
-                  disabled={saveMutation.isPending}
+                  disabled={saveMutation.isPending || hasValidationErrors()}
                 >
                   {saveMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -351,7 +362,7 @@ export function ParametricBudgetWizard({ open, onClose, budgetId }: ParametricBu
                 <Button
                   type="button"
                   onClick={() => saveMutation.mutate({ publish: true })}
-                  disabled={saveMutation.isPending}
+                  disabled={saveMutation.isPending || hasValidationErrors()}
                 >
                   {saveMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
