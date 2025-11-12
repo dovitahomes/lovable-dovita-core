@@ -18,6 +18,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +35,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { REGIMENES_FISCALES } from "@/lib/constants/regimenes-fiscales";
 
 const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z0-9]{3})$/;
 
@@ -92,6 +100,7 @@ const STEPS = [
 export function ProviderWizard({ open, onClose, provider }: ProviderWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isManualRegimen, setIsManualRegimen] = useState(false);
   const isEditing = !!provider;
 
   const form = useForm<ProviderFormData>({
@@ -424,9 +433,46 @@ export function ProviderWizard({ open, onClose, provider }: ProviderWizardProps)
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Régimen Fiscal</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Ej: 601 - General de Ley Personas Morales" />
-                      </FormControl>
+                      <Select
+                        value={isManualRegimen ? "manual" : (field.value || "")}
+                        onValueChange={(value) => {
+                          if (value === "manual") {
+                            setIsManualRegimen(true);
+                            field.onChange("");
+                          } else {
+                            setIsManualRegimen(false);
+                            field.onChange(value);
+                          }
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Selecciona un régimen fiscal" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover max-h-[300px]">
+                          {REGIMENES_FISCALES.map((regimen) => (
+                            <SelectItem 
+                              key={regimen.value} 
+                              value={regimen.value}
+                              className="hover:bg-accent"
+                            >
+                              {regimen.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {isManualRegimen && (
+                        <div className="mt-2 animate-fade-in">
+                          <Input
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="Escribe el régimen fiscal manualmente"
+                            className="border-primary/50"
+                          />
+                        </div>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
