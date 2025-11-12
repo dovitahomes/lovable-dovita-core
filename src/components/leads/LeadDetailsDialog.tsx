@@ -274,14 +274,16 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
         lead={lead}
       />
 
-      <CreateTaskDialog
-        open={showCreateTask}
-        onOpenChange={setShowCreateTask}
-        defaultRelatedTo={{
-          type: 'lead',
-          id: lead?.id || ''
-        }}
-      />
+      {lead?.id && (
+        <CreateTaskDialog
+          open={showCreateTask}
+          onOpenChange={setShowCreateTask}
+          defaultRelatedTo={{
+            type: 'lead',
+            id: lead.id
+          }}
+        />
+      )}
     </>
   );
 }

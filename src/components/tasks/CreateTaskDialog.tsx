@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,19 @@ const taskSchema = z.object({
   related_to_type: z.enum(["lead", "account", "contact", "opportunity", "project"]).optional(),
   related_to_id: z.string().optional(),
   assigned_to: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    // Si hay tipo, debe haber ID
+    if (data.related_to_type && !data.related_to_id) return false;
+    // Si hay ID, debe haber tipo
+    if (data.related_to_id && !data.related_to_type) return false;
+    return true;
+  },
+  {
+    message: "Debe especificar ambos: tipo y ID de la entidad relacionada",
+    path: ["related_to_id"]
+  }
+);
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
@@ -85,7 +97,19 @@ export function CreateTaskDialog({ open, onOpenChange, taskId, defaultRelatedTo 
   const selectedPriority = watch("priority");
   const selectedStatus = watch("status");
 
+  // Sincronizar defaultRelatedTo cuando cambia o cuando se abre el dialog
+  useEffect(() => {
+    if (open && defaultRelatedTo && !isEdit) {
+      setValue("related_to_type", defaultRelatedTo.type);
+      setValue("related_to_id", defaultRelatedTo.id);
+    }
+  }, [open, defaultRelatedTo, isEdit, setValue]);
+
   const onSubmit = async (data: TaskFormData) => {
+    console.log('📋 Datos de tarea a crear:', {
+      ...data,
+      defaultRelatedTo // Para verificar si la prop llegó correctamente
+    });
     try {
       if (isEdit) {
         await updateTask.mutateAsync({
