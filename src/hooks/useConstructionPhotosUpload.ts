@@ -8,6 +8,8 @@ interface UploadParams {
   file: File;
   description?: string;
   visibilidad: 'interno' | 'cliente';
+  categoria?: string;
+  stageId?: string | null;
   latitude?: number | null;
   longitude?: number | null;
 }
@@ -19,7 +21,7 @@ export function useConstructionPhotosUpload() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ projectId, file, description, visibilidad, latitude, longitude }: UploadParams) => {
+    mutationFn: async ({ projectId, file, description, visibilidad, categoria, stageId, latitude, longitude }: UploadParams) => {
       // Validate file size
       if (file.size > MAX_FILE_SIZE) {
         throw new Error("La imagen excede el tamaño máximo de 10 MB");
@@ -51,10 +53,13 @@ export function useConstructionPhotosUpload() {
         file_name: file.name,
         descripcion: description || null,
         visibilidad,
+        categoria: categoria || 'otros',
+        stage_id: stageId || null,
         latitude,
         longitude,
         fecha_foto: new Date().toISOString(),
         uploaded_by: user.id,
+        is_active: true,
       });
 
       if (insertError) {

@@ -35,7 +35,8 @@ export function useConstructionStats(projectId: string) {
       const photosResult = await supabase
         .from('construction_photos')
         .select('id, created_at')
-        .eq('project_id', projectId);
+        .eq('project_id', projectId)
+        .eq('is_active', true);
       
       const photos = photosResult.data || [];
       const totalPhotos = photos.length;

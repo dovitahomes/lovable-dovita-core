@@ -59,8 +59,12 @@ export function useProjectPhotos(projectId: string | null) {
       // Staff/Admin: usar tabla operativa
       const { data, error } = await supabase
         .from("construction_photos")
-        .select("*")
+        .select(`
+          *,
+          construction_stages(name)
+        `)
         .eq("project_id", projectId)
+        .eq("is_active", true)
         .order("fecha_foto", { ascending: false });
 
       if (error) throw error;

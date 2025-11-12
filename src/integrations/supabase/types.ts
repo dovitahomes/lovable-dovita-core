@@ -1004,41 +1004,53 @@ export type Database = {
       }
       construction_photos: {
         Row: {
+          categoria: string | null
           created_at: string
           descripcion: string | null
           fecha_foto: string
           file_name: string
           file_url: string
           id: string
+          is_active: boolean
           latitude: number | null
           longitude: number | null
+          metadata: Json | null
           project_id: string
+          stage_id: string | null
           uploaded_by: string | null
           visibilidad: string
         }
         Insert: {
+          categoria?: string | null
           created_at?: string
           descripcion?: string | null
           fecha_foto?: string
           file_name: string
           file_url: string
           id?: string
+          is_active?: boolean
           latitude?: number | null
           longitude?: number | null
+          metadata?: Json | null
           project_id: string
+          stage_id?: string | null
           uploaded_by?: string | null
           visibilidad: string
         }
         Update: {
+          categoria?: string | null
           created_at?: string
           descripcion?: string | null
           fecha_foto?: string
           file_name?: string
           file_url?: string
           id?: string
+          is_active?: boolean
           latitude?: number | null
           longitude?: number | null
+          metadata?: Json | null
           project_id?: string
+          stage_id?: string | null
           uploaded_by?: string | null
           visibilidad?: string
         }
@@ -1084,6 +1096,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_photos_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "construction_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "construction_photos_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_construction_progress"
+            referencedColumns: ["stage_id"]
           },
         ]
       }
@@ -4953,6 +4979,7 @@ export type Database = {
       }
       v_client_photos: {
         Row: {
+          categoria: string | null
           created_at: string | null
           descripcion: string | null
           fecha_foto: string | null
@@ -4961,29 +4988,11 @@ export type Database = {
           id: string | null
           latitude: number | null
           longitude: number | null
+          metadata: Json | null
           project_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          descripcion?: string | null
-          fecha_foto?: string | null
-          file_name?: string | null
-          file_url?: string | null
-          id?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          project_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          descripcion?: string | null
-          fecha_foto?: string | null
-          file_name?: string | null
-          file_url?: string | null
-          id?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          project_id?: string | null
+          stage_id: string | null
+          stage_name: string | null
+          uploaded_by: string | null
         }
         Relationships: [
           {
@@ -5027,6 +5036,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vw_kpi_project_progress"
             referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "construction_photos_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "construction_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "construction_photos_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_construction_progress"
+            referencedColumns: ["stage_id"]
           },
         ]
       }
@@ -5396,6 +5419,33 @@ export type Database = {
         Returns: Json
       }
       get_full_code: { Args: { node_id: string }; Returns: string }
+      get_geolocated_photos: {
+        Args: { p_project_id: string }
+        Returns: {
+          categoria: string
+          descripcion: string
+          fecha_foto: string
+          file_url: string
+          latitude: number
+          longitude: number
+          metadata: Json
+          photo_id: string
+          stage_name: string
+        }[]
+      }
+      get_photos_by_category: {
+        Args: { p_categoria?: string; p_project_id: string }
+        Returns: {
+          categoria: string
+          descripcion: string
+          fecha_foto: string
+          file_url: string
+          latitude: number
+          longitude: number
+          photo_id: string
+          stage_name: string
+        }[]
+      }
       get_provider_balance: {
         Args: { p_provider_id: string }
         Returns: {

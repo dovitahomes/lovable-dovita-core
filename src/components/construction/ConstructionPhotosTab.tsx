@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Upload, MapPin, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { MapPreview } from "./MapPreview";
+import { PHOTO_CATEGORIES, getCategoryLabel, getCategoryIcon } from "@/lib/constants/photo-categories";
 
 interface ConstructionPhotosTabProps {
   projectId: string;
@@ -20,9 +22,12 @@ interface ConstructionPhotosTabProps {
 
 export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps) {
   const [photos, setPhotos] = useState<any[]>([]);
+  const [stages, setStages] = useState<any[]>([]);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [description, setDescription] = useState("");
   const [visibilidad, setVisibilidad] = useState<"interno" | "cliente">("interno");
+  const [categoria, setCategoria] = useState<string>("otros");
+  const [stageId, setStageId] = useState<string>("");
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -31,8 +36,21 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
 
   useEffect(() => {
     loadPhotos();
+    loadStages();
     getCurrentLocation();
   }, [projectId]);
+
+  const loadStages = async () => {
+    const { data, error } = await supabase
+      .from("construction_stages")
+      .select("id, name, progress")
+      .eq("project_id", projectId)
+      .order("start_date", { ascending: true });
+
+    if (!error && data) {
+      setStages(data);
+    }
+  };
 
   const getCurrentLocation = () => {
     if ("geolocation" in navigator) {
@@ -53,8 +71,12 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
   const loadPhotos = async () => {
     const { data, error } = await supabase
       .from("construction_photos")
-      .select("*")
+      .select(`
+        *,
+        construction_stages(name)
+      `)
       .eq("project_id", projectId)
+      .eq("is_active", true)
       .order("fecha_foto", { ascending: false });
 
     if (!error && data) {
@@ -72,11 +94,15 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
       file,
       description,
       visibilidad,
+      categoria,
+      stageId: stageId || null,
       latitude: location?.lat,
       longitude: location?.lng,
     }, {
       onSuccess: () => {
         setDescription("");
+        setCategoria("otros");
+        setStageId("");
         loadPhotos();
       }
     });
@@ -111,13 +137,10 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
     if (!confirm("¿Estás seguro de eliminar esta foto?")) return;
 
     try {
-      // Delete from storage
-      await deleteFromBucket("project_photos", filePath);
-
-      // Delete from database
+      // Soft delete - just mark as inactive
       const { error } = await supabase
         .from("construction_photos")
-        .delete()
+        .update({ is_active: false })
         .eq("id", photoId);
 
       if (error) throw error;
@@ -158,6 +181,45 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
                 placeholder="-99.1332"
               />
             </div>
+          </div>
+
+          <div>
+            <Label>Etapa de Construcción</Label>
+            <Select value={stageId} onValueChange={setStageId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona una etapa (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Ninguna</SelectItem>
+                {stages.map((stage) => (
+                  <SelectItem key={stage.id} value={stage.id}>
+                    {stage.name} - {stage.progress}% completo
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Categoría</Label>
+            <Select value={categoria} onValueChange={setCategoria}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PHOTO_CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        <span>{cat.label}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -211,37 +273,59 @@ export function ConstructionPhotosTab({ projectId }: ConstructionPhotosTabProps)
             <p className="text-muted-foreground text-center py-8">No hay fotografías aún</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {photos.map((photo) => (
-                <div key={photo.id} className="relative group">
-                  <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Upload className="h-8 w-8 text-muted-foreground animate-pulse" />
+              {photos.map((photo) => {
+                const CategoryIcon = getCategoryIcon(photo.categoria);
+                return (
+                  <div key={photo.id} className="relative group">
+                    <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Upload className="h-8 w-8 text-muted-foreground animate-pulse" />
+                      </div>
                     </div>
+                    
+                    {/* Badges en la esquina superior izquierda */}
+                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                      {photo.categoria && (
+                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                          <CategoryIcon className="h-3 w-3" />
+                          {getCategoryLabel(photo.categoria)}
+                        </Badge>
+                      )}
+                      {photo.construction_stages?.name && (
+                        <Badge variant="outline" className="text-xs bg-background/80 backdrop-blur-sm">
+                          {photo.construction_stages.name}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Quick actions */}
+                    <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => viewPhoto(photo)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" /> Ver
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deletePhoto(photo.id, photo.file_url)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Info */}
+                    {photo.descripcion && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{photo.descripcion}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(photo.fecha_foto).toLocaleDateString('es-MX')}
+                    </p>
                   </div>
-                  <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => viewPhoto(photo)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" /> Ver
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deletePhoto(photo.id, photo.file_url)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {photo.descripcion && (
-                    <p className="text-sm text-muted-foreground mt-2">{photo.descripcion}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(photo.fecha_foto).toLocaleDateString('es-MX')}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
