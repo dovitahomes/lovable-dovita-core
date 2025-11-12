@@ -28,10 +28,8 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
   const [notes, setNotes] = useState(lead?.notas || '');
   const [timelineOpen, setTimelineOpen] = useState(false);
 
-  if (!lead) return null;
-
-  const { data: activities } = useCrmActivities('lead', lead.id);
-  const canConvert = ['nuevo', 'contactado', 'propuesta'].includes(lead.status);
+  // ✅ CRÍTICO: Hooks DEBEN llamarse ANTES de cualquier early return
+  const { data: activities } = useCrmActivities('lead', lead?.id || '');
 
   // Calculate urgency
   const urgencyBadge = useMemo(() => {
@@ -44,6 +42,11 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
     if (daysDiff >= 3) return { label: 'SEGUIR', color: 'bg-yellow-500' };
     return { label: 'ACTIVO', color: 'bg-green-500' };
   }, [activities]);
+
+  // Early return DESPUÉS de todos los hooks
+  if (!lead) return null;
+
+  const canConvert = ['nuevo', 'contactado', 'propuesta'].includes(lead.status);
 
   const getInitials = (name: string) => {
     return name
