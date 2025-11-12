@@ -2,47 +2,84 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 
-interface ProviderStats {
-  total: number;
-  active: number;
-  withTerms: number;
-  usedInBudgets: number;
+export interface ProviderStatDetail {
+  count: number;
+  providerIds: string[];
+}
+
+export interface ProviderStats {
+  total: ProviderStatDetail;
+  active: ProviderStatDetail;
+  withTerms: ProviderStatDetail;
+  usedInBudgets: ProviderStatDetail;
+}
+
+/**
+ * Helper function to validate if a provider has actual terms defined
+ * Returns true only if at least ONE of the terms fields has real content
+ */
+function hasTerms(termsJson: any): boolean {
+  if (!termsJson || typeof termsJson !== 'object') return false;
+  
+  return !!(
+    (termsJson.tiempo_entrega && termsJson.tiempo_entrega.trim()) ||
+    (termsJson.forma_pago && termsJson.forma_pago.trim()) ||
+    (termsJson.condiciones && termsJson.condiciones.trim())
+  );
 }
 
 export function useProviderStats() {
   return useQuery({
     queryKey: ["provider-stats"],
     queryFn: async (): Promise<ProviderStats> => {
-      // Get all providers
+      // Get all providers with necessary fields
       const { data: providers, error: providersError } = await supabase
         .from("providers")
-        .select("id, activo, terms_json");
+        .select("id, code_short, activo, terms_json");
 
       if (providersError) throw providersError;
 
-      const total = providers?.length || 0;
-      const active = providers?.filter((p) => p.activo).length || 0;
-      const withTerms = providers?.filter((p) => p.terms_json !== null).length || 0;
+      const allProviders = providers || [];
 
-      // Get distinct providers used in budget_items
+      // Calculate each stat with provider IDs
+      const totalProviders = allProviders;
+      const activeProviders = allProviders.filter((p) => p.activo);
+      const withTermsProviders = allProviders.filter((p) => hasTerms(p.terms_json));
+
+      // Get providers used in budget_items (using proveedor_alias field)
       const { data: budgetItems, error: budgetItemsError } = await supabase
         .from("budget_items")
-        .select("provider_id")
-        .not("provider_id", "is", null);
+        .select("proveedor_alias")
+        .not("proveedor_alias", "is", null);
 
       if (budgetItemsError) throw budgetItemsError;
 
-      // Count unique provider IDs
-      const uniqueProviderIds = new Set(
-        budgetItems?.map((item) => item.provider_id).filter(Boolean)
+      // Map proveedor_alias (code_short) to provider IDs
+      const usedAliases = new Set(
+        budgetItems?.map((item) => item.proveedor_alias).filter(Boolean) || []
       );
-      const usedInBudgets = uniqueProviderIds.size;
+
+      const usedInBudgetsProviders = allProviders.filter((p) =>
+        usedAliases.has(p.code_short)
+      );
 
       return {
-        total,
-        active,
-        withTerms,
-        usedInBudgets,
+        total: {
+          count: totalProviders.length,
+          providerIds: totalProviders.map((p) => p.id),
+        },
+        active: {
+          count: activeProviders.length,
+          providerIds: activeProviders.map((p) => p.id),
+        },
+        withTerms: {
+          count: withTermsProviders.length,
+          providerIds: withTermsProviders.map((p) => p.id),
+        },
+        usedInBudgets: {
+          count: usedInBudgetsProviders.length,
+          providerIds: usedInBudgetsProviders.map((p) => p.id),
+        },
       };
     },
     ...CACHE_CONFIG.catalogs, // 60s staleTime para catálogos

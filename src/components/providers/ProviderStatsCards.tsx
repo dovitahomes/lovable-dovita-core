@@ -22,14 +22,14 @@ export function ProviderStatsCards() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard
         title="Total Proveedores"
-        value={stats.total}
+        value={stats.total.count}
         icon={Building2}
         gradient="from-blue-500/10 to-indigo-500/10"
       />
       
       <StatsCard
         title="Activos"
-        value={stats.active}
+        value={stats.active.count}
         icon={CheckCircle}
         gradient="from-green-500/10 to-emerald-500/10"
         badge={{
@@ -40,14 +40,14 @@ export function ProviderStatsCards() {
       
       <StatsCard
         title="Con Términos Definidos"
-        value={stats.withTerms}
+        value={stats.withTerms.count}
         icon={FileText}
         gradient="from-violet-500/10 to-purple-500/10"
       />
       
       <StatsCard
         title="Usados en Presupuestos"
-        value={stats.usedInBudgets}
+        value={stats.usedInBudgets.count}
         icon={TrendingUp}
         gradient="from-orange-500/10 to-amber-500/10"
         badge={{
