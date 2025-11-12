@@ -353,6 +353,8 @@ export function ExecutiveBudgetWizard({ open, onClose, budgetId }: ExecutiveBudg
               selectedSubpartidas={selectedSubpartidas}
               items={items}
               onItemsChange={setItems}
+              clientViewEnabled={form.watch('cliente_view_enabled')}
+              onClientViewChange={(enabled) => form.setValue('cliente_view_enabled', enabled)}
             />
           )}
           {currentStep === 4 && (
