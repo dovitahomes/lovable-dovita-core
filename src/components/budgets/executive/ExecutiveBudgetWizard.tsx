@@ -295,31 +295,31 @@ export function ExecutiveBudgetWizard({ open, onClose, budgetId }: ExecutiveBudg
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[95vh] overflow-y-auto p-4 md:p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-lg md:text-xl">
             {budgetId ? 'Editar' : 'Nuevo'} Presupuesto Ejecutivo
           </DialogTitle>
         </DialogHeader>
 
         {/* Progress Indicator */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center overflow-x-auto pb-2">
             {STEPS.map((step, idx) => (
-              <div key={step.id} className="flex items-center gap-2">
+              <div key={step.id} className="flex items-center gap-1 md:gap-2 shrink-0">
                 <div
                   className={cn(
-                    "flex items-center justify-center h-10 w-10 rounded-full border-2 transition-all",
+                    "flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-full border-2 transition-all",
                     currentStep >= step.id
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-muted bg-background text-muted-foreground"
                   )}
                 >
-                  <span className="text-lg">{step.icon}</span>
+                  <span className="text-sm md:text-lg">{step.icon}</span>
                 </div>
-                <div className="hidden md:block">
+                <div className="hidden sm:block">
                   <div className={cn(
-                    "text-sm font-medium",
+                    "text-xs md:text-sm font-medium whitespace-nowrap",
                     currentStep >= step.id ? "text-foreground" : "text-muted-foreground"
                   )}>
                     {step.name}
@@ -327,7 +327,7 @@ export function ExecutiveBudgetWizard({ open, onClose, budgetId }: ExecutiveBudg
                 </div>
                 {idx < STEPS.length - 1 && (
                   <div className={cn(
-                    "hidden md:block w-12 h-0.5 mx-2",
+                    "hidden sm:block w-6 md:w-12 h-0.5 mx-1 md:mx-2",
                     currentStep > step.id ? "bg-primary" : "bg-muted"
                   )} />
                 )}
@@ -335,6 +335,11 @@ export function ExecutiveBudgetWizard({ open, onClose, budgetId }: ExecutiveBudg
             ))}
           </div>
           <Progress value={progress} className="h-2" />
+          <div className="text-center">
+            <Badge variant="outline" className="text-xs">
+              Paso {currentStep} de {STEPS.length}
+            </Badge>
+          </div>
         </div>
 
         {/* Step Content */}
@@ -367,33 +372,37 @@ export function ExecutiveBudgetWizard({ open, onClose, budgetId }: ExecutiveBudg
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Anterior
-            </Button>
-          </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="w-full sm:w-auto"
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Anterior</span>
+            <span className="sm:hidden">Atrás</span>
+          </Button>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             {currentStep < STEPS.length && (
               <Button
                 variant="outline"
                 onClick={() => saveMutation.mutate({ publish: false })}
                 disabled={saveMutation.isPending || hasValidationErrors()}
+                className="w-full sm:w-auto"
               >
+                {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <Save className="h-4 w-4 mr-2" />
-                Guardar Borrador
+                <span className="hidden sm:inline">Guardar Borrador</span>
+                <span className="sm:hidden">Borrador</span>
               </Button>
             )}
 
             {currentStep < STEPS.length ? (
-              <Button onClick={handleNext}>
-                Siguiente
+              <Button onClick={handleNext} className="w-full sm:w-auto">
+                <span className="hidden sm:inline">Siguiente</span>
+                <span className="sm:hidden">Continuar</span>
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
@@ -402,18 +411,21 @@ export function ExecutiveBudgetWizard({ open, onClose, budgetId }: ExecutiveBudg
                   variant="outline"
                   onClick={() => saveMutation.mutate({ publish: false })}
                   disabled={saveMutation.isPending || hasValidationErrors()}
+                  className="w-full sm:w-auto"
                 >
                   {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   <Save className="h-4 w-4 mr-2" />
-                  Guardar Borrador
+                  <span className="hidden sm:inline">Guardar Borrador</span>
+                  <span className="sm:hidden">Borrador</span>
                 </Button>
                 <Button
                   onClick={() => saveMutation.mutate({ publish: true })}
                   disabled={saveMutation.isPending || hasValidationErrors()}
+                  className="w-full sm:w-auto"
                 >
                   {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   <Send className="h-4 w-4 mr-2" />
-                  Publicar Presupuesto
+                  Publicar
                 </Button>
               </>
             )}
