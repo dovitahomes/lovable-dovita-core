@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { VirtualizedProvidersTable } from "@/components/finance/VirtualizedProvidersTable";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { toast } from "sonner";
 import { Plus, Search, Download, Upload } from "lucide-react";
@@ -14,6 +13,7 @@ import { ProviderDetailsDialog } from "@/components/ProviderDetailsDialog";
 import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
 import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
 import { ProviderFilters, FilterType } from "@/components/providers/ProviderFilters";
+import { ProviderCard } from "@/components/providers/ProviderCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,9 +24,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LoadingError } from "@/components/common/LoadingError";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { exportProvidersToCSV, importProvidersFromCSV } from "@/utils/exports/providersExport";
 
 interface Provider {
@@ -225,26 +222,46 @@ export default function Proveedores() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
-          <LoadingError
-            isLoading={isLoading}
-            error={error}
-            isEmpty={filteredProviders.length === 0}
-            emptyMessage="No se encontraron proveedores"
-            onRetry={() => queryClient.invalidateQueries({ queryKey: ['providers'] })}
-          />
-          {!isLoading && !error && filteredProviders.length > 0 && (
-            <VirtualizedProvidersTable
-              providers={filteredProviders}
+      {/* Providers Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="h-48 animate-pulse bg-muted" />
+          ))}
+        </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-muted-foreground mb-4">Error al cargar proveedores</p>
+            <Button
+              variant="outline"
+              onClick={() => queryClient.invalidateQueries({ queryKey: ["providers"] })}
+            >
+              Reintentar
+            </Button>
+          </CardContent>
+        </Card>
+      ) : filteredProviders.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-muted-foreground">No se encontraron proveedores</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProviders.map((provider, index) => (
+            <ProviderCard
+              key={provider.id}
+              provider={provider}
               onEdit={handleEdit}
               onView={handleViewDetails}
               onViewUsage={handleViewUsage}
               onDelete={confirmDelete}
+              index={index}
             />
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
 
       <ProviderDialog
         open={showDialog}
