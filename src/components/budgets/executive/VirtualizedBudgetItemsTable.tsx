@@ -22,6 +22,7 @@ interface VirtualizedBudgetItemsTableProps {
   allItems: ExecutiveBudgetItem[];
   onUpdateItem: (index: number, field: keyof ExecutiveBudgetItem, value: any) => void;
   onRemoveItem: (index: number) => void;
+  clientViewEnabled?: boolean;
 }
 
 export function VirtualizedBudgetItemsTable({
@@ -30,6 +31,7 @@ export function VirtualizedBudgetItemsTable({
   allItems,
   onUpdateItem,
   onRemoveItem,
+  clientViewEnabled = false,
 }: VirtualizedBudgetItemsTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [editingItem, setEditingItem] = useState<{ item: ExecutiveBudgetItem; index: number } | null>(null);
@@ -106,10 +108,14 @@ export function VirtualizedBudgetItemsTable({
                 <TableHead className="min-w-[200px]">Descripción</TableHead>
                 <TableHead className="min-w-[100px]">Unidad</TableHead>
                 <TableHead className="min-w-[90px] text-right">Cant. Real</TableHead>
-                <TableHead className="min-w-[80px] text-right">Desp. %</TableHead>
-                <TableHead className="min-w-[100px] text-right">Cant. Nec.</TableHead>
-                <TableHead className="min-w-[120px] text-right">Costo Unit.</TableHead>
-                <TableHead className="min-w-[80px] text-right">Hon. %</TableHead>
+                {!clientViewEnabled && (
+                  <>
+                    <TableHead className="min-w-[80px] text-right transition-all duration-300">Desp. %</TableHead>
+                    <TableHead className="min-w-[100px] text-right transition-all duration-300">Cant. Nec.</TableHead>
+                    <TableHead className="min-w-[120px] text-right transition-all duration-300">Costo Unit.</TableHead>
+                    <TableHead className="min-w-[80px] text-right transition-all duration-300">Hon. %</TableHead>
+                  </>
+                )}
                 <TableHead className="min-w-[120px] text-right">Precio Unit.</TableHead>
                 <TableHead className="min-w-[100px]">Proveedor</TableHead>
                 <TableHead className="min-w-[120px] text-right sticky right-20 bg-background">Total</TableHead>
@@ -172,51 +178,56 @@ export function VirtualizedBudgetItemsTable({
                       />
                     </TableCell>
 
-                    {/* Desperdicio % */}
-                    <TableCell className="min-w-[80px]">
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        value={item.desperdicio_pct}
-                        onChange={(e) => onUpdateItem(globalIndex, 'desperdicio_pct', parseFloat(e.target.value) || 0)}
-                        className="text-sm h-8 text-right"
-                        min="0"
-                        step="0.1"
-                      />
-                    </TableCell>
+                    {/* Columnas sensibles - solo visibles si NO es vista cliente */}
+                    {!clientViewEnabled && (
+                      <>
+                        {/* Desperdicio % */}
+                        <TableCell className="min-w-[80px] transition-all duration-300">
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={item.desperdicio_pct}
+                            onChange={(e) => onUpdateItem(globalIndex, 'desperdicio_pct', parseFloat(e.target.value) || 0)}
+                            className="text-sm h-8 text-right"
+                            min="0"
+                            step="0.1"
+                          />
+                        </TableCell>
 
-                    {/* Cantidad Necesaria (Calculada) */}
-                    <TableCell className="min-w-[100px] text-right">
-                      <span className="text-sm text-muted-foreground font-mono">
-                        {(item.cant_real * (1 + item.desperdicio_pct / 100)).toFixed(2)}
-                      </span>
-                    </TableCell>
+                        {/* Cantidad Necesaria (Calculada) */}
+                        <TableCell className="min-w-[100px] text-right transition-all duration-300">
+                          <span className="text-sm text-muted-foreground font-mono">
+                            {(item.cant_real * (1 + item.desperdicio_pct / 100)).toFixed(2)}
+                          </span>
+                        </TableCell>
 
-                    {/* Costo Unitario */}
-                    <TableCell className="min-w-[120px]">
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        value={item.costo_unit}
-                        onChange={(e) => onUpdateItem(globalIndex, 'costo_unit', parseFloat(e.target.value) || 0)}
-                        className="text-sm h-8 text-right"
-                        min="0"
-                        step="0.01"
-                      />
-                    </TableCell>
+                        {/* Costo Unitario */}
+                        <TableCell className="min-w-[120px] transition-all duration-300">
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            value={item.costo_unit}
+                            onChange={(e) => onUpdateItem(globalIndex, 'costo_unit', parseFloat(e.target.value) || 0)}
+                            className="text-sm h-8 text-right"
+                            min="0"
+                            step="0.01"
+                          />
+                        </TableCell>
 
-                    {/* Honorarios % */}
-                    <TableCell className="min-w-[80px]">
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        value={item.honorarios_pct}
-                        onChange={(e) => onUpdateItem(globalIndex, 'honorarios_pct', parseFloat(e.target.value) || 0)}
-                        className="text-sm h-8 text-right"
-                        min="0"
-                        step="0.1"
-                      />
-                    </TableCell>
+                        {/* Honorarios % */}
+                        <TableCell className="min-w-[80px] transition-all duration-300">
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={item.honorarios_pct}
+                            onChange={(e) => onUpdateItem(globalIndex, 'honorarios_pct', parseFloat(e.target.value) || 0)}
+                            className="text-sm h-8 text-right"
+                            min="0"
+                            step="0.1"
+                          />
+                        </TableCell>
+                      </>
+                    )}
 
                     {/* Precio Unitario (Calculado) */}
                     <TableCell className="min-w-[120px] text-right">

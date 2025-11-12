@@ -9,12 +9,16 @@ interface StepItemsConfigProps {
   selectedSubpartidas: TUNode[];
   items: ExecutiveBudgetItem[];
   onItemsChange: (items: ExecutiveBudgetItem[]) => void;
+  clientViewEnabled: boolean;
+  onClientViewChange: (enabled: boolean) => void;
 }
 
 export function StepItemsConfig({
   selectedSubpartidas,
   items,
   onItemsChange,
+  clientViewEnabled,
+  onClientViewChange,
 }: StepItemsConfigProps) {
   
   const handleAddItem = (subpartida: TUNode) => {
@@ -127,13 +131,14 @@ export function StepItemsConfig({
                     <p className="text-xs">Agrega al menos un item para esta subpartida</p>
                   </div>
                 ) : (
-                  <VirtualizedBudgetItemsTable
-                    subpartida={subpartida}
-                    items={subpartidaItems}
-                    allItems={items}
-                    onUpdateItem={handleUpdateItem}
-                    onRemoveItem={handleRemoveItem}
-                  />
+            <VirtualizedBudgetItemsTable
+              subpartida={subpartida}
+              items={subpartidaItems}
+              allItems={items}
+              onUpdateItem={handleUpdateItem}
+              onRemoveItem={handleRemoveItem}
+              clientViewEnabled={clientViewEnabled}
+            />
                 )}
               </CardContent>
             </Card>
