@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -97,22 +97,53 @@ export function ProviderEditForm({ open, onClose, provider }: ProviderEditFormPr
     resolver: zodResolver(providerSchema),
     mode: "onChange",
     defaultValues: {
-      code_short: provider?.code_short || "",
-      name: provider?.name || "",
-      activo: provider?.activo ?? true,
-      rfc: provider?.fiscales_json?.rfc || "",
-      regimen_fiscal: provider?.fiscales_json?.regimen_fiscal || "",
-      razon_social: provider?.fiscales_json?.razon_social || "",
-      direccion_fiscal: provider?.fiscales_json?.direccion_fiscal || "",
-      tiempo_entrega: provider?.terms_json?.tiempo_entrega || "",
-      forma_pago: provider?.terms_json?.forma_pago || "",
-      condiciones: provider?.terms_json?.condiciones || "",
-      contacto_nombre: provider?.contacto_json?.nombre || "",
-      contacto_email: provider?.contacto_json?.email || "",
-      contacto_telefono: provider?.contacto_json?.telefono || "",
-      contacto_puesto: provider?.contacto_json?.puesto || "",
+      code_short: "",
+      name: "",
+      activo: true,
+      rfc: "",
+      regimen_fiscal: "",
+      razon_social: "",
+      direccion_fiscal: "",
+      tiempo_entrega: "",
+      forma_pago: "",
+      condiciones: "",
+      contacto_nombre: "",
+      contacto_email: "",
+      contacto_telefono: "",
+      contacto_puesto: "",
     },
   });
+
+  // Pre-poblar el formulario cuando el provider llega o el dialog se abre
+  useEffect(() => {
+    if (provider && open) {
+      form.reset({
+        code_short: provider.code_short || "",
+        name: provider.name || "",
+        activo: provider.activo ?? true,
+        rfc: provider.fiscales_json?.rfc || "",
+        regimen_fiscal: provider.fiscales_json?.regimen_fiscal || "",
+        razon_social: provider.fiscales_json?.razon_social || "",
+        direccion_fiscal: provider.fiscales_json?.direccion_fiscal || "",
+        tiempo_entrega: provider.terms_json?.tiempo_entrega || "",
+        forma_pago: provider.terms_json?.forma_pago || "",
+        condiciones: provider.terms_json?.condiciones || "",
+        contacto_nombre: provider.contacto_json?.nombre || "",
+        contacto_email: provider.contacto_json?.email || "",
+        contacto_telefono: provider.contacto_json?.telefono || "",
+        contacto_puesto: provider.contacto_json?.puesto || "",
+      });
+
+      // Detectar si el régimen fiscal es predefinido o manual
+      const regimenValue = provider.fiscales_json?.regimen_fiscal;
+      if (regimenValue) {
+        const isPredefined = REGIMENES_FISCALES.some(r => r.value === regimenValue);
+        setIsManualRegimen(!isPredefined);
+      } else {
+        setIsManualRegimen(false);
+      }
+    }
+  }, [provider, open, form]);
 
   const hasBasicData = form.watch("code_short") && form.watch("name");
   const hasFiscalData = form.watch("rfc") || form.watch("regimen_fiscal") || form.watch("razon_social");
