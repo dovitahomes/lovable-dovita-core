@@ -98,7 +98,7 @@ export function ProviderCard({
         )}
 
         {/* Quick Actions */}
-        <div className="flex gap-1 pt-2 border-t opacity-0 md:group-hover:opacity-100 md:opacity-0 opacity-100 transition-opacity duration-200">
+        <div className="flex gap-1 pt-2 border-t opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
           <Button
             size="sm"
             variant="ghost"
