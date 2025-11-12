@@ -53,6 +53,10 @@ const PresupuestoEjecutivo = lazy(() => import("./pages/PresupuestoEjecutivo"));
 const GanttPlan = lazy(() => import("./pages/construction/GanttPlan"));
 const Proveedores = lazy(() => import("./pages/Proveedores"));
 const Construccion = lazy(() => import("./pages/Construccion"));
+const ConstruccionEtapas = lazy(() => import("./pages/construccion/ConstruccionEtapas"));
+const ConstruccionFotos = lazy(() => import("./pages/construccion/ConstruccionFotos"));
+const ConstruccionMateriales = lazy(() => import("./pages/construccion/ConstruccionMateriales"));
+const ConstruccionEquipo = lazy(() => import("./pages/construccion/ConstruccionEquipo"));
 const OrdenesCompra = lazy(() => import("./pages/OrdenesCompra"));
 const Pagos = lazy(() => import("./pages/Pagos"));
 const LotesPago = lazy(() => import("./pages/LotesPago"));
@@ -270,6 +274,26 @@ const InternalLayout = () => {
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.CONSTRUCCION} element={<Suspense fallback={<TableSkeleton />}><Construccion /></Suspense>} />
                 <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_DETALLE} element={<Suspense fallback={<TabsSkeleton />}><Construccion /></Suspense>} />
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_ETAPAS} element={
+                  <ProtectedRoute moduleName="construccion">
+                    <Suspense fallback={<TabsSkeleton />}><ConstruccionEtapas /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_FOTOS} element={
+                  <ProtectedRoute moduleName="construccion">
+                    <Suspense fallback={<TableSkeleton />}><ConstruccionFotos /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_MATERIALES} element={
+                  <ProtectedRoute moduleName="construccion">
+                    <Suspense fallback={<TabsSkeleton />}><ConstruccionMateriales /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_EQUIPO} element={
+                  <ProtectedRoute moduleName="construccion">
+                    <Suspense fallback={<TableSkeleton />}><ConstruccionEquipo /></Suspense>
+                  </ProtectedRoute>
+                } />
                 <Route path={BACKOFFICE_ROUTES.CONSTRUCCION_CRONOGRAMA} element={
                   <ProtectedRoute moduleName="construccion">
                     <Suspense fallback={<TableSkeleton />}><ProjectSchedule /></Suspense>

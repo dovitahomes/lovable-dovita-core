@@ -98,6 +98,10 @@ export const BACKOFFICE_ROUTES = {
   // Construcción
   CONSTRUCCION: '/construccion',
   CONSTRUCCION_DETALLE: '/construccion/:id',
+  CONSTRUCCION_ETAPAS: '/construccion/:id/etapas',
+  CONSTRUCCION_FOTOS: '/construccion/:id/fotos',
+  CONSTRUCCION_MATERIALES: '/construccion/:id/materiales',
+  CONSTRUCCION_EQUIPO: '/construccion/:id/equipo',
   CONSTRUCCION_CRONOGRAMA: '/construccion/proyectos/:projectId/cronograma',
   
   // Proveedores y Órdenes de Compra
