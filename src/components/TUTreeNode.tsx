@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, ChevronDown, Edit, Trash2, GripVertical } from "lucide-react";
+import { ChevronRight, ChevronDown, Edit, Trash2, GripVertical, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TUNode {
   id: string;
@@ -50,22 +51,60 @@ export function TUTreeNode({
 
   const getTypeBadge = (type: string) => {
     const config = {
-      departamento: { variant: "default" as const, label: "Dep" },
-      mayor: { variant: "secondary" as const, label: "May" },
-      partida: { variant: "outline" as const, label: "Par" },
-      subpartida: { variant: "default" as const, label: "Sub" }
+      departamento: { 
+        variant: "default" as const, 
+        label: "DEP",
+        className: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20"
+      },
+      mayor: { 
+        variant: "default" as const, 
+        label: "MAY",
+        className: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+      },
+      partida: { 
+        variant: "default" as const, 
+        label: "PAR",
+        className: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20"
+      },
+      subpartida: { 
+        variant: "default" as const, 
+        label: "SUB",
+        className: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+      }
     };
     const badge = config[type as keyof typeof config];
-    return <Badge variant={badge.variant} className="text-xs">{badge.label}</Badge>;
+    return (
+      <Badge 
+        variant={badge.variant} 
+        className={cn("text-xs font-semibold", badge.className)}
+      >
+        {badge.label}
+      </Badge>
+    );
   };
 
   const fullCode = getFullCode(node);
   const indentSize = level * 24;
 
+  const getGradientByType = (type: string) => {
+    const gradients = {
+      departamento: "hover:bg-gradient-to-r hover:from-purple-500/5 hover:to-transparent",
+      mayor: "hover:bg-gradient-to-r hover:from-green-500/5 hover:to-transparent",
+      partida: "hover:bg-gradient-to-r hover:from-orange-500/5 hover:to-transparent",
+      subpartida: "hover:bg-gradient-to-r hover:from-red-500/5 hover:to-transparent"
+    };
+    return gradients[type as keyof typeof gradients];
+  };
+
   return (
-    <div>
+    <div className="animate-fade-in">
       <div
-        className="flex items-center gap-2 py-2 px-3 hover:bg-muted/50 rounded-lg group transition-colors"
+        className={cn(
+          "flex items-center gap-2 py-2.5 px-3 rounded-lg group transition-all duration-200",
+          "border border-transparent hover:border-border/40",
+          "hover:shadow-sm",
+          getGradientByType(node.type)
+        )}
         style={{ paddingLeft: `${indentSize + 12}px` }}
       >
         <div className="flex items-center gap-2 flex-1">
@@ -84,7 +123,7 @@ export function TUTreeNode({
             <div className="w-5" />
           )}
           
-          <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-move" />
+          <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-move hover:text-primary" />
           
           {getTypeBadge(node.type)}
           
@@ -101,24 +140,26 @@ export function TUTreeNode({
           )}
         </div>
 
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
           <Button
             variant="ghost"
             size="sm"
+            className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
             onClick={() => onEdit(node)}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
             onClick={() => {
               if (confirm(`¿Eliminar "${node.name}"? Esto eliminará también todos sus hijos.`)) {
                 onDelete(node.id);
               }
             }}
           >
-            <Trash2 className="h-4 w-4 text-destructive" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>

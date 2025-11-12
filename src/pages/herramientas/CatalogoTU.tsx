@@ -4,15 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Download, Upload, Search, ChevronRight, ChevronDown, Edit, Trash2 } from "lucide-react";
+import { Plus, Download, Upload, Search, FolderTree, Filter, X } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { TUTreeNode } from "@/components/TUTreeNode";
+import { TUStatsCards } from "@/components/tu/TUStatsCards";
 
 interface TUNode {
   id: string;
@@ -301,17 +303,32 @@ export default function CatalogoTU() {
     : treeData;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Catálogo de Transacciones Unificadas (TU)</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownloadTemplate}>
-            <Download className="h-4 w-4 mr-2" /> Plantilla
+    <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6 max-w-full overflow-x-hidden">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20">
+            <FolderTree className="h-6 w-6 text-blue-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Transacciones Unificadas</h1>
+            <p className="text-sm text-muted-foreground">Gestiona la jerarquía presupuestal</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={handleDownloadTemplate}
+            className="flex-1 sm:flex-none"
+          >
+            <Download className="h-4 w-4 mr-2" /> 
+            <span className="hidden sm:inline">Plantilla</span>
           </Button>
-          <label>
-            <Button variant="outline" asChild>
+          <label className="flex-1 sm:flex-none">
+            <Button variant="outline" asChild className="w-full">
               <span>
-                <Upload className="h-4 w-4 mr-2" /> Importar
+                <Upload className="h-4 w-4 mr-2" /> 
+                <span className="hidden sm:inline">Importar</span>
               </span>
             </Button>
             <input
@@ -321,18 +338,32 @@ export default function CatalogoTU() {
               className="hidden"
             />
           </label>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" /> Exportar
+          <Button 
+            variant="outline" 
+            onClick={handleExport}
+            className="flex-1 sm:flex-none"
+          >
+            <Download className="h-4 w-4 mr-2" /> 
+            <span className="hidden sm:inline">Exportar</span>
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+              <Button 
+                onClick={() => { resetForm(); setDialogOpen(true); }}
+                className="flex-1 sm:flex-none"
+              >
                 <Plus className="h-4 w-4 mr-2" /> Nuevo Nodo
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingNode ? 'Editar' : 'Crear'} Nodo</DialogTitle>
+                <DialogTitle>{editingNode ? 'Editar' : 'Crear'} Nodo TU</DialogTitle>
+                <DialogDescription>
+                  {editingNode 
+                    ? 'Modifica los datos del nodo existente'
+                    : 'Crea un nuevo nodo en la jerarquía presupuestal'
+                  }
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -394,9 +425,13 @@ export default function CatalogoTU() {
         </div>
       </div>
 
-      <Card>
+      {/* Stats Cards */}
+      <TUStatsCards scopeFilter={scopeFilter} />
+
+      {/* Tree Card */}
+      <Card className="border-border/40">
         <CardHeader>
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -405,42 +440,105 @@ export default function CatalogoTU() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
             </div>
-            <div>
+            <div className="w-full sm:w-auto">
               <Select value={scopeFilter} onValueChange={(v: any) => setScopeFilter(v)}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-48">
+                  <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="global">Global</SelectItem>
-                  <SelectItem value="sucursal">Sucursal</SelectItem>
-                  <SelectItem value="proyecto">Proyecto</SelectItem>
+                  <SelectItem value="global">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      Global
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="sucursal">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      Sucursal
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="proyecto">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-orange-500" />
+                      Proyecto
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+          {searchQuery && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Search className="h-3 w-3" />
+              <span>Buscando: <strong className="text-foreground">{searchQuery}</strong></span>
+            </div>
+          )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           {isLoading ? (
-            <div>Cargando...</div>
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3 p-3">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-4 flex-1" />
+                </div>
+              ))}
+            </div>
           ) : filteredTree.length > 0 ? (
-            <div className="space-y-1">
-              {filteredTree.map(node => (
-                <TUTreeNode
+            <div className="space-y-0.5">
+              {filteredTree.map((node, index) => (
+                <div 
                   key={node.id}
-                  node={node}
-                  allNodes={nodes || []}
-                  expandedNodes={expandedNodes}
-                  onToggle={toggleNode}
-                  onEdit={handleEdit}
-                  onDelete={(id) => deleteMutation.mutate(id)}
-                  level={0}
-                />
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <TUTreeNode
+                    node={node}
+                    allNodes={nodes || []}
+                    expandedNodes={expandedNodes}
+                    onToggle={toggleNode}
+                    onEdit={handleEdit}
+                    onDelete={(id) => deleteMutation.mutate(id)}
+                    level={0}
+                  />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>No hay nodos en este catálogo</p>
+            <div className="text-center py-16">
+              <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-500/5 flex items-center justify-center">
+                <FolderTree className="h-8 w-8 text-blue-500" />
+              </div>
+              <p className="text-lg font-medium mb-1">
+                {searchQuery ? 'No se encontraron resultados' : 'No hay nodos en este catálogo'}
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {searchQuery 
+                  ? `Intenta con otro término de búsqueda` 
+                  : `Comienza creando el primer nodo de tu jerarquía`
+                }
+              </p>
+              {!searchQuery && (
+                <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Primer Nodo
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
