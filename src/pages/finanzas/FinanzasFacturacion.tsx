@@ -15,7 +15,7 @@ export default function FinanzasFacturacion() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
 
   return (
-    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6 overflow-x-hidden">
       {/* Header with Back Button */}
       <div className="space-y-4">
         <Button
@@ -28,22 +28,23 @@ export default function FinanzasFacturacion() {
           Volver a Finanzas
         </Button>
 
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-500/10">
               <FileText className="h-8 w-8 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">Facturación</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Facturación</h1>
               <p className="text-sm text-muted-foreground">
                 Gestión de facturas XML SAT y lotes de pago
               </p>
             </div>
           </div>
           
-          <Button onClick={() => setShowUploadDialog(true)} className="gap-2">
+          <Button onClick={() => setShowUploadDialog(true)} className="gap-2 w-full sm:w-auto">
             <Upload className="h-4 w-4" />
-            Cargar XML SAT
+            <span className="hidden sm:inline">Cargar XML SAT</span>
+            <span className="sm:hidden">Cargar XML</span>
           </Button>
         </div>
       </div>
@@ -53,11 +54,11 @@ export default function FinanzasFacturacion() {
 
       {/* Content Tabs */}
       <Tabs defaultValue="invoices" className="w-full">
-        <TabsList>
-          <TabsTrigger value="invoices">Facturas</TabsTrigger>
-          <TabsTrigger value="reconciliation">Conciliación</TabsTrigger>
-          <TabsTrigger value="batches">Lotes de Pago</TabsTrigger>
-          <TabsTrigger value="builder">Crear Lote</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="invoices" className="text-xs sm:text-sm">Facturas</TabsTrigger>
+          <TabsTrigger value="reconciliation" className="text-xs sm:text-sm">Conciliación</TabsTrigger>
+          <TabsTrigger value="batches" className="text-xs sm:text-sm">Lotes</TabsTrigger>
+          <TabsTrigger value="builder" className="text-xs sm:text-sm">Crear</TabsTrigger>
         </TabsList>
 
         <TabsContent value="invoices" className="mt-6">

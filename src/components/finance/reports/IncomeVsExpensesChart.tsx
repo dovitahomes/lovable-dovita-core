@@ -31,11 +31,11 @@ export function IncomeVsExpensesChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ingresos vs Egresos</CardTitle>
-        <CardDescription>Comparación mensual de últimos 6 meses</CardDescription>
+        <CardTitle className="text-base sm:text-lg">Ingresos vs Egresos</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Comparación mensual de últimos 6 meses</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={320}>
+      <CardContent className="p-3 sm:p-6">
+        <ResponsiveContainer width="100%" height={280}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis 

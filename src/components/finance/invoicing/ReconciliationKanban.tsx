@@ -120,9 +120,9 @@ export function ReconciliationKanban() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">Conciliación Bancaria</h3>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Badge variant="secondary">{unreconciled.length} por conciliar</Badge>
           <Badge variant="default" className="bg-emerald-500">{reconciled.length} conciliadas</Badge>
         </div>
@@ -134,7 +134,7 @@ export function ReconciliationKanban() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {columns.map((column, index) => {
             const items = getColumnData(column.id);
             

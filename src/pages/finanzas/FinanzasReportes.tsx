@@ -112,7 +112,7 @@ export default function FinanzasReportes() {
   };
 
   return (
-    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6 overflow-x-hidden">
       {/* Header with Back Button */}
       <div className="space-y-4">
         <Button
@@ -130,7 +130,7 @@ export default function FinanzasReportes() {
             <BarChart3 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Reportes</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Reportes</h1>
             <p className="text-sm text-muted-foreground">
               Generación de reportes financieros y análisis de saldos
             </p>
@@ -147,12 +147,13 @@ export default function FinanzasReportes() {
 
         <TabsContent value="charts" className="mt-6 space-y-6">
           {/* Export Actions */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
                   <Download className="h-4 w-4" />
-                  Flujo de Caja
+                  <span className="hidden sm:inline">Flujo de Caja</span>
+                  <span className="sm:hidden">Flujo</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -171,9 +172,10 @@ export default function FinanzasReportes() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
                   <Download className="h-4 w-4" />
-                  Distribución Gastos
+                  <span className="hidden sm:inline">Distribución Gastos</span>
+                  <span className="sm:hidden">Gastos</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -194,20 +196,22 @@ export default function FinanzasReportes() {
               variant="outline" 
               size="sm" 
               onClick={handleExportProfitLoss}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <Download className="h-4 w-4" />
-              Estado de Resultados (P&L)
+              <span className="hidden sm:inline">Estado de Resultados (P&L)</span>
+              <span className="sm:hidden">P&L</span>
             </Button>
 
             <Button 
               variant="outline" 
               size="sm" 
               onClick={handleExportBalanceSheet}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <Download className="h-4 w-4" />
-              Balance General
+              <span className="hidden sm:inline">Balance General</span>
+              <span className="sm:hidden">Balance</span>
             </Button>
           </div>
 

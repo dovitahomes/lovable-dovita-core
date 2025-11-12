@@ -14,7 +14,7 @@ export default function FinanzasTesoreria() {
   const navigate = useNavigate();
 
   return (
-    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6 overflow-x-hidden">
       {/* Header with Back Button */}
       <div className="space-y-4">
         <Button
@@ -32,7 +32,7 @@ export default function FinanzasTesoreria() {
             <Building2 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Tesorería</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Tesorería</h1>
             <p className="text-sm text-muted-foreground">
               Dashboard de salud financiera y gestión de cuentas
             </p>
@@ -55,10 +55,10 @@ export default function FinanzasTesoreria() {
       {/* Management Tabs */}
       <div className="pt-6 border-t">
         <Tabs defaultValue="accounts" className="w-full">
-          <TabsList>
-            <TabsTrigger value="accounts">Gestión de Bancos</TabsTrigger>
-            <TabsTrigger value="transactions">Registrar Movimientos</TabsTrigger>
-            <TabsTrigger value="reconciliation">Conciliar</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="accounts" className="text-xs sm:text-sm">Bancos</TabsTrigger>
+            <TabsTrigger value="transactions" className="text-xs sm:text-sm">Movimientos</TabsTrigger>
+            <TabsTrigger value="reconciliation" className="text-xs sm:text-sm">Conciliar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="accounts" className="mt-6">
