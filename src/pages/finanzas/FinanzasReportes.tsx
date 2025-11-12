@@ -3,12 +3,12 @@ import { ArrowLeft, BarChart3, Download, FileSpreadsheet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  IncomeVsExpensesChart, 
-  ExpenseDistributionChart, 
-  BalanceTrendChart, 
-  FinancialHeatmap 
-} from "@/components/finance/reports";
-import { ProviderBalancesGrid } from "@/components/finance/provider-balances";
+  LazyIncomeVsExpensesChart,
+  LazyExpenseDistributionChart,
+  LazyBalanceTrendChart,
+  LazyFinancialHeatmap,
+} from "@/components/finance/reports/LazyCharts";
+import { VirtualizedProviderBalancesGrid } from "@/components/finance/provider-balances/VirtualizedProviderBalancesGrid";
 import { useIncomeVsExpenses, useExpenseDistribution } from "@/hooks/finance/useFinancialReports";
 import { useTreasuryStats } from "@/hooks/finance/useTreasuryStats";
 import { subMonths } from "date-fns";
@@ -215,17 +215,17 @@ export default function FinanzasReportes() {
             </Button>
           </div>
 
-          {/* Charts Grid */}
+          {/* Charts Grid - Lazy loaded for performance */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <IncomeVsExpensesChart />
-            <ExpenseDistributionChart />
-            <BalanceTrendChart />
-            <FinancialHeatmap />
+            <LazyIncomeVsExpensesChart />
+            <LazyExpenseDistributionChart />
+            <LazyBalanceTrendChart />
+            <LazyFinancialHeatmap />
           </div>
         </TabsContent>
 
         <TabsContent value="balances" className="mt-6">
-          <ProviderBalancesGrid />
+          <VirtualizedProviderBalancesGrid />
         </TabsContent>
       </Tabs>
     </div>
