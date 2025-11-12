@@ -13,6 +13,9 @@ import { ConvertLeadDialog } from "./ConvertLeadDialog";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { useTasks } from "@/hooks/crm/useTasks";
 import { useUpdateLead } from "@/hooks/useLeads";
+import { useLeadNotes, useAddLeadNote } from "@/hooks/crm/useLeadNotes";
+import { NoteCard } from "./NoteCard";
+import { useToast } from "@/hooks/use-toast";
 import { TaskList } from "@/components/tasks/TaskList";
 import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 import { useMemo, useState, useEffect } from "react";
@@ -37,7 +40,10 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
   // ✅ CRÍTICO: Hooks DEBEN llamarse ANTES de cualquier early return
   const { data: activities } = useCrmActivities('lead', lead?.id || '');
   const { data: tasks = [] } = useTasks('', undefined, undefined, 'lead', lead?.id || '');
+  const { data: savedNotes = [], isLoading: notesLoading } = useLeadNotes(lead?.id || '');
   const updateLead = useUpdateLead();
+  const addNote = useAddLeadNote();
+  const { toast } = useToast();
 
   // Sync notes when lead changes
   useEffect(() => {
@@ -81,11 +87,26 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
   };
 
   const handleSaveNotes = async () => {
+    if (!notes.trim()) {
+      toast({
+        title: "Error",
+        description: "La nota no puede estar vacía",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!lead?.id) return;
-    await updateLead.mutateAsync({
-      leadId: lead.id,
-      updates: { notas: notes }
-    });
+
+    try {
+      await addNote.mutateAsync({
+        leadId: lead.id,
+        note: notes.trim()
+      });
+      setNotes(''); // Limpiar textarea después de guardar
+    } catch (error) {
+      console.error('Error al guardar nota:', error);
+    }
   };
 
   const InfoField = ({ icon: Icon, label, value }: any) => {
@@ -224,20 +245,62 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
               </TabsContent>
 
               <TabsContent value="notes" className="m-0 space-y-4">
-                <Textarea 
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Agregar notas sobre este lead..."
-                  className="min-h-[300px]"
-                />
-                <div className="flex justify-end">
-                  <Button 
-                    onClick={handleSaveNotes}
-                    disabled={updateLead.isPending}
-                  >
-                    {updateLead.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Guardar Notas
-                  </Button>
+                {/* Agregar Nueva Nota */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Agregar Nueva Nota</label>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Escribe una nota sobre este lead..."
+                    className="min-h-[120px] resize-none"
+                  />
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleSaveNotes}
+                      disabled={addNote.isPending || !notes.trim()}
+                      size="sm"
+                    >
+                      {addNote.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        'Guardar Nota'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Historial de Notas */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground">Historial de Notas</h3>
+                    {savedNotes && savedNotes.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {savedNotes.length} {savedNotes.length === 1 ? 'nota' : 'notas'}
+                      </span>
+                    )}
+                  </div>
+
+                  {notesLoading ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-24 bg-muted/50 rounded-lg animate-pulse" />
+                      ))}
+                    </div>
+                  ) : savedNotes && savedNotes.length > 0 ? (
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                      {savedNotes.map((note) => (
+                        <NoteCard key={note.id} note={note} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">No hay notas guardadas para este lead</p>
+                      <p className="text-xs mt-1">Agrega la primera nota arriba</p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </div>
