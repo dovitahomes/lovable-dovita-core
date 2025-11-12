@@ -7,6 +7,8 @@ export function useHardDeleteProvider() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      console.log("🗑️ [HARD DELETE] Starting validation for provider:", id);
+      
       // Step 1: Get provider code_short for validation
       const { data: provider, error: providerError } = await supabase
         .from("providers")
@@ -15,6 +17,8 @@ export function useHardDeleteProvider() {
         .single();
 
       if (providerError) throw providerError;
+      
+      console.log("✅ [HARD DELETE] Provider found:", provider.code_short);
 
       // Step 2: Check if provider is used in budget_items
       const { data: budgetItems, error: budgetError } = await supabase
@@ -29,10 +33,13 @@ export function useHardDeleteProvider() {
       }
 
       if (budgetItems && budgetItems.length > 0) {
+        console.log("❌ [HARD DELETE] Provider is in use in budget_items:", budgetItems.length);
         throw new Error(
           "No se puede eliminar porque el proveedor está siendo usado en presupuestos. Desactívalo en su lugar."
         );
       }
+      
+      console.log("✅ [HARD DELETE] Provider not in use, proceeding with delete");
 
       // Step 3: All validations passed, proceed with hard delete
       const { error: deleteError } = await supabase

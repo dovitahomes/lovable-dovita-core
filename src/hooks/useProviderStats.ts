@@ -32,6 +32,8 @@ export function useProviderStats() {
   return useQuery({
     queryKey: ["provider-stats"],
     queryFn: async (): Promise<ProviderStats> => {
+      console.log("📊 [STATS] Calculating provider stats...");
+      
       // Get all providers with necessary fields
       const { data: providers, error: providersError } = await supabase
         .from("providers")
@@ -40,11 +42,15 @@ export function useProviderStats() {
       if (providersError) throw providersError;
 
       const allProviders = providers || [];
+      console.log("📊 [STATS] Loaded providers:", allProviders.length);
 
       // Calculate each stat with provider IDs
       const totalProviders = allProviders;
       const activeProviders = allProviders.filter((p) => p.activo);
       const withTermsProviders = allProviders.filter((p) => hasTerms(p.terms_json));
+      
+      console.log("📊 [STATS] Active:", activeProviders.length);
+      console.log("📊 [STATS] With terms:", withTermsProviders.length, withTermsProviders.map(p => p.code_short));
 
       // Get providers used in budget_items (using proveedor_alias field)
       const { data: budgetItems, error: budgetItemsError } = await supabase
@@ -62,6 +68,9 @@ export function useProviderStats() {
       const usedInBudgetsProviders = allProviders.filter((p) =>
         usedAliases.has(p.code_short)
       );
+      
+      console.log("📊 [STATS] Used in budgets:", usedInBudgetsProviders.length, usedInBudgetsProviders.map(p => p.code_short));
+      console.log("✅ [STATS] Stats calculated successfully");
 
       return {
         total: {

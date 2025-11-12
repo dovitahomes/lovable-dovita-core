@@ -117,6 +117,8 @@ export function ProviderEditForm({ open, onClose, provider }: ProviderEditFormPr
   // Pre-poblar el formulario cuando el provider llega o el dialog se abre
   useEffect(() => {
     if (provider && open) {
+      console.log("✏️ [EDIT FORM] Pre-populating form with provider:", provider.code_short);
+      
       form.reset({
         code_short: provider.code_short || "",
         name: provider.name || "",
@@ -138,10 +140,13 @@ export function ProviderEditForm({ open, onClose, provider }: ProviderEditFormPr
       const regimenValue = provider.fiscales_json?.regimen_fiscal;
       if (regimenValue) {
         const isPredefined = REGIMENES_FISCALES.some(r => r.value === regimenValue);
+        console.log("✏️ [EDIT FORM] Regimen fiscal:", regimenValue, "| Is predefined:", isPredefined);
         setIsManualRegimen(!isPredefined);
       } else {
         setIsManualRegimen(false);
       }
+      
+      console.log("✅ [EDIT FORM] Form populated successfully");
     }
   }, [provider, open, form]);
 
