@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, AlertTriangle, Table as TableIcon } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Plus, AlertTriangle, Table as TableIcon, Eye, EyeOff } from "lucide-react";
 import { ExecutiveBudgetItem, TUNode } from "../ExecutiveBudgetWizard";
 import { VirtualizedBudgetItemsTable } from "../VirtualizedBudgetItemsTable";
 
@@ -75,6 +77,35 @@ export function StepItemsConfig({
           Agrega y configura los items de cada subpartida seleccionada
         </p>
       </div>
+
+      {/* Vista Cliente Toggle */}
+      <Card className="p-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5 border-blue-200 dark:border-blue-800">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {clientViewEnabled ? (
+              <Eye className="h-5 w-5 text-blue-600" />
+            ) : (
+              <EyeOff className="h-5 w-5 text-muted-foreground" />
+            )}
+            <div>
+              <Label htmlFor="client-view-toggle" className="text-sm font-semibold cursor-pointer">
+                Vista Cliente
+              </Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {clientViewEnabled 
+                  ? "Columnas sensibles ocultas (costo, desperdicio, honorarios)" 
+                  : "Mostrando todas las columnas con información detallada"}
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="client-view-toggle"
+            checked={clientViewEnabled}
+            onCheckedChange={onClientViewChange}
+            className="data-[state=checked]:bg-blue-600"
+          />
+        </div>
+      </Card>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
