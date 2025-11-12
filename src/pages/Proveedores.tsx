@@ -9,6 +9,7 @@ import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { toast } from "sonner";
 import { Plus, Search, Download, Upload } from "lucide-react";
 import { ProviderWizard } from "@/components/providers/ProviderWizard";
+import { ProviderEditForm } from "@/components/providers/ProviderEditForm";
 import { ProviderDetailsDialogModern } from "@/components/providers/ProviderDetailsDialogModern";
 import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
 import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
@@ -40,7 +41,8 @@ interface Provider {
 
 export default function Proveedores() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [showDialog, setShowDialog] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showUsageDialog, setShowUsageDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -102,7 +104,7 @@ export default function Proveedores() {
 
   const handleEdit = (provider: Provider) => {
     setSelectedProvider(provider);
-    setShowDialog(true);
+    setShowEditForm(true);
   };
 
   const handleViewDetails = (provider: Provider) => {
@@ -157,7 +159,7 @@ export default function Proveedores() {
             <Upload className="h-4 w-4" />
             Importar
           </Button>
-          <Button onClick={() => setShowDialog(true)} className="gap-2">
+          <Button onClick={() => setShowWizard(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Nuevo Proveedor
           </Button>
@@ -230,10 +232,23 @@ export default function Proveedores() {
         </div>
       )}
 
+      {/* Wizard for creating new providers */}
       <ProviderWizard
-        open={showDialog}
+        open={showWizard}
         onClose={(shouldReload) => {
-          setShowDialog(false);
+          setShowWizard(false);
+          if (shouldReload) {
+            queryClient.invalidateQueries({ queryKey: ["providers"] });
+          }
+        }}
+        provider={null}
+      />
+
+      {/* Edit Form for editing existing providers */}
+      <ProviderEditForm
+        open={showEditForm}
+        onClose={(shouldReload) => {
+          setShowEditForm(false);
           setSelectedProvider(null);
           if (shouldReload) {
             queryClient.invalidateQueries({ queryKey: ["providers"] });
