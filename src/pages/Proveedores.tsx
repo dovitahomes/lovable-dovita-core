@@ -8,7 +8,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { CACHE_CONFIG } from "@/lib/queryConfig";
 import { toast } from "sonner";
 import { Plus, Search, Download, Upload } from "lucide-react";
-import { ProviderDialog } from "@/components/ProviderDialog";
+import { ProviderWizard } from "@/components/providers/ProviderWizard";
 import { ProviderDetailsDialogModern } from "@/components/providers/ProviderDetailsDialogModern";
 import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
 import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
@@ -263,7 +263,7 @@ export default function Proveedores() {
         </div>
       )}
 
-      <ProviderDialog
+      <ProviderWizard
         open={showDialog}
         onClose={(shouldReload) => {
           setShowDialog(false);
