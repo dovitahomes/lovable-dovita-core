@@ -7,21 +7,47 @@ export function useHardDeleteProvider() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Perform hard delete directly
-      // Note: Database foreign keys should prevent deletion if in use
-      const { error } = await supabase
+      // Step 1: Get provider code_short for validation
+      const { data: provider, error: providerError } = await supabase
+        .from("providers")
+        .select("code_short")
+        .eq("id", id)
+        .single();
+
+      if (providerError) throw providerError;
+
+      // Step 2: Check if provider is used in budget_items
+      const { data: budgetItems, error: budgetError } = await supabase
+        .from("budget_items")
+        .select("id")
+        .eq("proveedor_alias", provider.code_short)
+        .limit(1);
+
+      if (budgetError && budgetError.code !== 'PGRST116') {
+        // PGRST116 = no rows found, which is fine
+        throw budgetError;
+      }
+
+      if (budgetItems && budgetItems.length > 0) {
+        throw new Error(
+          "No se puede eliminar porque el proveedor está siendo usado en presupuestos. Desactívalo en su lugar."
+        );
+      }
+
+      // Step 3: All validations passed, proceed with hard delete
+      const { error: deleteError } = await supabase
         .from("providers")
         .delete()
         .eq("id", id);
 
-      if (error) {
-        // Check if it's a foreign key constraint error
-        if (error.code === '23503') {
+      if (deleteError) {
+        // Check if it's a foreign key constraint error (fallback)
+        if (deleteError.code === '23503') {
           throw new Error(
-            "No se puede eliminar porque el proveedor está siendo usado en presupuestos u órdenes de compra. Desactívalo en su lugar."
+            "No se puede eliminar porque el proveedor está siendo usado en órdenes de compra u otros registros. Desactívalo en su lugar."
           );
         }
-        throw error;
+        throw deleteError;
       }
     },
     onSuccess: () => {
