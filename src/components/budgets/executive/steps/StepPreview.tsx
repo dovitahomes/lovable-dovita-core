@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, FileText, CheckCircle, XCircle, Eye, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Building2, FileText, CheckCircle, XCircle, Eye, Share2, Download, FileSpreadsheet, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { ExecutiveBudgetItem, TUNode } from "../ExecutiveBudgetWizard";
+import { BudgetValidation } from "@/components/budgets/parametric/BudgetValidation";
+import { exportExecutivePreviewToPDF, exportExecutivePreviewToXLSX } from "@/utils/exports/executivePreviewExports";
 
 interface StepPreviewProps {
   formData: {
@@ -19,6 +24,9 @@ interface StepPreviewProps {
 }
 
 export function StepPreview({ formData, selectedSubpartidas, items }: StepPreviewProps) {
+  const [exportingPDF, setExportingPDF] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ['project', formData.project_id],
     queryFn: async () => {
@@ -67,6 +75,40 @@ export function StepPreview({ formData, selectedSubpartidas, items }: StepPrevie
     }).format(value);
   };
 
+  const handleExportPDF = async () => {
+    try {
+      setExportingPDF(true);
+      await exportExecutivePreviewToPDF({
+        formData,
+        selectedSubpartidas,
+        items,
+      });
+      toast.success('PDF descargado correctamente');
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Error al exportar PDF');
+    } finally {
+      setExportingPDF(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      setExportingExcel(true);
+      await exportExecutivePreviewToXLSX({
+        formData,
+        selectedSubpartidas,
+        items,
+      });
+      toast.success('Excel descargado correctamente');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      toast.error('Error al exportar Excel');
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
   if (projectLoading) {
     return (
       <div className="space-y-4">
@@ -85,6 +127,17 @@ export function StepPreview({ formData, selectedSubpartidas, items }: StepPrevie
           Revisa toda la información antes de guardar o publicar
         </p>
       </div>
+
+      {/* Validations */}
+      <BudgetValidation
+        items={items.map(item => ({
+          ...item,
+          mayor_id: '', // Not used in executive
+          partida_id: item.subpartida_id,
+        }))}
+        selectedMayores={[]} // Not used in executive
+        projectId={formData.project_id || ''}
+      />
 
       {/* Project Info */}
       <Card>
@@ -248,6 +301,59 @@ export function StepPreview({ formData, selectedSubpartidas, items }: StepPrevie
               {selectedSubpartidas.length} subpartida{selectedSubpartidas.length !== 1 ? 's' : ''} •{' '}
               {items.length} item{items.length !== 1 ? 's' : ''}
             </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Export Buttons */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Download className="h-5 w-5" />
+            Exportar Presupuesto
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground mb-4">
+            Descarga el presupuesto en formato PDF o Excel para compartir con tu equipo o cliente.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={handleExportPDF}
+              disabled={exportingPDF || items.length === 0}
+              className="flex-1"
+              variant="default"
+            >
+              {exportingPDF ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generando PDF...
+                </>
+              ) : (
+                <>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Descargar PDF
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleExportExcel}
+              disabled={exportingExcel || items.length === 0}
+              className="flex-1"
+              variant="outline"
+            >
+              {exportingExcel ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generando Excel...
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  Descargar Excel
+                </>
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
