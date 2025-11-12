@@ -58,6 +58,10 @@ const Pagos = lazy(() => import("./pages/Pagos"));
 const LotesPago = lazy(() => import("./pages/LotesPago"));
 const ProjectSchedule = lazy(() => import("./pages/construction/ProjectSchedule"));
 const Finanzas = lazy(() => import("./pages/Finanzas"));
+const FinanzasTesoreria = lazy(() => import("./pages/finanzas/FinanzasTesoreria"));
+const FinanzasFacturacion = lazy(() => import("./pages/finanzas/FinanzasFacturacion"));
+const FinanzasReportes = lazy(() => import("./pages/finanzas/FinanzasReportes"));
+const FinanzasConstruccion = lazy(() => import("./pages/finanzas/FinanzasConstruccion"));
 const PaymentBatchDetail = lazy(() => import("./pages/finance/PaymentBatchDetail"));
 const Contabilidad = lazy(() => import("./pages/Contabilidad"));
 const Comisiones = lazy(() => import("./pages/Comisiones"));
@@ -309,10 +313,38 @@ const InternalLayout = () => {
                 } />
                 
                 {/* Legacy finance redirects */}
-                <Route path={LEGACY_ROUTES.FINANZAS} element={<Navigate to={BACKOFFICE_ROUTES.CONTABILIDAD} replace />} />
                 <Route path={LEGACY_ROUTES.FINANZAS_PAGOS} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
                 <Route path={LEGACY_ROUTES.FINANZAS_PAGO_DETALLE} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
                 <Route path={LEGACY_ROUTES.FINANCE_PAYMENTS} element={<Navigate to={BACKOFFICE_ROUTES.LOTES_PAGO} replace />} />
+                
+                {/* ============================================ */}
+                {/* FINANZAS                                    */}
+                {/* ============================================ */}
+                <Route path={BACKOFFICE_ROUTES.FINANZAS} element={
+                  <ProtectedRoute moduleName="finanzas">
+                    <Suspense fallback={<TableSkeleton />}><Finanzas /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.FINANZAS_TESORERIA} element={
+                  <ProtectedRoute moduleName="finanzas">
+                    <Suspense fallback={<TableSkeleton />}><FinanzasTesoreria /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.FINANZAS_FACTURACION} element={
+                  <ProtectedRoute moduleName="finanzas">
+                    <Suspense fallback={<TableSkeleton />}><FinanzasFacturacion /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.FINANZAS_REPORTES} element={
+                  <ProtectedRoute moduleName="finanzas">
+                    <Suspense fallback={<TableSkeleton />}><FinanzasReportes /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.FINANZAS_CONSTRUCCION} element={
+                  <ProtectedRoute moduleName="finanzas">
+                    <Suspense fallback={<TableSkeleton />}><FinanzasConstruccion /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
                 {/* ============================================ */}
                 {/* CONTABILIDAD Y COMISIONES                   */}

@@ -108,7 +108,14 @@ export const BACKOFFICE_ROUTES = {
   LOTES_PAGO: '/lotes-pago',
   LOTE_PAGO_DETALLE: '/lotes-pago/:id',
   
-  // Contabilidad y Finanzas
+  // Finanzas
+  FINANZAS: '/finanzas',
+  FINANZAS_TESORERIA: '/finanzas/tesoreria',
+  FINANZAS_FACTURACION: '/finanzas/facturacion',
+  FINANZAS_REPORTES: '/finanzas/reportes',
+  FINANZAS_CONSTRUCCION: '/finanzas/construccion',
+  
+  // Contabilidad y Comisiones
   CONTABILIDAD: '/contabilidad',
   COMISIONES: '/comisiones',
   
@@ -159,8 +166,7 @@ export const LEGACY_ROUTES = {
   PURCHASE_ORDERS: '/purchase-orders',
   CONSTRUCTION_PURCHASE_ORDERS: '/construction/purchase-orders',
   
-  // Finance legacy
-  FINANZAS: '/finanzas',
+  // Finance legacy (redirects eliminados - Finanzas ahora es ruta activa)
   FINANZAS_PAGOS: '/finanzas/pagos-proveedores',
   FINANZAS_PAGO_DETALLE: '/finanzas/pagos-proveedores/:id',
   FINANCE_PAYMENTS: '/finance/payments',

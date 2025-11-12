@@ -1,16 +1,26 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { BankAccountsTab } from "@/components/finance/BankAccountsTab";
-import { PaymentBatchesTab } from "@/components/finance/PaymentBatchesTab";
-import { BankReconciliationTab } from "@/components/finance/BankReconciliationTab";
-import { TransactionsTab } from "@/components/finance/TransactionsTab";
-import { ProviderBalanceTab } from "@/components/finance/ProviderBalanceTab";
-import { ReportsTab } from "@/components/finance/ReportsTab";
-import { Building2, FileText, DollarSign, ArrowLeftRight, Receipt, TrendingUp, BarChart3, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building2, FileText, BarChart3, Hammer, AlertCircle, ArrowRight } from "lucide-react";
 import { useModuleAccess } from "@/hooks/useModuleAccess";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+interface FinanceModuleCard {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  gradient: string;
+  route: string;
+  stats?: {
+    label: string;
+    value: string;
+  }[];
+}
 
 export default function Finanzas() {
   const { canView } = useModuleAccess();
+  const navigate = useNavigate();
 
   if (!canView('finanzas')) {
     return (
@@ -26,75 +36,133 @@ export default function Finanzas() {
     );
   }
 
+  const modules: FinanceModuleCard[] = [
+    {
+      id: 'treasury',
+      title: 'Tesorería',
+      description: 'Gestiona cuentas bancarias, movimientos y conciliación',
+      icon: <Building2 className="h-8 w-8" />,
+      gradient: 'from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20',
+      route: '/finanzas/tesoreria',
+      stats: [
+        { label: 'Cuentas Activas', value: '-' },
+        { label: 'Balance Total', value: '-' }
+      ]
+    },
+    {
+      id: 'invoicing',
+      title: 'Facturación',
+      description: 'Administra facturas, lotes de pago y XML SAT',
+      icon: <FileText className="h-8 w-8" />,
+      gradient: 'from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20',
+      route: '/finanzas/facturacion',
+      stats: [
+        { label: 'Por Pagar', value: '-' },
+        { label: 'Lotes Activos', value: '-' }
+      ]
+    },
+    {
+      id: 'reports',
+      title: 'Reportes',
+      description: 'Genera reportes financieros y análisis de saldos',
+      icon: <BarChart3 className="h-8 w-8" />,
+      gradient: 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20',
+      route: '/finanzas/reportes',
+      stats: [
+        { label: 'Ingresos del Mes', value: '-' },
+        { label: 'Egresos del Mes', value: '-' }
+      ]
+    },
+    {
+      id: 'construction',
+      title: 'Construcción',
+      description: 'Monitorea gastos por proyecto y consumo de presupuesto',
+      icon: <Hammer className="h-8 w-8" />,
+      gradient: 'from-orange-500/10 to-red-500/10 dark:from-orange-500/20 dark:to-red-500/20',
+      route: '/finanzas/construccion',
+      stats: [
+        { label: 'Proyectos Activos', value: '-' },
+        { label: 'Alertas', value: '-' }
+      ]
+    }
+  ];
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-2">
-        <DollarSign className="h-8 w-8" />
-        <h1 className="text-3xl font-bold">Finanzas</h1>
+    <div className="container max-w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5">
+            <Building2 className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Finanzas</h1>
+            <p className="text-sm text-muted-foreground">
+              Centro de control financiero y tesorería
+            </p>
+          </div>
+        </div>
       </div>
 
-      <Tabs defaultValue="accounts" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="accounts" className="gap-2">
-            <Building2 className="h-4 w-4" />
-            Bancos
-          </TabsTrigger>
-          <TabsTrigger value="invoices" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Facturas
-          </TabsTrigger>
-          <TabsTrigger value="batches" className="gap-2">
-            <DollarSign className="h-4 w-4" />
-            Lotes de Pago
-          </TabsTrigger>
-          <TabsTrigger value="reconciliation" className="gap-2">
-            <ArrowLeftRight className="h-4 w-4" />
-            Conciliación
-          </TabsTrigger>
-          <TabsTrigger value="transactions" className="gap-2">
-            <Receipt className="h-4 w-4" />
-            Movimientos
-          </TabsTrigger>
-          <TabsTrigger value="providers" className="gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Saldos
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Reportes
-          </TabsTrigger>
-        </TabsList>
+      {/* Module Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {modules.map((module, index) => (
+          <Card
+            key={module.id}
+            className={cn(
+              "group cursor-pointer transition-all duration-300",
+              "hover:scale-[1.02] hover:shadow-lg",
+              "border-2 hover:border-primary/50",
+              "animate-in fade-in slide-in-from-bottom-4"
+            )}
+            style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
+            onClick={() => navigate(module.route)}
+          >
+            <CardHeader className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div className={cn(
+                  "p-4 rounded-xl bg-gradient-to-br transition-transform group-hover:scale-110",
+                  module.gradient
+                )}>
+                  {module.icon}
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              
+              <div className="space-y-1">
+                <CardTitle className="text-2xl group-hover:text-primary transition-colors">
+                  {module.title}
+                </CardTitle>
+                <CardDescription className="text-base">
+                  {module.description}
+                </CardDescription>
+              </div>
+            </CardHeader>
 
-        <TabsContent value="accounts">
-          <BankAccountsTab />
-        </TabsContent>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {module.stats?.map((stat) => (
+                  <div key={stat.label} className="space-y-1">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      {stat.label}
+                    </p>
+                    <p className="text-lg font-semibold text-foreground">
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-        <TabsContent value="invoices">
-          <div className="text-center py-12 text-muted-foreground">
-            Módulo de Facturas en desarrollo
-          </div>
-        </TabsContent>
-
-        <TabsContent value="batches">
-          <PaymentBatchesTab />
-        </TabsContent>
-
-        <TabsContent value="reconciliation">
-          <BankReconciliationTab />
-        </TabsContent>
-
-        <TabsContent value="transactions">
-          <TransactionsTab />
-        </TabsContent>
-
-        <TabsContent value="providers">
-          <ProviderBalanceTab />
-        </TabsContent>
-
-        <TabsContent value="reports">
-          <ReportsTab />
-        </TabsContent>
-      </Tabs>
+      {/* Quick Access Info */}
+      <div className="mt-8 p-4 rounded-lg bg-muted/50 border">
+        <p className="text-sm text-muted-foreground text-center">
+          💡 <span className="font-medium">Consejo:</span> Haz clic en cualquier módulo para acceder a sus funcionalidades
+        </p>
+      </div>
     </div>
   );
 }
