@@ -48,10 +48,11 @@ const providerSchema = z.object({
   rfc: z
     .string()
     .trim()
-    .max(13, "RFC inválido")
-    .regex(rfcRegex, "Formato de RFC inválido (ej: XAXX010101000)")
     .optional()
-    .or(z.literal("")),
+    .refine(
+      (val) => !val || val === "" || rfcRegex.test(val),
+      { message: "Formato de RFC inválido (ej: XAXX010101000)" }
+    ),
   regimen_fiscal: z.string().trim().max(100).optional().or(z.literal("")),
   razon_social: z.string().trim().max(200).optional().or(z.literal("")),
   direccion_fiscal: z.string().trim().max(300).optional().or(z.literal("")),
@@ -64,10 +65,11 @@ const providerSchema = z.object({
   contacto_email: z
     .string()
     .trim()
-    .email("Email inválido")
-    .max(100)
     .optional()
-    .or(z.literal("")),
+    .refine(
+      (val) => !val || val === "" || z.string().email().safeParse(val).success,
+      { message: "Email inválido" }
+    ),
   contacto_telefono: z.string().trim().max(20).optional().or(z.literal("")),
   contacto_puesto: z.string().trim().max(100).optional().or(z.literal("")),
 });
@@ -164,8 +166,8 @@ export function ProviderWizard({ open, onClose, provider }: ProviderWizardProps)
         fieldsToValidate = ["rfc", "regimen_fiscal", "razon_social", "direccion_fiscal"];
         break;
       case 3:
-        fieldsToValidate = ["contacto_nombre", "contacto_email", "contacto_telefono", "contacto_puesto"];
-        break;
+        // Contact fields are optional, always return true
+        return true;
       case 4:
         fieldsToValidate = ["tiempo_entrega", "forma_pago", "condiciones"];
         break;
@@ -453,6 +455,9 @@ export function ProviderWizard({ open, onClose, provider }: ProviderWizardProps)
             {/* Step 3: Contacto */}
             {currentStep === 3 && (
               <div className="space-y-4 animate-fade-in">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Todos los campos de contacto son opcionales
+                </p>
                 <FormField
                   control={form.control}
                   name="contacto_nombre"
