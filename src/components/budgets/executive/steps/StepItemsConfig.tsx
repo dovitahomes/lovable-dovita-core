@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, Table as TableIcon } from "lucide-react";
 import { ExecutiveBudgetItem, TUNode } from "../ExecutiveBudgetWizard";
-import { cn } from "@/lib/utils";
+import { VirtualizedBudgetItemsTable } from "../VirtualizedBudgetItemsTable";
 
 interface StepItemsConfigProps {
   selectedSubpartidas: TUNode[];
@@ -98,148 +96,44 @@ export function StepItemsConfig({
         </Card>
       </div>
 
-      {/* Items by Subpartida */}
-      <div className="space-y-4">
+      {/* Virtualized Items Table by Subpartida */}
+      <div className="space-y-6">
         {selectedSubpartidas.map((subpartida) => {
           const subpartidaItems = getItemsBySubpartida(subpartida.id);
 
           return (
             <Card key={subpartida.id}>
-              <CardHeader>
+              <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Badge variant="secondary">{subpartida.code}</Badge>
-                    <span>{subpartida.name}</span>
+                    <TableIcon className="h-5 w-5 text-primary" />
+                    <span>Items de Subpartida</span>
                   </CardTitle>
                   <Button
                     size="sm"
-                    variant="outline"
                     onClick={() => handleAddItem(subpartida)}
+                    className="gap-2"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4" />
                     Agregar Item
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="pt-6">
                 {subpartidaItems.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-                    <AlertTriangle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Agrega al menos un item para esta subpartida</p>
+                  <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                    <AlertTriangle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm font-medium mb-1">Sin items configurados</p>
+                    <p className="text-xs">Agrega al menos un item para esta subpartida</p>
                   </div>
                 ) : (
-                  subpartidaItems.map((item, itemIndex) => {
-                    const globalIndex = items.findIndex(i => i === item);
-                    const total = calculateItemTotal(item);
-
-                    return (
-                      <div
-                        key={globalIndex}
-                        className="grid grid-cols-12 gap-2 p-3 rounded-lg border bg-muted/30 items-center"
-                      >
-                        {/* Descripción */}
-                        <div className="col-span-12 md:col-span-3">
-                          <Input
-                            placeholder="Descripción"
-                            value={item.descripcion}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'descripcion', e.target.value)}
-                            className="text-sm"
-                          />
-                        </div>
-
-                        {/* Unidad */}
-                        <div className="col-span-6 md:col-span-2">
-                          <Input
-                            placeholder="Unidad"
-                            value={item.unidad}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'unidad', e.target.value)}
-                            className="text-sm"
-                          />
-                        </div>
-
-                        {/* Cantidad Real */}
-                        <div className="col-span-6 md:col-span-1">
-                          <Input
-                            type="number"
-                            placeholder="Cant."
-                            value={item.cant_real}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'cant_real', parseFloat(e.target.value) || 0)}
-                            className="text-sm"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-
-                        {/* Desperdicio % */}
-                        <div className="col-span-6 md:col-span-1">
-                          <Input
-                            type="number"
-                            placeholder="Desp%"
-                            value={item.desperdicio_pct}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'desperdicio_pct', parseFloat(e.target.value) || 0)}
-                            className="text-sm"
-                            min="0"
-                            step="0.1"
-                          />
-                        </div>
-
-                        {/* Costo Unit */}
-                        <div className="col-span-6 md:col-span-2">
-                          <Input
-                            type="number"
-                            placeholder="Costo Unit."
-                            value={item.costo_unit}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'costo_unit', parseFloat(e.target.value) || 0)}
-                            className="text-sm"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-
-                        {/* Honorarios % */}
-                        <div className="col-span-6 md:col-span-1">
-                          <Input
-                            type="number"
-                            placeholder="Hon%"
-                            value={item.honorarios_pct}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'honorarios_pct', parseFloat(e.target.value) || 0)}
-                            className="text-sm"
-                            min="0"
-                            step="0.1"
-                          />
-                        </div>
-
-                        {/* Proveedor */}
-                        <div className="col-span-8 md:col-span-1">
-                          <Input
-                            placeholder="Prov"
-                            value={item.proveedor_alias}
-                            onChange={(e) => handleUpdateItem(globalIndex, 'proveedor_alias', e.target.value)}
-                            className="text-sm"
-                            maxLength={6}
-                          />
-                        </div>
-
-                        {/* Total + Delete */}
-                        <div className="col-span-4 md:col-span-1 flex items-center justify-end gap-2">
-                          <span className={cn(
-                            "text-sm font-semibold whitespace-nowrap",
-                            total > 0 ? "text-primary" : "text-muted-foreground"
-                          )}>
-                            {formatCurrency(total)}
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveItem(globalIndex)}
-                            className="h-8 w-8 p-0 shrink-0"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })
+                  <VirtualizedBudgetItemsTable
+                    subpartida={subpartida}
+                    items={subpartidaItems}
+                    allItems={items}
+                    onUpdateItem={handleUpdateItem}
+                    onRemoveItem={handleRemoveItem}
+                  />
                 )}
               </CardContent>
             </Card>
