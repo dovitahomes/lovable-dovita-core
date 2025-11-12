@@ -247,6 +247,15 @@ export function VirtualizedBudgetItemsTable({
           </TableBody>
         </Table>
       </div>
-    </div>
+      </div>
+
+      <ExecutiveItemDialog
+        open={!!editingItem}
+        onOpenChange={(open) => !open && setEditingItem(null)}
+        item={editingItem?.item || null}
+        onSave={handleSaveItem}
+        subpartidaName={subpartida.name}
+      />
+    </>
   );
 }
