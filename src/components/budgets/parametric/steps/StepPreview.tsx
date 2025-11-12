@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, FileText, CheckCircle, XCircle } from "lucide-react";
 import { BudgetItem, Mayor } from "../ParametricBudgetWizard";
 import { cn } from "@/lib/utils";
+import { BudgetValidation } from "../BudgetValidation";
 
 interface StepPreviewProps {
   formData: {
@@ -95,6 +96,13 @@ export function StepPreview({ formData, selectedMayores, items }: StepPreviewPro
           Revisa toda la información antes de guardar
         </p>
       </div>
+
+      {/* Validations */}
+      <BudgetValidation
+        items={items}
+        selectedMayores={selectedMayores}
+        projectId={formData.project_id || ""}
+      />
 
       {/* Project Info */}
       <Card>
