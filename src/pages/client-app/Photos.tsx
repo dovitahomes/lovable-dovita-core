@@ -17,6 +17,8 @@ import { useAuth } from '@/app/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { PhotosGridSkeleton, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
+import { MapPreview } from '@/components/construction/MapPreview';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 
 export default function Photos() {
@@ -27,6 +29,8 @@ export default function Photos() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [selectedMapLocation, setSelectedMapLocation] = useState<{ lat: number; lng: number; description?: string } | null>(null);
 
   // Fetch photos using unified hook that respects mock/real toggle
   // Escuchar notificaciones en tiempo real de cambios en citas
@@ -134,6 +138,18 @@ export default function Photos() {
     setSelectedPhotoIndex(originalIndex);
   };
 
+  const handleViewMap = (photo: any, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent photo click
+    if (photo.latitude && photo.longitude) {
+      setSelectedMapLocation({
+        lat: photo.latitude,
+        lng: photo.longitude,
+        description: photo.descripcion
+      });
+      setMapDialogOpen(true);
+    }
+  };
+
   return (
     <div className="h-full overflow-y-auto pb-[130px]">
       {/* Header con Degradado Azul */}
@@ -167,26 +183,50 @@ export default function Photos() {
                 style={{ animationDelay: `${index * 0.05}s` }}
                 onClick={() => handlePhotoClick(index)}
               >
-                {/* Contenedor de Imagen */}
-                <div className="relative aspect-square">
-                  <img
-                    src={photo.url}
-                    alt={photo.descripcion || 'Foto'}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Badge de Fecha */}
-                  <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm text-white">
-                    {format(new Date(photo.fecha_foto || new Date()), "d MMM", { locale: es })}
-                  </Badge>
-                  {/* Overlay de Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-white text-xs font-medium line-clamp-2">
-                        {photo.descripcion || 'Sin descripción'}
-                      </p>
+                {/* Layout Grid con Imagen + Mini-mapa si hay geolocalización */}
+                <div className={photo.latitude && photo.longitude ? "grid grid-cols-[1fr_80px] gap-0" : ""}>
+                  {/* Contenedor de Imagen */}
+                  <div className="relative aspect-square">
+                    <img
+                      src={photo.url}
+                      alt={photo.descripcion || 'Foto'}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Badge de Fecha */}
+                    <Badge className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm text-white">
+                      {format(new Date(photo.fecha_foto || new Date()), "d MMM", { locale: es })}
+                    </Badge>
+                    {/* Overlay de Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="text-white text-xs font-medium line-clamp-2">
+                          {photo.descripcion || 'Sin descripción'}
+                        </p>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Mini-mapa Thumbnail (solo si hay geolocalización) */}
+                  {photo.latitude && photo.longitude && (
+                    <div 
+                      className="relative aspect-square bg-muted cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={(e) => handleViewMap(photo, e)}
+                    >
+                      <MapPreview
+                        latitude={photo.latitude}
+                        longitude={photo.longitude}
+                        description={photo.descripcion}
+                        height="100%"
+                        className="h-full"
+                      />
+                      {/* Overlay con ícono MapPin */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
+                        <MapPin className="h-6 w-6 text-white drop-shadow-lg" />
+                      </div>
+                    </div>
+                  )}
                 </div>
+                
                 {/* Información debajo */}
                 <div className="p-3 space-y-2">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -195,7 +235,7 @@ export default function Photos() {
                   </p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {currentProject?.location || 'Obra'}
+                    {photo.latitude && photo.longitude ? 'Ver en mapa' : currentProject?.location || 'Obra'}
                   </p>
                 </div>
               </Card>
@@ -240,6 +280,25 @@ export default function Photos() {
         currentIndex={selectedPhotoIndex ?? 0}
         onNavigate={setSelectedPhotoIndex}
       />
+
+      {/* Map Dialog */}
+      {selectedMapLocation && (
+        <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedMapLocation.description || "Ubicación de la Foto"}
+              </DialogTitle>
+            </DialogHeader>
+            <MapPreview
+              latitude={selectedMapLocation.lat}
+              longitude={selectedMapLocation.lng}
+              description={selectedMapLocation.description}
+              height="400px"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

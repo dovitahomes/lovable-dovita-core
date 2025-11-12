@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useProject } from "@/contexts/client-app/ProjectContext";
 import { useClientPhotos } from "@/hooks/client-app/useClientData";
 import { shouldShowConstructionPhotos } from "@/lib/project-utils";
-import { Download, Maximize2, Image as ImageIcon, Camera } from "lucide-react";
+import { Download, Maximize2, Image as ImageIcon, Camera, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhotoViewer from "@/components/client-app/PhotoViewer";
 import { CameraCapture } from "@/components/construction/CameraCapture";
@@ -15,6 +15,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PhotosGridSkeletonDesktop, ClientLoadingState, ClientEmptyState, ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
+import { MapPreview } from '@/components/construction/MapPreview';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 
 export default function PhotosDesktop() {
@@ -24,6 +26,8 @@ export default function PhotosDesktop() {
   const navigate = useNavigate();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [selectedMapLocation, setSelectedMapLocation] = useState<{ lat: number; lng: number; description?: string } | null>(null);
   
   // Fetch photos using unified hook that respects mock/real toggle
   const { data: photos = [], isLoading, error, refetch } = useClientPhotos(currentProject?.id || null);
@@ -104,6 +108,18 @@ export default function PhotosDesktop() {
     }
   };
 
+  const handleViewMap = (photo: any, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent photo click
+    if (photo.latitude && photo.longitude) {
+      setSelectedMapLocation({
+        lat: photo.latitude,
+        lng: photo.longitude,
+        description: photo.description || photo.descripcion
+      });
+      setMapDialogOpen(true);
+    }
+  };
+
   return (
     <div className="h-[calc(100vh-100px)] overflow-y-auto space-y-6 pr-2">
       <div className="flex items-center justify-between">
@@ -134,22 +150,55 @@ export default function PhotosDesktop() {
             style={{ animationDelay: `${index * 0.03}s` }}
             onClick={() => setSelectedPhotoIndex(index)}
           >
-            <div className="relative aspect-square">
-              <img 
-                src={photo.url} 
-                alt={photo.description || 'Foto'}
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Layout con imagen + mini-mapa si hay geolocalización */}
+            <div className={photo.latitude && photo.longitude ? "grid grid-cols-[1fr_100px] gap-0" : ""}>
+              <div className="relative aspect-square">
+                <img 
+                  src={photo.url} 
+                  alt={photo.description || 'Foto'}
+                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                  <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="absolute top-2 right-2">
+                  <Badge>{format(new Date(photo.date || new Date()), "d MMM yyyy", { locale: es })}</Badge>
+                </div>
               </div>
-              <div className="absolute top-2 right-2">
-                <Badge>{format(new Date(photo.date || new Date()), "d MMM yyyy", { locale: es })}</Badge>
-              </div>
+
+              {/* Mini-mapa Thumbnail */}
+              {photo.latitude && photo.longitude && (
+                <div 
+                  className="relative aspect-square bg-muted cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={(e) => handleViewMap(photo, e)}
+                >
+                  <MapPreview
+                    latitude={photo.latitude}
+                    longitude={photo.longitude}
+                    description={photo.description}
+                    height="100%"
+                    className="h-full"
+                  />
+                  {/* Overlay con ícono MapPin */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
+                    <MapPin className="h-6 w-6 text-white drop-shadow-lg" />
+                  </div>
+                </div>
+              )}
             </div>
+            
             <div className="p-3">
               <h3 className="font-medium text-sm line-clamp-1">{photo.description || 'Sin descripción'}</h3>
-              <p className="text-xs text-muted-foreground">Construcción</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                {photo.latitude && photo.longitude ? (
+                  <>
+                    <MapPin className="h-3 w-3" />
+                    Ver en mapa
+                  </>
+                ) : (
+                  'Construcción'
+                )}
+              </p>
             </div>
           </Card>
         ))}
@@ -172,6 +221,25 @@ export default function PhotosDesktop() {
           onOpenChange={(open) => !open && setSelectedPhotoIndex(null)}
           onNavigate={setSelectedPhotoIndex}
         />
+      )}
+
+      {/* Map Dialog */}
+      {selectedMapLocation && (
+        <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedMapLocation.description || "Ubicación de la Foto"}
+              </DialogTitle>
+            </DialogHeader>
+            <MapPreview
+              latitude={selectedMapLocation.lat}
+              longitude={selectedMapLocation.lng}
+              description={selectedMapLocation.description}
+              height="400px"
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

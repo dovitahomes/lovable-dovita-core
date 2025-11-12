@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, MapPin, Calendar, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { MapPreview } from '@/components/construction/MapPreview';
 
 interface Photo {
   id: number;
@@ -13,6 +15,10 @@ interface Photo {
   date: string;
   description: string;
   location: { lat: number; lng: number };
+  latitude?: number;
+  longitude?: number;
+  descripcion?: string;
+  fecha_foto?: string;
 }
 
 interface PhotoViewerProps {
@@ -127,6 +133,9 @@ export default function PhotoViewer({
 
   if (!currentPhoto) return null;
 
+  // Check if photo has geolocation
+  const hasGeolocation = currentPhoto?.latitude && currentPhoto?.longitude;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full w-full h-full max-h-screen p-0 bg-black/95">
@@ -135,20 +144,22 @@ export default function PhotoViewer({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <Badge className="bg-primary mb-2">
-                {currentPhoto.phase}
+                {currentPhoto.phase || 'Construcción'}
               </Badge>
               <h3 className="text-white font-semibold text-lg">
-                {currentPhoto.description}
+                {currentPhoto.description || currentPhoto.descripcion || 'Sin descripción'}
               </h3>
               <div className="flex items-center gap-4 mt-2 text-sm text-white/80">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  {format(new Date(currentPhoto.date), "d 'de' MMMM, yyyy", { locale: es })}
+                  {format(new Date(currentPhoto.date || currentPhoto.fecha_foto), "d 'de' MMMM, yyyy", { locale: es })}
                 </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  Obra - Juriquilla
-                </span>
+                {hasGeolocation && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    Geolocalizada
+                  </span>
+                )}
               </div>
             </div>
             <Button
@@ -162,23 +173,56 @@ export default function PhotoViewer({
           </div>
         </div>
 
-        {/* Image Container */}
-        <div 
-          className="flex items-center justify-center h-full w-full overflow-hidden p-16"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
+        {/* Main Content with Sidebar for Geolocated Photos */}
+        <div className="flex h-full w-full">
+          {/* Image Container */}
           <div 
-            className="transition-transform duration-200 ease-out"
-            style={{ transform: `scale(${zoom})` }}
+            className={`flex items-center justify-center overflow-hidden ${hasGeolocation ? 'w-3/4 pr-4' : 'w-full'} p-16`}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
-            <img
-              src={currentPhoto.url}
-              alt={currentPhoto.description}
-              className="max-h-[80vh] max-w-full object-contain"
-            />
+            <div 
+              className="transition-transform duration-200 ease-out"
+              style={{ transform: `scale(${zoom})` }}
+            >
+              <img
+                src={currentPhoto.url}
+                alt={currentPhoto.description || currentPhoto.descripcion}
+                className="max-h-[80vh] max-w-full object-contain"
+              />
+            </div>
           </div>
+
+          {/* Sidebar with Map (only if geolocated) */}
+          {hasGeolocation && (
+            <div className="w-1/4 bg-black/60 backdrop-blur-sm border-l border-white/10 p-6 overflow-y-auto">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white text-sm font-medium mb-2 block">
+                    Ubicación de la Foto
+                  </Label>
+                  <MapPreview 
+                    latitude={currentPhoto.latitude}
+                    longitude={currentPhoto.longitude}
+                    description={currentPhoto.description || currentPhoto.descripcion}
+                    height="250px"
+                  />
+                </div>
+                
+                <div className="text-white/70 text-xs space-y-1">
+                  <p className="flex items-center gap-2">
+                    <MapPin className="h-3 w-3" />
+                    <span>Lat: {currentPhoto.latitude.toFixed(6)}</span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <MapPin className="h-3 w-3" />
+                    <span>Lng: {currentPhoto.longitude.toFixed(6)}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation Controls */}
