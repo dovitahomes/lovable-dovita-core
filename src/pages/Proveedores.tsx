@@ -14,6 +14,7 @@ import { ProviderUsageDialog } from "@/components/ProviderUsageDialog";
 import { ProviderStatsCards } from "@/components/providers/ProviderStatsCards";
 import { ProviderFilters, FilterType } from "@/components/providers/ProviderFilters";
 import { ProviderCard } from "@/components/providers/ProviderCard";
+import { ProviderImportDialog } from "@/components/providers/ProviderImportDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,10 +44,10 @@ export default function Proveedores() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showUsageDialog, setShowUsageDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
   const [appliedFilters, setAppliedFilters] = useState<FilterType[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
@@ -142,33 +143,6 @@ export default function Proveedores() {
     exportProvidersToCSV(providers);
   };
 
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const result = await importProvidersFromCSV(file);
-      toast.success(
-        `Importación completada: ${result.created} creados, ${result.updated} actualizados`
-      );
-      if (result.errors.length > 0) {
-        console.error("Errores de importación:", result.errors);
-        toast.warning(`${result.errors.length} filas con errores (ver consola)`);
-      }
-      queryClient.invalidateQueries({ queryKey: ["providers"] });
-    } catch (err: any) {
-      toast.error("Error al importar: " + err.message);
-    }
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -179,17 +153,10 @@ export default function Proveedores() {
             <Download className="h-4 w-4" />
             Exportar
           </Button>
-          <Button onClick={handleImportClick} variant="outline" className="gap-2">
+          <Button onClick={() => setShowImportDialog(true)} variant="outline" className="gap-2">
             <Upload className="h-4 w-4" />
             Importar
           </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls,.csv"
-            onChange={handleImportFile}
-            className="hidden"
-          />
           <Button onClick={() => setShowDialog(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Nuevo Proveedor
@@ -292,6 +259,11 @@ export default function Proveedores() {
         }}
         providerId={selectedProvider?.id || null}
         providerName={selectedProvider?.name}
+      />
+
+      <ProviderImportDialog
+        open={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
