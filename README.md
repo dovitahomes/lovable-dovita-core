@@ -50,7 +50,8 @@ El sistema cuenta con **8 vistas SQL optimizadas** que exponen datos del ERP al 
 | `v_client_project_summary` | Dashboard con KPIs y fechas | ✅ Funcional |
 | `v_client_documents` | Documentos visibles al cliente | ✅ Funcional |
 | `v_client_photos` | Fotos de construcción | ✅ Funcional |
-| `v_client_appointments` | Citas y reuniones | ⚠️ Falta ubicación |
+| `v_client_events` | Eventos/citas con meeting_link | ✅ Funcional |
+| `v_client_project_members` | Miembros del equipo | ✅ Funcional |
 | `v_client_ministrations` | Cronograma de pagos | ⚠️ Falta estado de pago |
 | `v_client_financial_summary` | Resumen financiero | ✅ Funcional |
 | `v_client_budget_categories` | Desglose presupuestal | ✅ Funcional |
@@ -60,14 +61,14 @@ El sistema cuenta con **8 vistas SQL optimizadas** que exponen datos del ERP al 
 Para hacer el Client App **100% funcional con datos reales**, se requieren:
 
 **🔴 Críticos**:
-- [ ] `calendar_events.location` / `meeting_link` / `visibility`
-- [ ] Tabla `project_members` para mostrar equipo del proyecto
+- [x] ~~`project_events.location` / `meeting_link` / `visibility`~~ ✅ **Completo (Sprint 1)**
+- [x] ~~Vista `v_client_project_members` para mostrar equipo~~ ✅ **Completo (Sprint 1)**
 - [ ] `projects.progress_override` o función de cálculo automático
 - [ ] `gantt_ministrations.invoice_id` para estado de pago
 
 **🟡 Deseables**:
 - [ ] `construction_photos.phase_id` para vincular fotos a fases
-- [ ] Tabla `chat_messages` para mensajería en tiempo real
+- [ ] Mejoras en mensajería en tiempo real (ya existe `project_messages`)
 - [ ] Función `calculate_project_progress()` basada en gantt
 
 ### Hooks Unificados
@@ -86,7 +87,8 @@ Hooks disponibles:
 - `useUnifiedMinistrations` - Cronograma de pagos
 - `useUnifiedFinancialSummary` - Resumen financiero
 - `useUnifiedBudgetCategories` - Categorías presupuestales
-- `useUnifiedAppointments` - Citas y reuniones
+- `useClientCalendar` - Eventos/citas con meeting_link ✅
+- `useClientProjectMembers` - Miembros del equipo ✅
 
 ### Documentación Completa
 
