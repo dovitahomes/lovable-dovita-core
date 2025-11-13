@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar as CalendarIcon, Clock, MapPin, User, CheckCircle, XCircle, AlertCircle, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, User, CheckCircle, XCircle, AlertCircle, Filter, Video, ExternalLink } from 'lucide-react';
 import { format, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useProjectEvents } from '@/hooks/useProjectEvents';
@@ -245,6 +245,19 @@ export function ProjectCalendarTab({ projectId }: ProjectCalendarTabProps) {
                                   <div className="flex items-center gap-1">
                                     <MapPin className="h-4 w-4" />
                                     {eventAny.location}
+                                  </div>
+                                )}
+                                {eventAny.meeting_link && (
+                                  <div className="flex items-center gap-2">
+                                    <Video className="h-4 w-4 text-muted-foreground" />
+                                    <a 
+                                      href={eventAny.meeting_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:underline flex items-center gap-1"
+                                    >
+                                      Unirse a la reunión <ExternalLink className="h-3 w-3" />
+                                    </a>
                                   </div>
                                 )}
                                 {event.created_by_name && (

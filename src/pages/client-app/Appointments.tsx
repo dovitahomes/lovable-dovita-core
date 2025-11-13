@@ -11,7 +11,8 @@ import { useClientAppointments } from '@/hooks/client-app/useClientData';
 import { useDeleteAppointment, useUpdateAppointment } from '@/hooks/useProjectAppointments';
 import { useEventNotifications } from '@/hooks/client-app/useEventNotifications';
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { Plus, Clock, User, Calendar as CalendarIcon, X, Check } from 'lucide-react';
+import { Plus, Clock, User, Calendar as CalendarIcon, X, Check, Video, ExternalLink } from 'lucide-react';
+import { EventDetailsDialog } from '@/components/client-app/EventDetailsDialog';
 import { ClientErrorState } from '@/components/client-app/ClientSkeletons';
 import { useClientError } from '@/hooks/client-app/useClientError';
 import { format, isSameDay, isFuture, isToday, parseISO } from 'date-fns';
@@ -29,6 +30,8 @@ export default function Appointments() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [eventDetailsOpen, setEventDetailsOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   
   // Use unified hook that respects mock/real toggle
   const { data: rawAppointments, isLoading, error, refetch } = useClientAppointments(currentProject?.id || null);
@@ -270,11 +273,31 @@ export default function Appointments() {
                       </p>
                     )}
 
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-xs">{duration} min</span>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{duration} min</span>
                       </div>
+                      {appointment.meeting_link && (
+                        <div className="flex items-center gap-2">
+                          <Video className="h-4 w-4 text-muted-foreground" />
+                          <a 
+                            href={appointment.meeting_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline flex items-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Unirse <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      )}
+                      {appointment.created_by_name && (
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{appointment.created_by_name}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2 pt-2">
@@ -282,7 +305,10 @@ export default function Appointments() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1" 
-                        onClick={() => handleViewDetails(appointment)}
+                        onClick={() => {
+                          setSelectedEvent(appointment);
+                          setEventDetailsOpen(true);
+                        }}
                       >
                         Ver Detalles
                       </Button>
@@ -531,17 +557,27 @@ export default function Appointments() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Cancelar esta cita?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción notificará al equipo sobre la cancelación. ¿Estás seguro de que deseas cancelar esta cita?
+              Esta acción no se puede deshacer. La cita será cancelada y se notificará a los participantes.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, mantener</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmCancel} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogCancel>No, mantener cita</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmCancel}
+              className="bg-destructive hover:bg-destructive/90"
+            >
               Sí, cancelar cita
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Event Details Dialog */}
+      <EventDetailsDialog 
+        open={eventDetailsOpen}
+        onOpenChange={setEventDetailsOpen}
+        event={selectedEvent}
+      />
       </div>
     </div>
   );
