@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogIn, Mail, Fingerprint } from "lucide-react";
 import { z } from "zod";
 import { bootstrapUserAfterLogin } from "@/lib/auth/bootstrap";
 import { isWebAuthnSupported, authenticateWithBiometric } from "@/lib/webauthn";
+import { SignInPage } from "@/components/auth/SignInPage";
+import { useCorporateContent } from "@/hooks/useCorporateContent";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -19,12 +16,12 @@ const loginSchema = z.object({
 const Login = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isMagicLink, setIsMagicLink] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   const biometricSupported = isWebAuthnSupported();
+  const { data: corporateContent } = useCorporateContent();
 
   const handleBiometricLogin = async () => {
     setIsLoading(true);
@@ -109,10 +106,8 @@ const Login = () => {
     }
   };
 
-  const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !z.string().email().safeParse(email).success) {
+  const handleMagicLink = async () => {
+    if (!email) {
       toast.error("Por favor ingresa un correo válido");
       return;
     }
@@ -157,123 +152,28 @@ const Login = () => {
     }
   };
 
-  if (magicLinkSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="space-y-3 text-center">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
-              <Mail className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-2xl font-bold">Revisa tu correo</CardTitle>
-            <CardDescription>
-              Te hemos enviado un enlace de acceso a <strong>{email}</strong>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              El enlace expirará en 1 hora. Si no lo recibes, revisa tu carpeta de spam.
-            </p>
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={() => setMagicLinkSent(false)}
-            >
-              Volver al inicio de sesión
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
-            <LogIn className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <CardTitle className="text-2xl font-bold">Dovita CRM</CardTitle>
-          <CardDescription>
-            {isMagicLink ? "Ingresa tu correo para recibir un enlace de acceso" : "Ingresa a tu cuenta"}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={isMagicLink ? handleMagicLink : handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@correo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            {!isMagicLink && (
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Procesando..." : isMagicLink ? "Enviar enlace de acceso" : "Iniciar Sesión"}
-            </Button>
-
-            {biometricSupported && !isMagicLink && (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleBiometricLogin}
-                disabled={isLoading}
-              >
-                <Fingerprint className="mr-2 h-4 w-4" />
-                Iniciar con Biométricos
-              </Button>
-            )}
-
-            <div className="space-y-2">
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => setIsMagicLink(!isMagicLink)}
-              >
-                {isMagicLink ? "Usar contraseña" : "Usar enlace de acceso"}
-              </Button>
-
-              {!isMagicLink && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full text-muted-foreground"
-                  onClick={handleForgotPassword}
-                >
-                  ¿Olvidaste tu contraseña?
-                </Button>
-              )}
-            </div>
-
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              El registro está cerrado. Solo usuarios invitados pueden acceder.
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <SignInPage
+      title={
+        <span className="font-light text-foreground tracking-tighter">
+          Bienvenido a <span className="font-semibold text-primary">Dovita</span>
+        </span>
+      }
+      description="Accede a tu cuenta y gestiona tus proyectos"
+      heroImageSrc={corporateContent?.auth_hero_image_url || undefined}
+      showLogo={true}
+      email={email}
+      password={password}
+      onEmailChange={setEmail}
+      onPasswordChange={setPassword}
+      onSignIn={handleLogin}
+      onMagicLink={handleMagicLink}
+      onBiometricLogin={biometricSupported ? handleBiometricLogin : undefined}
+      onResetPassword={handleForgotPassword}
+      isLoading={isLoading}
+      magicLinkSent={magicLinkSent}
+      biometricSupported={biometricSupported}
+    />
   );
 };
 
