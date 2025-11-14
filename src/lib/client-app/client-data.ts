@@ -643,18 +643,18 @@ export async function getProjectSummary(projectId: string) {
 
     return {
       id: summary.project_id,
-      clientName: 'Cliente', // TODO: add to view if needed
+      clientName: summary.client_name || 'Cliente',
       name: summary.project_name,
-      location: 'Sin ubicación', // TODO: add from projects.ubicacion_json
-      progress: Number(summary.progress_percent) || 0,
+      location: 'Sin ubicación',
+      progress: Number(summary.progress) || 0,
       currentPhase: 'En proceso',
       projectStage: 'construction' as const,
-      totalAmount: Number(summary.total_amount) || 0,
-      totalPaid: Number(summary.total_paid) || 0,
-      totalPending: Number(summary.total_pending) || 0,
-      startDate: summary.start_date,
-      estimatedEndDate: summary.estimated_end_date,
-      status: summary.status
+      totalAmount: Number(summary.total_budget) || 0,
+      totalPaid: 0, // Calcular con paid_ministrations si es necesario
+      totalPending: Number(summary.total_budget) || 0,
+      startDate: summary.created_at,
+      estimatedEndDate: summary.next_event_date || null,
+      status: summary.project_status
     };
   } catch (error) {
     console.error('Error in getProjectSummary:', error);
@@ -818,7 +818,7 @@ export async function getProjectFinancial(projectId: string) {
       .from('v_client_ministrations')
       .select('*')
       .eq('project_id', projectId)
-      .order('seq', { ascending: true });
+      .order('date', { ascending: true });
 
     if (minError) {
       console.error('Error fetching ministrations:', minError);
@@ -846,7 +846,7 @@ export async function getProjectFinancial(projectId: string) {
     }
 
     const formattedMinistrations = (ministrations || []).map(m => ({
-      id: m.seq,
+      id: m.id,
       projectId,
       amount: summary ? (Number(summary.total_amount) * Number(m.percent)) / 100 : 0,
       date: m.date,
