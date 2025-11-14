@@ -14,6 +14,7 @@ export const BUCKETS = {
   cfdi: { private: true },
   firmas: { private: true },
   'crm-attachments': { private: true },
+  'auth-hero-images': { private: true },
   avatars: { private: false }, // Public bucket
 } as const;
 

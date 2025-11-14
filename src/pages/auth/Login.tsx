@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -6,7 +6,8 @@ import { z } from "zod";
 import { bootstrapUserAfterLogin } from "@/lib/auth/bootstrap";
 import { isWebAuthnSupported, authenticateWithBiometric } from "@/lib/webauthn";
 import { SignInPage } from "@/components/auth/SignInPage";
-import { useCorporateContent } from "@/hooks/useCorporateContent";
+import { useActiveAuthHeroImage } from "@/hooks/useAuthHeroImage";
+import { getSignedUrl } from "@/lib/storage-helpers";
 
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -19,9 +20,26 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [heroImageUrl, setHeroImageUrl] = useState<string>("");
 
   const biometricSupported = isWebAuthnSupported();
-  const { data: corporateContent } = useCorporateContent();
+  const { data: activeImage } = useActiveAuthHeroImage();
+
+  // Generar signed URL cuando hay imagen activa
+  useEffect(() => {
+    if (activeImage?.image_path) {
+      getSignedUrl({
+        bucket: 'auth-hero-images',
+        path: activeImage.image_path,
+        expiresInSeconds: 3600,
+      }).then(({ url }) => {
+        setHeroImageUrl(url);
+      });
+    } else {
+      // Fallback a imagen por defecto
+      setHeroImageUrl("https://images.unsplash.com/photo-1497366216548-37526070297c?w=2160&q=80");
+    }
+  }, [activeImage]);
 
   const handleBiometricLogin = async () => {
     setIsLoading(true);
@@ -160,7 +178,7 @@ const Login = () => {
         </span>
       }
       description="Accede a tu cuenta y gestiona tus proyectos"
-      heroImageSrc={corporateContent?.auth_hero_image_url || undefined}
+      heroImageSrc={heroImageUrl || undefined}
       showLogo={true}
       email={email}
       password={password}
