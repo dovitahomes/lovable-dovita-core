@@ -1242,6 +1242,7 @@ export type Database = {
       }
       contenido_corporativo: {
         Row: {
+          auth_hero_image_url: string | null
           color_primario: string | null
           color_secundario: string | null
           created_at: string
@@ -1258,6 +1259,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auth_hero_image_url?: string | null
           color_primario?: string | null
           color_secundario?: string | null
           created_at?: string
@@ -1274,6 +1276,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auth_hero_image_url?: string | null
           color_primario?: string | null
           color_secundario?: string | null
           created_at?: string

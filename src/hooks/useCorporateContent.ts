@@ -14,6 +14,7 @@ export type CorporateContent = {
   telefono_secundario: string | null;
   direccion: string | null;
   sitio_web: string | null;
+  auth_hero_image_url: string | null;
 };
 
 export function useCorporateContent() {
