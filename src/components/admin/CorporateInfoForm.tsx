@@ -27,6 +27,7 @@ export default function CorporateInfoForm() {
     telefono_secundario: "",
     direccion: "",
     sitio_web: "",
+    auth_hero_image_url: "",
   });
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function CorporateInfoForm() {
         telefono_secundario: corporateData.telefono_secundario || "",
         direccion: corporateData.direccion || "",
         sitio_web: corporateData.sitio_web || "",
+        auth_hero_image_url: corporateData.auth_hero_image_url || "",
       });
     }
   }, [corporateData]);
@@ -306,6 +308,35 @@ export default function CorporateInfoForm() {
               onChange={(e) => setFormData({ ...formData, sitio_web: e.target.value })}
               placeholder="https://www.dovita.mx"
             />
+          </div>
+
+          {/* Imagen Hero - Login */}
+          <div className="space-y-2">
+            <Label htmlFor="auth_hero_image_url">
+              Imagen de Hero - Página de Login
+              <span className="text-xs text-muted-foreground ml-2">
+                (Recomendado: 2160x1440px, formato landscape)
+              </span>
+            </Label>
+            <Input
+              id="auth_hero_image_url"
+              type="url"
+              value={formData.auth_hero_image_url}
+              onChange={(e) => setFormData({ ...formData, auth_hero_image_url: e.target.value })}
+              placeholder="https://images.unsplash.com/photo-..."
+            />
+            {formData.auth_hero_image_url && (
+              <div className="mt-2 rounded-lg overflow-hidden border border-border bg-muted">
+                <img 
+                  src={formData.auth_hero_image_url} 
+                  alt="Preview Hero Login" 
+                  className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <Button type="submit" disabled={isSaving} className="w-full">
