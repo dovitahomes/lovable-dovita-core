@@ -40,8 +40,8 @@ export function useClientCalendar(projectId: string | null) {
         notes: event.description,
         created_by: event.created_by,
         created_by_name: event.created_by_name,
-        location: event.location,
-        meeting_link: event.meeting_link,
+        location: event.location || null,
+        meeting_link: (event as any).meeting_link || null,
       })) as CalendarEvent[];
     },
     enabled: !!projectId,
