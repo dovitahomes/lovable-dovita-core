@@ -221,6 +221,33 @@ export type Database = {
           },
         ]
       }
+      auth_hero_images: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string
+          image_path: string
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          image_path: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          image_path?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       bank_accounts: {
         Row: {
           account_alias: string | null

@@ -25,6 +25,7 @@ import {
   MessageSquare,
   CalendarDays,
   CheckSquare,
+  Image,
 } from "lucide-react";
 import { BACKOFFICE_ROUTES } from "./routes";
 
@@ -182,8 +183,32 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     ],
   },
   {
-    label: "Gestión",
+    label: "Gestión / Herramientas",
     items: [
+      { 
+        title: "Manuales", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_MANUALES, 
+        icon: FileText, 
+        moduleName: "herramientas" 
+      },
+      { 
+        title: "Imagen Auth", 
+        url: "/herramientas/imagen-auth", 
+        icon: Image, 
+        moduleName: "herramientas" 
+      },
+      { 
+        title: "Render del Mes", 
+        url: "/herramientas/render-del-mes", 
+        icon: TrendingUp, 
+        moduleName: "herramientas" 
+      },
+      { 
+        title: "Promociones", 
+        url: "/herramientas/promociones", 
+        icon: Percent, 
+        moduleName: "herramientas" 
+      },
       { 
         title: "Métricas", 
         url: BACKOFFICE_ROUTES.METRICS, 

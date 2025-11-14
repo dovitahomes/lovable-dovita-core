@@ -86,6 +86,7 @@ const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
 const RenderDelMes = lazy(() => import("./pages/herramientas/RenderDelMes"));
+const ImagenAuth = lazy(() => import("./pages/herramientas/ImagenAuth"));
 const Manuales = lazy(() => import("./pages/herramientas/Manuales"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 const Budgets = lazy(() => import("./pages/erp/Budgets"));
@@ -404,6 +405,15 @@ const InternalLayout = () => {
                 {/* HERRAMIENTAS - TAREAS                       */}
                 {/* ============================================ */}
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_TAREAS} element={<Suspense fallback={<TableSkeleton />}><Tareas /></Suspense>} />
+                
+                {/* ============================================ */}
+                {/* HERRAMIENTAS - Gestión Corporativa          */}
+                {/* ============================================ */}
+                <Route path="/herramientas/imagen-auth" element={
+                  <ProtectedRoute moduleName="herramientas">
+                    <Suspense fallback={<TableSkeleton />}><ImagenAuth /></Suspense>
+                  </ProtectedRoute>
+                } />
                 
                 {/* ============================================ */}
                 {/* VER COMO CLIENTE (Preview Mode)             */}
