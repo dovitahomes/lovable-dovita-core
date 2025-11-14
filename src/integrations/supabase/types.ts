@@ -2082,6 +2082,7 @@ export type Database = {
           date: string
           gantt_id: string
           id: string
+          invoice_id: string | null
           label: string
           order_index: number
           percent: number | null
@@ -2093,6 +2094,7 @@ export type Database = {
           date: string
           gantt_id: string
           id?: string
+          invoice_id?: string | null
           label: string
           order_index?: number
           percent?: number | null
@@ -2104,6 +2106,7 @@ export type Database = {
           date?: string
           gantt_id?: string
           id?: string
+          invoice_id?: string | null
           label?: string
           order_index?: number
           percent?: number | null
@@ -2115,6 +2118,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "gantt_plans"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gantt_ministrations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gantt_ministrations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_reconciliation"
+            referencedColumns: ["invoice_id"]
           },
         ]
       }
@@ -3280,6 +3297,7 @@ export type Database = {
           event_type: string | null
           id: string
           location: string | null
+          meeting_link: string | null
           notes: string | null
           project_id: string
           start_time: string
@@ -3296,6 +3314,7 @@ export type Database = {
           event_type?: string | null
           id?: string
           location?: string | null
+          meeting_link?: string | null
           notes?: string | null
           project_id: string
           start_time: string
@@ -3312,6 +3331,7 @@ export type Database = {
           event_type?: string | null
           id?: string
           location?: string | null
+          meeting_link?: string | null
           notes?: string | null
           project_id?: string
           start_time?: string
@@ -3540,6 +3560,7 @@ export type Database = {
           created_by: string | null
           id: string
           notas: string | null
+          progress_override: number | null
           project_name: string | null
           sales_advisor_id: string | null
           status: Database["public"]["Enums"]["project_status"]
@@ -3554,6 +3575,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notas?: string | null
+          progress_override?: number | null
           project_name?: string | null
           sales_advisor_id?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -3568,6 +3590,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notas?: string | null
+          progress_override?: number | null
           project_name?: string | null
           sales_advisor_id?: string | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -4893,6 +4916,8 @@ export type Database = {
           event_type: string | null
           id: string | null
           location: string | null
+          meeting_link: string | null
+          notes: string | null
           project_id: string | null
           start_time: string | null
           status: string | null
@@ -4957,15 +4982,44 @@ export type Database = {
       }
       v_client_ministrations: {
         Row: {
-          cumulative_percent: number | null
+          accumulated_percent: number | null
+          alcance: string | null
+          client_name: string | null
           date: string | null
+          gantt_id: string | null
+          id: string | null
+          invoice_amount: number | null
+          invoice_date: string | null
+          invoice_id: string | null
+          invoice_uuid: string | null
           label: string | null
-          notes: string | null
+          payment_status: string | null
           percent: number | null
           project_id: string | null
-          seq: number | null
+          project_name: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "gantt_ministrations_gantt_id_fkey"
+            columns: ["gantt_id"]
+            isOneToOne: false
+            referencedRelation: "gantt_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gantt_ministrations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gantt_ministrations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_reconciliation"
+            referencedColumns: ["invoice_id"]
+          },
           {
             foreignKeyName: "gantt_plans_project_id_fkey"
             columns: ["project_id"]
@@ -5086,18 +5140,77 @@ export type Database = {
           },
         ]
       }
+      v_client_project_members: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          project_id: string | null
+          role: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_project_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_client_financial_summary"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "vw_kpi_project_progress"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       v_client_project_summary: {
         Row: {
-          estimated_end_date: string | null
-          last_payment_at: string | null
-          progress_percent: number | null
+          client_email: string | null
+          client_name: string | null
+          created_at: string | null
+          next_event_date: string | null
+          paid_ministrations: number | null
+          pending_ministrations: number | null
+          progress: number | null
+          project_description: string | null
           project_id: string | null
           project_name: string | null
-          start_date: string | null
-          status: Database["public"]["Enums"]["project_status"] | null
-          total_amount: number | null
-          total_paid: number | null
-          total_pending: number | null
+          project_status: Database["public"]["Enums"]["project_status"] | null
+          team_size: number | null
+          total_budget: number | null
+          updated_at: string | null
         }
         Relationships: []
       }
@@ -5397,6 +5510,10 @@ export type Database = {
       }
       bootstrap_first_admin: { Args: never; Returns: undefined }
       bootstrap_user_on_login: { Args: never; Returns: undefined }
+      calculate_project_progress: {
+        Args: { p_project_id: string }
+        Returns: number
+      }
       check_price_variance: {
         Args: { new_price: number; subpartida_id_param: string }
         Returns: {
