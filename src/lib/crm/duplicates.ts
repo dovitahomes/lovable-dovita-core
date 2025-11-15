@@ -36,11 +36,16 @@ export async function detectDuplicates({
   
   // 1. Buscar por email exacto
   if (email?.trim()) {
-    const { data: emailMatches } = await supabase
+    let query = supabase
       .from('leads')
       .select('*')
-      .ilike('email', email.trim())
-      .neq('id', excludeId || '');
+      .ilike('email', email.trim());
+    
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+
+    const { data: emailMatches } = await query;
 
     if (emailMatches && emailMatches.length > 0) {
       emailMatches.forEach(lead => {
@@ -57,11 +62,16 @@ export async function detectDuplicates({
   if (telefono?.trim()) {
     const cleanPhone = telefono.replace(/\D/g, ''); // Remover no-dígitos
     if (cleanPhone.length >= 10) {
-      const { data: phoneMatches } = await supabase
+      let query = supabase
         .from('leads')
         .select('*')
-        .ilike('telefono', `%${cleanPhone.slice(-10)}%`) // Últimos 10 dígitos
-        .neq('id', excludeId || '');
+        .ilike('telefono', `%${cleanPhone.slice(-10)}%`); // Últimos 10 dígitos
+      
+      if (excludeId) {
+        query = query.neq('id', excludeId);
+      }
+
+      const { data: phoneMatches } = await query;
 
       if (phoneMatches && phoneMatches.length > 0) {
         phoneMatches.forEach(lead => {
@@ -87,10 +97,15 @@ export async function detectDuplicates({
   // 3. Buscar por nombre similar (fuzzy match)
   if (nombre_completo?.trim()) {
     const searchName = nombre_completo.trim().toLowerCase();
-    const { data: nameMatches } = await supabase
+    let query = supabase
       .from('leads')
-      .select('*')
-      .neq('id', excludeId || '');
+      .select('*');
+    
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+
+    const { data: nameMatches } = await query;
 
     if (nameMatches && nameMatches.length > 0) {
       nameMatches.forEach(lead => {
