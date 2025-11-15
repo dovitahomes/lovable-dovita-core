@@ -5,6 +5,11 @@ import { Database } from "@/integrations/supabase/types";
 
 type MailchimpSeatType = Database['public']['Enums']['mailchimp_seat_type'];
 
+interface MailchimpSeatProfile {
+  full_name: string | null;
+  email: string | null;
+}
+
 interface MailchimpSeat {
   id: string;
   user_id: string | null;
@@ -13,6 +18,7 @@ interface MailchimpSeat {
   is_active: boolean;
   mailchimp_member_id: string | null;
   created_at: string;
+  profiles: MailchimpSeatProfile | null;
 }
 
 interface CreateSeatPayload {
@@ -41,17 +47,40 @@ export function useMailchimpSeats() {
   const { data: seats, isLoading } = useQuery({
     queryKey: ['mailchimp-seats'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Primero obtenemos los seats
+      const { data: seatsData, error: seatsError } = await supabase
         .from('mailchimp_seats')
-        .select(`
-          *,
-          profiles!mailchimp_seats_user_id_fkey(full_name, email)
-        `)
+        .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data as MailchimpSeat[];
+      if (seatsError) throw seatsError;
+
+      // Luego obtenemos los profiles para los user_ids que existan
+      const userIds = seatsData?.filter(s => s.user_id).map(s => s.user_id!) || [];
+      
+      let profilesMap: Record<string, { full_name: string | null; email: string | null }> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        if (profilesError) throw profilesError;
+
+        profilesMap = Object.fromEntries(
+          profilesData?.map(p => [p.id, { full_name: p.full_name, email: p.email }]) || []
+        );
+      }
+
+      // Combinar seats con profiles
+      const seatsWithProfiles: MailchimpSeat[] = seatsData?.map(seat => ({
+        ...seat,
+        profiles: seat.user_id ? profilesMap[seat.user_id] || null : null,
+      })) || [];
+
+      return seatsWithProfiles;
     },
   });
 
