@@ -114,10 +114,39 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 4. Enviar según proveedor
     if (provider === 'mailchimp' && mailchimpEmail) {
-      // TODO FASE 2: Implementar envío via Mailchimp
-      // Por ahora, fallback a Resend
-      console.log('[email-router] Mailchimp sending not implemented yet, using Resend');
-      provider = 'resend';
+      // Enviar via Mailchimp
+      console.log('[email-router] Sending via Mailchimp from:', mailchimpEmail);
+      
+      const mailchimpResponse = await supabase.functions.invoke('mailchimp-proxy', {
+        body: { 
+          from: mailchimpEmail,
+          to,
+          subject,
+          html: body.replace(/\n/g, '<br>'), // Convertir saltos de línea a HTML
+        },
+      });
+
+      if (mailchimpResponse.error) {
+        console.error('[email-router] Mailchimp error, falling back to Resend:', mailchimpResponse.error);
+        provider = 'resend';
+      } else if (!mailchimpResponse.data?.success) {
+        console.error('[email-router] Mailchimp failed, falling back to Resend:', mailchimpResponse.data?.error);
+        provider = 'resend';
+      } else {
+        // Éxito con Mailchimp
+        return new Response(
+          JSON.stringify({
+            success: true,
+            provider: 'mailchimp',
+            sentFrom: mailchimpEmail,
+            campaignId: mailchimpResponse.data.campaignId,
+          } as EmailRouterResponse),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
     }
 
     if (provider === 'resend') {
