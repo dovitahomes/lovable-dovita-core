@@ -1832,6 +1832,48 @@ export type Database = {
           },
         ]
       }
+      email_config: {
+        Row: {
+          created_at: string
+          id: string
+          mailchimp_api_key: string | null
+          mailchimp_default_list_id: string | null
+          mailchimp_generic_email: string | null
+          mailchimp_server_prefix: string | null
+          mailchimp_total_seats: number | null
+          proveedor: Database["public"]["Enums"]["email_provider"]
+          resend_api_key: string | null
+          resend_from_domain: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mailchimp_api_key?: string | null
+          mailchimp_default_list_id?: string | null
+          mailchimp_generic_email?: string | null
+          mailchimp_server_prefix?: string | null
+          mailchimp_total_seats?: number | null
+          proveedor?: Database["public"]["Enums"]["email_provider"]
+          resend_api_key?: string | null
+          resend_from_domain?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mailchimp_api_key?: string | null
+          mailchimp_default_list_id?: string | null
+          mailchimp_generic_email?: string | null
+          mailchimp_server_prefix?: string | null
+          mailchimp_total_seats?: number | null
+          proveedor?: Database["public"]["Enums"]["email_provider"]
+          resend_api_key?: string | null
+          resend_from_domain?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employee_calendar_events: {
         Row: {
           created_at: string | null
@@ -2451,6 +2493,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mailchimp_seats: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          mailchimp_email: string
+          mailchimp_member_id: string | null
+          seat_type: Database["public"]["Enums"]["mailchimp_seat_type"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          mailchimp_email: string
+          mailchimp_member_id?: string | null
+          seat_type: Database["public"]["Enums"]["mailchimp_seat_type"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          mailchimp_email?: string
+          mailchimp_member_id?: string | null
+          seat_type?: Database["public"]["Enums"]["mailchimp_seat_type"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       materials_consumption: {
         Row: {
@@ -5705,6 +5780,7 @@ export type Database = {
       commission_status: "calculada" | "pendiente" | "pagada"
       commission_type: "alianza" | "colaborador"
       currency_type: "MXN" | "USD" | "EUR"
+      email_provider: "mailchimp" | "resend" | "none"
       equipment_type: "propia" | "rentada"
       gantt_type: "parametrico" | "ejecutivo"
       invoice_type: "ingreso" | "egreso"
@@ -5717,6 +5793,7 @@ export type Database = {
         | "propuesta"
         | "negociacion"
         | "ganado"
+      mailchimp_seat_type: "generic" | "user"
       node_type: "departamento" | "mayor" | "partida" | "subpartida"
       payment_method: "PUE" | "PPD"
       person_type: "fisica" | "moral"
@@ -5857,6 +5934,7 @@ export const Constants = {
       commission_status: ["calculada", "pendiente", "pagada"],
       commission_type: ["alianza", "colaborador"],
       currency_type: ["MXN", "USD", "EUR"],
+      email_provider: ["mailchimp", "resend", "none"],
       equipment_type: ["propia", "rentada"],
       gantt_type: ["parametrico", "ejecutivo"],
       invoice_type: ["ingreso", "egreso"],
@@ -5870,6 +5948,7 @@ export const Constants = {
         "negociacion",
         "ganado",
       ],
+      mailchimp_seat_type: ["generic", "user"],
       node_type: ["departamento", "mayor", "partida", "subpartida"],
       payment_method: ["PUE", "PPD"],
       person_type: ["fisica", "moral"],
