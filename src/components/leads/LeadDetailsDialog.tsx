@@ -1,18 +1,19 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, Mail, MapPin, Building, LayoutGrid, UserPlus, Edit, Loader2, Plus } from "lucide-react";
+import { Phone, Mail, MapPin, Building, LayoutGrid, UserPlus, Edit, Loader2, Plus, Trash2 } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { LeadQuickActions } from "./LeadQuickActions";
 import { ActivityTimeline } from "./ActivityTimeline";
 import { ConvertLeadDialog } from "./ConvertLeadDialog";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { useTasks } from "@/hooks/crm/useTasks";
-import { useUpdateLead } from "@/hooks/useLeads";
+import { useUpdateLead, useDeleteLead } from "@/hooks/useLeads";
 import { useLeadNotes, useAddLeadNote } from "@/hooks/crm/useLeadNotes";
 import { NoteCard } from "./NoteCard";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +37,7 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
   const [showConvertDialog, setShowConvertDialog] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // ✅ CRÍTICO: Hooks DEBEN llamarse ANTES de cualquier early return
   const { data: activities } = useCrmActivities('lead', lead?.id || '');
@@ -43,6 +45,7 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
   const { data: savedNotes = [], isLoading: notesLoading } = useLeadNotes(lead?.id || '');
   const updateLead = useUpdateLead();
   const addNote = useAddLeadNote();
+  const deleteLead = useDeleteLead();
   const { toast } = useToast();
 
   // Sync notes when lead changes
@@ -109,6 +112,18 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
     }
   };
 
+  const handleDelete = async () => {
+    if (!lead?.id) return;
+    
+    try {
+      await deleteLead.mutateAsync(lead.id);
+      setShowDeleteDialog(false);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+    }
+  };
+
   const InfoField = ({ icon: Icon, label, value }: any) => {
     if (!value) return null;
     return (
@@ -127,28 +142,40 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader className="border-b pb-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarFallback className="text-lg bg-primary/10 text-primary font-semibold">
-                  {getInitials(lead.nombre_completo)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <DialogTitle className="text-2xl mb-1">{lead.nombre_completo}</DialogTitle>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <StatusBadge status={lead.status} />
-                  {urgencyBadge && (
-                    <Badge className={cn("text-white border-0", urgencyBadge.color)}>
-                      {urgencyBadge.label}
-                    </Badge>
-                  )}
-                  {lead.amount && (
-                    <Badge variant="secondary" className="font-mono">
-                      {formatCurrency(lead.amount)}
-                    </Badge>
-                  )}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-lg bg-primary/10 text-primary font-semibold">
+                    {getInitials(lead.nombre_completo)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <DialogTitle className="text-2xl mb-1">{lead.nombre_completo}</DialogTitle>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <StatusBadge status={lead.status} />
+                    {urgencyBadge && (
+                      <Badge className={cn("text-white border-0", urgencyBadge.color)}>
+                        {urgencyBadge.label}
+                      </Badge>
+                    )}
+                    {lead.amount && (
+                      <Badge variant="secondary" className="font-mono">
+                        {formatCurrency(lead.amount)}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                title="Eliminar lead"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </DialogHeader>
 
@@ -347,6 +374,39 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
           }}
         />
       )}
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente el lead <strong>{lead?.nombre_completo}</strong> y toda su información asociada.
+              <br /><br />
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteLead.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteLead.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Eliminar
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
