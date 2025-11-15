@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useMyProjectChats } from "@/hooks/useMyProjectChats";
-import useProjectChat from "@/features/client/hooks/useProjectChat";
+import { useERPProjectChat } from "@/hooks/useERPProjectChat";
 import { useProjectChatParticipants } from "@/hooks/useProjectChatParticipants";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,7 +34,7 @@ export default function MisChats() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
-  const { messages, loading: messagesLoading, sending, sendMessage } = useProjectChat(selectedProjectId);
+  const { messages, loading: messagesLoading, sending, sendMessage } = useERPProjectChat(selectedProjectId);
   const { data: participants = [] } = useProjectChatParticipants(selectedProjectId || '');
 
   // Get current user ID
@@ -403,7 +403,15 @@ export default function MisChats() {
                         {dateMessages.map((message) => (
                           <ERPChatMessage 
                             key={message.id} 
-                            message={message}
+                            message={{
+                              ...message,
+                              attachments: message.attachments || [],
+                              edited_at: message.edited_at || null,
+                              sender: {
+                                ...message.sender,
+                                avatar_url: message.sender.avatar_url || ''
+                              }
+                            }}
                             currentUserId={currentUserId}
                           />
                         ))}
