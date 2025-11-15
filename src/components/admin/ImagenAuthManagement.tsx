@@ -24,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getSignedUrl } from "@/lib/storage-helpers";
 
-export default function ImagenAuth() {
+export default function ImagenAuthManagement() {
   const { data: images, isLoading } = useAllAuthHeroImages();
   const createMutation = useCreateAuthHeroImage();
   const toggleMutation = useToggleAuthHeroImage();
@@ -132,23 +132,15 @@ export default function ImagenAuth() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <Skeleton className="h-[400px] w-full" />
+      <div className="space-y-4">
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-32 w-full" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Imagen de Login</h1>
-        <p className="text-muted-foreground mt-2">
-          Gestiona la imagen de fondo que se muestra en la página de inicio de sesión
-        </p>
-      </div>
-
-      {/* Upload Card */}
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -156,68 +148,64 @@ export default function ImagenAuth() {
             Subir Nueva Imagen
           </CardTitle>
           <CardDescription>
-            Formato recomendado: JPG o PNG, 2160x1440px (landscape), máximo 5MB
+            La imagen de fondo para la página de login (máx. 5MB, JPG/PNG/WEBP)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <label htmlFor="image-upload" className="cursor-pointer">
-              <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                <ImageIcon className="h-4 w-4" />
-                Seleccionar Imagen
-              </div>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-                disabled={uploading}
-              />
-            </label>
-            {uploading && (
-              <span className="text-sm text-muted-foreground">
-                Subiendo imagen...
-              </span>
-            )}
+          <div className="flex flex-col items-center gap-4 p-8 border-2 border-dashed rounded-lg hover:border-primary/50 transition-colors">
+            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+            <div className="text-center">
+              <label htmlFor="hero-upload" className="cursor-pointer">
+                <div className="text-sm text-muted-foreground">
+                  Haz clic para seleccionar una imagen
+                </div>
+                <input
+                  id="hero-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                  className="hidden"
+                />
+              </label>
+            </div>
           </div>
 
-          {previewUrl && (
-            <div className="rounded-lg overflow-hidden border border-border">
+          {uploading && (
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">Subiendo imagen...</p>
+            </div>
+          )}
+
+          {previewUrl && !uploading && (
+            <div className="relative aspect-video rounded-lg overflow-hidden">
               <img 
                 src={previewUrl} 
                 alt="Preview" 
-                className="w-full h-64 object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Images List */}
       <Card>
         <CardHeader>
-          <CardTitle>Imágenes Subidas</CardTitle>
+          <CardTitle>Imágenes Guardadas</CardTitle>
           <CardDescription>
-            Solo una imagen puede estar activa a la vez
+            Gestiona las imágenes de login. Solo una puede estar activa a la vez.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!images || images.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No hay imágenes subidas</p>
-              <p className="text-sm mt-2">Sube tu primera imagen de hero para el login</p>
-            </div>
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No hay imágenes guardadas aún
+            </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {images.map((image) => (
-                <div
-                  key={image.id}
-                  className="group relative rounded-lg border border-border overflow-hidden bg-card hover:shadow-lg transition-all"
-                >
-                  {/* Image */}
-                  <div className="aspect-video relative">
+                <Card key={image.id} className="overflow-hidden">
+                  <div className="relative aspect-video">
                     {imageUrls[image.id] ? (
                       <img
                         src={imageUrls[image.id]}
@@ -225,80 +213,68 @@ export default function ImagenAuth() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Skeleton className="w-full h-full" />
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                      </div>
                     )}
-                    
-                    {/* Badge Active */}
                     {image.active && (
-                      <Badge className="absolute top-2 right-2 bg-green-500">
+                      <Badge className="absolute top-2 right-2" variant="default">
                         Activa
                       </Badge>
                     )}
                   </div>
-
-                  {/* Actions */}
-                  <div className="p-4 space-y-2">
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(image.created_at).toLocaleDateString('es-MX', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                  <CardContent className="p-4">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(image.created_at).toLocaleDateString()}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={image.active ? "secondary" : "default"}
+                          size="sm"
+                          onClick={() => toggleActive(image.id, image.active || false)}
+                          className="flex-1"
+                        >
+                          {image.active ? (
+                            <>
+                              <EyeOff className="h-4 w-4 mr-1" />
+                              Desactivar
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="h-4 w-4 mr-1" />
+                              Activar
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteId(image.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant={image.active ? "secondary" : "outline"}
-                        onClick={() => toggleActive(image.id, image.active)}
-                        disabled={toggleMutation.isPending}
-                        className="flex-1"
-                      >
-                        {image.active ? (
-                          <>
-                            <EyeOff className="h-4 w-4 mr-1" />
-                            Desactivar
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-1" />
-                            Activar
-                          </>
-                        )}
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => setDeleteId(image.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar imagen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. La imagen se eliminará permanentemente del sistema.
+              Esta acción no se puede deshacer. La imagen se eliminará permanentemente del servidor.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
