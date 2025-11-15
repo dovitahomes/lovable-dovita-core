@@ -234,6 +234,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: Mail, 
         moduleName: "herramientas" 
       },
+      { 
+        title: "Asientos Mailchimp", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_SEATS, 
+        icon: Mail, 
+        moduleName: "herramientas" 
+      },
     ],
   },
 ];
