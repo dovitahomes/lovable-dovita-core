@@ -95,21 +95,25 @@ export function EmailComposerDialog({
         throw new Error("Email inválido");
       }
 
-      // Llamar edge function para enviar email
-      const { data, error: functionError } = await supabase.functions.invoke('send-email', {
+      // Obtener usuario actual para asignación de asiento
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+
+      // 1. Enviar email via email-router (priorización inteligente)
+      const { data, error: functionError } = await supabase.functions.invoke('email-router', {
         body: { 
           to,
           cc: cc.trim() || undefined,
           subject,
           body,
           leadName,
+          userId, // Para asignación de asiento Mailchimp
         }
       });
 
       if (functionError) throw functionError;
+      if (!data?.success) throw new Error(data?.error || 'Error al enviar email');
 
-      // Registrar actividad en CRM
-      const userId = (await supabase.auth.getUser()).data.user?.id;
+      // 2. Registrar actividad en CRM
       const { error: activityError } = await supabase
         .from('crm_activities')
         .insert({
@@ -122,6 +126,8 @@ export function EmailComposerDialog({
             cc: cc.trim() || null,
             subject,
             preview: body.substring(0, 100) + (body.length > 100 ? '...' : ''),
+            provider: data.provider,
+            sentFrom: data.sentFrom,
           },
           performed_by: userId,
         });
@@ -130,10 +136,10 @@ export function EmailComposerDialog({
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['crm-activities'] });
       queryClient.invalidateQueries({ queryKey: ['leads'] });
-      toast.success("Email enviado exitosamente");
+      toast.success(`Email enviado desde ${data.sentFrom} vía ${data.provider.toUpperCase()}`);
       
       // Reset form
       setTo(leadEmail);
