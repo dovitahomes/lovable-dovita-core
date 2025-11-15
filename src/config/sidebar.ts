@@ -27,6 +27,7 @@ import {
   CheckSquare,
   Image,
   Mail,
+  TrendingUp as TrendingUpIcon,
 } from "lucide-react";
 import { BACKOFFICE_ROUTES } from "./routes";
 
@@ -238,6 +239,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         title: "Asientos Mailchimp", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_SEATS, 
         icon: Mail, 
+        moduleName: "herramientas" 
+      },
+      { 
+        title: "Métricas Mailchimp", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_METRICS, 
+        icon: TrendingUpIcon, 
         moduleName: "herramientas" 
       },
     ],
