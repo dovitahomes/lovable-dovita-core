@@ -186,18 +186,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     label: "Gestión / Herramientas",
     items: [
       { 
-        title: "Manuales", 
-        url: BACKOFFICE_ROUTES.HERRAMIENTAS_MANUALES, 
-        icon: FileText, 
-        moduleName: "herramientas" 
-      },
-      { 
-        title: "Imagen Auth", 
-        url: "/herramientas/imagen-auth", 
-        icon: Image, 
-        moduleName: "herramientas" 
-      },
-      { 
         title: "Contenido Corporativo", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO, 
         icon: Building2, 
