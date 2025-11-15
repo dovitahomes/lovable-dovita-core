@@ -237,23 +237,17 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: Mail, 
         moduleName: "herramientas" 
       },
+    ],
+  },
+  {
+    label: "Mailchimp",
+    items: [
       { 
-        title: "Asientos Mailchimp", 
-        url: BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_SEATS, 
-        icon: Mail, 
-        moduleName: "herramientas" 
-      },
-      { 
-        title: "Métricas Mailchimp", 
+        title: "Métricas", 
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_METRICS, 
         icon: TrendingUpIcon, 
         moduleName: "herramientas" 
       },
-    ],
-  },
-  {
-    label: "Comunicaciones",
-    items: [
       { 
         title: "Bandeja de Entrada", 
         url: BACKOFFICE_ROUTES.MAILCHIMP_INBOX,

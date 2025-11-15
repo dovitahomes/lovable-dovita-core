@@ -74,9 +74,18 @@ export function AppSidebar() {
   // Si está cargando, mostrar todas las secciones con skeleton
   // Si no, filtrar por permisos
   const routesToShow = permsLoading
-    ? SIDEBAR_SECTIONS // Mostrar estructura mientras carga
+    ? SIDEBAR_SECTIONS
     : SIDEBAR_SECTIONS.map(section => {
+        // Filtrar sección "Mailchimp" solo si está configurado
+        if (section.label === "Mailchimp" && emailConfig?.proveedor !== 'mailchimp') {
+          return { ...section, items: [] };
+        }
+        
         const filteredItems = section.items.filter(item => {
+          // Para items externos de Mailchimp
+          if (item.isExternal && item.url === "external:mailchimp") {
+            return emailConfig?.proveedor === 'mailchimp' && canView(item.moduleName);
+          }
           const can = canView(item.moduleName);
           // LOGGING: Detallar cada módulo
           console.log('[AppSidebar] 📋 Module:', item.moduleName, 'canView:', can, 'totalPerms:', perms.length);

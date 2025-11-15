@@ -86,7 +86,7 @@ const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
 const EmailConfiguration = lazy(() => import("./pages/admin/EmailConfiguration"));
-const MailchimpSeats = lazy(() => import("./pages/admin/MailchimpSeats"));
+
 const MailchimpMetrics = lazy(() => import("./pages/admin/MailchimpMetrics"));
 const MailchimpInbox = lazy(() => import("./pages/MailchimpInbox"));
 const Metrics = lazy(() => import("./pages/Metrics"));
@@ -197,13 +197,6 @@ const InternalLayout = () => {
                   <RequireAdmin>
                     <ProtectedRoute moduleName="herramientas">
                       <Suspense fallback={<TableSkeleton />}><EmailConfiguration /></Suspense>
-                    </ProtectedRoute>
-                  </RequireAdmin>
-                } />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_SEATS} element={
-                  <RequireAdmin>
-                    <ProtectedRoute moduleName="herramientas">
-                      <Suspense fallback={<TableSkeleton />}><MailchimpSeats /></Suspense>
                     </ProtectedRoute>
                   </RequireAdmin>
                 } />

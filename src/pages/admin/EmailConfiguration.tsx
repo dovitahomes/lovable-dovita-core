@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Mail, Server, Key } from "lucide-react";
+import MailchimpSeats from "./MailchimpSeats";
 
 export default function EmailConfiguration() {
   const { config, isLoading, updateConfig, isUpdating } = useEmailConfig();
@@ -60,15 +62,24 @@ export default function EmailConfiguration() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Selector de Proveedor */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Proveedor de Email</CardTitle>
-            <CardDescription>
-              Seleccione el servicio que desea utilizar para envío de emails
-            </CardDescription>
-          </CardHeader>
+      <Tabs defaultValue="config" className="w-full">
+        <TabsList>
+          <TabsTrigger value="config">Configuración</TabsTrigger>
+          {config?.proveedor === 'mailchimp' && (
+            <TabsTrigger value="seats">Asientos Mailchimp</TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="config" className="mt-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Selector de Proveedor */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Proveedor de Email</CardTitle>
+                <CardDescription>
+                  Seleccione el servicio que desea utilizar para envío de emails
+                </CardDescription>
+              </CardHeader>
           <CardContent>
             <RadioGroup
               value={formData.proveedor}
