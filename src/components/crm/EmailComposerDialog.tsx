@@ -19,6 +19,8 @@ import { Loader2, Send, Paperclip, X, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { MailchimpTemplateSelector } from "@/components/email/MailchimpTemplateSelector";
+import { MailchimpLinkButton } from "@/components/email/MailchimpLinkButton";
 
 interface EmailComposerDialogProps {
   open: boolean;
@@ -176,6 +178,10 @@ export function EmailComposerDialog({
     setBody(template.body);
   };
 
+  const handleMailchimpTemplateLoad = (html: string) => {
+    setBody(html);
+  };
+
   const handleSend = () => {
     sendEmailMutation.mutate();
   };
@@ -193,9 +199,14 @@ export function EmailComposerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Send className="h-5 w-5 text-primary" />
-            Enviar Email a {leadName}
+          <DialogTitle className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
+              Enviar Email a {leadName}
+            </div>
+            {config?.proveedor === 'mailchimp' && (
+              <MailchimpLinkButton variant="ghost" size="sm" />
+            )}
           </DialogTitle>
           <DialogDescription>
             Redacta y envía un email directamente al lead. Se registrará automáticamente en el timeline.
@@ -234,9 +245,17 @@ export function EmailComposerDialog({
             </div>
           )}
 
+          {/* Templates de Mailchimp (si está configurado) */}
+          {config && config.proveedor === 'mailchimp' && (
+            <MailchimpTemplateSelector 
+              onTemplateSelect={handleMailchimpTemplateLoad}
+              disabled={sendEmailMutation.isPending}
+            />
+          )}
+
           {/* Plantillas rápidas */}
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Plantillas rápidas</Label>
+            <Label className="text-xs text-muted-foreground">Plantillas rápidas locales</Label>
             <div className="flex gap-2 flex-wrap">
               {EMAIL_TEMPLATES.map((template) => (
                 <Button
@@ -245,6 +264,7 @@ export function EmailComposerDialog({
                   variant="outline"
                   onClick={() => handleTemplateSelect(template)}
                   className="text-xs"
+                  disabled={sendEmailMutation.isPending}
                 >
                   {template.name}
                 </Button>
