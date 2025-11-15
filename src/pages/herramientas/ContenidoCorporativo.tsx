@@ -1,9 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, ImageIcon, Sparkles, FileText } from "lucide-react";
+import { Building2, ImageIcon, Sparkles, FileText, Image } from "lucide-react";
 import CorporateInfoForm from "@/components/admin/CorporateInfoForm";
 import RendersManagement from "@/components/admin/RendersManagement";
 import PromotionsManagement from "@/components/admin/PromotionsManagement";
 import ManualsManagement from "@/components/admin/ManualsManagement";
+import ImagenAuthManagement from "@/components/admin/ImagenAuthManagement";
 
 export default function ContenidoCorporativo() {
   return (
@@ -16,7 +17,7 @@ export default function ContenidoCorporativo() {
       </div>
 
       <Tabs defaultValue="info-empresa" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
           <TabsTrigger value="info-empresa" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">Información Empresa</span>
@@ -37,6 +38,11 @@ export default function ContenidoCorporativo() {
             <span className="hidden sm:inline">Manuales</span>
             <span className="sm:hidden">Docs</span>
           </TabsTrigger>
+          <TabsTrigger value="imagen-auth" className="flex items-center gap-2">
+            <Image className="h-4 w-4" />
+            <span className="hidden sm:inline">Imagen Auth</span>
+            <span className="sm:hidden">Auth</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info-empresa" className="mt-6">
@@ -53,6 +59,10 @@ export default function ContenidoCorporativo() {
 
         <TabsContent value="manuales" className="mt-6">
           <ManualsManagement />
+        </TabsContent>
+
+        <TabsContent value="imagen-auth" className="mt-6">
+          <ImagenAuthManagement />
         </TabsContent>
       </Tabs>
     </div>

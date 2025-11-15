@@ -198,28 +198,16 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         moduleName: "herramientas" 
       },
       { 
-        title: "Render del Mes", 
-        url: "/herramientas/render-del-mes", 
-        icon: TrendingUp, 
-        moduleName: "herramientas" 
-      },
-      { 
-        title: "Promociones", 
-        url: "/herramientas/promociones", 
-        icon: Percent, 
-        moduleName: "herramientas" 
+        title: "Contenido Corporativo", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO, 
+        icon: Building2, 
+        moduleName: "contenido_corporativo" 
       },
       { 
         title: "Métricas", 
         url: BACKOFFICE_ROUTES.METRICS, 
         icon: TrendingUp, 
         moduleName: "herramientas" 
-      },
-      { 
-        title: "Contenido Corporativo", 
-        url: BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO, 
-        icon: Building2, 
-        moduleName: "contenido_corporativo" 
       },
       { 
         title: "Sucursales", 

@@ -85,9 +85,6 @@ const Accesos = lazy(() => import("./pages/herramientas/Accesos"));
 const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
-const RenderDelMes = lazy(() => import("./pages/herramientas/RenderDelMes"));
-const ImagenAuth = lazy(() => import("./pages/herramientas/ImagenAuth"));
-const Manuales = lazy(() => import("./pages/herramientas/Manuales"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 const Budgets = lazy(() => import("./pages/erp/Budgets"));
 const BudgetWizard = lazy(() => import("./pages/erp/BudgetWizard"));
@@ -190,16 +187,6 @@ const InternalLayout = () => {
                 <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_USUARIOS} element={
                   <ProtectedRoute moduleName="usuarios">
                     <Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>
-                  </ProtectedRoute>
-                } />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_RENDER_DEL_MES} element={
-                  <ProtectedRoute moduleName="contenido_corporativo">
-                    <Suspense fallback={<TableSkeleton />}><RenderDelMes /></Suspense>
-                  </ProtectedRoute>
-                } />
-                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_MANUALES} element={
-                  <ProtectedRoute moduleName="contenido_corporativo">
-                    <Suspense fallback={<TableSkeleton />}><Manuales /></Suspense>
                   </ProtectedRoute>
                 } />
                 
@@ -409,11 +396,17 @@ const InternalLayout = () => {
                 {/* ============================================ */}
                 {/* HERRAMIENTAS - Gestión Corporativa          */}
                 {/* ============================================ */}
-                <Route path="/herramientas/imagen-auth" element={
-                  <ProtectedRoute moduleName="herramientas">
-                    <Suspense fallback={<TableSkeleton />}><ImagenAuth /></Suspense>
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} element={
+                  <ProtectedRoute moduleName="contenido_corporativo">
+                    <Suspense fallback={<TabsSkeleton />}><ContenidoCorporativo /></Suspense>
                   </ProtectedRoute>
                 } />
+                
+                {/* Redirects de URLs legacy a Contenido Corporativo */}
+                <Route path="/herramientas/render-del-mes" element={<Navigate to={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} replace />} />
+                <Route path="/herramientas/imagen-auth" element={<Navigate to={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} replace />} />
+                <Route path="/herramientas/manuales" element={<Navigate to={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} replace />} />
+                <Route path="/herramientas/promociones" element={<Navigate to={BACKOFFICE_ROUTES.HERRAMIENTAS_CONTENIDO} replace />} />
                 
                 {/* ============================================ */}
                 {/* VER COMO CLIENTE (Preview Mode)             */}
