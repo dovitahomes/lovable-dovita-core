@@ -36,6 +36,7 @@ export type SidebarItem = {
   url: string;
   icon: any;
   moduleName: string; // For permission checks
+  isExternal?: boolean; // For external links that open in new tab
   children?: SidebarItem[];
 };
 
@@ -246,6 +247,18 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_MAILCHIMP_METRICS, 
         icon: TrendingUpIcon, 
         moduleName: "herramientas" 
+      },
+    ],
+  },
+  {
+    label: "Comunicaciones",
+    items: [
+      { 
+        title: "Mailchimp Dashboard", 
+        url: "external:mailchimp",
+        icon: Mail, 
+        moduleName: "herramientas",
+        isExternal: true
       },
     ],
   },

@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useEmailConfig } from "@/hooks/useEmailConfig";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { useRef, useEffect } from "react";
 import dovitaIcon from "@/assets/dovita-icon.png";
@@ -30,6 +31,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export function AppSidebar() {
   const { state, setOpen } = useSidebar();
   const navigate = useNavigate();
+  const { config: emailConfig } = useEmailConfig();
   const { theme } = useTheme();
   const { sidebarTheme, toggleSidebarTheme } = useSidebarTheme();
   const { prefetch } = usePrefetchRoute();
@@ -151,31 +153,60 @@ export function AppSidebar() {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {group.items.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <NavLink
-                          to={item.url}
-                          end={item.url === "/"}
-                          className={getNavClass}
-                          onMouseEnter={() => {
-                            if (item.url === "/proveedores") {
-                              prefetch({
-                                queryKey: ["providers"],
-                                queryFn: async () => {
-                                  const { data } = await supabase.from("providers").select("*").order("name");
-                                  return data;
-                                },
-                              });
-                            }
-                          }}
-                        >
-                          <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
-                          {(isMobile || state !== "collapsed") && <span>{item.title}</span>}
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {group.items.map((item) => {
+                    // Handle external Mailchimp link
+                    if (item.isExternal && item.url === "external:mailchimp") {
+                      // Only show if Mailchimp is configured
+                      if (!emailConfig || emailConfig.proveedor !== 'mailchimp' || !emailConfig.mailchimp_server_prefix) {
+                        return null;
+                      }
+                      
+                      const mailchimpUrl = `https://${emailConfig.mailchimp_server_prefix}.admin.mailchimp.com/`;
+                      
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <a
+                              href={mailchimpUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                              {(isMobile || state !== "collapsed") && <span>{item.title}</span>}
+                            </a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    }
+                    
+                    // Normal internal links
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            end={item.url === "/"}
+                            className={getNavClass}
+                            onMouseEnter={() => {
+                              if (item.url === "/proveedores") {
+                                prefetch({
+                                  queryKey: ["providers"],
+                                  queryFn: async () => {
+                                    const { data } = await supabase.from("providers").select("*").order("name");
+                                    return data;
+                                  },
+                                });
+                              }
+                            }}
+                          >
+                            <item.icon className={sidebarTheme === "light" ? "h-4 w-4 text-blue-600" : "h-4 w-4"} />
+                            {(isMobile || state !== "collapsed") && <span>{item.title}</span>}
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
