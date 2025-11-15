@@ -232,63 +232,94 @@ export default function useProjectChat(projectId: string | null) {
     return () => clearTimeout(timer);
   }, [projectId, messages.length, queryClient]);
 
-  // Set up realtime subscription (only for real data, not mock)
+  // Set up realtime subscription (only for real data, not mock) - MEJORADO
   useEffect(() => {
     if (!projectId || useMock) return;
 
-    const channel = supabase
-      .channel(`pm:${projectId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'project_messages',
-          filter: `project_id=eq.${projectId}`,
-        },
-        async (payload) => {
-          if (isMounted.current) {
-            // Fetch complete message with sender info
-            const { data } = await (supabase
-              .from('project_messages') as any)
-              .select(`
-                id,
-                project_id,
-                sender_id,
-                message,
-                attachments,
-                status,
-                is_edited,
-                edited_at,
-                replied_to_id,
-                created_at,
-                sender:profiles!project_messages_sender_id_fkey(
-                  id,
-                  full_name,
-                  email,
-                  avatar_url
-                )
-              `)
-              .eq('id', payload.new.id)
-              .single();
+    console.log('[Client Chat] Configurando Realtime para proyecto:', projectId);
 
-            if (data) {
-              const transformedMsg = {
-                ...data,
-                sender: Array.isArray(data.sender) ? data.sender[0] : data.sender,
-                attachments: data.attachments || []
-              };
-              setMessages(prev => [...prev, transformedMsg as ChatMessage]);
-            }
+    const channel = supabase
+      .channel(`client-project-chat:${projectId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'project_messages',
+        filter: `project_id=eq.${projectId}`
+      }, async (payload) => {
+        console.log('[Client Chat] Nuevo mensaje Realtime:', payload.new);
+
+        if (isMounted.current) {
+          // Cargar mensaje completo con información del sender
+          const { data: newMessage } = await supabase
+            .from('project_messages')
+            .select(`
+              id, project_id, sender_id, message, attachments, 
+              status, is_edited, edited_at, replied_to_id, created_at,
+              sender:profiles!project_messages_sender_id_fkey(
+                id, full_name, email, avatar_url
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (newMessage) {
+            const transformedMsg: ChatMessage = {
+              id: newMessage.id,
+              project_id: newMessage.project_id,
+              sender_id: newMessage.sender_id,
+              message: newMessage.message,
+              attachments: (newMessage.attachments as any) || [],
+              status: (newMessage.status as 'sent' | 'delivered' | 'read') || 'sent',
+              is_edited: newMessage.is_edited || false,
+              edited_at: newMessage.edited_at || undefined,
+              replied_to_id: newMessage.replied_to_id || undefined,
+              created_at: newMessage.created_at,
+              sender: {
+                id: (newMessage.sender as any)?.id || newMessage.sender_id,
+                full_name: (newMessage.sender as any)?.full_name || 'Usuario',
+                email: (newMessage.sender as any)?.email || '',
+                avatar_url: (newMessage.sender as any)?.avatar_url
+              }
+            };
+
+            // Evitar duplicados
+            setMessages(prev => {
+              const exists = prev.some(m => m.id === transformedMsg.id);
+              if (exists) return prev;
+              return [...prev, transformedMsg];
+            });
           }
         }
-      )
-      .subscribe();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'project_messages',
+        filter: `project_id=eq.${projectId}`
+      }, (payload) => {
+        console.log('[Client Chat] Mensaje actualizado:', payload.new);
+        
+        if (isMounted.current) {
+          setMessages(prev => prev.map(msg => 
+            msg.id === payload.new.id 
+              ? { 
+                  ...msg, 
+                  status: (payload.new.status as 'sent' | 'delivered' | 'read') || msg.status,
+                  is_edited: payload.new.is_edited || msg.is_edited
+                }
+              : msg
+          ));
+        }
+      })
+      .subscribe((status) => {
+        console.log('[Client Chat] Estado de suscripción:', status);
+      });
 
     return () => {
-      channel.unsubscribe();
+      console.log('[Client Chat] Limpiando suscripción Realtime');
+      supabase.removeChannel(channel);
     };
-  }, [projectId, isMounted, useMock]);
+  }, [projectId, useMock]);
 
   return {
     messages,
