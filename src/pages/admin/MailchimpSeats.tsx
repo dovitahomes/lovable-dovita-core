@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { UserPlus, Trash2, Mail } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { UserPlus, Trash2, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function MailchimpSeats() {
   const { seats, isLoading, activeSeats, totalSeats, createSeat, deactivateSeat, isCreating, isDeactivating } = useMailchimpSeats();
@@ -102,6 +104,47 @@ export default function MailchimpSeats() {
 
   const genericSeat = seats.find(s => s.seat_type === 'generic');
   const userSeats = seats.filter(s => s.seat_type === 'user');
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Asientos Mailchimp</h1>
+          <p className="text-muted-foreground">
+            Gestiona los asientos de Mailchimp para envío de emails personalizados
+          </p>
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-32" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-80 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-20 w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-72 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-32 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -264,8 +307,8 @@ export default function MailchimpSeats() {
                   <TableRow key={seat.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{(seat as any).profiles?.full_name || 'Sin nombre'}</p>
-                        <p className="text-sm text-muted-foreground">{(seat as any).profiles?.email}</p>
+                        <p className="font-medium">{seat.profiles?.full_name || 'Sin nombre'}</p>
+                        <p className="text-sm text-muted-foreground">{seat.profiles?.email || 'Sin email'}</p>
                       </div>
                     </TableCell>
                     <TableCell className="font-mono">{seat.mailchimp_email}</TableCell>
