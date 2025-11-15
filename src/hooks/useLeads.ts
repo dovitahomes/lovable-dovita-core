@@ -189,3 +189,26 @@ export function useConvertLead() {
     }
   });
 }
+
+export function useDeleteLead() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (leadId: string) => {
+      const { error } = await supabase
+        .from('leads')
+        .delete()
+        .eq('id', leadId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['all-leads'] });
+      toast.success("Lead eliminado correctamente");
+    },
+    onError: (error: any) => {
+      toast.error("Error al eliminar lead: " + error.message);
+    }
+  });
+}
