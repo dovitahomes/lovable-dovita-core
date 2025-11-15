@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEmailConfig } from "@/hooks/useEmailConfig";
+import { useMailchimpSeat } from "@/hooks/useMailchimpSeat";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, Paperclip, X } from "lucide-react";
+import { Loader2, Send, Paperclip, X, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface EmailComposerDialogProps {
   open: boolean;
@@ -81,7 +85,19 @@ export function EmailComposerDialog({
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [showCc, setShowCc] = useState(false);
+  const [userId, setUserId] = useState<string | undefined>();
   const queryClient = useQueryClient();
+  
+  // Obtener usuario actual
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id);
+    });
+  }, []);
+  
+  // Obtener configuración de email y asiento Mailchimp
+  const { config, isLoading: configLoading } = useEmailConfig();
+  const { data: mailchimpSeat } = useMailchimpSeat(userId);
 
   const sendEmailMutation = useMutation({
     mutationFn: async () => {
@@ -187,6 +203,37 @@ export function EmailComposerDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Alerta si no hay proveedor configurado */}
+          {config && config.proveedor === 'none' && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No hay proveedor de email configurado. Por favor, configure Mailchimp o Resend en{' '}
+                <a href="/herramientas/configuracion-email" className="underline font-medium">
+                  Configuración de Email
+                </a>.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Badge indicador de proveedor */}
+          {config && config.proveedor !== 'none' && (
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Enviando vía{' '}
+                <Badge variant="outline" className="ml-1">
+                  {config.proveedor === 'mailchimp' ? 'Mailchimp' : 'Resend'}
+                </Badge>
+                {mailchimpSeat && (
+                  <Badge variant="secondary" className="ml-1">
+                    desde {mailchimpSeat.mailchimp_email}
+                  </Badge>
+                )}
+              </span>
+            </div>
+          )}
+
           {/* Plantillas rápidas */}
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Plantillas rápidas</Label>
@@ -313,7 +360,14 @@ export function EmailComposerDialog({
           <Button
             type="button"
             onClick={handleSend}
-            disabled={sendEmailMutation.isPending || !to.trim() || !subject.trim() || !body.trim()}
+            disabled={
+              sendEmailMutation.isPending || 
+              configLoading || 
+              !to.trim() || 
+              !subject.trim() || 
+              !body.trim() || 
+              (config?.proveedor === 'none')
+            }
           >
             {sendEmailMutation.isPending ? (
               <>
