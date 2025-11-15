@@ -84,9 +84,39 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
       await createLeadDirectly();
     } catch (error: any) {
       console.error('Error checking duplicates:', error);
-      toast.error("Error al verificar duplicados: " + error.message);
+      // PASO 3: Mensaje más específico según tipo de error
+      if (error.message?.includes('uuid')) {
+        toast.error("Error técnico al verificar duplicados. Intenta nuevamente.");
+      } else {
+        toast.error("Error al verificar duplicados: " + error.message);
+      }
       setIsCheckingDuplicates(false);
     }
+  };
+
+  // PASO 2B: Función para resetear completamente el estado del dialog
+  const handleDialogClose = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset completo cuando cierra
+      setFormData({
+        nombre_completo: "",
+        telefono: "",
+        email: "",
+        terreno_m2: undefined,
+        presupuesto_referencia: undefined,
+        notas: "",
+        sucursal_id: null,
+        status: "nuevo" as LeadStatus,
+        amount: undefined,
+        probability: undefined,
+        expected_close_date: undefined,
+      });
+      setExpectedCloseDate(undefined);
+      setIsCheckingDuplicates(false);
+      setDuplicates([]);
+      setShowDuplicatesWarning(false);
+    }
+    onOpenChange(newOpen);
   };
 
   const createLeadDirectly = () => {
@@ -95,24 +125,14 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
       expected_close_date: expectedCloseDate ? format(expectedCloseDate, "yyyy-MM-dd") : undefined,
     };
     
+    // PASO 2A: Agregar onError para resetear estado cuando falla
     createLead.mutate(submitData as LeadFormData, {
       onSuccess: () => {
-        onOpenChange(false);
-        setFormData({
-          nombre_completo: "",
-          telefono: "",
-          email: "",
-          terreno_m2: undefined,
-          presupuesto_referencia: undefined,
-          notas: "",
-          sucursal_id: null,
-          status: "nuevo" as LeadStatus,
-          amount: undefined,
-          probability: undefined,
-          expected_close_date: undefined,
-        });
-        setExpectedCloseDate(undefined);
+        handleDialogClose(false);
       },
+      onError: () => {
+        setIsCheckingDuplicates(false);
+      }
     });
   };
 
@@ -133,7 +153,8 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
         }}
       />
       
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* PASO 2B: Usar handleDialogClose para reset automático */}
+      <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nuevo Lead</DialogTitle>
@@ -310,7 +331,8 @@ export function LeadDialog({ open, onOpenChange }: LeadDialogProps) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            {/* PASO 2C: Botón Cancelar usa handleDialogClose */}
+            <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
               Cancelar
             </Button>
             <Button type="submit" disabled={createLead.isPending || isCheckingDuplicates}>
