@@ -6,8 +6,10 @@ import { Phone, Mail, Clock, Eye, AlertCircle, GripVertical } from "lucide-react
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useEmailAvailability } from "@/hooks/useEmailAvailability";
+import { EmailComposerDialog } from "@/components/crm/EmailComposerDialog";
 
 interface LeadCardCompactProps {
   lead: any;
@@ -18,6 +20,8 @@ interface LeadCardCompactProps {
 
 export function LeadCardCompact({ lead, onOpenDetails, isDragging, dragHandleProps }: LeadCardCompactProps) {
   const { data: activities } = useCrmActivities('lead', lead.id);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const { hasEmailConfigured } = useEmailAvailability();
 
   // Calculate days since last contact
   const daysSinceContact = useMemo(() => {
@@ -59,13 +63,20 @@ export function LeadCardCompact({ lead, onOpenDetails, isDragging, dragHandlePro
 
   const handleEmail = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (lead.email) {
-      window.location.href = `mailto:${lead.email}`;
-    }
+    setEmailOpen(true);
   };
 
   return (
-    <Card 
+    <>
+      <EmailComposerDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        leadId={lead.id}
+        leadName={lead.nombre_completo}
+        leadEmail={lead.email || ""}
+      />
+      
+      <Card
       className={cn(
         "hover:shadow-lg transition-all cursor-pointer group relative",
         isDragging && "opacity-50"
@@ -138,7 +149,7 @@ export function LeadCardCompact({ lead, onOpenDetails, isDragging, dragHandlePro
               <Phone className="h-3 w-3" />
             </Button>
           )}
-          {lead.email && (
+          {hasEmailConfigured && lead.email && (
             <Button 
               size="icon" 
               variant="ghost" 
@@ -162,5 +173,6 @@ export function LeadCardCompact({ lead, onOpenDetails, isDragging, dragHandlePro
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }
