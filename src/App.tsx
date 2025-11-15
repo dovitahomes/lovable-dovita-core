@@ -85,6 +85,7 @@ const Accesos = lazy(() => import("./pages/herramientas/Accesos"));
 const Reglas = lazy(() => import("./pages/herramientas/Reglas"));
 const CatalogoTU = lazy(() => import("./pages/herramientas/CatalogoTU"));
 const HerramientasUsuarios = lazy(() => import("./pages/herramientas/Usuarios"));
+const EmailConfiguration = lazy(() => import("./pages/admin/EmailConfiguration"));
 const Metrics = lazy(() => import("./pages/Metrics"));
 const Budgets = lazy(() => import("./pages/erp/Budgets"));
 const BudgetWizard = lazy(() => import("./pages/erp/BudgetWizard"));
@@ -188,6 +189,13 @@ const InternalLayout = () => {
                   <ProtectedRoute moduleName="usuarios">
                     <Suspense fallback={<TableSkeleton />}><HerramientasUsuarios /></Suspense>
                   </ProtectedRoute>
+                } />
+                <Route path={BACKOFFICE_ROUTES.HERRAMIENTAS_EMAIL_CONFIG} element={
+                  <RequireAdmin>
+                    <ProtectedRoute moduleName="herramientas">
+                      <Suspense fallback={<TableSkeleton />}><EmailConfiguration /></Suspense>
+                    </ProtectedRoute>
+                  </RequireAdmin>
                 } />
                 
                 {/* ============================================ */}

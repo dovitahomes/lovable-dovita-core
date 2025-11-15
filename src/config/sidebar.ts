@@ -26,6 +26,7 @@ import {
   CalendarDays,
   CheckSquare,
   Image,
+  Mail,
 } from "lucide-react";
 import { BACKOFFICE_ROUTES } from "./routes";
 
@@ -226,6 +227,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         url: BACKOFFICE_ROUTES.HERRAMIENTAS_REGLAS, 
         icon: FileText, 
         moduleName: "centro_reglas" 
+      },
+      { 
+        title: "Configuración Email", 
+        url: BACKOFFICE_ROUTES.HERRAMIENTAS_EMAIL_CONFIG, 
+        icon: Mail, 
+        moduleName: "herramientas" 
       },
     ],
   },
