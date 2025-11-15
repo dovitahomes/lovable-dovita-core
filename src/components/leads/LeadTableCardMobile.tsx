@@ -8,6 +8,9 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "./StatusBadge";
+import { useState } from "react";
+import { useEmailAvailability } from "@/hooks/useEmailAvailability";
+import { EmailComposerDialog } from "@/components/crm/EmailComposerDialog";
 
 interface LeadTableCardMobileProps {
   lead: any;
@@ -22,6 +25,9 @@ export function LeadTableCardMobile({
   onSelect, 
   onOpenDetails 
 }: LeadTableCardMobileProps) {
+  const [emailOpen, setEmailOpen] = useState(false);
+  const { hasEmailConfigured } = useEmailAvailability();
+  
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -40,13 +46,20 @@ export function LeadTableCardMobile({
 
   const handleEmail = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (lead.email) {
-      window.location.href = `mailto:${lead.email}`;
-    }
+    setEmailOpen(true);
   };
 
   return (
-    <Card 
+    <>
+      <EmailComposerDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        leadId={lead.id}
+        leadName={lead.nombre_completo}
+        leadEmail={lead.email || ""}
+      />
+      
+      <Card
       className={cn(
         "hover:shadow-md transition-all cursor-pointer",
         selected && "ring-2 ring-primary"
@@ -142,7 +155,7 @@ export function LeadTableCardMobile({
                 <Phone className="h-3.5 w-3.5" />
               </Button>
             )}
-            {lead.email && (
+            {hasEmailConfigured && lead.email && (
               <Button 
                 size="icon" 
                 variant="ghost" 
@@ -167,5 +180,6 @@ export function LeadTableCardMobile({
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }

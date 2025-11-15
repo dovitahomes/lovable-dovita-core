@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { EmailComposerDialog } from "@/components/crm/EmailComposerDialog";
 import { CallLogDialog } from "@/components/crm/CallLogDialog";
 import { ScheduleMeetingDialog } from "@/components/crm/ScheduleMeetingDialog";
+import { useEmailAvailability } from "@/hooks/useEmailAvailability";
 
 interface LeadQuickActionsProps {
   leadId: string;
@@ -24,6 +25,7 @@ export function LeadQuickActions({ leadId, leadName = "", leadEmail = "", projec
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
   const queryClient = useQueryClient();
+  const { hasEmailConfigured } = useEmailAvailability();
 
   const logActivityMutation = useMutation({
     mutationFn: async ({ 
@@ -132,19 +134,21 @@ export function LeadQuickActions({ leadId, leadName = "", leadEmail = "", projec
         )}
       </Button>
 
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={handleEmail}
-        disabled={isLoading}
-        className="h-8 w-8 p-0 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
-      >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Mail className="h-4 w-4" />
-        )}
-      </Button>
+      {hasEmailConfigured && (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleEmail}
+          disabled={isLoading}
+          className="h-8 w-8 p-0 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Mail className="h-4 w-4" />
+          )}
+        </Button>
+      )}
 
       <Popover open={noteOpen} onOpenChange={setNoteOpen}>
         <PopoverTrigger asChild>
