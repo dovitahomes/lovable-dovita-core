@@ -2539,6 +2539,66 @@ export type Database = {
         }
         Relationships: []
       }
+      mailchimp_emails: {
+        Row: {
+          archived: boolean | null
+          body_html: string | null
+          body_text: string | null
+          conversation_id: string | null
+          created_at: string | null
+          from_email: string
+          from_name: string | null
+          id: string
+          lead_id: string | null
+          message_id: string
+          metadata: Json | null
+          read: boolean | null
+          received_at: string
+          starred: boolean | null
+          subject: string
+          to_email: string
+          updated_at: string | null
+        }
+        Insert: {
+          archived?: boolean | null
+          body_html?: string | null
+          body_text?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          from_email: string
+          from_name?: string | null
+          id?: string
+          lead_id?: string | null
+          message_id: string
+          metadata?: Json | null
+          read?: boolean | null
+          received_at: string
+          starred?: boolean | null
+          subject: string
+          to_email: string
+          updated_at?: string | null
+        }
+        Update: {
+          archived?: boolean | null
+          body_html?: string | null
+          body_text?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          lead_id?: string | null
+          message_id?: string
+          metadata?: Json | null
+          read?: boolean | null
+          received_at?: string
+          starred?: boolean | null
+          subject?: string
+          to_email?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       mailchimp_seats: {
         Row: {
           created_at: string

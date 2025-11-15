@@ -28,6 +28,7 @@ import {
   Image,
   Mail,
   TrendingUp as TrendingUpIcon,
+  Inbox,
 } from "lucide-react";
 import { BACKOFFICE_ROUTES } from "./routes";
 
@@ -253,6 +254,12 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
     label: "Comunicaciones",
     items: [
+      { 
+        title: "Bandeja de Entrada", 
+        url: BACKOFFICE_ROUTES.MAILCHIMP_INBOX,
+        icon: Inbox, 
+        moduleName: "crm"
+      },
       { 
         title: "Mailchimp Dashboard", 
         url: "external:mailchimp",
