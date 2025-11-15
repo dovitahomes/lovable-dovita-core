@@ -140,6 +140,7 @@ export const BACKOFFICE_ROUTES = {
   HERRAMIENTAS_MANUALES: '/herramientas/manuales',
   HERRAMIENTAS_EMAIL_CONFIG: '/herramientas/configuracion-email',
   HERRAMIENTAS_MAILCHIMP_SEATS: '/herramientas/asientos-mailchimp',
+  HERRAMIENTAS_MAILCHIMP_METRICS: '/herramientas/metricas-mailchimp',
   
   // ERP
   ERP_TRANSACTIONS: '/erp/transactions',

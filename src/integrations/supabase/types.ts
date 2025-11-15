@@ -2494,6 +2494,51 @@ export type Database = {
           },
         ]
       }
+      mailchimp_campaigns: {
+        Row: {
+          bounces: number | null
+          campaign_id: string
+          clicks: number | null
+          created_at: string | null
+          email_from: string
+          email_to: string
+          id: string
+          last_synced_at: string | null
+          metadata: Json | null
+          opens: number | null
+          sent_at: string
+          subject: string
+        }
+        Insert: {
+          bounces?: number | null
+          campaign_id: string
+          clicks?: number | null
+          created_at?: string | null
+          email_from: string
+          email_to: string
+          id?: string
+          last_synced_at?: string | null
+          metadata?: Json | null
+          opens?: number | null
+          sent_at?: string
+          subject: string
+        }
+        Update: {
+          bounces?: number | null
+          campaign_id?: string
+          clicks?: number | null
+          created_at?: string | null
+          email_from?: string
+          email_to?: string
+          id?: string
+          last_synced_at?: string | null
+          metadata?: Json | null
+          opens?: number | null
+          sent_at?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       mailchimp_seats: {
         Row: {
           created_at: string
