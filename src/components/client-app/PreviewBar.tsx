@@ -86,9 +86,7 @@ export default function PreviewBar() {
 
   // Combinar con mock clients si está en modo mock
   const mockClients: Client[] = [
-    { client_id: 'mock_1', client_name: 'Familia Martínez (Mock)' },
-    { client_id: 'mock_2', client_name: 'Familia González (Mock)' },
-    { client_id: 'mock_3', client_name: 'Familia Rodríguez (Mock)' }
+    { client_id: 'mock_1', client_name: 'Familia Martínez (Mock)' }
   ];
 
   const displayClients = source === 'mock' ? mockClients : realClients;
