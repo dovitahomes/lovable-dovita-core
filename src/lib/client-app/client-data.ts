@@ -29,14 +29,14 @@ export const mockClientData = {
       clientName: "Familia Martínez",
       name: "Casa Residencial Juriquilla",
       location: "Juriquilla, Querétaro",
-      progress: 45,
-      currentPhase: "Estructura",
-      projectStage: "construction" as const,
-      totalAmount: 4500000,
-      totalPaid: 2250000,
-      totalPending: 2250000,
-      startDate: "2024-03-15",
-      estimatedEndDate: "2025-03-15",
+      progress: 85,
+      currentPhase: "Diseño de Interiores",
+      projectStage: "design" as const,
+      totalAmount: 150000,
+      totalPaid: 127500,
+      totalPending: 22500,
+      startDate: "2024-03-01",
+      estimatedEndDate: "2024-06-30",
       heroImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
       renders: [
         {
@@ -90,25 +90,20 @@ export const mockClientData = {
       documents: [
         { id: 1, name: 'Escrituras.pdf', size: '3.1 MB', date: '1 Mar 2024', type: 'pdf' as const, category: 'cliente' as const },
         { id: 2, name: 'Identificación Oficial.pdf', size: '450 KB', date: '1 Mar 2024', type: 'pdf' as const, category: 'cliente' as const },
-        { id: 3, name: 'Planos Arquitectónicos.pdf', size: '2.5 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'proyecto' as const },
-        { id: 4, name: 'Especificaciones Técnicas.pdf', size: '890 KB', date: '8 Mar 2024', type: 'pdf' as const, category: 'proyecto' as const },
-        { id: 5, name: 'Contrato de Construcción.pdf', size: '2.8 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
-        { id: 6, name: 'Permiso de Construcción.pdf', size: '1.5 MB', date: '20 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
-        { id: 7, name: 'Diseño Interior.pdf', size: '4.2 MB', date: '12 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 8, name: 'Renders 3D.jpg', size: '2.1 MB', date: '10 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80' },
-        { id: 9, name: 'Paleta de Colores.pdf', size: '650 KB', date: '8 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 10, name: 'Avance Semana 1.pdf', size: '1.8 MB', date: '22 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
-        { id: 11, name: 'Fotos Obra.jpg', size: '3.5 MB', date: '21 Mar 2024', type: 'image' as const, category: 'construccion' as const },
-        { id: 12, name: 'Bitácora Construcción.pdf', size: '920 KB', date: '20 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
+        { id: 3, name: 'Contrato de Diseño.pdf', size: '2.8 MB', date: '1 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
+        { id: 4, name: 'Planos Arquitectónicos.pdf', size: '2.5 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'proyecto' as const },
+        { id: 5, name: 'Especificaciones Técnicas.pdf', size: '890 KB', date: '8 Mar 2024', type: 'pdf' as const, category: 'proyecto' as const },
+        { id: 6, name: 'Diseño Interior.pdf', size: '4.2 MB', date: '12 Abr 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 7, name: 'Renders 3D.jpg', size: '2.1 MB', date: '10 Abr 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80' },
+        { id: 8, name: 'Paleta de Colores.pdf', size: '650 KB', date: '8 Abr 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 9, name: 'Propuesta Mobiliario.pdf', size: '1.8 MB', date: '20 Abr 2024', type: 'pdf' as const, category: 'diseno' as const },
       ] as Document[],
       phases: [
-        { id: 1, name: 'Cimentación', status: 'completed' as const, progress: 100, startDate: '8 Abr 2024', endDate: '25 Abr 2024' },
-        { id: 2, name: 'Estructura', status: 'in-progress' as const, progress: 45, startDate: '28 Abr 2024', endDate: '30 May 2024' },
-        { id: 3, name: 'Instalaciones', status: 'pending' as const, progress: 0, startDate: '1 Jun 2024', endDate: '30 Jun 2024' },
-        { id: 4, name: 'Acabados Interiores', status: 'pending' as const, progress: 0, startDate: '1 Jul 2024', endDate: '20 Ago 2024' },
-        { id: 5, name: 'Acabados Exteriores', status: 'pending' as const, progress: 0, startDate: '21 Ago 2024', endDate: '10 Sep 2024' },
-        { id: 6, name: 'Inspección Final', status: 'pending' as const, progress: 0, startDate: '11 Sep 2024', endDate: '14 Sep 2024' },
-        { id: 7, name: 'Entrega', status: 'pending' as const, progress: 0, startDate: '15 Sep 2024', endDate: '15 Sep 2024' },
+        { id: 1, name: 'Diseño Conceptual', status: 'completed' as const, progress: 100, startDate: '1 Mar 2024', endDate: '15 Mar 2024' },
+        { id: 2, name: 'Diseño Arquitectónico', status: 'completed' as const, progress: 100, startDate: '16 Mar 2024', endDate: '10 Abr 2024' },
+        { id: 3, name: 'Diseño de Interiores', status: 'in-progress' as const, progress: 85, startDate: '11 Abr 2024', endDate: '15 May 2024' },
+        { id: 4, name: 'Planos Ejecutivos', status: 'pending' as const, progress: 0, startDate: '16 May 2024', endDate: '10 Jun 2024' },
+        { id: 5, name: 'Documentación Final', status: 'pending' as const, progress: 0, startDate: '11 Jun 2024', endDate: '30 Jun 2024' },
       ] as Phase[]
     },
     {
@@ -116,14 +111,14 @@ export const mockClientData = {
       clientName: "Familia Martínez",
       name: "Casa Playa del Carmen",
       location: "Playa del Carmen, Q. Roo",
-      progress: 53, // 2 fases completas (40%) + fase actual 65% de 20% = 53%
-      currentPhase: "Diseño de Interiores",
-      projectStage: "design" as const,
+      progress: 42,
+      currentPhase: "Estructura",
+      projectStage: "construction" as const,
       totalAmount: 6200000,
-      totalPaid: 50000,
-      totalPending: 70000,
+      totalPaid: 2604000,
+      totalPending: 3596000,
       startDate: "2024-02-01",
-      estimatedEndDate: "2025-12-01",
+      estimatedEndDate: "2025-09-30",
       heroImage: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80",
       renders: [
         {
@@ -165,19 +160,17 @@ export const mockClientData = {
         { id: 15, name: 'Planos Casa Playa.pdf', size: '3.2 MB', date: '20 Feb 2024', type: 'pdf' as const, category: 'proyecto' as const },
         { id: 16, name: 'Especificaciones Técnicas Playa.pdf', size: '1.1 MB', date: '18 Feb 2024', type: 'pdf' as const, category: 'proyecto' as const },
         { id: 17, name: 'Contrato Construcción Playa.pdf', size: '3.0 MB', date: '25 Feb 2024', type: 'pdf' as const, category: 'legal' as const },
-        { id: 18, name: 'Propuesta Conceptual.jpg', size: '3.5 MB', date: '5 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80' },
-        { id: 19, name: 'Diseño Interior Playa.pdf', size: '5.1 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 20, name: 'Renders Vista al Mar.jpg', size: '2.8 MB', date: '18 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80' },
-        { id: 21, name: 'Paleta Tropical.pdf', size: '720 KB', date: '20 Mar 2024', type: 'pdf' as const, category: 'diseno' as const },
-        { id: 22, name: 'Render Fachada Principal.jpg', size: '3.2 MB', date: '25 Mar 2024', type: 'image' as const, category: 'diseno' as const, url: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80' },
-        { id: 23, name: 'Planos Ejecutivos.pdf', size: '4.5 MB', date: '1 Abr 2024', type: 'pdf' as const, category: 'diseno' as const },
+        { id: 18, name: 'Permiso de Construcción.pdf', size: '1.5 MB', date: '1 Mar 2024', type: 'pdf' as const, category: 'legal' as const },
+        { id: 19, name: 'Bitácora Obra Semana 1.pdf', size: '1.2 MB', date: '15 Mar 2024', type: 'pdf' as const, category: 'construccion' as const },
+        { id: 20, name: 'Fotos Cimentación.jpg', size: '3.5 MB', date: '20 Mar 2024', type: 'image' as const, category: 'construccion' as const },
+        { id: 21, name: 'Avance Estructura.pdf', size: '2.1 MB', date: '10 Abr 2024', type: 'pdf' as const, category: 'construccion' as const },
       ] as Document[],
       phases: [
-        { id: 1, name: 'Diseño Conceptual', status: 'completed' as const, progress: 100, startDate: '1 Feb 2024', endDate: '20 Feb 2024' },
-        { id: 2, name: 'Diseño Arquitectónico', status: 'completed' as const, progress: 100, startDate: '21 Feb 2024', endDate: '15 Mar 2024' },
-        { id: 3, name: 'Diseño de Interiores', status: 'in-progress' as const, progress: 65, startDate: '16 Mar 2024', endDate: '10 Abr 2024' },
-        { id: 4, name: 'Planos Ejecutivos', status: 'pending' as const, progress: 0, startDate: '11 Abr 2024', endDate: '30 Abr 2024' },
-        { id: 5, name: 'Permisos y Licencias', status: 'pending' as const, progress: 0, startDate: '1 May 2024', endDate: '20 May 2024' },
+        { id: 1, name: 'Cimentación', status: 'completed' as const, progress: 100, startDate: '1 Feb 2024', endDate: '28 Feb 2024' },
+        { id: 2, name: 'Estructura', status: 'in-progress' as const, progress: 42, startDate: '1 Mar 2024', endDate: '30 Abr 2024' },
+        { id: 3, name: 'Instalaciones', status: 'pending' as const, progress: 0, startDate: '1 May 2024', endDate: '30 Jun 2024' },
+        { id: 4, name: 'Acabados', status: 'pending' as const, progress: 0, startDate: '1 Jul 2024', endDate: '31 Ago 2024' },
+        { id: 5, name: 'Entrega', status: 'pending' as const, progress: 0, startDate: '1 Sep 2024', endDate: '30 Sep 2024' },
       ] as Phase[]
     }
   ]
@@ -187,40 +180,42 @@ export const mockClientData = {
 export const mockProjectData = mockClientData.projects[0];
 
 export const mockPhotos = [
+  // Juriquilla - Solo renders (proyecto de diseño)
   {
     id: 1,
     projectId: "project_juriquilla",
-    url: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800",
-    phase: "Cimentación",
-    date: "2024-04-10",
-    description: "Excavación completada y cimbra instalada",
-    location: { lat: 20.5888, lng: -100.3899 }
+    url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+    phase: "Diseño",
+    date: "2024-03-20",
+    description: "Render Fachada Principal",
+    location: null
   },
   {
     id: 2,
     projectId: "project_juriquilla",
-    url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80",
-    phase: "Estructura",
-    date: "2024-05-05",
-    description: "Columnas de planta baja terminadas",
-    location: { lat: 20.5888, lng: -100.3899 }
+    url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+    phase: "Diseño",
+    date: "2024-04-15",
+    description: "Render Interior Sala",
+    location: null
   },
   {
     id: 3,
     projectId: "project_juriquilla",
-    url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80",
-    phase: "Estructura",
-    date: "2024-05-12",
-    description: "Losa de entrepiso en proceso",
-    location: { lat: 20.5888, lng: -100.3899 }
+    url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80",
+    phase: "Diseño",
+    date: "2024-04-25",
+    description: "Render Vista Posterior",
+    location: null
   },
+  // Playa del Carmen - Fotos de construcción
   {
     id: 4,
     projectId: "project_playa",
     url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800",
     phase: "Cimentación",
-    date: "2024-09-15",
-    description: "Inicio de excavación en terreno costero",
+    date: "2024-02-15",
+    description: "Excavación completada",
     location: { lat: 20.6296, lng: -87.0739 }
   },
   {
@@ -228,68 +223,87 @@ export const mockPhotos = [
     projectId: "project_playa",
     url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800",
     phase: "Cimentación",
-    date: "2024-10-01",
+    date: "2024-02-25",
     description: "Cimbra de zapatas instalada",
+    location: { lat: 20.6296, lng: -87.0739 }
+  },
+  {
+    id: 6,
+    projectId: "project_playa",
+    url: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800",
+    phase: "Estructura",
+    date: "2024-03-20",
+    description: "Columnas planta baja en proceso",
     location: { lat: 20.6296, lng: -87.0739 }
   }
 ];
 
 export const mockMinistraciones = [
+  // Juriquilla - Proyecto de Diseño ($150,000)
   {
     id: 1,
     projectId: "project_juriquilla",
-    amount: 450000,
-    date: "2024-03-15",
+    amount: 75000,
+    date: "2024-03-01",
     status: "paid" as const,
-    concept: "Anticipo - Diseño Arquitectónico"
+    concept: "Anticipo - Proyecto de Diseño"
   },
   {
     id: 2,
     projectId: "project_juriquilla",
-    amount: 900000,
-    date: "2024-04-01",
+    amount: 52500,
+    date: "2024-04-15",
     status: "paid" as const,
-    concept: "Primera Ministración - Cimentación"
+    concept: "Segunda Ministración - Diseño Arquitectónico"
   },
   {
     id: 3,
     projectId: "project_juriquilla",
-    amount: 900000,
+    amount: 22500,
+    date: "2024-05-30",
+    status: "pending" as const,
+    concept: "Pago Final - Entrega de Planos Ejecutivos"
+  },
+  // Playa del Carmen - Proyecto de Construcción ($6,200,000)
+  {
+    id: 4,
+    projectId: "project_playa",
+    amount: 1240000,
+    date: "2024-02-01",
+    status: "paid" as const,
+    concept: "Anticipo - Inicio de Obra"
+  },
+  {
+    id: 5,
+    projectId: "project_playa",
+    amount: 1364000,
+    date: "2024-03-15",
+    status: "paid" as const,
+    concept: "Primera Ministración - Cimentación"
+  },
+  {
+    id: 6,
+    projectId: "project_playa",
+    amount: 1240000,
     date: "2024-05-01",
     status: "pending" as const,
     concept: "Segunda Ministración - Estructura"
   },
   {
-    id: 4,
-    projectId: "project_juriquilla",
-    amount: 900000,
-    date: "2024-06-01",
+    id: 7,
+    projectId: "project_playa",
+    amount: 1240000,
+    date: "2024-07-01",
     status: "future" as const,
     concept: "Tercera Ministración - Instalaciones"
   },
   {
-    id: 5,
+    id: 8,
     projectId: "project_playa",
-    amount: 50000,
-    date: "2024-02-15",
-    status: "paid" as const,
-    concept: "Anticipo - Proyecto de Diseño"
-  },
-  {
-    id: 6,
-    projectId: "project_playa",
-    amount: 40000,
-    date: "2024-03-20",
-    status: "pending" as const,
-    concept: "Segunda Ministración - Diseño Arquitectónico"
-  },
-  {
-    id: 7,
-    projectId: "project_playa",
-    amount: 30000,
-    date: "2024-04-15",
+    amount: 1116000,
+    date: "2024-09-01",
     status: "future" as const,
-    concept: "Tercera Ministración - Diseño Final"
+    concept: "Cuarta Ministración - Acabados"
   }
 ];
 
@@ -304,10 +318,11 @@ export const appointmentTypes = [
 ];
 
 export const mockAppointments = [
+  // Juriquilla - Proyecto de Diseño
   {
     id: 1,
     projectId: "project_juriquilla",
-    type: "Revisión de Avances",
+    type: "Presentación de diseños",
     date: "2025-11-05",
     time: "10:00",
     duration: 60,
@@ -318,36 +333,36 @@ export const mockAppointments = [
       role: "Arquitecto Líder",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos"
     },
-    location: "Obra - Casa Juriquilla",
-    notes: "Revisión de estructura y acabados de planta baja",
+    location: "Oficina Dovita",
+    notes: "Presentación de propuesta de diseño de interiores",
     isVirtual: false
   },
   {
     id: 2,
     projectId: "project_juriquilla",
-    type: "Junta de Avances",
+    type: "Revisión de planos",
     date: "2025-11-10",
     time: "16:00",
     duration: 45,
     status: "pending" as const,
     teamMember: {
-      id: 2,
-      name: "Ing. Laura Ramírez",
-      role: "Ingeniera de Obra",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Laura"
+      id: 1,
+      name: "Arq. Carlos Mendoza",
+      role: "Arquitecto Líder",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos"
     },
     location: "Virtual - Google Meet",
-    notes: "Revisión de presupuesto y próximas ministraciones",
+    notes: "Revisión de planos ejecutivos",
     isVirtual: true,
     meetingLink: "https://meet.google.com/abc-defg-hij"
   },
   {
     id: 3,
     projectId: "project_juriquilla",
-    type: "Entrega de Documentos",
+    type: "Selección de materiales",
     date: "2025-10-25",
     time: "11:00",
-    duration: 30,
+    duration: 90,
     status: "completed" as const,
     teamMember: {
       id: 3,
@@ -355,32 +370,15 @@ export const mockAppointments = [
       role: "Administradora de Proyecto",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana"
     },
-    location: "Oficina Dovita",
-    notes: "Entrega de planos arquitectónicos firmados",
+    location: "Showroom",
+    notes: "Selección de acabados y paleta de colores",
     isVirtual: false
   },
+  // Playa del Carmen - Proyecto de Construcción
   {
     id: 4,
-    projectId: "project_juriquilla",
-    type: "Visita al terreno/obra",
-    date: "2025-11-15",
-    time: "09:00",
-    duration: 90,
-    status: "confirmed" as const,
-    teamMember: {
-      id: 1,
-      name: "Arq. Carlos Mendoza",
-      role: "Arquitecto Líder",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos"
-    },
-    location: "Terreno - Juriquilla",
-    notes: "Inspección final de cimentación antes de proceder con estructura",
-    isVirtual: false
-  },
-  {
-    id: 5,
     projectId: "project_playa",
-    type: "Revisión de Avances",
+    type: "Visita a obra",
     date: "2025-11-08",
     time: "11:00",
     duration: 60,
@@ -392,7 +390,44 @@ export const mockAppointments = [
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria"
     },
     location: "Obra - Playa del Carmen",
-    notes: "Revisión de avance en cimentación",
+    notes: "Revisión de avance de estructura",
+    isVirtual: false
+  },
+  {
+    id: 5,
+    projectId: "project_playa",
+    type: "Junta de obra",
+    date: "2025-11-12",
+    time: "15:00",
+    duration: 90,
+    status: "pending" as const,
+    teamMember: {
+      id: 2,
+      name: "Ing. Roberto Sánchez",
+      role: "Ingeniero de Obra",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Roberto"
+    },
+    location: "Virtual - Zoom",
+    notes: "Revisión de cronograma y siguientes ministraciones",
+    isVirtual: true,
+    meetingLink: "https://zoom.us/j/123456789"
+  },
+  {
+    id: 6,
+    projectId: "project_playa",
+    type: "Revisión de avances",
+    date: "2025-10-20",
+    time: "09:00",
+    duration: 120,
+    status: "completed" as const,
+    teamMember: {
+      id: 1,
+      name: "Arq. María González",
+      role: "Arquitecta Líder",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria"
+    },
+    location: "Obra - Playa del Carmen",
+    notes: "Inspección final de cimentación",
     isVirtual: false
   }
 ];
