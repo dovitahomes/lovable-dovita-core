@@ -15,10 +15,12 @@ interface EventFiltersEnhancedProps {
   projectId?: string;
   clientId?: string;
   eventType?: string;
+  entityTypeFilter?: string; // Nuevo filtro
   statusFilter?: string;
   onProjectChange: (value: string | undefined) => void;
   onClientChange: (value: string | undefined) => void;
   onEventTypeChange: (value: string | undefined) => void;
+  onEntityTypeChange: (value: string | undefined) => void; // Nuevo handler
   onStatusFilterChange: (value: string | undefined) => void;
   onClearFilters: () => void;
   resultsCount: number;
@@ -29,10 +31,12 @@ export function EventFiltersEnhanced({
   projectId,
   clientId,
   eventType,
+  entityTypeFilter, // Nuevo prop
   statusFilter,
   onProjectChange,
   onClientChange,
   onEventTypeChange,
+  onEntityTypeChange, // Nuevo handler
   onStatusFilterChange,
   onClearFilters,
   resultsCount,
@@ -97,13 +101,14 @@ export function EventFiltersEnhanced({
     enabled: !!projects,
   });
   
-  const hasActiveFilters = !!(projectId || clientId || eventType || statusFilter);
+  const hasActiveFilters = !!(projectId || clientId || eventType || entityTypeFilter || statusFilter);
   
   // Encontrar nombres para los badges
   const projectName = projects?.find(p => p.id === projectId)?.project_name;
   const clientName = clients?.find(c => c.id === clientId)?.name;
   const eventTypeLabel = eventType ? EVENT_TYPE_LABELS[eventType as keyof typeof EVENT_TYPE_LABELS] : undefined;
   const statusLabel = statusFilter ? STATUS_LABELS[statusFilter as keyof typeof STATUS_LABELS] : undefined;
+  const entityTypeLabel = entityTypeFilter === 'project' ? 'Proyectos' : entityTypeFilter === 'lead' ? 'Leads' : entityTypeFilter === 'personal' ? 'Personales' : undefined;
   
   return (
     <div className="space-y-4">
@@ -194,6 +199,22 @@ export function EventFiltersEnhanced({
               </SelectContent>
             </Select>
           </div>
+          
+          {/* Filtro por Tipo de Entidad (NUEVO - Calendario Universal) */}
+          <div>
+            <Label htmlFor="filter-entity-type">Tipo de Entidad</Label>
+            <Select value={entityTypeFilter || "all"} onValueChange={(v) => onEntityTypeChange(v === "all" ? undefined : v)}>
+              <SelectTrigger id="filter-entity-type">
+                <SelectValue placeholder="Todos los eventos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los eventos</SelectItem>
+                <SelectItem value="project">🏢 Proyectos</SelectItem>
+                <SelectItem value="lead">👤 Leads</SelectItem>
+                <SelectItem value="personal">📅 Personales</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
       
@@ -244,6 +265,18 @@ export function EventFiltersEnhanced({
                 Estado: {statusLabel}
                 <button 
                   onClick={() => onStatusFilterChange(undefined)}
+                  className="hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            
+            {entityTypeFilter && entityTypeLabel && (
+              <Badge variant="secondary" className="gap-1">
+                Tipo: {entityTypeLabel}
+                <button 
+                  onClick={() => onEntityTypeChange(undefined)}
                   className="hover:text-foreground"
                 >
                   <X className="h-3 w-3" />

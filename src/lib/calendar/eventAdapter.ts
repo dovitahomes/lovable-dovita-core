@@ -7,20 +7,34 @@ export interface DovitaEvent {
   description?: string | null;
   start_time: string;
   end_time: string;
-  event_type: string; // Puede ser cualquier string, validamos en runtime
-  visibility: string; // Puede ser cualquier string, validamos en runtime
+  event_type: string;
+  visibility: string;
   location?: string | null;
-  status: string; // Puede ser cualquier string, validamos en runtime
-  project_id: string;
+  status: string;
+  
+  // Campos de entidad (nuevos para Calendario Universal)
+  entity_type?: string | null; // Runtime validation
+  project_id?: string | null;
+  lead_id?: string | null;
+  
   created_by: string;
   created_at?: string;
   updated_at?: string;
+  
+  // Relaciones opcionales
   projects?: {
     id: string;
     project_name: string | null;
     client_id: string;
     clients: { name: string } | null;
-  };
+  } | null;
+  
+  leads?: {
+    id: string;
+    nombre_completo: string;
+    email?: string;
+    telefono?: string;
+  } | null;
 }
 
 export interface EventManagerEvent {
@@ -30,8 +44,8 @@ export interface EventManagerEvent {
   startTime: Date;
   endTime: Date;
   color: string;
-  category: string; // Usamos event_type aquí
-  tags: string[]; // Status y visibility como tags
+  category: string;
+  tags: string[];
   projectId: string;
   projectName: string;
   clientName: string;
@@ -39,6 +53,11 @@ export interface EventManagerEvent {
   status: string;
   visibility: string;
   event_type: string;
+  // Campos nuevos para Calendario Universal
+  entity_type?: string | null;
+  lead_id?: string | null;
+  leadEmail?: string;
+  leadPhone?: string;
 }
 
 // Mapeo de colores consistente por event_type
@@ -103,10 +122,26 @@ export const VISIBILITY_LABELS = {
 /**
  * Transforma un evento de Supabase al formato EventManager
  */
-export function toEventManagerFormat(dovitaEvent: DovitaEvent): EventManagerEvent {
   // Validar y normalizar event_type
   const eventType = dovitaEvent.event_type as keyof typeof EVENT_TYPE_COLORS;
   const colorConfig = EVENT_TYPE_COLORS[eventType] || EVENT_TYPE_COLORS.other;
+  
+  // Determinar nombre de la entidad relacionada
+  let entityName = 'Evento Personal';
+  let entityId = '';
+  let clientName = 'Personal';
+  
+  const normalizedEntityType = dovitaEvent.entity_type as 'project' | 'lead' | 'personal' | undefined;
+  
+  if (normalizedEntityType === 'project' && dovitaEvent.projects) {
+    entityName = dovitaEvent.projects.project_name || 'Sin nombre';
+    entityId = dovitaEvent.projects.id;
+    clientName = dovitaEvent.projects.clients?.name || 'Sin cliente';
+  } else if (normalizedEntityType === 'lead' && dovitaEvent.leads) {
+    entityName = dovitaEvent.leads.nombre_completo;
+    entityId = dovitaEvent.leads.id;
+    clientName = dovitaEvent.leads.nombre_completo;
+  }
   
   return {
     id: dovitaEvent.id,
@@ -115,15 +150,19 @@ export function toEventManagerFormat(dovitaEvent: DovitaEvent): EventManagerEven
     startTime: new Date(dovitaEvent.start_time),
     endTime: new Date(dovitaEvent.end_time),
     color: colorConfig.value,
-    category: eventType, // event_type como category
-    tags: [dovitaEvent.status, dovitaEvent.visibility], // Status y visibility como tags
-    projectId: dovitaEvent.project_id,
-    projectName: dovitaEvent.projects?.project_name || 'Sin nombre',
-    clientName: dovitaEvent.projects?.clients?.name || 'Sin cliente',
+    category: eventType,
+    tags: [dovitaEvent.status, dovitaEvent.visibility, normalizedEntityType || 'project'],
+    projectId: dovitaEvent.project_id || '',
+    projectName: entityName,
+    clientName: clientName,
     location: dovitaEvent.location || undefined,
     status: dovitaEvent.status,
     visibility: dovitaEvent.visibility,
     event_type: eventType,
+    entity_type: normalizedEntityType,
+    lead_id: dovitaEvent.lead_id,
+    leadEmail: dovitaEvent.leads?.email,
+    leadPhone: dovitaEvent.leads?.telefono,
   };
 }
 
@@ -133,8 +172,6 @@ export function toEventManagerFormat(dovitaEvent: DovitaEvent): EventManagerEven
 export function toEventManagerFormats(dovitaEvents: DovitaEvent[]): EventManagerEvent[] {
   return dovitaEvents.map(toEventManagerFormat);
 }
-
-/**
  * Extrae los datos necesarios para actualizar un evento en Supabase
  * NO incluye project_id ya que eso no debe cambiar con drag & drop
  */

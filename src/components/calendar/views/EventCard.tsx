@@ -1,5 +1,6 @@
 // FASE 2: EventCard Component
 // Card de evento con hover effects y variantes (default, compact, detailed)
+// Calendario Universal: muestra badges para proyectos, leads y eventos personales
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -66,7 +67,11 @@ export function EventCard({
             !canDrag && "cursor-default opacity-75"
           )}
         >
-          <div className="truncate">{event.title}</div>
+          <div className="truncate flex items-center gap-1">
+            {event.entity_type === 'lead' && <span>👤</span>}
+            {event.entity_type === 'personal' && <span>📅</span>}
+            {event.title}
+          </div>
         </div>
         {isHovered && (
           <div className="absolute left-0 top-full z-50 mt-1 w-72 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -76,6 +81,12 @@ export function EventCard({
                   <h4 className="font-semibold text-sm leading-tight">{event.title}</h4>
                   <div className={cn("h-3 w-3 rounded-full flex-shrink-0", colorClasses.bg)} />
                 </div>
+                {event.entity_type === 'lead' && (
+                  <Badge variant="outline" className="text-[10px]">👤 Lead</Badge>
+                )}
+                {event.entity_type === 'personal' && (
+                  <Badge variant="outline" className="text-[10px]">📅 Personal</Badge>
+                )}
                 {event.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
                 )}
