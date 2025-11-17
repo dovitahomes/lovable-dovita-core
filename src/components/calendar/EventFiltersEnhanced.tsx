@@ -141,10 +141,10 @@ export function EventFiltersEnhanced({
                 <SelectValue placeholder="Todos los eventos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">✨ Todos los eventos</SelectItem>
-                <SelectItem value="project">🏢 Eventos de Proyectos</SelectItem>
-                <SelectItem value="lead">👤 Reuniones con Leads</SelectItem>
-                <SelectItem value="personal">📅 Mis eventos personales</SelectItem>
+                <SelectItem value="all">Todos los eventos</SelectItem>
+                <SelectItem value="project">Eventos de Proyectos</SelectItem>
+                <SelectItem value="lead">Reuniones con Leads</SelectItem>
+                <SelectItem value="personal">Mis eventos personales</SelectItem>
               </SelectContent>
             </Select>
             
