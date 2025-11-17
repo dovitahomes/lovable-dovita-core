@@ -252,37 +252,17 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Selector de Tipo de Evento (PRIMERO) */}
           <div>
-            <Label className="text-base font-semibold">Tipo de Evento *</Label>
-            <RadioGroup 
-              value={entityType} 
-              onValueChange={(v) => setEntityType(v as any)} 
-              disabled={isPending}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2"
-            >
-              <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
-                <RadioGroupItem value="project" id="type-project" />
-                <Label htmlFor="type-project" className="cursor-pointer flex-1">
-                  <span className="block font-medium">Evento de Proyecto</span>
-                  <span className="text-xs text-muted-foreground">Vinculado a un proyecto específico</span>
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
-                <RadioGroupItem value="lead" id="type-lead" />
-                <Label htmlFor="type-lead" className="cursor-pointer flex-1">
-                  <span className="block font-medium">Reunión con Lead</span>
-                  <span className="text-xs text-muted-foreground">Reunión con prospecto</span>
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
-                <RadioGroupItem value="personal" id="type-personal" />
-                <Label htmlFor="type-personal" className="cursor-pointer flex-1">
-                  <span className="block font-medium">Evento Personal</span>
-                  <span className="text-xs text-muted-foreground">Sin proyecto ni lead</span>
-                </Label>
-              </div>
-            </RadioGroup>
+            <Label htmlFor="entity-type">Tipo de Evento *</Label>
+            <Select value={entityType} onValueChange={(v) => setEntityType(v as any)} disabled={isPending}>
+              <SelectTrigger id="entity-type">
+                <SelectValue placeholder="Selecciona el tipo de evento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="project">Evento de Proyecto</SelectItem>
+                <SelectItem value="lead">Reunión con Lead</SelectItem>
+                <SelectItem value="personal">Evento Personal</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Selector de Proyecto (SOLO si entityType === 'project') */}
