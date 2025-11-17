@@ -128,43 +128,84 @@ export function EventFiltersEnhanced({
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Filtro por Proyecto */}
+          {/* Filtro 1: Origen del Evento (PRIMERO Y DESTACADO) */}
           <div>
-            <Label htmlFor="filter-project">Proyecto</Label>
-            <Select value={projectId || "all"} onValueChange={(v) => onProjectChange(v === "all" ? undefined : v)}>
-              <SelectTrigger id="filter-project">
-                <SelectValue placeholder="Todos los proyectos" />
+            <Label htmlFor="filter-entity-type" className="text-base font-semibold">
+              Origen del Evento
+            </Label>
+            <Select 
+              value={entityTypeFilter || "all"} 
+              onValueChange={(v) => onEntityTypeChange(v === "all" ? undefined : v)}
+            >
+              <SelectTrigger id="filter-entity-type" className="h-10">
+                <SelectValue placeholder="Todos los eventos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los proyectos</SelectItem>
-                {projects?.map(project => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.project_name || `Proyecto ${project.id.slice(0, 8)}`}
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">✨ Todos los eventos</SelectItem>
+                <SelectItem value="project">🏢 Eventos de Proyectos</SelectItem>
+                <SelectItem value="lead">👤 Reuniones con Leads</SelectItem>
+                <SelectItem value="personal">📅 Mis eventos personales</SelectItem>
               </SelectContent>
             </Select>
+            
+            {/* Texto explicativo según selección */}
+            {entityTypeFilter === 'lead' && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Mostrando reuniones agendadas con prospectos (leads)
+              </p>
+            )}
+            {entityTypeFilter === 'personal' && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Mostrando solo tus eventos personales
+              </p>
+            )}
+            {entityTypeFilter === 'project' && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Mostrando eventos vinculados a proyectos
+              </p>
+            )}
           </div>
+
+          {/* Filtros 2 y 3: Proyecto y Cliente (SOLO si entityType === 'project' o 'all') */}
+          {(!entityTypeFilter || entityTypeFilter === 'project') && (
+            <>
+              <div>
+                <Label htmlFor="filter-project">Proyecto</Label>
+                <Select value={projectId || "all"} onValueChange={(v) => onProjectChange(v === "all" ? undefined : v)}>
+                  <SelectTrigger id="filter-project">
+                    <SelectValue placeholder="Todos los proyectos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los proyectos</SelectItem>
+                    {projects?.map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.project_name || `Proyecto ${project.id.slice(0, 8)}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="filter-client">Cliente</Label>
+                <Select value={clientId || "all"} onValueChange={(v) => onClientChange(v === "all" ? undefined : v)}>
+                  <SelectTrigger id="filter-client">
+                    <SelectValue placeholder="Todos los clientes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los clientes</SelectItem>
+                    {clients?.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
           
-          {/* Filtro por Cliente */}
-          <div>
-            <Label htmlFor="filter-client">Cliente</Label>
-            <Select value={clientId || "all"} onValueChange={(v) => onClientChange(v === "all" ? undefined : v)}>
-              <SelectTrigger id="filter-client">
-                <SelectValue placeholder="Todos los clientes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los clientes</SelectItem>
-                {clients?.map(client => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {/* Filtro por Tipo de Evento */}
+          {/* Filtro 4: Tipo de Evento (siempre visible) */}
           <div>
             <Label htmlFor="filter-type">Tipo de evento</Label>
             <Select value={eventType || "all"} onValueChange={(v) => onEventTypeChange(v === "all" ? undefined : v)}>
@@ -182,7 +223,7 @@ export function EventFiltersEnhanced({
             </Select>
           </div>
           
-          {/* Filtro por Status (NUEVO) */}
+          {/* Filtro 5: Status (siempre visible) */}
           <div>
             <Label htmlFor="filter-status">Estado</Label>
             <Select value={statusFilter || "all"} onValueChange={(v) => onStatusFilterChange(v === "all" ? undefined : v)}>
@@ -196,22 +237,6 @@ export function EventFiltersEnhanced({
                     {label}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {/* Filtro por Tipo de Entidad (NUEVO - Calendario Universal) */}
-          <div>
-            <Label htmlFor="filter-entity-type">Tipo de Entidad</Label>
-            <Select value={entityTypeFilter || "all"} onValueChange={(v) => onEntityTypeChange(v === "all" ? undefined : v)}>
-              <SelectTrigger id="filter-entity-type">
-                <SelectValue placeholder="Todos los eventos" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los eventos</SelectItem>
-                <SelectItem value="project">🏢 Proyectos</SelectItem>
-                <SelectItem value="lead">👤 Leads</SelectItem>
-                <SelectItem value="personal">📅 Personales</SelectItem>
               </SelectContent>
             </Select>
           </div>
