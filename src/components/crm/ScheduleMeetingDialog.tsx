@@ -81,7 +81,12 @@ export function ScheduleMeetingDialog({
       const endTime = new Date(startTime);
       endTime.setHours(endTime.getHours() + 1);
 
-      const userId = (await supabase.auth.getUser()).data.user?.id;
+      // Obtener usuario de forma robusta
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (!user || userError) {
+        throw new Error('Usuario no autenticado');
+      }
+      const userId = user.id;
 
       // 1. Crear evento en project_events (siempre, detectando el tipo de entidad)
       const eventData = {
@@ -101,6 +106,20 @@ export function ScheduleMeetingDialog({
         ),
       };
 
+      // 🔍 LOGGING: Datos antes de inserción
+      console.log('🔍 Intentando insertar evento:', JSON.stringify(eventData, null, 2));
+      console.log('🔍 User ID:', userId);
+      console.log('🔍 Lead ID:', leadId);
+      console.log('🔍 Project ID:', projectId);
+
+      // ✅ Validación pre-inserción
+      if (eventData.entity_type === 'lead' && !eventData.lead_id) {
+        throw new Error('lead_id es requerido para eventos de tipo lead');
+      }
+      if (eventData.entity_type === 'lead' && eventData.created_by !== userId) {
+        throw new Error('created_by debe coincidir con el usuario actual');
+      }
+
       const { data: insertedEvent, error: eventError } = await supabase
         .from('project_events')
         .insert(eventData)
@@ -108,8 +127,15 @@ export function ScheduleMeetingDialog({
         .single();
 
       if (eventError) {
-        console.error('❌ Error insertando evento:', eventError);
-        throw eventError;
+        console.error('❌ Error insertando evento:', {
+          error: eventError,
+          message: eventError.message,
+          details: eventError.details,
+          hint: eventError.hint,
+          code: eventError.code,
+          eventData
+        });
+        throw new Error(`Error al crear el evento: ${eventError.message}`);
       }
 
       console.log('✅ Evento creado exitosamente:', {
@@ -157,11 +183,12 @@ export function ScheduleMeetingDialog({
       if (activityError) throw activityError;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-calendar-events'] });
       queryClient.invalidateQueries({ queryKey: ['crm-activities'] });
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['project-events'] });
-      toast.success("Reunión agendada exitosamente");
+      toast.success("✅ Reunión agendada en calendario y tareas");
       
       // Reset form
       setDate(undefined);
