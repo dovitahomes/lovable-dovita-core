@@ -262,7 +262,7 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
               <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
                 <RadioGroupItem value="project" id="type-project" />
                 <Label htmlFor="type-project" className="cursor-pointer flex-1">
-                  <span className="block font-medium">🏢 Evento de Proyecto</span>
+                  <span className="block font-medium">Evento de Proyecto</span>
                   <span className="text-xs text-muted-foreground">Vinculado a un proyecto específico</span>
                 </Label>
               </div>
@@ -270,7 +270,7 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
               <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
                 <RadioGroupItem value="lead" id="type-lead" />
                 <Label htmlFor="type-lead" className="cursor-pointer flex-1">
-                  <span className="block font-medium">👤 Reunión con Lead</span>
+                  <span className="block font-medium">Reunión con Lead</span>
                   <span className="text-xs text-muted-foreground">Reunión con prospecto</span>
                 </Label>
               </div>
@@ -278,7 +278,7 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
               <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
                 <RadioGroupItem value="personal" id="type-personal" />
                 <Label htmlFor="type-personal" className="cursor-pointer flex-1">
-                  <span className="block font-medium">📅 Evento Personal</span>
+                  <span className="block font-medium">Evento Personal</span>
                   <span className="text-xs text-muted-foreground">Sin proyecto ni lead</span>
                 </Label>
               </div>
