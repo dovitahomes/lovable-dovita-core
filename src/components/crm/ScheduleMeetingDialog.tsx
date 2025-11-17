@@ -101,11 +101,24 @@ export function ScheduleMeetingDialog({
         ),
       };
 
-      const { error: eventError } = await supabase
+      const { data: insertedEvent, error: eventError } = await supabase
         .from('project_events')
-        .insert(eventData);
+        .insert(eventData)
+        .select()
+        .single();
 
-      if (eventError) throw eventError;
+      if (eventError) {
+        console.error('❌ Error insertando evento:', eventError);
+        throw eventError;
+      }
+
+      console.log('✅ Evento creado exitosamente:', {
+        id: insertedEvent.id,
+        entity_type: insertedEvent.entity_type,
+        lead_id: insertedEvent.lead_id,
+        project_id: insertedEvent.project_id,
+        title: insertedEvent.title
+      });
 
       // 2. Crear tarea recordatorio
       const { error: taskError } = await supabase
