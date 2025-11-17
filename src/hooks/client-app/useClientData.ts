@@ -15,7 +15,8 @@ import { getSignedUrl } from "@/lib/storage/storage-helpers";
 import { 
   mockPhotos, 
   mockMinistraciones,
-  mockAppointments 
+  mockAppointments,
+  mockDocuments
 } from "@/lib/client-app/client-data";
 
 // Helper to generate signed URLs
@@ -56,11 +57,8 @@ export function useClientDocuments(projectId: string | null) {
     queryKey: ['client-documents', projectId, useMock],
     queryFn: async () => {
       if (useMock) {
-        // Mock documents
-        return [
-          { id: '1', projectId, name: 'Contrato.pdf', size: 245000, date: new Date().toISOString(), type: 'application/pdf', category: 'contractual', url: '/placeholder.svg' },
-          { id: '2', projectId, name: 'Presupuesto.xlsx', size: 128000, date: new Date().toISOString(), type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', category: 'presupuesto', url: '/placeholder.svg' },
-        ];
+        if (!projectId) return [];
+        return mockDocuments.filter(doc => doc.projectId === projectId);
       }
       
       if (!projectId) return [];
@@ -148,6 +146,7 @@ export function useClientMinistrations(projectId: string | null) {
     queryKey: ['client-ministrations', projectId, useMock],
     queryFn: async () => {
       if (useMock) {
+        if (!projectId) return [];
         return mockMinistraciones.filter(m => m.projectId === projectId);
       }
       
@@ -267,6 +266,7 @@ export function useClientAppointments(projectId: string | null) {
     queryKey: ['client-appointments', projectId, useMock],
     queryFn: async () => {
       if (useMock) {
+        if (!projectId) return [];
         return mockAppointments.filter(apt => apt.projectId === projectId);
       }
       
