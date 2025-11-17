@@ -369,10 +369,12 @@ export default function MiCalendario() {
               clientId={clientId}
               eventType={eventType}
               statusFilter={statusFilter}
+              entityTypeFilter={entityTypeFilter}
               onProjectChange={handleProjectChange}
               onClientChange={handleClientChange}
               onEventTypeChange={setEventType}
               onStatusFilterChange={setStatusFilter}
+              onEntityTypeChange={setEntityTypeFilter}
               onClearFilters={handleClearFilters}
               resultsCount={filteredEvents.length}
               totalCount={events.length}
