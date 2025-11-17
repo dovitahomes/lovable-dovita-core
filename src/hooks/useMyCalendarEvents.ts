@@ -6,6 +6,7 @@ interface CalendarFilters {
   projectId?: string;
   clientId?: string;
   eventType?: string;
+  entityType?: string; // Nuevo filtro para tipo de entidad
   startDate?: string;
   endDate?: string;
 }
@@ -42,21 +43,25 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
         .from('project_events')
         .select(`
           *,
-          projects!inner (
+          projects (
             id,
             project_name,
             client_id,
             clients (name)
+          ),
+          leads (
+            id,
+            nombre_completo,
+            email,
+            telefono
           )
         `)
         .order('start_time', { ascending: true });
       
-      // Filtrar por proyectos donde el usuario es participante
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
       
-      // Filtrar solo proyectos donde soy colaborador (via project_collaborators)
-      // Los admins ven todos los proyectos
+      // Obtener roles del usuario
       const { data: userRoles } = await supabase
         .from('user_roles')
         .select('role_name')
@@ -65,20 +70,35 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
       const isAdmin = userRoles?.some(r => r.role_name === 'admin');
       
       if (!isAdmin) {
+        // Colaboradores ven:
+        // 1. Eventos de proyectos donde son colaboradores
+        // 2. Eventos de leads donde ellos crearon la reunión
+        // 3. Sus propios eventos personales
+        
         const { data: myProjects } = await supabase
           .from('project_collaborators')
           .select('project_id')
           .eq('user_id', user.id);
         
         const projectIds = myProjects?.map(p => p.project_id) || [];
+        
+        // Construir filtro OR complejo
+        const conditions = [];
+        
         if (projectIds.length > 0) {
-          query = query.in('project_id', projectIds);
+          conditions.push(`and(project_id.in.(${projectIds.join(',')}),entity_type.eq.project)`);
+        }
+        conditions.push(`and(created_by.eq.${user.id},entity_type.eq.lead)`);
+        conditions.push(`and(created_by.eq.${user.id},entity_type.eq.personal)`);
+        
+        if (conditions.length > 0) {
+          query = query.or(conditions.join(','));
         } else {
-          // Si no tiene proyectos asignados, no mostrar nada
           return [];
         }
       }
       
+      // Aplicar filtros adicionales
       if (filters?.projectId) {
         query = query.eq('project_id', filters.projectId);
       }
@@ -89,6 +109,10 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
       
       if (filters?.eventType) {
         query = query.eq('event_type', filters.eventType);
+      }
+      
+      if (filters?.entityType) {
+        query = query.eq('entity_type', filters.entityType);
       }
       
       if (filters?.startDate && filters?.endDate) {

@@ -83,25 +83,29 @@ export function ScheduleMeetingDialog({
 
       const userId = (await supabase.auth.getUser()).data.user?.id;
 
-      // 1. Crear evento en project_events si hay projectId
-      if (projectId) {
-        const { error: eventError } = await supabase
-          .from('project_events')
-          .insert({
-            project_id: projectId,
-            title: `Reunión con ${leadName}`,
-            description: notes.trim() || `Reunión agendada con lead ${leadName}`,
-            start_time: startTime.toISOString(),
-            end_time: endTime.toISOString(),
-            event_type: meetingType === 'site_visit' ? 'site_visit' : 'meeting',
-            location: location.trim() || null,
-            visibility: 'team', // Solo colaboradores ven esta cita del lead
-            status: 'propuesta',
-            created_by: userId,
-          });
+      // 1. Crear evento en project_events (siempre, detectando el tipo de entidad)
+      const eventData = {
+        title: `Reunión con ${leadName}`,
+        description: notes.trim() || `Reunión agendada con lead ${leadName}`,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        event_type: meetingType === 'site_visit' ? 'site_visit' : 'meeting',
+        location: location.trim() || null,
+        visibility: 'team' as const, // Solo colaboradores ven esta cita del lead
+        status: 'propuesta',
+        created_by: userId,
+        // Lógica condicional para determinar entidad
+        ...(projectId 
+          ? { project_id: projectId, entity_type: 'project' as const }
+          : { lead_id: leadId, entity_type: 'lead' as const }
+        ),
+      };
 
-        if (eventError) throw eventError;
-      }
+      const { error: eventError } = await supabase
+        .from('project_events')
+        .insert(eventData);
+
+      if (eventError) throw eventError;
 
       // 2. Crear tarea recordatorio
       const { error: taskError } = await supabase
