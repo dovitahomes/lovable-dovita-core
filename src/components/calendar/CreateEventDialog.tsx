@@ -19,7 +19,9 @@ interface CreateEventDialogProps {
 }
 
 export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId }: CreateEventDialogProps) {
+  const [entityType, setEntityType] = useState<'project' | 'lead' | 'personal'>('project');
   const [projectId, setProjectId] = useState(defaultProjectId || "");
+  const [leadId, setLeadId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [eventType, setEventType] = useState("meeting");
@@ -30,6 +32,7 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
   const [status, setStatus] = useState("propuesta");
   const [clientName, setClientName] = useState("");
   const [projects, setProjects] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
   
   const createEvent = useCreateEvent();
   const updateEvent = useUpdateEvent();
@@ -75,15 +78,40 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
       }
     };
     
-    if (open) {
+    if (open && entityType === 'project') {
       loadProjects();
     }
-  }, [open]);
+  }, [open, entityType]);
+  
+  // Cargar leads disponibles para el usuario
+  useEffect(() => {
+    const loadLeads = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      // Leads que el usuario creó o está asignado (estados activos)
+      const { data, error } = await supabase
+        .from('leads')
+        .select('id, nombre_completo, email, telefono, status')
+        .in('status', ['nuevo', 'contactado', 'calificado', 'propuesta', 'negociacion'])
+        .order('nombre_completo');
+      
+      if (!error && data) {
+        setLeads(data);
+      }
+    };
+    
+    if (open && entityType === 'lead') {
+      loadLeads();
+    }
+  }, [open, entityType]);
   
   // Pre-cargar datos si es modo edición
   useEffect(() => {
     if (event && open) {
-      setProjectId(event.project_id);
+      setEntityType(event.entity_type || 'project');
+      setProjectId(event.project_id || "");
+      setLeadId(event.lead_id || "");
       setTitle(event.title);
       setDescription(event.description || "");
       setEventType(event.event_type || "meeting");
@@ -94,11 +122,13 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
       setStatus(event.status || "propuesta");
     } else if (!event && open) {
       // Reset form
+      setEntityType('project');
       if (defaultProjectId) {
         setProjectId(defaultProjectId);
       } else {
         setProjectId("");
       }
+      setLeadId("");
       setTitle("");
       setDescription("");
       setEventType("meeting");
