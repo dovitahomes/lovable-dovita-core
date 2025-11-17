@@ -58,45 +58,8 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
         `)
         .order('start_time', { ascending: true });
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-      
-      // Obtener roles del usuario
-      const { data: userRoles } = await supabase
-        .from('user_roles')
-        .select('role_name')
-        .eq('user_id', user.id);
-      
-      const isAdmin = userRoles?.some(r => r.role_name === 'admin');
-      
-      if (!isAdmin) {
-        // Colaboradores ven:
-        // 1. Eventos de proyectos donde son colaboradores
-        // 2. Eventos de leads donde ellos crearon la reunión
-        // 3. Sus propios eventos personales
-        
-        const { data: myProjects } = await supabase
-          .from('project_collaborators')
-          .select('project_id')
-          .eq('user_id', user.id);
-        
-        const projectIds = myProjects?.map(p => p.project_id) || [];
-        
-        // Construir filtro OR complejo
-        const conditions = [];
-        
-        if (projectIds.length > 0) {
-          conditions.push(`and(project_id.in.(${projectIds.join(',')}),entity_type.eq.project)`);
-        }
-        conditions.push(`and(created_by.eq.${user.id},entity_type.eq.lead)`);
-        conditions.push(`and(created_by.eq.${user.id},entity_type.eq.personal)`);
-        
-        if (conditions.length > 0) {
-          query = query.or(conditions.join(','));
-        } else {
-          return [];
-        }
-      }
+      // ✨ SIMPLIFICACIÓN: Las políticas RLS ahora manejan los permisos automáticamente
+      // Ya no necesitamos construir filtros OR complejos en el frontend
       
       // Aplicar filtros adicionales
       if (filters?.projectId) {
@@ -122,7 +85,28 @@ export function useMyCalendarEvents(filters?: CalendarFilters) {
       }
       
       const { data, error } = await query;
-      if (error) throw error;
+      
+      if (error) {
+        console.error('❌ Error cargando eventos:', error);
+        throw error;
+      }
+
+      console.log('✅ Eventos cargados:', {
+        total: data?.length || 0,
+        porTipo: {
+          proyectos: data?.filter(e => e.entity_type === 'project').length || 0,
+          leads: data?.filter(e => e.entity_type === 'lead').length || 0,
+          personales: data?.filter(e => e.entity_type === 'personal').length || 0,
+        },
+        eventos: data?.map(e => ({
+          id: e.id,
+          title: e.title,
+          entity_type: e.entity_type,
+          project_id: e.project_id,
+          lead_id: e.lead_id
+        }))
+      });
+
       return data || [];
     },
     staleTime: 1000 * 60 * 2, // 2 minutos
