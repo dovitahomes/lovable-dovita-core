@@ -10,7 +10,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useClientDataMode } from "@/contexts/client-app/ClientDataModeProvider";
+import { useDataSource } from "@/contexts/client-app/DataSourceContext";
 import { getSignedUrl } from "@/lib/storage/storage-helpers";
 import { 
   mockPhotos, 
@@ -51,7 +51,8 @@ async function getSignedFileUrl(fileUrl: string | null): Promise<string> {
  * Fetch documents for a project
  */
 export function useClientDocuments(projectId: string | null) {
-  const { useMock } = useClientDataMode();
+  const { source } = useDataSource();
+  const useMock = source === 'mock';
   
   return useQuery({
     queryKey: ['client-documents', projectId, useMock],
@@ -97,7 +98,8 @@ export function useClientDocuments(projectId: string | null) {
  * Fetch photos for a project
  */
 export function useClientPhotos(projectId: string | null) {
-  const { useMock } = useClientDataMode();
+  const { source } = useDataSource();
+  const useMock = source === 'mock';
   
   return useQuery({
     queryKey: ['client-photos', projectId, useMock],
@@ -140,7 +142,8 @@ export function useClientPhotos(projectId: string | null) {
  * Fetch ministrations (payments) for a project
  */
 export function useClientMinistrations(projectId: string | null) {
-  const { useMock } = useClientDataMode();
+  const { source } = useDataSource();
+  const useMock = source === 'mock';
   
   return useQuery({
     queryKey: ['client-ministrations', projectId, useMock],
@@ -185,7 +188,8 @@ export function useClientMinistrations(projectId: string | null) {
  * Fetch financial summary for a project
  */
 export function useClientFinancialSummary(projectId: string | null) {
-  const { useMock } = useClientDataMode();
+  const { source } = useDataSource();
+  const useMock = source === 'mock';
   
   return useQuery({
     queryKey: ['client-financial-summary', projectId, useMock],
@@ -227,7 +231,8 @@ export function useClientFinancialSummary(projectId: string | null) {
  * Fetch budget categories for a project
  */
 export function useClientBudgetCategories(projectId: string | null) {
-  const { useMock } = useClientDataMode();
+  const { source } = useDataSource();
+  const useMock = source === 'mock';
   
   return useQuery({
     queryKey: ['client-budget-categories', projectId, useMock],
@@ -260,7 +265,8 @@ export function useClientBudgetCategories(projectId: string | null) {
  * Fetch appointments for a project
  */
 export function useClientAppointments(projectId: string | null) {
-  const { useMock } = useClientDataMode();
+  const { source } = useDataSource();
+  const useMock = source === 'mock';
   
   return useQuery({
     queryKey: ['client-appointments', projectId, useMock],
