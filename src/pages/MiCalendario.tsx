@@ -12,7 +12,6 @@ import { useCollaboratorEventNotifications } from "@/hooks/useCollaboratorEventN
 import { EventFiltersEnhanced } from "@/components/calendar/EventFiltersEnhanced";
 import { EventDetailsPanel } from "@/components/calendar/EventDetailsPanel";
 import { CreateEventDialog } from "@/components/calendar/CreateEventDialog";
-import { CreatePersonalEventDialog } from "@/components/calendar/CreatePersonalEventDialog";
 import { CalendarViewSelector } from "@/components/calendar/CalendarViewSelector";
 import { MonthView } from "@/components/calendar/views/MonthView";
 import { WeekView } from "@/components/calendar/views/WeekView";
@@ -45,7 +44,6 @@ export default function MiCalendario() {
   // State para eventos seleccionados y dialogs
   const [selectedEvent, setSelectedEvent] = useState<EventManagerEvent | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showCreatePersonalEventDialog, setShowCreatePersonalEventDialog] = useState(false); // Nuevo dialog
   const [editingEvent, setEditingEvent] = useState<any>(null);
   
   // State para drag & drop (FASE 5)
@@ -318,20 +316,10 @@ export default function MiCalendario() {
             {/* Selector de vista y botón crear */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <CalendarViewSelector view={view} onViewChange={handleViewChange} />
-              <div className="flex gap-2">
-                <Button onClick={() => setShowCreateDialog(true)} className="flex-1 sm:flex-initial">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nuevo Evento
-                </Button>
-                <Button 
-                  onClick={() => setShowCreatePersonalEventDialog(true)}
-                  variant="outline"
-                  className="flex-1 sm:flex-initial"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  Evento Personal
-                </Button>
-              </div>
+              <Button onClick={() => setShowCreateDialog(true)} className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo Evento
+              </Button>
             </div>
           </div>
         </div>
