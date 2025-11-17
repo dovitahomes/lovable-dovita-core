@@ -156,43 +156,70 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validaciones
-    if (!projectId) {
+    // Validaciones según entityType
+    if (entityType === 'project' && !projectId) {
       toast.error("Selecciona un proyecto");
       return;
     }
+    
+    if (entityType === 'lead' && !leadId) {
+      toast.error("Selecciona un lead");
+      return;
+    }
+    
     if (!title.trim()) {
       toast.error("El título es obligatorio");
       return;
     }
+    
     if (title.length > 100) {
       toast.error("El título no puede exceder 100 caracteres");
       return;
     }
+    
     if (!startTime) {
       toast.error("La fecha de inicio es obligatoria");
       return;
     }
+    
     if (!endTime) {
       toast.error("La fecha de fin es obligatoria");
       return;
     }
+    
     if (new Date(endTime) <= new Date(startTime)) {
       toast.error("La fecha de fin debe ser posterior a la fecha de inicio");
       return;
     }
     
-    const eventData = {
-      project_id: projectId,
+    // Construir eventData según tipo
+    const eventData: any = {
       title: title.trim(),
       description: description.trim() || undefined,
       start_time: startTime,
       end_time: endTime,
       event_type: eventType,
-      visibility,
       location: location.trim() || undefined,
       status,
+      entity_type: entityType,
     };
+    
+    // Agregar campos específicos según tipo
+    if (entityType === 'project') {
+      eventData.project_id = projectId;
+      eventData.visibility = visibility;
+    } else if (entityType === 'lead') {
+      eventData.lead_id = leadId;
+      eventData.visibility = 'team';
+      eventData.project_id = null;
+    } else {
+      // Personal
+      eventData.project_id = null;
+      eventData.lead_id = null;
+      eventData.visibility = 'team';
+    }
+    
+    console.log('🚀 Enviando eventData:', eventData);
     
     try {
       if (event) {
@@ -200,10 +227,15 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
         toast.success("Evento actualizado correctamente");
       } else {
         await createEvent.mutateAsync(eventData);
-        toast.success("Evento creado correctamente");
+        const successMsg = 
+          entityType === 'personal' ? 'Evento personal creado' :
+          entityType === 'lead' ? 'Reunión con lead agendada' :
+          'Evento de proyecto creado';
+        toast.success(successMsg);
       }
       onOpenChange(false);
     } catch (error: any) {
+      console.error('❌ Error guardando evento:', error);
       toast.error(error.message || "Error al guardar el evento");
     }
   };
@@ -218,28 +250,92 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Proyecto */}
+          {/* Selector de Tipo de Evento (PRIMERO) */}
           <div>
-            <Label htmlFor="project">Proyecto *</Label>
-            <Select value={projectId} onValueChange={setProjectId} disabled={isPending}>
-              <SelectTrigger id="project">
-                <SelectValue placeholder="Selecciona un proyecto" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map(project => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.project_name || `Proyecto ${project.id.slice(0, 8)}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-base font-semibold">Tipo de Evento *</Label>
+            <RadioGroup 
+              value={entityType} 
+              onValueChange={(v) => setEntityType(v as any)} 
+              disabled={isPending}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2"
+            >
+              <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
+                <RadioGroupItem value="project" id="type-project" />
+                <Label htmlFor="type-project" className="cursor-pointer flex-1">
+                  <span className="block font-medium">🏢 Evento de Proyecto</span>
+                  <span className="text-xs text-muted-foreground">Vinculado a un proyecto específico</span>
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
+                <RadioGroupItem value="lead" id="type-lead" />
+                <Label htmlFor="type-lead" className="cursor-pointer flex-1">
+                  <span className="block font-medium">👤 Reunión con Lead</span>
+                  <span className="text-xs text-muted-foreground">Reunión con prospecto</span>
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-accent">
+                <RadioGroupItem value="personal" id="type-personal" />
+                <Label htmlFor="type-personal" className="cursor-pointer flex-1">
+                  <span className="block font-medium">📅 Evento Personal</span>
+                  <span className="text-xs text-muted-foreground">Sin proyecto ni lead</span>
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
+
+          {/* Selector de Proyecto (SOLO si entityType === 'project') */}
+          {entityType === 'project' && (
+            <div>
+              <Label htmlFor="project">Proyecto *</Label>
+              <Select value={projectId} onValueChange={setProjectId} disabled={isPending}>
+                <SelectTrigger id="project">
+                  <SelectValue placeholder="Selecciona un proyecto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map(project => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.project_name || `Proyecto ${project.id.slice(0, 8)}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           
-          {/* Cliente (read-only, auto-cargado) */}
-          {clientName && (
+          {/* Cliente (read-only, SOLO si entityType === 'project') */}
+          {entityType === 'project' && clientName && (
             <div>
               <Label>Cliente</Label>
               <Input value={clientName} disabled className="bg-muted" />
+            </div>
+          )}
+
+          {/* Selector de Lead (SOLO si entityType === 'lead') */}
+          {entityType === 'lead' && (
+            <div>
+              <Label htmlFor="lead">Lead (Prospecto) *</Label>
+              <Select value={leadId} onValueChange={setLeadId} disabled={isPending}>
+                <SelectTrigger id="lead">
+                  <SelectValue placeholder="Selecciona un lead" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leads.map(lead => (
+                    <SelectItem key={lead.id} value={lead.id}>
+                      <div>
+                        <div className="font-medium">{lead.nombre_completo}</div>
+                        <div className="text-xs text-muted-foreground">{lead.email}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {leads.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  No hay leads activos disponibles
+                </p>
+              )}
             </div>
           )}
           
@@ -250,7 +346,13 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Reunión de seguimiento"
+              placeholder={
+                entityType === 'personal' 
+                  ? "Mi evento personal" 
+                  : entityType === 'lead' 
+                  ? "Reunión con prospecto" 
+                  : "Reunión de seguimiento"
+              }
               maxLength={100}
               disabled={isPending}
             />
@@ -325,24 +427,26 @@ export function CreateEventDialog({ open, onOpenChange, event, defaultProjectId 
             />
           </div>
           
-          {/* Visibilidad */}
-          <div>
-            <Label>Visibilidad *</Label>
-            <RadioGroup value={visibility} onValueChange={(v: any) => setVisibility(v)} disabled={isPending}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="client" id="visibility-client" />
-                <Label htmlFor="visibility-client" className="font-normal cursor-pointer">
-                  Cliente (el cliente verá esta cita en su Client App)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="team" id="visibility-team" />
-                <Label htmlFor="visibility-team" className="font-normal cursor-pointer">
-                  Solo equipo (visible solo para colaboradores)
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
+          {/* Visibilidad (SOLO si entityType === 'project') */}
+          {entityType === 'project' && (
+            <div>
+              <Label>Visibilidad *</Label>
+              <RadioGroup value={visibility} onValueChange={(v: any) => setVisibility(v)} disabled={isPending}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="team" id="visibility-team" />
+                  <Label htmlFor="visibility-team" className="font-normal cursor-pointer">
+                    Solo equipo (visible solo para colaboradores)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="client" id="visibility-client" />
+                  <Label htmlFor="visibility-client" className="font-normal cursor-pointer">
+                    Cliente (el cliente verá esta cita en su Client App)
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
           
           {/* Status */}
           <div>
