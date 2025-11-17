@@ -52,9 +52,27 @@ export function EventDetailsPanel({ event, onEdit, onClose }: EventDetailsPanelP
   const deleteEvent = useDeleteEvent();
   const updateEvent = useUpdateEvent();
   
-  const projectName = event.projects?.project_name || "Sin proyecto";
-  const clientName = event.projects?.clients?.name || "Sin cliente";
+  const entityType = event.entity_type || 'project';
   const createdBy = event.profiles?.full_name || "Desconocido";
+  
+  // Detectar tipo de evento y adaptar labels
+  let entityLabel = 'Proyecto';
+  let entityName = 'Sin nombre';
+  let secondaryLabel = 'Cliente';
+  let secondaryValue = 'Sin cliente';
+  let showEntitySection = true;
+
+  if (entityType === 'lead' && event.leads) {
+    entityLabel = 'Lead (Prospecto)';
+    entityName = event.leads.nombre_completo || 'Sin nombre';
+    secondaryLabel = 'Contacto';
+    secondaryValue = event.leads.email || event.leads.telefono || 'Sin contacto';
+  } else if (entityType === 'personal') {
+    showEntitySection = false;
+  } else if (event.projects) {
+    entityName = event.projects.project_name || 'Sin nombre';
+    secondaryValue = event.projects.clients?.name || 'Sin cliente';
+  }
   
   const handleDelete = async () => {
     try {
@@ -75,7 +93,11 @@ export function EventDetailsPanel({ event, onEdit, onClose }: EventDetailsPanelP
     }
   };
   
+  const canChangeVisibility = entityType === 'project';
+  
   const handleToggleVisibility = async () => {
+    if (!canChangeVisibility) return;
+    
     const newVisibility = event.visibility === 'client' ? 'team' : 'client';
     try {
       await updateEvent.mutateAsync({ id: event.id, visibility: newVisibility });
@@ -98,16 +120,33 @@ export function EventDetailsPanel({ event, onEdit, onClose }: EventDetailsPanelP
         </CardHeader>
         
         <CardContent className="space-y-4">
-          {/* Proyecto y Cliente */}
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Proyecto</p>
-            <p className="text-base">{projectName}</p>
-          </div>
+          {/* Badges visuales para tipo de evento */}
+          {entityType === 'lead' && (
+            <Badge variant="secondary" className="w-fit">
+              Reunión con Lead
+            </Badge>
+          )}
           
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Cliente</p>
-            <p className="text-base">{clientName}</p>
-          </div>
+          {entityType === 'personal' && (
+            <Badge variant="outline" className="w-fit">
+              Evento Personal
+            </Badge>
+          )}
+          
+          {/* Proyecto/Lead y Cliente/Contacto (solo si NO es personal) */}
+          {showEntitySection && (
+            <>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{entityLabel}</p>
+                <p className="text-base">{entityName}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{secondaryLabel}</p>
+                <p className="text-base">{secondaryValue}</p>
+              </div>
+            </>
+          )}
           
           <Separator />
           
@@ -171,18 +210,39 @@ export function EventDetailsPanel({ event, onEdit, onClose }: EventDetailsPanelP
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Visibilidad</span>
-              {event.visibility === 'client' ? (
-                <Badge variant="default" className="gap-1">
-                  <Eye className="h-3 w-3" />
-                  Cliente
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="gap-1">
-                  <EyeOff className="h-3 w-3" />
-                  Solo equipo
-                </Badge>
-              )}
+              <div className="flex-1">
+                <span className="text-sm text-muted-foreground">Visibilidad</span>
+                {!canChangeVisibility && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Los eventos de leads y personales solo son visibles para el equipo
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {event.visibility === 'client' ? (
+                  <Badge variant="default" className="gap-1">
+                    <Eye className="h-3 w-3" />
+                    Cliente
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="gap-1">
+                    <EyeOff className="h-3 w-3" />
+                    Solo equipo
+                  </Badge>
+                )}
+                <Button 
+                  onClick={handleToggleVisibility}
+                  variant="outline"
+                  size="sm"
+                  disabled={!canChangeVisibility || updateEvent.isPending}
+                >
+                  {canChangeVisibility ? (
+                    event.visibility === 'client' ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 opacity-50" />
+                  )}
+                </Button>
+              </div>
             </div>
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
