@@ -238,6 +238,92 @@ export const mockPhotos = [
   }
 ];
 
+// Mock documents for preview mode
+export const mockDocuments = [
+  // Juriquilla - Documentos de Diseño
+  {
+    id: '1',
+    projectId: 'project_juriquilla',
+    name: 'Contrato de Diseño.pdf',
+    size: 245000,
+    date: '2024-03-01',
+    type: 'application/pdf',
+    category: 'contractual',
+    url: '/placeholder.svg'
+  },
+  {
+    id: '2',
+    projectId: 'project_juriquilla',
+    name: 'Presupuesto Diseño.xlsx',
+    size: 128000,
+    date: '2024-03-05',
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    category: 'presupuesto',
+    url: '/placeholder.svg'
+  },
+  {
+    id: '3',
+    projectId: 'project_juriquilla',
+    name: 'Planos Arquitectónicos.pdf',
+    size: 3200000,
+    date: '2024-04-10',
+    type: 'application/pdf',
+    category: 'diseno',
+    url: '/placeholder.svg'
+  },
+  {
+    id: '4',
+    projectId: 'project_juriquilla',
+    name: 'Renders 3D.zip',
+    size: 15000000,
+    date: '2024-04-20',
+    type: 'application/zip',
+    category: 'diseno',
+    url: '/placeholder.svg'
+  },
+  // Playa del Carmen - Documentos de Construcción
+  {
+    id: '5',
+    projectId: 'project_playa',
+    name: 'Contrato de Obra.pdf',
+    size: 450000,
+    date: '2024-02-01',
+    type: 'application/pdf',
+    category: 'contractual',
+    url: '/placeholder.svg'
+  },
+  {
+    id: '6',
+    projectId: 'project_playa',
+    name: 'Permiso de Construcción.pdf',
+    size: 1200000,
+    date: '2024-02-10',
+    type: 'application/pdf',
+    category: 'legal',
+    url: '/placeholder.svg'
+  },
+  {
+    id: '7',
+    projectId: 'project_playa',
+    name: 'Presupuesto Construcción.xlsx',
+    size: 350000,
+    date: '2024-02-15',
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    category: 'presupuesto',
+    url: '/placeholder.svg'
+  },
+  {
+    id: '8',
+    projectId: 'project_playa',
+    name: 'Bitácora de Obra.pdf',
+    size: 850000,
+    date: '2024-05-01',
+    type: 'application/pdf',
+    category: 'construccion',
+    url: '/placeholder.svg'
+  }
+];
+
 export const mockMinistraciones = [
   // Juriquilla - Proyecto de Diseño ($150,000)
   {
@@ -317,13 +403,20 @@ export const appointmentTypes = [
   "Otro"
 ];
 
+// Helper para generar fechas relativas
+const getRelativeDate = (daysOffset: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+  return date.toISOString().split('T')[0];
+};
+
 export const mockAppointments = [
   // Juriquilla - Proyecto de Diseño
   {
     id: 1,
     projectId: "project_juriquilla",
     type: "Presentación de diseños",
-    date: "2025-11-05",
+    date: getRelativeDate(3), // Hoy + 3 días
     time: "10:00",
     duration: 60,
     status: "confirmed" as const,
@@ -341,7 +434,7 @@ export const mockAppointments = [
     id: 2,
     projectId: "project_juriquilla",
     type: "Revisión de planos",
-    date: "2025-11-10",
+    date: getRelativeDate(10), // Hoy + 10 días
     time: "16:00",
     duration: 45,
     status: "pending" as const,
@@ -360,7 +453,7 @@ export const mockAppointments = [
     id: 3,
     projectId: "project_juriquilla",
     type: "Selección de materiales",
-    date: "2025-10-25",
+    date: getRelativeDate(-5), // Hace 5 días (completada)
     time: "11:00",
     duration: 90,
     status: "completed" as const,
@@ -379,7 +472,7 @@ export const mockAppointments = [
     id: 4,
     projectId: "project_playa",
     type: "Visita a obra",
-    date: "2025-11-08",
+    date: getRelativeDate(5), // Hoy + 5 días
     time: "11:00",
     duration: 60,
     status: "confirmed" as const,
@@ -397,7 +490,7 @@ export const mockAppointments = [
     id: 5,
     projectId: "project_playa",
     type: "Junta de obra",
-    date: "2025-11-12",
+    date: getRelativeDate(12), // Hoy + 12 días
     time: "15:00",
     duration: 90,
     status: "pending" as const,
@@ -416,7 +509,7 @@ export const mockAppointments = [
     id: 6,
     projectId: "project_playa",
     type: "Revisión de avances",
-    date: "2025-10-20",
+    date: getRelativeDate(-10), // Hace 10 días (completada)
     time: "09:00",
     duration: 120,
     status: "completed" as const,
