@@ -122,6 +122,7 @@ export const VISIBILITY_LABELS = {
 /**
  * Transforma un evento de Supabase al formato EventManager
  */
+export function toEventManagerFormat(dovitaEvent: DovitaEvent): EventManagerEvent {
   // Validar y normalizar event_type
   const eventType = dovitaEvent.event_type as keyof typeof EVENT_TYPE_COLORS;
   const colorConfig = EVENT_TYPE_COLORS[eventType] || EVENT_TYPE_COLORS.other;
@@ -172,6 +173,8 @@ export const VISIBILITY_LABELS = {
 export function toEventManagerFormats(dovitaEvents: DovitaEvent[]): EventManagerEvent[] {
   return dovitaEvents.map(toEventManagerFormat);
 }
+
+/**
  * Extrae los datos necesarios para actualizar un evento en Supabase
  * NO incluye project_id ya que eso no debe cambiar con drag & drop
  */
