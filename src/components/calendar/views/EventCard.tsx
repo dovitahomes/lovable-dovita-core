@@ -67,9 +67,7 @@ export function EventCard({
             !canDrag && "cursor-default opacity-75"
           )}
         >
-          <div className="truncate flex items-center gap-1">
-            {event.entity_type === 'lead' && <span>👤</span>}
-            {event.entity_type === 'personal' && <span>📅</span>}
+          <div className="truncate">
             {event.title}
           </div>
         </div>
@@ -82,10 +80,10 @@ export function EventCard({
                   <div className={cn("h-3 w-3 rounded-full flex-shrink-0", colorClasses.bg)} />
                 </div>
                 {event.entity_type === 'lead' && (
-                  <Badge variant="outline" className="text-[10px]">👤 Lead</Badge>
+                  <Badge variant="outline" className="text-[10px]">Lead</Badge>
                 )}
                 {event.entity_type === 'personal' && (
-                  <Badge variant="outline" className="text-[10px]">📅 Personal</Badge>
+                  <Badge variant="outline" className="text-[10px]">Personal</Badge>
                 )}
                 {event.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>

@@ -188,7 +188,7 @@ export function ScheduleMeetingDialog({
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['project-events'] });
-      toast.success("✅ Reunión agendada en calendario y tareas");
+      toast.success("Reunión agendada en calendario y tareas");
       
       // Reset form
       setDate(undefined);
