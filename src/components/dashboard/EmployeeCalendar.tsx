@@ -177,7 +177,7 @@ export function EmployeeCalendar() {
       </CardHeader>
       <CardContent className="pt-6">
         {/* Layout Grid Responsive: 2 columnas en desktop, 1 en mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(300px,1fr)_1.2fr] xl:grid-cols-[minmax(320px,400px)_1fr] gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr] gap-6 md:gap-8">
           
           {/* COLUMNA IZQUIERDA: Calendario */}
           <div className="flex flex-col space-y-4">
@@ -207,7 +207,7 @@ export function EmployeeCalendar() {
                   );
                 }
               }}
-              className="rounded-lg border shadow-sm mx-auto md:mx-0"
+              className="rounded-lg border shadow-sm mx-auto md:mx-0 w-full"
             />
             
             {/* Stats rápidas */}
@@ -224,7 +224,7 @@ export function EmployeeCalendar() {
           </div>
 
           {/* COLUMNA DERECHA: Eventos */}
-          <div className="flex flex-col space-y-4 max-h-[350px] md:max-h-[450px] xl:max-h-[500px] overflow-y-auto events-scroll scroll-smooth">
+          <div className="flex flex-col space-y-4 max-h-[350px] md:max-h-[520px] xl:max-h-[580px] overflow-y-auto events-scroll scroll-smooth">
             
             {/* Eventos del día seleccionado */}
             {selectedDate && (
