@@ -289,13 +289,14 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                 leads.map((lead) => (
                   <TableRow 
                     key={lead.id}
+                    onClick={() => onOpenDetails?.(lead.id)}
                     className={cn(
-                      "hover:bg-accent/50 transition-colors",
+                      "hover:bg-accent/50 transition-colors cursor-pointer",
                       selectedLeads.includes(lead.id) && "bg-accent/30"
                     )}
                   >
                     {/* Checkbox - SIEMPRE */}
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedLeads.includes(lead.id)}
                         onCheckedChange={(checked) => handleSelectLead(lead.id, checked as boolean)}
@@ -395,7 +396,7 @@ export function LeadsTableView({ search, filters, onOpenDetails }: LeadsTableVie
                     )}
                     
                     {/* Acciones - SIEMPRE */}
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <LeadTableActions lead={lead} />
                     </TableCell>
                   </TableRow>
