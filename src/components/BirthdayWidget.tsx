@@ -20,23 +20,27 @@ const getInitials = (name: string): string => {
 // Helper: Verificar si es el día exacto de hoy
 const isToday = (dateString: string): boolean => {
   const today = new Date();
-  const birthday = new Date(dateString);
+  // Usar string parsing en lugar de Date constructor
+  const [year, month, day] = dateString.split('-').map(Number);
   return (
-    today.getDate() === birthday.getDate() && 
-    today.getMonth() === birthday.getMonth()
+    today.getDate() === day && 
+    today.getMonth() + 1 === month
   );
 };
 
 // Helper: Obtener solo el día del mes
 const getDayOfMonth = (dateString: string): number => {
-  return new Date(dateString).getDate();
+  // Extraer día directamente del string 'YYYY-MM-DD'
+  return parseInt(dateString.substring(8, 10), 10);
 };
 
 // Helper: Verificar si está próximo (dentro de 3 días)
 const isUpcoming = (dateString: string): boolean => {
   const today = new Date();
-  const birthday = new Date(dateString);
-  birthday.setFullYear(today.getFullYear());
+  const [year, month, day] = dateString.split('-').map(Number);
+  
+  // Crear fecha de cumpleaños para el año actual
+  const birthday = new Date(today.getFullYear(), month - 1, day);
   
   const diffTime = birthday.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -67,10 +71,11 @@ export const BirthdayWidget = () => {
       if (error) throw error;
       if (!data) return [];
 
-      // Filtrar por mes actual en client side
+      // Filtrar por mes actual usando string parsing para evitar problemas de timezone
       return data.filter((user) => {
         if (!user.fecha_nacimiento) return false;
-        const birthMonth = new Date(user.fecha_nacimiento).getMonth() + 1;
+        // Extraer mes directamente del string 'YYYY-MM-DD' (posición 5-6)
+        const birthMonth = parseInt(user.fecha_nacimiento.substring(5, 7), 10);
         return birthMonth === currentMonth;
       });
     },
