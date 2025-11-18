@@ -113,6 +113,8 @@ export function ImportLeadsDialog({ open, onOpenChange }: ImportLeadsDialogProps
             autoMapping[header] = "amount";
           } else if (lowerHeader.includes("probability") || lowerHeader.includes("probabilidad")) {
             autoMapping[header] = "probability";
+          } else if ((lowerHeader.includes("cierre") || lowerHeader.includes("close")) && (lowerHeader.includes("fecha") || lowerHeader.includes("esperada") || lowerHeader.includes("esperado"))) {
+            autoMapping[header] = "expected_close_date";
           } else {
             autoMapping[header] = "ignore";
           }
@@ -153,6 +155,34 @@ export function ImportLeadsDialog({ open, onOpenChange }: ImportLeadsDialogProps
     setStep("importing");
     setImportProgress(0);
 
+    // Helper function to convert Excel dates to ISO format
+    const convertExcelDateToISO = (value: any): string | undefined => {
+      if (!value) return undefined;
+      
+      // Si ya es string en formato ISO (YYYY-MM-DD), devolverlo
+      if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return value;
+      }
+      
+      // Si es número de serie de Excel
+      if (typeof value === 'number') {
+        // Excel epoch: 1900-01-01 (con bug del 1900 leap year)
+        const excelEpoch = new Date(1899, 11, 30); // 30 dic 1899
+        const date = new Date(excelEpoch.getTime() + value * 86400000);
+        return date.toISOString().split('T')[0]; // YYYY-MM-DD
+      }
+      
+      // Intentar parsear como fecha
+      try {
+        const parsed = new Date(value);
+        if (!isNaN(parsed.getTime())) {
+          return parsed.toISOString().split('T')[0];
+        }
+      } catch {}
+      
+      return undefined;
+    };
+
     const mappedData: ImportRow[] = data.map((row) => {
       const mappedRow: ImportRow = {};
       Object.entries(columnMapping).forEach(([fileColumn, dbColumn]) => {
@@ -162,6 +192,8 @@ export function ImportLeadsDialog({ open, onOpenChange }: ImportLeadsDialogProps
             mappedRow[dbColumn] = parseFloat(value) || undefined;
           } else if (dbColumn === "origen_lead") {
             mappedRow[dbColumn] = [value.toString()];
+          } else if (dbColumn === "expected_close_date") {
+            mappedRow[dbColumn] = convertExcelDateToISO(value);
           } else {
             mappedRow[dbColumn] = value;
           }

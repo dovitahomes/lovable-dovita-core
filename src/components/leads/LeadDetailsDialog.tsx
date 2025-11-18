@@ -11,6 +11,7 @@ import { StatusBadge } from "./StatusBadge";
 import { LeadQuickActions } from "./LeadQuickActions";
 import { ActivityTimeline } from "./ActivityTimeline";
 import { ConvertLeadDialog } from "./ConvertLeadDialog";
+import { EditOpportunityDialog } from "./EditOpportunityDialog";
 import { useCrmActivities } from "@/hooks/crm/useCrmActivities";
 import { useTasks } from "@/hooks/crm/useTasks";
 import { useUpdateLead, useDeleteLead } from "@/hooks/useLeads";
@@ -38,6 +39,7 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditOpportunity, setShowEditOpportunity] = useState(false);
 
   // ✅ CRÍTICO: Hooks DEBEN llamarse ANTES de cualquier early return
   const { data: activities } = useCrmActivities('lead', lead?.id || '');
@@ -197,20 +199,30 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
                 </div>
 
                 {lead.amount && (
-                  <div className="border rounded-lg p-4">
-                    <h4 className="text-sm font-semibold mb-3">Oportunidad</h4>
+                  <div className="border rounded-lg p-4 relative group">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold">Oportunidad</h4>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setShowEditOpportunity(true)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label className="text-xs text-muted-foreground">Valor</Label>
-                        <p className="text-2xl font-bold mt-1">{formatCurrency(lead.amount)}</p>
+                        <p className="text-lg font-semibold mt-1">{formatCurrency(lead.amount)}</p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Probabilidad</Label>
-                        <p className="text-2xl font-bold mt-1">{lead.probability}%</p>
+                        <p className="text-lg font-semibold mt-1">{lead.probability}%</p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Cierre Esperado</Label>
-                        <p className="text-sm mt-1">
+                        <p className="text-lg font-semibold mt-1">
                           {lead.expected_close_date ? new Date(lead.expected_close_date).toLocaleDateString('es-MX') : '-'}
                         </p>
                       </div>
@@ -407,6 +419,13 @@ export function LeadDetailsDialog({ lead, open, onOpenChange, onConvert }: LeadD
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Opportunity Dialog */}
+      <EditOpportunityDialog
+        lead={lead}
+        open={showEditOpportunity}
+        onOpenChange={setShowEditOpportunity}
+      />
     </>
   );
 }
