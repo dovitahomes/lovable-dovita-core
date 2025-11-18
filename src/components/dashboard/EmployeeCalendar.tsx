@@ -230,7 +230,7 @@ export function EmployeeCalendar() {
             {selectedDate && (
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold sticky top-0 bg-background pb-2 z-10">
-                  📅 {selectedDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
+                  {selectedDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
                 </h4>
                 <div className="space-y-2">
                   {eventsOnSelectedDate.length > 0 ? (
@@ -263,7 +263,7 @@ export function EmployeeCalendar() {
             {upcomingEvents.length > 0 && (
               <div className="space-y-2 pt-4 border-t">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide sticky top-0 bg-background pb-2 z-10">
-                  ⚡ Próximos eventos
+                  Próximos eventos
                 </h4>
                 <div className="space-y-1.5">
                   {upcomingEvents.map((event, index) => (
