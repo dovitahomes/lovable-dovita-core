@@ -2,19 +2,28 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ExternalLink, Plus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Calendar as CalendarIcon, ExternalLink, Plus, PanelLeftClose, PanelLeftOpen, Users, HardHat, ClipboardCheck, Clock, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { useMyCalendarEvents } from "@/hooks/useMyCalendarEvents";
 import { useCollaboratorEventNotifications } from "@/hooks/useCollaboratorEventNotifications";
-import { toEventManagerFormats, EVENT_TYPE_COLORS } from "@/lib/calendar/eventAdapter";
+import { toEventManagerFormats, EVENT_TYPE_COLORS, EVENT_TYPE_LABELS } from "@/lib/calendar/eventAdapter";
 import { EventCard } from "@/components/calendar/views/EventCard";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+
+// Mapeo de íconos por tipo de evento
+const EVENT_TYPE_ICONS = {
+  meeting: Users,
+  site_visit: HardHat,
+  review: ClipboardCheck,
+  deadline: Clock,
+  other: Sparkles,
+} as const;
 
 export function EmployeeCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -248,45 +257,54 @@ export function EmployeeCalendar() {
               {isLoading ? (
                 <div className="space-y-2">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                    <Skeleton key={i} className="h-[68px] w-full rounded-xl" />
                   ))}
                 </div>
               ) : upcomingEvents.length > 0 ? (
                 <div className="flex flex-col space-y-2 max-h-[420px] overflow-y-auto scrollbar-thin">
-                  {upcomingEvents.map((event, index) => (
-                    <button
-                      key={event.id}
-                      onClick={() => handleEventClick(event)}
-                      className="w-full text-left hover:bg-accent/50 rounded-lg p-2.5 transition-all border border-transparent hover:border-border group animate-fade-in"
-                      style={{ animationDelay: `${index * 30}ms` }}
-                    >
-                      <div className="flex items-start gap-2">
-                        {/* Dot colorizado por tipo */}
-                        <div 
-                          className={cn(
-                            "h-2.5 w-2.5 rounded-full shrink-0 mt-1.5 group-hover:scale-125 transition-transform",
-                            EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
-                          )} 
-                        />
-                        
-                        {/* Info del evento */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                            {event.title}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground">
-                            <span>{formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}</span>
-                            {event.projectName && (
-                              <>
-                                <span>•</span>
-                                <span className="truncate">{event.projectName}</span>
-                              </>
+                  {upcomingEvents.map((event, index) => {
+                    const IconComponent = EVENT_TYPE_ICONS[event.event_type as keyof typeof EVENT_TYPE_ICONS] || Sparkles;
+                    const colorConfig = EVENT_TYPE_COLORS[event.event_type] || EVENT_TYPE_COLORS.other;
+                    
+                    return (
+                      <button
+                        key={event.id}
+                        onClick={() => handleEventClick(event)}
+                        className="w-full text-left hover:shadow-md rounded-xl p-3 transition-all border border-border/50 hover:border-border bg-card group animate-fade-in"
+                        style={{ animationDelay: `${index * 30}ms` }}
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Círculo con ícono */}
+                          <div 
+                            className={cn(
+                              "h-11 w-11 rounded-full shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
+                              colorConfig.bg
                             )}
+                          >
+                            <IconComponent className="h-5 w-5 text-white" />
+                          </div>
+                          
+                          {/* Contenido del evento */}
+                          <div className="flex-1 min-w-0">
+                            {/* Título y tiempo en la misma línea */}
+                            <div className="flex items-start justify-between gap-2 mb-0.5">
+                              <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors flex-1">
+                                {event.title}
+                              </p>
+                              <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
+                                {formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}
+                              </span>
+                            </div>
+                            
+                            {/* Subtítulo: nombre del proyecto o tipo de evento */}
+                            <p className="text-xs text-muted-foreground truncate">
+                              {event.projectName || EVENT_TYPE_LABELS[event.event_type as keyof typeof EVENT_TYPE_LABELS] || 'Evento'}
+                            </p>
                           </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
