@@ -54,18 +54,23 @@ export const BirthdayWidget = () => {
     queryFn: async () => {
       const currentMonth = new Date().getMonth() + 1;
       
-      // Query con INNER JOIN a user_roles excluyendo solo clientes
+      // PASO 1: Obtener user_ids que NO son clientes
+      const { data: userRolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .neq("role_name", "cliente");
+      
+      if (rolesError) throw rolesError;
+      if (!userRolesData || userRolesData.length === 0) return [];
+      
+      const nonClientUserIds = userRolesData.map(ur => ur.user_id);
+      
+      // PASO 2: Obtener profiles de esos usuarios con cumpleaños
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          full_name, 
-          email, 
-          fecha_nacimiento,
-          avatar_url,
-          user_roles!inner(role_name)
-        `)
+        .select("full_name, email, fecha_nacimiento, avatar_url")
         .not("fecha_nacimiento", "is", null)
-        .neq("user_roles.role_name", "cliente")
+        .in("id", nonClientUserIds)
         .order("fecha_nacimiento");
 
       if (error) throw error;
