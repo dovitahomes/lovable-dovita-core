@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, ExternalLink, Plus, PanelLeftClose, PanelLeftOpen, Users, HardHat, ClipboardCheck, Clock, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Popover, PopoverContent } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useMyCalendarEvents } from "@/hooks/useMyCalendarEvents";
 import { useCollaboratorEventNotifications } from "@/hooks/useCollaboratorEventNotifications";
@@ -415,53 +415,67 @@ export function EmployeeCalendar() {
           )}
         </div>
 
-        {/* Popover de eventos del día seleccionado */}
-        <Popover open={dayPopoverOpen} onOpenChange={setDayPopoverOpen}>
-          <PopoverContent 
-            className="w-80 p-3" 
-            align="center"
-            side="top"
-          >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold">
+        {/* Dialog de eventos del día seleccionado */}
+        <Dialog open={dayPopoverOpen} onOpenChange={setDayPopoverOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>
                   Eventos del {selectedDate?.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
-                </h4>
-                <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                </span>
+                <Badge variant="secondary" className="h-5 px-2 text-xs ml-2">
                   {selectedDayEvents.length}
                 </Badge>
-              </div>
-              
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {selectedDayEvents.map((event) => (
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+              {selectedDayEvents.map((event) => {
+                const IconComponent = EVENT_TYPE_ICONS[event.event_type as keyof typeof EVENT_TYPE_ICONS] || Sparkles;
+                const colorConfig = EVENT_TYPE_COLORS[event.event_type] || EVENT_TYPE_COLORS.other;
+                
+                return (
                   <button
                     key={event.id}
                     onClick={() => {
                       setDayPopoverOpen(false);
                       handleEventClick(event);
                     }}
-                    className="w-full text-left p-2 rounded-lg hover:bg-accent border border-transparent hover:border-border transition-all"
+                    className="w-full text-left hover:shadow-md rounded-xl p-3 transition-all border border-border/50 hover:border-border bg-card group"
                   >
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-3">
+                      {/* Círculo con ícono */}
                       <div 
                         className={cn(
-                          "h-2 w-2 rounded-full shrink-0 mt-1.5",
-                          EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
-                        )} 
-                      />
+                          "h-11 w-11 rounded-full shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
+                          colorConfig.bg
+                        )}
+                      >
+                        <IconComponent className="h-5 w-5 text-white" />
+                      </div>
+                      
+                      {/* Contenido del evento */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{event.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {event.startTime.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors flex-1">
+                            {event.title}
+                          </p>
+                          <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
+                            {event.startTime.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        
+                        <p className="text-xs text-muted-foreground truncate">
+                          {event.projectName || EVENT_TYPE_LABELS[event.event_type as keyof typeof EVENT_TYPE_LABELS] || 'Evento'}
                         </p>
                       </div>
                     </div>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </PopoverContent>
-        </Popover>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
