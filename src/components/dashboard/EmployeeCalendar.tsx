@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ExternalLink, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, ExternalLink, Plus, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyCalendarEvents } from "@/hooks/useMyCalendarEvents";
@@ -17,6 +17,23 @@ import { cn } from "@/lib/utils";
 export function EmployeeCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const navigate = useNavigate();
+  
+  const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('dashboard-calendar-visible');
+      return saved !== null ? JSON.parse(saved) : true;
+    }
+    return true;
+  });
+
+  // Persistir estado del toggle
+  const toggleCalendar = () => {
+    const newState = !isCalendarVisible;
+    setIsCalendarVisible(newState);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard-calendar-visible', JSON.stringify(newState));
+    }
+  };
   
   const now = new Date();
   const [month] = useState(now.getMonth());
@@ -177,123 +194,229 @@ export function EmployeeCalendar() {
       </CardHeader>
       <CardContent className="pt-6">
         {/* Layout Grid Responsive: 2 columnas en desktop, 1 en mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr] gap-6 md:gap-8">
+      <div className={cn(
+        "grid grid-cols-1 gap-4",
+        // Tablet: 2 columnas (calendario colapsable + eventos)
+        "md:grid-cols-[280px_1fr]",
+        // Desktop: 3 columnas (calendario + eventos del día + próximos)
+        "lg:grid-cols-[280px_1fr_380px]",
+        // XL: columnas más amplias
+        "xl:grid-cols-[300px_1fr_420px]",
+        // 2XL: máxima amplitud
+        "2xl:grid-cols-[320px_1.2fr_450px]",
+        // Gaps responsive
+        "md:gap-5 lg:gap-6 xl:gap-8",
+        // Si calendario está colapsado, ajustar grid
+        !isCalendarVisible && "md:grid-cols-[0px_1fr] lg:grid-cols-[0px_1fr_420px] xl:grid-cols-[0px_1fr_450px]"
+      )}>
           
-          {/* COLUMNA IZQUIERDA: Calendario */}
-          <div className="flex flex-col space-y-4">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              components={{
-                DayContent: ({ date }) => {
-                  const dots = getEventDotsForDate(date);
-                  return (
-                    <div className="relative w-full h-full flex flex-col items-center justify-center group">
-                      <span className="group-hover:scale-110 transition-transform">
-                        {date.getDate()}
-                      </span>
-                      {dots.length > 0 && (
-                        <div className="absolute -bottom-0.5 flex gap-0.5 justify-center">
-                          {dots.map((dot, i) => (
-                            <div 
-                              key={i} 
-                              className={cn("h-1 w-1 rounded-full", dot.color)} 
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-              }}
-              className="rounded-lg border shadow-sm mx-auto md:mx-0 w-full"
-            />
-            
-            {/* Stats rápidas */}
-            <div className="flex gap-2 justify-center md:justify-start flex-wrap">
-              <Badge variant="secondary" className="text-xs">
-                {events.length} eventos este mes
-              </Badge>
+        {/* Calendario Mini - Colapsable */}
+        <div className={cn(
+          "transition-all duration-300 ease-in-out overflow-hidden",
+          isCalendarVisible ? "opacity-100" : "opacity-0 w-0"
+        )}>
+          {isCalendarVisible && (
+            <div className="bg-card rounded-lg border shadow-sm p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  Calendario
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleCalendar}
+                  className="h-8 w-8 p-0"
+                  title="Ocultar calendario"
+                >
+                  <PanelLeftClose className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-lg border shadow-sm mx-auto w-full"
+                classNames={{
+                  months: "space-y-4",
+                  month: "space-y-4",
+                  caption: "flex justify-center pt-1 relative items-center",
+                  caption_label: "text-sm font-medium",
+                  nav: "space-x-1 flex items-center",
+                  nav_button: cn(
+                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+                  ),
+                  table: "w-full border-collapse",
+                  head_row: "flex",
+                  head_cell: "text-muted-foreground rounded-md w-10 font-normal text-xs",
+                  row: "flex w-full mt-1",
+                  cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
+                  day: cn(
+                    "h-10 w-10 p-0 font-normal rounded-md hover:bg-accent hover:text-accent-foreground",
+                    "aria-selected:bg-primary aria-selected:text-primary-foreground"
+                  ),
+                }}
+                modifiers={{
+                  hasEvent: datesWithEvents
+                }}
+                modifiersClassNames={{
+                  hasEvent: "font-bold"
+                }}
+                components={{
+                  DayContent: ({ date }) => {
+                    const dots = getEventDotsForDate(date);
+                    return (
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <span className="text-xs">{date.getDate()}</span>
+                        {dots.length > 0 && (
+                          <div className="absolute bottom-0.5 flex gap-0.5 justify-center">
+                            {dots.map((dot, idx) => (
+                              <div
+                                key={idx}
+                                className={cn("w-1 h-1 rounded-full", dot.color)}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                }}
+              />
+              
               {pendingEvents > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {pendingEvents} pendientes
-                </Badge>
+                <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <p className="text-xs text-amber-800 dark:text-amber-200 text-center">
+                    {pendingEvents} propuesta{pendingEvents > 1 ? 's' : ''} pendiente{pendingEvents > 1 ? 's' : ''}
+                  </p>
+                </div>
               )}
             </div>
-          </div>
-
-          {/* COLUMNA DERECHA: Eventos */}
-          <div className="flex flex-col space-y-4 max-h-[350px] md:max-h-[520px] xl:max-h-[580px] overflow-y-auto events-scroll scroll-smooth">
-            
-            {/* Eventos del día seleccionado */}
-            {selectedDate && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold sticky top-0 bg-background pb-2 z-10">
-                  {selectedDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}
-                </h4>
-                <div className="space-y-2">
-                  {eventsOnSelectedDate.length > 0 ? (
-                    eventsOnSelectedDate.map((event, index) => (
-                      <div 
-                        key={event.id}
-                        className="animate-fade-in"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <EventCard
-                          event={event}
-                          onEventClick={handleEventClick}
-                          onDragStart={() => {}}
-                          onDragEnd={() => {}}
-                          variant="compact"
-                          canDrag={false}
-                        />
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-6 animate-fade-in">
-                      No hay eventos para este día
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Próximos Eventos */}
-            {upcomingEvents.length > 0 && (
-              <div className="space-y-2 pt-4 border-t">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide sticky top-0 bg-background pb-2 z-10">
-                  Próximos eventos
-                </h4>
-                <div className="space-y-1.5">
-                  {upcomingEvents.map((event, index) => (
-                    <button
-                      key={event.id}
-                      onClick={() => handleEventClick(event)}
-                      className="w-full text-left hover:bg-accent/50 rounded-lg p-2.5 transition-all duration-200 hover:shadow-sm group animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className={cn(
-                            "h-2.5 w-2.5 rounded-full shrink-0 transition-transform group-hover:scale-125",
-                            EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
-                          )} 
-                        />
-                        <span className="text-xs font-medium truncate flex-1 group-hover:text-primary transition-colors">
-                          {event.title}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-muted-foreground mt-1 ml-4">
-                        {formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
+
+        {/* Columna Central: Eventos del Día Seleccionado */}
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              {!isCalendarVisible && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleCalendar}
+                  className="h-9 px-3"
+                  title="Mostrar calendario"
+                >
+                  <PanelLeftOpen className="h-4 w-4 mr-2" />
+                  Calendario
+                </Button>
+              )}
+              <h3 className="text-lg font-semibold">
+                {selectedDate ? `Eventos del ${selectedDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}` : 'Eventos del día'}
+              </h3>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/mi-calendario')}
+              className="hidden md:flex"
+            >
+              Ver todos
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : eventsOnSelectedDate.length > 0 ? (
+            <div className="flex flex-col space-y-3 max-h-[520px] overflow-y-auto events-scroll scroll-smooth">
+              {eventsOnSelectedDate.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onEventClick={handleEventClick}
+                  onDragStart={() => {}}
+                  onDragEnd={() => {}}
+                  variant="compact"
+                  canDrag={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <CalendarIcon className="h-12 w-12 text-muted-foreground/40 mb-3" />
+              <p className="text-sm text-muted-foreground">
+                No hay eventos programados para este día
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => navigate('/mi-calendario?action=create')}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Crear evento
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Columna Derecha: Próximos Eventos */}
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Próximos eventos</h3>
+            <Badge variant="secondary" className="text-xs">
+              {upcomingEvents.length} próximos
+            </Badge>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : upcomingEvents.length > 0 ? (
+            <div className="flex flex-col space-y-3 max-h-[520px] md:max-h-[520px] xl:max-h-[580px] overflow-y-auto events-scroll scroll-smooth">
+              {upcomingEvents.map((event, index) => (
+                <button
+                  key={event.id}
+                  onClick={() => handleEventClick(event)}
+                  className="w-full text-left hover:bg-accent/50 rounded-lg p-2.5 transition-all duration-200 hover:shadow-sm group animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className={cn(
+                        "h-2.5 w-2.5 rounded-full shrink-0 transition-transform group-hover:scale-125",
+                        EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
+                      )} 
+                    />
+                    <span className="text-xs font-medium truncate flex-1 group-hover:text-primary transition-colors">
+                      {event.title}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-1 ml-4">
+                    {formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <CalendarIcon className="h-12 w-12 text-muted-foreground/40 mb-3" />
+              <p className="text-sm text-muted-foreground">
+                No hay próximos eventos
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
       </CardContent>
     </Card>
   );
