@@ -58,19 +58,7 @@ export function EmployeeCalendar() {
     return events ? toEventManagerFormats(events) : [];
   }, [events]);
 
-  // Filtrar eventos del día seleccionado
-  const eventsOnSelectedDate = useMemo(() => {
-    if (!selectedDate) return [];
-    
-    return eventCards.filter(event => {
-      const eventDate = new Date(event.startTime);
-      return (
-        eventDate.getDate() === selectedDate.getDate() &&
-        eventDate.getMonth() === selectedDate.getMonth() &&
-        eventDate.getFullYear() === selectedDate.getFullYear()
-      );
-    });
-  }, [selectedDate, eventCards]);
+  // Eliminar lógica de eventos del día - redundante con próximos eventos
 
   // Contar eventos pendientes (propuestas de clientes)
   const pendingEvents = useMemo(() => {
@@ -196,18 +184,10 @@ export function EmployeeCalendar() {
         {/* Layout Grid Responsive: 2 columnas en desktop, 1 en mobile */}
       <div className={cn(
         "grid grid-cols-1 gap-4",
-        // Tablet: 2 columnas (calendario colapsable + eventos)
-        "md:grid-cols-[280px_1fr]",
-        // Desktop: 3 columnas (calendario + eventos del día + próximos)
-        "lg:grid-cols-[280px_1fr_380px]",
-        // XL: columnas más amplias
-        "xl:grid-cols-[300px_1fr_420px]",
-        // 2XL: máxima amplitud
-        "2xl:grid-cols-[320px_1.2fr_450px]",
-        // Gaps responsive
-        "md:gap-5 lg:gap-6 xl:gap-8",
-        // Si calendario está colapsado, ajustar grid
-        !isCalendarVisible && "md:grid-cols-[0px_1fr] lg:grid-cols-[0px_1fr_420px] xl:grid-cols-[0px_1fr_450px]"
+        // Desktop: 2 columnas (calendario + próximos eventos)
+        "md:grid-cols-[300px_1fr]",
+        // Si calendario está colapsado: 1 columna full-width
+        !isCalendarVisible && "md:grid-cols-1"
       )}>
           
         {/* Calendario Mini - Colapsable */}
@@ -296,8 +276,8 @@ export function EmployeeCalendar() {
           )}
         </div>
 
-        {/* Columna Central: Eventos del Día Seleccionado */}
-        <div className="flex flex-col">
+        {/* Próximos Eventos - Columna Principal */}
+        <div className="flex flex-col h-full">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               {!isCalendarVisible && (
@@ -312,9 +292,10 @@ export function EmployeeCalendar() {
                   Calendario
                 </Button>
               )}
-              <h3 className="text-lg font-semibold">
-                {selectedDate ? `Eventos del ${selectedDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}` : 'Eventos del día'}
-              </h3>
+              <h3 className="text-lg font-semibold">Próximos eventos</h3>
+              <Badge variant="secondary" className="text-xs ml-2">
+                {upcomingEvents.length}
+              </Badge>
             </div>
             <Button
               variant="outline"
@@ -329,29 +310,53 @@ export function EmployeeCalendar() {
 
           {isLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-24 w-full rounded-lg" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
               ))}
             </div>
-          ) : eventsOnSelectedDate.length > 0 ? (
+          ) : upcomingEvents.length > 0 ? (
             <div className="flex flex-col space-y-3 max-h-[520px] overflow-y-auto events-scroll scroll-smooth">
-              {eventsOnSelectedDate.map((event) => (
-                <EventCard
+              {upcomingEvents.map((event, index) => (
+                <button
                   key={event.id}
-                  event={event}
-                  onEventClick={handleEventClick}
-                  onDragStart={() => {}}
-                  onDragEnd={() => {}}
-                  variant="compact"
-                  canDrag={false}
-                />
+                  onClick={() => handleEventClick(event)}
+                  className="w-full text-left hover:bg-accent/50 rounded-lg p-3 transition-all duration-200 hover:shadow-sm group animate-fade-in border border-transparent hover:border-border"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div 
+                      className={cn(
+                        "h-3 w-3 rounded-full shrink-0 mt-1 transition-transform group-hover:scale-125",
+                        EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
+                      )} 
+                    />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium truncate block group-hover:text-primary transition-colors">
+                        {event.title}
+                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}
+                        </span>
+                        {event.projectName && (
+                          <>
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground truncate">
+                              {event.projectName}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </button>
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <CalendarIcon className="h-12 w-12 text-muted-foreground/40 mb-3" />
               <p className="text-sm text-muted-foreground">
-                No hay eventos programados para este día
+                No hay próximos eventos programados
               </p>
               <Button
                 variant="outline"
@@ -362,57 +367,6 @@ export function EmployeeCalendar() {
                 <Plus className="h-4 w-4 mr-2" />
                 Crear evento
               </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Columna Derecha: Próximos Eventos */}
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Próximos eventos</h3>
-            <Badge variant="secondary" className="text-xs">
-              {upcomingEvents.length} próximos
-            </Badge>
-          </div>
-
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-20 w-full rounded-lg" />
-              ))}
-            </div>
-          ) : upcomingEvents.length > 0 ? (
-            <div className="flex flex-col space-y-3 max-h-[520px] md:max-h-[520px] xl:max-h-[580px] overflow-y-auto events-scroll scroll-smooth">
-              {upcomingEvents.map((event, index) => (
-                <button
-                  key={event.id}
-                  onClick={() => handleEventClick(event)}
-                  className="w-full text-left hover:bg-accent/50 rounded-lg p-2.5 transition-all duration-200 hover:shadow-sm group animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className={cn(
-                        "h-2.5 w-2.5 rounded-full shrink-0 transition-transform group-hover:scale-125",
-                        EVENT_TYPE_COLORS[event.event_type]?.bg || "bg-gray-500"
-                      )} 
-                    />
-                    <span className="text-xs font-medium truncate flex-1 group-hover:text-primary transition-colors">
-                      {event.title}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-muted-foreground mt-1 ml-4">
-                    {formatDistanceToNow(event.startTime, { addSuffix: true, locale: es })}
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CalendarIcon className="h-12 w-12 text-muted-foreground/40 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                No hay próximos eventos
-              </p>
             </div>
           )}
         </div>
