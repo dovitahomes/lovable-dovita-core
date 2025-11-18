@@ -6,6 +6,7 @@ import { Calendar as CalendarIcon, ExternalLink, Plus, PanelLeftClose, PanelLeft
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { useMyCalendarEvents } from "@/hooks/useMyCalendarEvents";
 import { useCollaboratorEventNotifications } from "@/hooks/useCollaboratorEventNotifications";
 import { toEventManagerFormats, EVENT_TYPE_COLORS } from "@/lib/calendar/eventAdapter";
@@ -223,16 +224,15 @@ export function EmployeeCalendar() {
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleCalendar}
-                    className="h-8 px-2 text-xs"
-                    title="Mostrar vista calendario"
-                  >
-                    <CalendarIcon className="h-4 w-4" />
-                  </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Calendario</span>
+                    <Switch
+                      checked={isCalendarVisible}
+                      onCheckedChange={toggleCalendar}
+                      className="data-[state=checked]:bg-primary"
+                    />
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -318,16 +318,15 @@ export function EmployeeCalendar() {
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleCalendar}
-                    className="h-8 px-2 text-xs"
-                    title="Mostrar próximos eventos"
-                  >
-                    <PanelLeftClose className="h-4 w-4" />
-                  </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Calendario</span>
+                    <Switch
+                      checked={isCalendarVisible}
+                      onCheckedChange={toggleCalendar}
+                      className="data-[state=checked]:bg-primary"
+                    />
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
