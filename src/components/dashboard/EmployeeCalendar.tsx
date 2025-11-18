@@ -357,49 +357,51 @@ export function EmployeeCalendar() {
               </div>
 
               {/* Calendario con dots */}
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDayClick}
-                className="rounded-lg border shadow-sm w-full pointer-events-auto"
-                classNames={{
-                  months: "space-y-3",
-                  month: "space-y-3",
-                  caption: "flex justify-center pt-1 relative items-center",
-                  caption_label: "text-sm font-medium",
-                  nav: "space-x-1 flex items-center",
-                  nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                  table: "w-full border-collapse",
-                  head_row: "flex",
-                  head_cell: "text-muted-foreground rounded-md w-10 font-normal text-xs",
-                  row: "flex w-full mt-1",
-                  cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-                  day: "h-10 w-10 p-0 font-normal rounded-md hover:bg-accent cursor-pointer",
-                }}
-                modifiers={{
-                  hasEvent: datesWithEvents
-                }}
-                modifiersClassNames={{
-                  hasEvent: "font-bold"
-                }}
-                components={{
-                  DayContent: ({ date }) => {
-                    const dots = getEventDotsForDate(date);
-                    return (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <span className="text-xs">{date.getDate()}</span>
-                        {dots.length > 0 && (
-                          <div className="absolute bottom-1 flex gap-0.5 justify-center">
-                            {dots.map((dot, idx) => (
-                              <div key={idx} className={cn("w-1 h-1 rounded-full", dot.color)} />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                }}
-              />
+              <div className="flex justify-center w-full">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDayClick}
+                  className="rounded-lg border shadow-sm pointer-events-auto"
+                  classNames={{
+                    months: "space-y-3",
+                    month: "space-y-3",
+                    caption: "flex justify-center pt-1 relative items-center",
+                    caption_label: "text-sm font-medium",
+                    nav: "space-x-1 flex items-center",
+                    nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                    table: "w-full border-collapse",
+                    head_row: "flex",
+                    head_cell: "text-muted-foreground rounded-md w-10 font-normal text-xs",
+                    row: "flex w-full mt-1",
+                    cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
+                    day: "h-10 w-10 p-0 font-normal rounded-md hover:bg-accent cursor-pointer",
+                  }}
+                  modifiers={{
+                    hasEvent: datesWithEvents
+                  }}
+                  modifiersClassNames={{
+                    hasEvent: "font-bold"
+                  }}
+                  components={{
+                    DayContent: ({ date }) => {
+                      const dots = getEventDotsForDate(date);
+                      return (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <span className="text-xs">{date.getDate()}</span>
+                          {dots.length > 0 && (
+                            <div className="absolute bottom-1 flex gap-0.5 justify-center">
+                              {dots.map((dot, idx) => (
+                                <div key={idx} className={cn("w-1 h-1 rounded-full", dot.color)} />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                  }}
+                />
+              </div>
 
               {/* Alert de propuestas pendientes */}
               {pendingEvents > 0 && (
