@@ -50,6 +50,7 @@ export function useUpdateUserProfile() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user-detail', variables.userId] });
       queryClient.invalidateQueries({ queryKey: ['users-management'] });
+      queryClient.invalidateQueries({ queryKey: ['birthdays-this-month'] });
       toast.success('Perfil actualizado exitosamente');
     },
     onError: (error) => {
