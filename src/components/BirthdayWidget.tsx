@@ -159,7 +159,7 @@ export const BirthdayWidget = () => {
                   "bg-gradient-to-br from-background via-background to-muted/20",
                   "border hover:shadow-xl hover:scale-[1.02]",
                   isBirthdayToday 
-                    ? "border-yellow-500 ring-2 ring-yellow-500/20 animate-pulse" 
+                    ? "border-yellow-500 ring-2 ring-yellow-500/20" 
                     : "border-primary/20"
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
@@ -167,9 +167,9 @@ export const BirthdayWidget = () => {
                 {/* Confetti background si es HOY */}
                 {isBirthdayToday && (
                   <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
-                    <div className="absolute top-0 left-1/4 w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="absolute top-0 left-1/2 w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '100ms' }} />
-                    <div className="absolute top-0 left-3/4 w-2 h-2 bg-red-400 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                    <div className="absolute top-0 left-1/4 w-2 h-2 bg-yellow-400 rounded-full" />
+                    <div className="absolute top-0 left-1/2 w-2 h-2 bg-orange-400 rounded-full" />
+                    <div className="absolute top-0 left-3/4 w-2 h-2 bg-red-400 rounded-full" />
                   </div>
                 )}
 
@@ -206,7 +206,7 @@ export const BirthdayWidget = () => {
                         variant="default" 
                         className="mt-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-0 shadow-lg"
                       >
-                        <Sparkles className="h-3 w-3 mr-1 animate-pulse" />
+                        <Sparkles className="h-3 w-3 mr-1" />
                         ¡Hoy es su cumpleaños!
                       </Badge>
                     )}
@@ -227,7 +227,7 @@ export const BirthdayWidget = () => {
                     <div className={cn(
                       "h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-all",
                       isBirthdayToday 
-                        ? "bg-gradient-to-br from-yellow-400 to-orange-500 animate-bounce" 
+                        ? "bg-gradient-to-br from-yellow-400 to-orange-500" 
                         : "bg-gradient-to-br from-primary to-primary/80"
                     )}>
                       <span className="text-xl font-bold text-white">
