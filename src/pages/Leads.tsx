@@ -12,6 +12,7 @@ import { LeadsDashboard } from "@/components/leads/LeadsDashboard";
 import { LeadsForecasting } from "@/components/leads/LeadsForecasting";
 import { ImportLeadsDialog } from "@/components/crm/ImportLeadsDialog";
 import { ExportLeadsDialog } from "@/components/crm/ExportLeadsDialog";
+import { AlertLeadsDialog } from "@/components/leads/AlertLeadsDialog";
 import { LeadsKanbanDesktop } from "@/components/leads/LeadsKanbanDesktop";
 import { LeadsKanbanTablet } from "@/components/leads/LeadsKanbanTablet";
 import { LeadsKanbanMobile } from "@/components/leads/LeadsKanbanMobile";
@@ -47,6 +48,7 @@ export default function Leads() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [alertDialogOpen, setAlertDialogOpen] = useState<'urgent' | 'followUp' | 'active' | null>(null);
 
   const updateStatusMutation = useUpdateLeadStatus();
 
@@ -131,39 +133,53 @@ export default function Leads() {
   // Get all activities to calculate alerts
   const { data: allActivities } = useCrmActivities();
 
-  // Calculate alert counts
-  const alertCounts = useMemo(() => {
+  // Calculate alert counts and categorize leads
+  const alertData = useMemo(() => {
     const allLeads = [
       ...(nuevoQuery.data || []),
       ...(contactadoQuery.data || []),
       ...(calificadoQuery.data || []),
     ];
 
-    let urgent = 0;
-    let followUp = 0;
-    let active = 0;
+    const urgent: any[] = [];
+    const followUp: any[] = [];
+    const active: any[] = [];
 
     allLeads.forEach(lead => {
       const leadActivities = allActivities?.filter(
         a => a.entity_type === 'lead' && a.entity_id === lead.id
       ) || [];
       
+      const lastActivity = leadActivities[0];
+      const leadWithActivity = {
+        ...lead,
+        last_activity: lastActivity?.created_at
+      };
+
       if (leadActivities.length === 0) {
-        urgent++;
+        urgent.push(leadWithActivity);
         return;
       }
 
-      const lastActivity = leadActivities[0];
       const daysDiff = Math.floor(
         (new Date().getTime() - new Date(lastActivity.created_at).getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      if (daysDiff >= 7) urgent++;
-      else if (daysDiff >= 3) followUp++;
-      else active++;
+      if (daysDiff >= 7) urgent.push(leadWithActivity);
+      else if (daysDiff >= 3) followUp.push(leadWithActivity);
+      else active.push(leadWithActivity);
     });
 
-    return { urgent, followUp, active };
+    return { 
+      urgent, 
+      followUp, 
+      active,
+      counts: {
+        urgent: urgent.length,
+        followUp: followUp.length,
+        active: active.length
+      }
+    };
   }, [nuevoQuery.data, contactadoQuery.data, calificadoQuery.data, allActivities]);
   
   return (
@@ -226,19 +242,22 @@ export default function Leads() {
 
       {/* Alerts Panel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-red-500">
+        <Card 
+          className="border-l-4 border-l-red-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setAlertDialogOpen('urgent')}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Requieren Atención</p>
                 <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                  {alertCounts.urgent}
+                  {alertData.counts.urgent}
                 </p>
                 <p className="text-xs text-muted-foreground">+7 días sin contacto</p>
               </div>
               <div className={cn(
                 "h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center",
-                alertCounts.urgent > 0 && "animate-pulse"
+                alertData.counts.urgent > 0 && "animate-pulse"
               )}>
                 <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
@@ -246,13 +265,16 @@ export default function Leads() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-yellow-500">
+        <Card 
+          className="border-l-4 border-l-yellow-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setAlertDialogOpen('followUp')}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Necesitan Seguimiento</p>
                 <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                  {alertCounts.followUp}
+                  {alertData.counts.followUp}
                 </p>
                 <p className="text-xs text-muted-foreground">3-6 días sin contacto</p>
               </div>
@@ -263,13 +285,16 @@ export default function Leads() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500">
+        <Card 
+          className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setAlertDialogOpen('active')}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Activos</p>
                 <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {alertCounts.active}
+                  {alertData.counts.active}
                 </p>
                 <p className="text-xs text-muted-foreground">Contacto reciente</p>
               </div>
@@ -376,6 +401,33 @@ export default function Leads() {
           ...(perdidoQuery.data || []),
         ]}
         totalCount={totalLeads}
+      />
+
+      <AlertLeadsDialog
+        open={alertDialogOpen === 'urgent'}
+        onOpenChange={(open) => !open && setAlertDialogOpen(null)}
+        leads={alertData.urgent}
+        title="Leads que Requieren Atención"
+        description="Leads con más de 7 días sin contacto"
+        onViewLead={handleOpenDetails}
+      />
+
+      <AlertLeadsDialog
+        open={alertDialogOpen === 'followUp'}
+        onOpenChange={(open) => !open && setAlertDialogOpen(null)}
+        leads={alertData.followUp}
+        title="Leads que Necesitan Seguimiento"
+        description="Leads con 3-6 días sin contacto"
+        onViewLead={handleOpenDetails}
+      />
+
+      <AlertLeadsDialog
+        open={alertDialogOpen === 'active'}
+        onOpenChange={(open) => !open && setAlertDialogOpen(null)}
+        leads={alertData.active}
+        title="Leads Activos"
+        description="Leads con contacto reciente (menos de 3 días)"
+        onViewLead={handleOpenDetails}
       />
     </div>
   );
