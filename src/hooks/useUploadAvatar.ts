@@ -39,6 +39,7 @@ export function useUploadAvatar() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user-detail', variables.userId] });
       queryClient.invalidateQueries({ queryKey: ['users-management'] });
+      queryClient.invalidateQueries({ queryKey: ['user-profile', variables.userId] });
       toast.success('Foto de perfil actualizada');
     },
     onError: (error) => {
