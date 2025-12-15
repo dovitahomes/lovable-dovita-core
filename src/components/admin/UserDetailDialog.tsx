@@ -23,6 +23,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDateOnly, formatDateTime } from '@/lib/datetime';
 import { toast } from 'sonner';
+import { getAvatarPublicUrl } from '@/lib/storage/avatar-url';
 
 interface UserDetailDialogProps {
   userId: string | null;
@@ -222,7 +223,7 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
             "ring-4 ring-white/20",
             isMobile ? "w-20 h-20" : "w-32 h-32 md:w-40 md:h-40"
           )}>
-            <AvatarImage src={avatarPreview || user.avatar_url || undefined} />
+            <AvatarImage src={avatarPreview || getAvatarPublicUrl(user.avatar_url)} />
             <AvatarFallback className={cn(
               "bg-white/20 text-white",
               isMobile ? "text-2xl" : "text-4xl"

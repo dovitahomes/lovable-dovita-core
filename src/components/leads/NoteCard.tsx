@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { StickyNote } from "lucide-react";
 import type { LeadNote } from "@/hooks/crm/useLeadNotes";
+import { getAvatarPublicUrl } from "@/lib/storage/avatar-url";
 
 interface NoteCardProps {
   note: LeadNote;
@@ -28,7 +29,7 @@ export function NoteCard({ note }: NoteCardProps) {
     <Card className="p-4 hover:shadow-md transition-shadow duration-200 bg-card border-border">
       <div className="flex gap-3">
         <Avatar className="h-10 w-10 ring-2 ring-primary/10">
-          <AvatarImage src={note.performer?.avatar_url} alt={performerName} />
+          <AvatarImage src={getAvatarPublicUrl(note.performer?.avatar_url)} alt={performerName} />
           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white text-sm font-semibold">
             {getInitials(performerName)}
           </AvatarFallback>

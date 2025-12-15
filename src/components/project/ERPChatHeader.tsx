@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { getAvatarPublicUrl } from '@/lib/storage/avatar-url';
 
 interface Participant {
   id: string;
@@ -109,7 +110,7 @@ export default function ERPChatHeader({
                         "h-10 w-10 border-2 border-background cursor-help transition-transform hover:scale-110 hover:z-10",
                         "ring-2 ring-transparent hover:ring-primary/20"
                       )}>
-                        <AvatarImage src={participant.profiles.avatar_url || undefined} />
+                        <AvatarImage src={getAvatarPublicUrl(participant.profiles.avatar_url)} />
                         <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
                           {getInitials(participant.profiles.full_name || participant.profiles.email)}
                         </AvatarFallback>

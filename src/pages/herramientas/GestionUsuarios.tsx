@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UserCardMobile } from '@/components/admin/UserCardMobile';
 import { cn } from '@/lib/utils';
+import { getAvatarPublicUrl } from '@/lib/storage/avatar-url';
 
 export default function GestionUsuarios() {
   const queryClient = useQueryClient();
@@ -152,7 +153,7 @@ export default function GestionUsuarios() {
       header: '',
       render: (_: any, user: any) => (
         <Avatar className="w-10 h-10">
-          <AvatarImage src={user.avatar_url || undefined} />
+          <AvatarImage src={getAvatarPublicUrl(user.avatar_url)} />
           <AvatarFallback>
             {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
           </AvatarFallback>
