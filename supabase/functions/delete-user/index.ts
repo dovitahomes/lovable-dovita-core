@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     console.log('[delete-user] Starting user deletion request');
 
     // Get authorization header
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('authorization') ?? req.headers.get('Authorization');
     if (!authHeader) {
       console.error('[delete-user] No authorization header');
       return new Response(
@@ -24,10 +24,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract JWT token from Bearer header
-    const token = authHeader.replace('Bearer ', '');
-    if (!token) {
-      console.error('[delete-user] No token in authorization header');
+    // Extract JWT token from Bearer header (robust parsing + trimming)
+    const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+    const token = (bearerMatch?.[1] ?? authHeader).trim();
+    const looksLikeJwt = token.split('.').length === 3;
+
+    console.log('[delete-user] Token extracted:', {
+      hasBearerPrefix: !!bearerMatch,
+      tokenLength: token.length,
+      looksLikeJwt,
+    });
+
+    if (!looksLikeJwt) {
+      console.error('[delete-user] Invalid authorization header format');
       return new Response(
         JSON.stringify({ error: 'Invalid authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
