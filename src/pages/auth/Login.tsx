@@ -44,18 +44,51 @@ const Login = () => {
   const handleBiometricLogin = async () => {
     setIsLoading(true);
     try {
+      console.log('[biometric-login] Starting local biometric authentication...');
+      
+      // Step 1: Local biometric authentication (WebAuthn)
       const result = await authenticateWithBiometric();
       
-      if (!result.success || !result.userId) {
+      if (!result.success || !result.userId || !result.credentialId) {
         throw new Error('Autenticación biométrica cancelada o fallida');
       }
 
-      // Create session with the user ID
-      const { error } = await supabase.auth.admin.getUserById(result.userId);
-      if (error) throw error;
+      console.log('[biometric-login] Local auth successful, calling edge function...');
 
-      // Bootstrap user
-      console.log('[biometric-login] Calling bootstrap...');
+      // Step 2: Call edge function to verify credential and get session token
+      const { data, error: fnError } = await supabase.functions.invoke('biometric-login', {
+        body: { 
+          userId: result.userId, 
+          credentialId: result.credentialId,
+        },
+      });
+
+      if (fnError) {
+        console.error('[biometric-login] Edge function error:', fnError);
+        throw new Error(fnError.message || 'Error al verificar credenciales');
+      }
+
+      if (!data?.token || !data?.email) {
+        console.error('[biometric-login] Invalid response from edge function:', data);
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      console.log('[biometric-login] Got token, verifying OTP...');
+
+      // Step 3: Verify the magic link token to create session
+      const { error: otpError } = await supabase.auth.verifyOtp({
+        token_hash: data.token,
+        type: 'magiclink',
+      });
+
+      if (otpError) {
+        console.error('[biometric-login] OTP verification error:', otpError);
+        throw new Error('Error al crear sesión: ' + otpError.message);
+      }
+
+      console.log('[biometric-login] Session created, calling bootstrap...');
+
+      // Step 4: Bootstrap user
       const bootstrapOk = await bootstrapUserAfterLogin();
       if (!bootstrapOk) {
         console.warn('[biometric-login] Bootstrap falló, pero permitir navegación');
