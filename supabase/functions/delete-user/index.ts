@@ -24,6 +24,16 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Extract JWT token from Bearer header
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      console.error('[delete-user] No token in authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Invalid authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create Supabase client with service role for admin operations
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -47,23 +57,9 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Create client with user's token to verify they're authenticated
-    const supabaseClient = createClient(
-      supabaseUrl,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
-
-    // Verify the requesting user is authenticated
-    const { data: { user: requestingUser }, error: authError } = await supabaseClient.auth.getUser();
+    // Verify the requesting user using the JWT token directly
+    console.log('[delete-user] Verifying JWT token');
+    const { data: { user: requestingUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
     if (authError || !requestingUser) {
       console.error('[delete-user] Auth error:', authError);
