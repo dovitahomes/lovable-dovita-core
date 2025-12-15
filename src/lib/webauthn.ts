@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
  * Supports fingerprint, face recognition, and other biometric methods
  */
 
-// Convert ArrayBuffer to Base64 string
+// Convert ArrayBuffer to Base64 string (standard)
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -15,7 +15,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-// Convert Base64 string to ArrayBuffer
+// Convert Base64 string to ArrayBuffer (standard)
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -23,6 +23,24 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes.buffer;
+}
+
+// Convert ArrayBuffer to Base64url string (WebAuthn standard)
+function arrayBufferToBase64url(buffer: ArrayBuffer): string {
+  return arrayBufferToBase64(buffer)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+// Convert Base64url string to ArrayBuffer (WebAuthn standard)
+function base64urlToArrayBuffer(base64url: string): ArrayBuffer {
+  // Convert base64url to standard base64
+  let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  // Add padding if needed
+  const padLen = (4 - (base64.length % 4)) % 4;
+  base64 += '='.repeat(padLen);
+  return base64ToArrayBuffer(base64);
 }
 
 /**
@@ -100,11 +118,18 @@ export async function registerBiometric(userId: string): Promise<boolean> {
 
     const response = credential.response as AuthenticatorAttestationResponse;
 
-    // Store credential in database
+    // Store credential in database using base64url format (WebAuthn standard)
+    const credentialId = arrayBufferToBase64url(credential.rawId);
+    const publicKey = response.getPublicKey();
+    
+    if (!publicKey) {
+      throw new Error('No se pudo obtener la clave pública');
+    }
+
     const { error } = await supabase.from('user_biometric_credentials').insert({
       user_id: userId,
-      credential_id: credential.id,
-      public_key: arrayBufferToBase64(response.getPublicKey()!),
+      credential_id: credentialId,
+      public_key: arrayBufferToBase64url(publicKey),
       device_name: navigator.userAgent.includes('Mac') ? 'MacBook' : 
                    navigator.userAgent.includes('iPhone') ? 'iPhone' :
                    navigator.userAgent.includes('Android') ? 'Android' : 'Dispositivo',
@@ -140,8 +165,13 @@ export async function hasBiometricEnabled(userId: string): Promise<boolean> {
 
 /**
  * Authenticate user with biometric
+ * Returns userId and credentialId for backend verification
  */
-export async function authenticateWithBiometric(): Promise<{ success: boolean; userId?: string }> {
+export async function authenticateWithBiometric(): Promise<{ 
+  success: boolean; 
+  userId?: string;
+  credentialId?: string;
+}> {
   if (!isWebAuthnSupported()) {
     throw new Error('WebAuthn no es soportado en este navegador');
   }
@@ -164,7 +194,7 @@ export async function authenticateWithBiometric(): Promise<{ success: boolean; u
     const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
       challenge,
       allowCredentials: credentials.map((cred) => ({
-        id: base64ToArrayBuffer(cred.credential_id),
+        id: base64urlToArrayBuffer(cred.credential_id),
         type: 'public-key',
       })),
       timeout: 60000,
@@ -180,21 +210,24 @@ export async function authenticateWithBiometric(): Promise<{ success: boolean; u
       throw new Error('Autenticación cancelada');
     }
 
+    // Convert credential ID to base64url for comparison
+    const returnedCredentialId = arrayBufferToBase64url(credential.rawId);
+
     // Find user by credential ID
-    const matchedCredential = credentials.find((c) => c.credential_id === credential.id);
+    const matchedCredential = credentials.find(
+      (c) => c.credential_id === returnedCredentialId
+    );
+    
     if (!matchedCredential) {
       throw new Error('Credencial no encontrada');
     }
 
-    // Update last_used_at
-    await supabase
-      .from('user_biometric_credentials')
-      .update({ last_used_at: new Date().toISOString() })
-      .eq('credential_id', credential.id);
+    // Note: last_used_at will be updated by the edge function after verification
 
     return {
       success: true,
       userId: matchedCredential.user_id,
+      credentialId: returnedCredentialId,
     };
   } catch (error) {
     console.error('Error authenticating with biometric:', error);
