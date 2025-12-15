@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Cake, Sparkles } from "lucide-react";
 import { formatDateOnly } from "@/lib/datetime";
 import { cn } from "@/lib/utils";
+import { getAvatarPublicUrl } from "@/lib/storage/avatar-url";
 
 // Helper: Generar iniciales de 2 letras
 const getInitials = (name: string): string => {
@@ -182,7 +183,7 @@ export const BirthdayWidget = () => {
                       : "ring-2 ring-primary/30"
                   )}>
                     {person.avatar_url ? (
-                      <AvatarImage src={person.avatar_url} alt={person.full_name} />
+                      <AvatarImage src={getAvatarPublicUrl(person.avatar_url)} alt={person.full_name} />
                     ) : (
                       <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-white text-lg font-bold">
                         {getInitials(person.full_name)}

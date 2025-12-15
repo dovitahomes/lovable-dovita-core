@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Building, Key, Mail, MoreVertical, Trash2 } from 'lucide-react';
+import { getAvatarPublicUrl } from '@/lib/storage/avatar-url';
 
 interface UserCardMobileProps {
   user: {
@@ -42,7 +43,7 @@ export function UserCardMobile({
         <div className="flex gap-3">
           {/* Avatar */}
           <Avatar className="w-10 h-10 shrink-0">
-            <AvatarImage src={user.avatar_url} />
+            <AvatarImage src={getAvatarPublicUrl(user.avatar_url)} />
             <AvatarFallback>
               {user.full_name?.charAt(0) || user.email.charAt(0)}
             </AvatarFallback>

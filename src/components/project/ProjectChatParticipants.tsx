@@ -20,6 +20,7 @@ import { Users, Crown, UserCheck, UserMinus, History, MessageSquare, Clock, User
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { getAvatarPublicUrl } from "@/lib/storage/avatar-url";
 
 interface ProjectChatParticipantsProps {
   projectId: string;
@@ -134,7 +135,7 @@ export default function ProjectChatParticipants({ projectId }: ProjectChatPartic
                   {/* Avatar */}
                   <div className="relative flex-shrink-0">
                     <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-border">
-                      <AvatarImage src={participant.profiles?.avatar_url || undefined} />
+                      <AvatarImage src={getAvatarPublicUrl(participant.profiles?.avatar_url)} />
                       <AvatarFallback className={cn("font-semibold text-sm", iconConfig.bg, iconConfig.color)}>
                         {participant.profiles?.full_name?.substring(0, 2).toUpperCase() || 'US'}
                       </AvatarFallback>

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Check, CheckCheck, FileIcon, Pencil, FileText, Image as ImageIcon, File, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getAvatarPublicUrl } from '@/lib/storage/avatar-url';
 
 interface ERPChatMessageProps {
   message: {
@@ -103,7 +104,7 @@ export default function ERPChatMessage({ message, currentUserId }: ERPChatMessag
       {/* Avatar */}
       {!isOwnMessage && (
         <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
-          <AvatarImage src={message.sender.avatar_url || undefined} />
+          <AvatarImage src={getAvatarPublicUrl(message.sender.avatar_url)} />
           <AvatarFallback className="text-xs bg-primary/10 text-primary">
             {getInitials(message.sender.full_name || message.sender.email)}
           </AvatarFallback>
